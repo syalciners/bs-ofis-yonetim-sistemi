@@ -1,21 +1,22 @@
-const CACHE_NAME = "bs-ofis-v1";
+const CACHE_NAME = "bs-ofis-v2";
 
-const APP_FILES = [
+const APP_SHELL = [
   "/bs-ofis-yonetim-sistemi/",
   "/bs-ofis-yonetim-sistemi/index.html",
-  "/bs-ofis-yonetim-sistemi/manifest.webmanifest"
+  "/bs-ofis-yonetim-sistemi/manifest.webmanifest",
+  "/bs-ofis-yonetim-sistemi/bs-app-icon-192.png",
+  "/bs-ofis-yonetim-sistemi/bs-app-icon-512.png"
 ];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll(APP_FILES);
+      return cache.addAll(APP_SHELL);
     })
   );
 
   self.skipWaiting();
 });
-
 
 self.addEventListener("activate", function (event) {
   event.waitUntil(
@@ -23,7 +24,7 @@ self.addEventListener("activate", function (event) {
       return Promise.all(
         cacheNames
           .filter(function (name) {
-            return name !== CACHE_NAME;
+            return name.startsWith("bs-ofis-") && name !== CACHE_NAME;
           })
           .map(function (name) {
             return caches.delete(name);
@@ -35,28 +36,45 @@ self.addEventListener("activate", function (event) {
   self.clients.claim();
 });
 
-
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+
+  // Supabase ve diğer dış servis yanıtlarını cache'leme.
+  // Finans ve operasyon verileri her zaman canlı kaynaktan gelmeli.
+  if (url.origin !== self.location.origin) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
-        const responseClone = response.clone();
+        if (response && response.ok) {
+          const responseClone = response.clone();
 
-        caches.open(CACHE_NAME).then(function (cache) {
-          cache.put(event.request, responseClone);
-        });
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(event.request, responseClone);
+          });
+        }
 
         return response;
       })
       .catch(function () {
         return caches.match(event.request).then(function (cachedResponse) {
-          return cachedResponse || caches.match(
-            "/bs-ofis-yonetim-sistemi/"
-          );
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          if (event.request.mode === "navigate") {
+            return caches.match(
+              "/bs-ofis-yonetim-sistemi/index.html"
+            );
+          }
+
+          return Response.error();
         });
       })
   );

@@ -1,8 +1,8 @@
 {
   "id": "/bs-ofis-yonetim-sistemi/",
-  "name": "BS Ofis Yönetim Sistemi",
-  "short_name": "BS Ofis",
-  "description": "BS Ofis ders, öğrenci ve finans yönetim sistemi",
+  "name": "BS Eğitim Yönetimi",
+  "short_name": "BS Eğitim",
+  "description": "BS Ofis eğitim, öğrenci, ders ve finans yönetim sistemi",
   "lang": "tr-TR",
   "start_url": "/bs-ofis-yonetim-sistemi/",
   "scope": "/bs-ofis-yonetim-sistemi/",

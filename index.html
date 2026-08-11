@@ -2,15 +2,9 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f7fb">
-
-  <title>BS Ofis Yönetim Sistemi</title>
+  <title>BS Eğitim Yönetimi</title>
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -19,41 +13,28 @@
   <link rel="shortcut icon" href="favicon.ico">
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --mavi: #2563eb;
       --mavi-koyu: #1d4ed8;
       --mavi-acik: #eff6ff;
-
       --arka-plan: #f5f7fb;
       --kart: #ffffff;
-
       --yazi: #0f172a;
       --ikincil: #64748b;
       --soluk: #94a3b8;
-
       --kenar: #e2e8f0;
-
       --yesil: #16a34a;
       --yesil-acik: #f0fdf4;
-
       --turuncu: #ea580c;
       --turuncu-acik: #fff7ed;
-
       --kirmizi: #dc2626;
       --kirmizi-acik: #fef2f2;
-
-      --golge:
-        0 12px 35px rgba(15, 23, 42, 0.07);
+      --golge: 0 12px 35px rgba(15, 23, 42, 0.07);
     }
 
-    html,
-    body {
+    html, body {
       min-height: 100%;
       background: var(--arka-plan);
     }
@@ -61,148 +42,83 @@
     body {
       min-height: 100vh;
       min-height: 100dvh;
-
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Helvetica,
-        Arial,
-        sans-serif;
-
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: var(--yazi);
-
       -webkit-font-smoothing: antialiased;
       overscroll-behavior-y: none;
     }
 
-    button,
-    input {
-      font: inherit;
-    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    svg { display: block; }
 
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    svg {
-      display: block;
-    }
-
-
-    /* ==================================================
-       AÇILIŞ
-    ================================================== */
-
+    /* Açılış */
     #acilisEkrani {
       position: fixed;
       inset: 0;
-
       z-index: 1000;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
-      background:
-        radial-gradient(
-          circle at top left,
-          #dbeafe 0%,
-          transparent 35%
-        ),
-        var(--arka-plan);
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%), var(--arka-plan);
     }
 
-    .acilis-logo {
-      width: 72px;
-      height: 72px;
-
+    .acilis-logo,
+    .giris-logo,
+    .marka-logo {
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-
-      border-radius: 22px;
-
       background: var(--mavi);
       color: white;
-
-      font-size: 26px;
-      font-weight: 850;
-
-      box-shadow:
-        0 18px 38px rgba(37, 99, 235, 0.28);
+      box-shadow: 0 18px 38px rgba(37, 99, 235, 0.22);
     }
 
+    .acilis-logo,
+    .giris-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+    }
 
-    /* ==================================================
-       GİRİŞ
-    ================================================== */
+    .acilis-logo img,
+    .giris-logo img,
+    .marka-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
 
+    /* Giriş */
     #girisEkrani {
       min-height: 100vh;
       min-height: 100dvh;
-
       display: none;
       align-items: center;
       justify-content: center;
-
-      padding:
-        max(24px, env(safe-area-inset-top))
-        20px
-        max(24px, env(safe-area-inset-bottom));
-
+      padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
       background:
-        radial-gradient(
-          circle at 15% 10%,
-          #dbeafe 0%,
-          transparent 30%
-        ),
-        radial-gradient(
-          circle at 85% 85%,
-          #e0e7ff 0%,
-          transparent 28%
-        ),
+        radial-gradient(circle at 15% 10%, #dbeafe 0%, transparent 30%),
+        radial-gradient(circle at 85% 85%, #e0e7ff 0%, transparent 28%),
         #f8fafc;
     }
 
     .giris-karti {
       width: 100%;
       max-width: 430px;
-
       padding: 42px 36px;
-
-      background: rgba(255, 255, 255, 0.96);
-
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(226,232,240,.9);
       border-radius: 26px;
-
-      box-shadow:
-        0 28px 70px rgba(15, 23, 42, 0.12);
+      box-shadow: 0 28px 70px rgba(15,23,42,.12);
     }
 
-    .giris-logo {
-      width: 72px;
-      height: 72px;
-
-      margin: 0 auto 20px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 22px;
-
-      background: var(--mavi);
-      color: white;
-
-      font-size: 26px;
-      font-weight: 850;
-    }
+    .giris-logo { margin: 0 auto 20px; }
 
     .giris-baslik {
       text-align: center;
-
       font-size: 25px;
       line-height: 1.25;
       font-weight: 800;
@@ -210,110 +126,69 @@
 
     .giris-aciklama {
       margin: 10px 0 34px;
-
       text-align: center;
-
       font-size: 14px;
       line-height: 1.55;
-
       color: var(--ikincil);
     }
 
     .google-buton {
       width: 100%;
       height: 58px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       gap: 12px;
-
       border: 1px solid #cbd5e1;
       border-radius: 14px;
-
       background: white;
       color: #1e293b;
-
       font-size: 15px;
       font-weight: 750;
-
       cursor: pointer;
     }
 
-    .google-logo {
-      width: 21px;
-      height: 21px;
-    }
+    .google-logo { width: 21px; height: 21px; }
 
     .giris-durum {
       display: none;
-
       margin-top: 18px;
       padding: 12px 14px;
-
       border-radius: 11px;
-
       background: #fef2f2;
       border: 1px solid #fecaca;
-
       color: #b91c1c;
-
       font-size: 13px;
       line-height: 1.45;
-
       text-align: center;
     }
 
     .giris-alt {
       margin-top: 30px;
-
       text-align: center;
-
       color: var(--soluk);
       font-size: 12px;
     }
 
-
-    /* ==================================================
-       UYGULAMA
-    ================================================== */
-
+    /* Uygulama */
     #uygulama {
       display: none;
-
       min-height: 100vh;
       min-height: 100dvh;
-
-      padding-bottom:
-        calc(98px + env(safe-area-inset-bottom));
+      padding-bottom: calc(98px + env(safe-area-inset-bottom));
     }
-
-
-    /* ==================================================
-       ÜST BAR
-    ================================================== */
 
     .ust-bar {
       position: sticky;
       top: 0;
       z-index: 50;
-
       min-height: 74px;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      padding:
-        env(safe-area-inset-top)
-        26px
-        0;
-
-      background: rgba(255, 255, 255, 0.94);
-
+      padding: env(safe-area-inset-top) 26px 0;
+      background: rgba(255,255,255,.94);
       border-bottom: 1px solid var(--kenar);
-
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
@@ -327,223 +202,118 @@
     .marka-logo {
       width: 44px;
       height: 44px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
       border-radius: 14px;
-
-      background: var(--mavi);
-      color: white;
-
-      font-size: 16px;
-      font-weight: 850;
-
-      box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.18);
+      box-shadow: 0 8px 20px rgba(37,99,235,.18);
     }
 
-    .marka-baslik {
-      font-size: 17px;
-      font-weight: 800;
-    }
-
-    .marka-alt {
-      margin-top: 2px;
-
-      color: var(--ikincil);
-      font-size: 12px;
-    }
+    .marka-baslik { font-size: 17px; font-weight: 800; }
+    .marka-alt { margin-top: 2px; color: var(--ikincil); font-size: 12px; }
 
     .profil-alani {
       position: relative;
-
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .profil-metin {
-      text-align: right;
-    }
-
-    .profil-isim {
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .profil-rol {
-      margin-top: 2px;
-
-      color: var(--ikincil);
-      font-size: 11px;
-    }
+    .profil-metin { text-align: right; }
+    .profil-isim { font-size: 13px; font-weight: 750; }
+    .profil-rol { margin-top: 2px; color: var(--ikincil); font-size: 11px; }
 
     .profil-buton {
       width: 42px;
       height: 42px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       border: 1px solid var(--kenar);
       border-radius: 13px;
-
       background: white;
       color: var(--mavi);
-
       font-size: 14px;
       font-weight: 800;
-
       cursor: pointer;
     }
 
     .profil-menu {
       position: absolute;
-
       top: 50px;
       right: 0;
-
       width: 210px;
-
       display: none;
-
       padding: 8px;
-
       background: white;
-
       border: 1px solid var(--kenar);
       border-radius: 14px;
-
       box-shadow: var(--golge);
     }
 
-    .profil-menu.acik {
-      display: block;
-    }
+    .profil-menu.acik { display: block; }
 
     .profil-menu-bilgi {
       padding: 10px 10px 12px;
-
       border-bottom: 1px solid var(--kenar);
-
       margin-bottom: 6px;
     }
 
-    .profil-menu-isim {
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .profil-menu-rol {
-      margin-top: 3px;
-
-      color: var(--ikincil);
-      font-size: 11px;
-    }
+    .profil-menu-isim { font-size: 13px; font-weight: 750; }
+    .profil-menu-rol { margin-top: 3px; color: var(--ikincil); font-size: 11px; }
 
     .profil-menu button {
       width: 100%;
-
       padding: 11px 10px;
-
       border: none;
       border-radius: 9px;
-
       background: white;
       color: #475569;
-
       text-align: left;
-
       font-size: 13px;
       font-weight: 650;
-
       cursor: pointer;
     }
 
-
-    /* ==================================================
-       İÇERİK
-    ================================================== */
-
     .icerik {
       width: min(1180px, calc(100% - 40px));
-
       margin: 0 auto;
-
       padding-top: 28px;
     }
 
-    .gorunum {
-      display: none;
-    }
-
-    .gorunum.aktif {
-      display: block;
-    }
+    .gorunum { display: none; }
+    .gorunum.aktif { display: block; }
 
     .sayfa-baslik-alani {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-
       gap: 16px;
-
       margin-bottom: 24px;
     }
 
-    .sayfa-baslik {
-      font-size: 27px;
-      font-weight: 820;
-    }
-
-    .sayfa-aciklama {
-      margin-top: 7px;
-
-      color: var(--ikincil);
-
-      font-size: 13px;
-    }
+    .sayfa-baslik { font-size: 27px; font-weight: 820; }
+    .sayfa-aciklama { margin-top: 7px; color: var(--ikincil); font-size: 13px; }
 
     .tarih-etiketi {
       padding: 9px 12px;
-
       border: 1px solid var(--kenar);
       border-radius: 10px;
-
       background: white;
-
       color: var(--ikincil);
-
       font-size: 12px;
       font-weight: 650;
     }
 
-
-    /* ==================================================
-       KPI
-    ================================================== */
-
+    /* KPI */
     .kpi-grid {
       display: grid;
-
-      grid-template-columns:
-        repeat(5, minmax(0, 1fr));
-
+      grid-template-columns: repeat(5, minmax(0,1fr));
       gap: 13px;
-
       margin-bottom: 18px;
     }
 
     .kpi-kart {
       min-height: 120px;
-
       padding: 18px;
-
       background: white;
-
       border: 1px solid var(--kenar);
       border-radius: 17px;
     }
@@ -552,29 +322,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       gap: 8px;
     }
 
-    .kpi-baslik {
-      color: var(--ikincil);
-
-      font-size: 12px;
-      font-weight: 680;
-    }
+    .kpi-baslik { color: var(--ikincil); font-size: 12px; font-weight: 680; }
 
     .ikon-kutu {
       width: 34px;
       height: 34px;
-
       flex-shrink: 0;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       border-radius: 10px;
-
       background: var(--mavi-acik);
       color: var(--mavi);
     }
@@ -582,71 +342,45 @@
     .ikon-kutu svg {
       width: 17px;
       height: 17px;
-
       stroke: currentColor;
       fill: none;
-
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .kpi-deger {
-      margin-top: 18px;
+    .kpi-deger { margin-top: 18px; font-size: 26px; font-weight: 820; }
 
-      font-size: 26px;
-      font-weight: 820;
-    }
-
-
-    /* ==================================================
-       HIZLI İŞLEMLER
-    ================================================== */
-
+    /* Hızlı işlemler */
     .hizli-grid {
       display: grid;
-
-      grid-template-columns:
-        repeat(4, 1fr);
-
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-
       margin-bottom: 18px;
     }
 
     .hizli-buton {
       min-height: 82px;
-
       display: flex;
       align-items: center;
-
       gap: 13px;
-
       padding: 15px;
-
       border: 1px solid var(--kenar);
       border-radius: 16px;
-
       background: white;
       color: var(--yazi);
-
       cursor: pointer;
-
       text-align: left;
     }
 
     .hizli-ikon {
       width: 42px;
       height: 42px;
-
       flex-shrink: 0;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       border-radius: 12px;
-
       background: var(--mavi-acik);
       color: var(--mavi);
     }
@@ -654,1123 +388,467 @@
     .hizli-ikon svg {
       width: 20px;
       height: 20px;
-
       fill: none;
       stroke: currentColor;
-
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .hizli-baslik {
-      font-size: 13px;
-      font-weight: 750;
-    }
+    .hizli-baslik { font-size: 13px; font-weight: 750; }
+    .hizli-alt { margin-top: 3px; color: var(--ikincil); font-size: 11px; }
 
-    .hizli-alt {
-      margin-top: 3px;
-
-      color: var(--ikincil);
-      font-size: 11px;
-    }
-
-
-    /* ==================================================
-       GENEL KART
-    ================================================== */
-
+    /* Kartlar */
     .ana-grid {
       display: grid;
-
-      grid-template-columns:
-        1.35fr 1fr;
-
+      grid-template-columns: 1.35fr 1fr;
       gap: 16px;
     }
 
     .kart {
       overflow: hidden;
-
       background: white;
-
       border: 1px solid var(--kenar);
       border-radius: 18px;
     }
 
     .kart-baslik {
       min-height: 58px;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       padding: 0 18px;
-
       border-bottom: 1px solid var(--kenar);
     }
 
-    .kart-baslik h2 {
-      font-size: 15px;
-      font-weight: 760;
-    }
+    .kart-baslik h2 { font-size: 15px; font-weight: 760; }
 
     .metin-buton {
       border: none;
       background: transparent;
-
       color: var(--mavi);
-
       font-size: 12px;
       font-weight: 700;
-
       cursor: pointer;
     }
 
-    .bos-durum {
+    .bos-durum,
+    .ders-yukleniyor,
+    .tahsilat-yukleniyor {
       min-height: 220px;
-
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-
       padding: 28px;
-
       text-align: center;
-    }
-
-    .bos-durum-ikon {
-      width: 46px;
-      height: 46px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      margin-bottom: 13px;
-
-      border-radius: 13px;
-
-      background: #f1f5f9;
-      color: #64748b;
-    }
-
-    .bos-durum-ikon svg {
-      width: 22px;
-      height: 22px;
-
-      fill: none;
-      stroke: currentColor;
-
-      stroke-width: 1.8;
-    }
-
-    .bos-durum-baslik {
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .bos-durum-aciklama {
-      max-width: 320px;
-
-      margin-top: 6px;
-
       color: var(--ikincil);
-
       font-size: 12px;
-      line-height: 1.5;
     }
 
+    .bos-durum-baslik { color: var(--yazi); font-size: 13px; font-weight: 750; }
+    .bos-durum-aciklama { max-width: 320px; margin-top: 6px; color: var(--ikincil); font-size: 12px; line-height: 1.5; }
 
-    /* ==================================================
-       BUGÜNKÜ DERSLER
-    ================================================== */
-
-    .ders-listesi {
-      padding: 6px 0;
-    }
+    /* Ders listesi */
+    .ders-listesi { padding: 6px 0; }
 
     .ders-satir {
       display: grid;
-
-      grid-template-columns:
-        76px minmax(0, 1fr) auto;
-
+      grid-template-columns: 76px minmax(0,1fr) auto;
       align-items: center;
-
       gap: 14px;
-
       min-height: 78px;
-
       padding: 12px 18px;
-
       border-bottom: 1px solid #f1f5f9;
     }
 
-    .ders-satir:last-child {
-      border-bottom: none;
-    }
+    .ders-satir:last-child { border-bottom: none; }
 
     .ders-saat {
       width: 64px;
-
       padding: 9px 7px;
-
       border-radius: 11px;
-
       background: var(--mavi-acik);
       color: var(--mavi);
-
       text-align: center;
-
       font-size: 12px;
       line-height: 1.3;
       font-weight: 800;
     }
 
-    .ders-ogrenci {
-      font-size: 13px;
-      font-weight: 800;
-
-      color: var(--yazi);
-    }
+    .ders-ogrenci { font-size: 13px; font-weight: 800; color: var(--yazi); }
 
     .ders-detay {
       margin-top: 5px;
-
       display: flex;
       flex-wrap: wrap;
-
       gap: 5px 12px;
-
       color: var(--ikincil);
-
       font-size: 11px;
       line-height: 1.4;
     }
 
-    .ders-detay span {
-      white-space: nowrap;
-    }
+    .ders-detay span { white-space: nowrap; }
 
     .durum-rozet {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-
       min-width: 78px;
-
       padding: 7px 10px;
-
       border-radius: 999px;
-
       font-size: 10px;
       font-weight: 750;
-
       white-space: nowrap;
     }
 
-    .durum-planlandi {
-      background: #eff6ff;
-      color: #2563eb;
-    }
+    .durum-planlandi { background: #eff6ff; color: #2563eb; }
+    .durum-yapildi { background: #f0fdf4; color: #15803d; }
+    .durum-iptal { background: #fef2f2; color: #b91c1c; }
+    .durum-diger { background: #f8fafc; color: #64748b; }
 
-    .durum-yapildi {
-      background: #f0fdf4;
-      color: #15803d;
-    }
+    /* Tahsilat listesi */
+    .tahsilat-listesi { padding: 4px 0; }
 
-    .durum-iptal {
-      background: #fef2f2;
-      color: #b91c1c;
-    }
-
-    .durum-diger {
-      background: #f8fafc;
-      color: #64748b;
-    }
-
-    .ders-yukleniyor {
-      min-height: 210px;
-
-      display: flex;
+    .tahsilat-satir {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 14px;
       align-items: center;
-      justify-content: center;
-
-      color: var(--ikincil);
-
-      font-size: 12px;
+      min-height: 72px;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
+    .tahsilat-satir:last-child { border-bottom: none; }
+    .tahsilat-ogrenci { font-size: 13px; font-weight: 800; color: var(--yazi); }
 
-    /* ==================================================
-       ALT SAYFALAR
-    ================================================== */
+    .tahsilat-detay {
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      color: var(--ikincil);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
 
+    .tahsilat-tutar {
+      color: var(--yesil);
+      font-size: 14px;
+      font-weight: 820;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    /* Alt sayfalar */
     .sekme-satiri {
       display: flex;
-
       gap: 7px;
-
       margin-bottom: 16px;
-
       overflow-x: auto;
-
       scrollbar-width: none;
     }
 
     .sekme {
       flex-shrink: 0;
-
       padding: 10px 14px;
-
       border: 1px solid var(--kenar);
       border-radius: 11px;
-
       background: white;
       color: var(--ikincil);
-
       font-size: 12px;
       font-weight: 700;
     }
 
-    .sekme.aktif {
-      border-color: #bfdbfe;
+    .sekme.aktif { border-color: #bfdbfe; background: var(--mavi-acik); color: var(--mavi); }
 
-      background: var(--mavi-acik);
-      color: var(--mavi);
-    }
-
-    .arama-alani {
-      position: relative;
-
-      margin-bottom: 16px;
-    }
+    .arama-alani { position: relative; margin-bottom: 16px; }
 
     .arama-alani input {
       width: 100%;
       height: 48px;
-
       padding: 0 16px 0 45px;
-
       border: 1px solid var(--kenar);
       border-radius: 13px;
-
       background: white;
-
       outline: none;
     }
 
     .arama-ikon {
       position: absolute;
-
       left: 16px;
       top: 50%;
-
       transform: translateY(-50%);
-
       color: var(--soluk);
     }
 
-    .arama-ikon svg {
-      width: 18px;
-      height: 18px;
-
-      fill: none;
-      stroke: currentColor;
-
-      stroke-width: 2;
-    }
+    .arama-ikon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 
     .ana-islem-buton {
       height: 42px;
-
       padding: 0 15px;
-
       border: none;
       border-radius: 11px;
-
       background: var(--mavi);
       color: white;
-
       font-size: 12px;
       font-weight: 750;
+      cursor: pointer;
     }
 
-
-    /* ==================================================
-       MODÜLLER
-    ================================================== */
-
+    /* Menü modülleri */
     .modul-grid {
       display: grid;
-
-      grid-template-columns:
-        repeat(4, 1fr);
-
+      grid-template-columns: repeat(4,1fr);
       gap: 13px;
     }
 
     .modul-kart {
       min-height: 132px;
-
       padding: 18px;
-
       border: 1px solid var(--kenar);
       border-radius: 17px;
-
       background: white;
-
       cursor: pointer;
     }
 
-    .modul-baslik {
-      margin-top: 16px;
+    .modul-baslik { margin-top: 16px; font-size: 13px; font-weight: 750; }
+    .modul-aciklama { margin-top: 4px; color: var(--ikincil); font-size: 11px; }
 
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .modul-aciklama {
-      margin-top: 4px;
-
-      color: var(--ikincil);
-
-      font-size: 11px;
-    }
-
-
-    /* ==================================================
-       ALT NAV
-    ================================================== */
-
+    /* Alt navigasyon */
     .alt-nav {
       position: fixed;
-
       left: 50%;
-      bottom:
-        calc(14px + env(safe-area-inset-bottom));
-
+      bottom: calc(14px + env(safe-area-inset-bottom));
       transform: translateX(-50%);
-
       z-index: 100;
-
       width: min(700px, calc(100% - 28px));
       height: 68px;
-
       display: grid;
-
-      grid-template-columns:
-        repeat(5, 1fr);
-
+      grid-template-columns: repeat(5,1fr);
       gap: 3px;
-
       padding: 6px;
-
-      background:
-        rgba(255, 255, 255, 0.96);
-
+      background: rgba(255,255,255,.96);
       border: 1px solid var(--kenar);
       border-radius: 20px;
-
-      box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.14);
-
+      box-shadow: 0 18px 45px rgba(15,23,42,.14);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
     }
 
     .nav-buton {
       min-width: 0;
-
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-
       gap: 4px;
-
       border: none;
       border-radius: 14px;
-
       background: transparent;
       color: #64748b;
-
       font-size: 10px;
       font-weight: 680;
-
       cursor: pointer;
     }
 
-    .nav-buton svg {
-      width: 20px;
-      height: 20px;
+    .nav-buton svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; }
+    .nav-buton.aktif { background: var(--mavi-acik); color: var(--mavi); }
 
-      fill: none;
-      stroke: currentColor;
-
-      stroke-width: 1.9;
-    }
-
-    .nav-buton.aktif {
-      background: var(--mavi-acik);
-      color: var(--mavi);
-    }
-
-
-    /* ==================================================
-       TOAST
-    ================================================== */
-
+    /* Toast */
     .toast {
       position: fixed;
-
       left: 50%;
-      bottom:
-        calc(96px + env(safe-area-inset-bottom));
-
-      transform: translate(-50%, 20px);
-
+      bottom: calc(96px + env(safe-area-inset-bottom));
+      transform: translate(-50%,20px);
       z-index: 300;
-
       padding: 11px 16px;
-
       border-radius: 11px;
-
       background: #0f172a;
       color: white;
-
       font-size: 12px;
       font-weight: 650;
-
       opacity: 0;
       pointer-events: none;
-
-      transition:
-        opacity 0.18s,
-        transform 0.18s;
+      transition: opacity .18s, transform .18s;
     }
 
-    .toast.goster {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-
-    /* ==================================================
-       TABLET
-    ================================================== */
+    .toast.goster { opacity: 1; transform: translate(-50%,0); }
 
     @media (max-width: 1050px) {
-
-      .kpi-grid {
-        grid-template-columns:
-          repeat(3, 1fr);
-      }
-
-      .hizli-grid {
-        grid-template-columns:
-          repeat(2, 1fr);
-      }
-
-      .modul-grid {
-        grid-template-columns:
-          repeat(3, 1fr);
-      }
-
+      .kpi-grid { grid-template-columns: repeat(3,1fr); }
+      .hizli-grid { grid-template-columns: repeat(2,1fr); }
+      .modul-grid { grid-template-columns: repeat(3,1fr); }
     }
 
     @media (max-width: 820px) {
-
-      .ana-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .profil-metin {
-        display: none;
-      }
-
+      .ana-grid { grid-template-columns: 1fr; }
+      .profil-metin { display: none; }
     }
 
-
-    /* ==================================================
-       MOBİL
-    ================================================== */
-
     @media (max-width: 640px) {
-
-      #uygulama {
-        padding-bottom:
-          calc(88px + env(safe-area-inset-bottom));
-      }
+      #uygulama { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
 
       .ust-bar {
-        min-height:
-          calc(58px + env(safe-area-inset-top));
-
-        padding:
-          env(safe-area-inset-top)
-          14px
-          0;
+        min-height: calc(58px + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top) 14px 0;
       }
 
-      .marka {
-        gap: 10px;
-      }
-
-      .marka-logo {
-        width: 38px;
-        height: 38px;
-
-        border-radius: 12px;
-
-        font-size: 15px;
-      }
-
-      .marka-baslik {
-        font-size: 14px;
-      }
-
-      .marka-alt {
-        display: none;
-      }
-
-      .profil-buton {
-        width: 38px;
-        height: 38px;
-
-        border-radius: 12px;
-      }
-
-      .icerik {
-        width: calc(100% - 22px);
-
-        padding-top: 16px;
-      }
-
-      .sayfa-baslik-alani {
-        align-items: flex-start;
-
-        margin-bottom: 14px;
-      }
-
-      .sayfa-baslik {
-        font-size: 20px;
-        line-height: 1.15;
-      }
-
-      .sayfa-aciklama {
-        margin-top: 4px;
-
-        font-size: 11px;
-      }
-
-      .tarih-etiketi {
-        display: none;
-      }
-
-
-      .kpi-grid {
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-
-        margin-bottom: 10px;
-      }
-
-      .kpi-kart {
-        min-height: 88px;
-
-        padding: 12px;
-
-        border-radius: 14px;
-      }
-
-      .kpi-baslik {
-        max-width: calc(100% - 32px);
-
-        font-size: 10px;
-        line-height: 1.25;
-      }
-
-      .ikon-kutu {
-        width: 27px;
-        height: 27px;
-
-        border-radius: 8px;
-      }
-
-      .ikon-kutu svg {
-        width: 14px;
-        height: 14px;
-      }
-
-      .kpi-deger {
-        margin-top: 10px;
-
-        font-size: 20px;
-        line-height: 1;
-      }
-
-      .kpi-kart:last-child {
-        grid-column: span 2;
-
-        min-height: 74px;
-      }
-
-
-      .hizli-grid {
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-
-        gap: 8px;
-
-        margin-bottom: 12px;
-      }
-
-      .hizli-buton {
-        min-height: 60px;
-
-        gap: 9px;
-
-        padding: 9px 10px;
-
-        border-radius: 13px;
-      }
-
-      .hizli-ikon {
-        width: 34px;
-        height: 34px;
-
-        border-radius: 10px;
-      }
-
-      .hizli-ikon svg {
-        width: 17px;
-        height: 17px;
-      }
-
-      .hizli-baslik {
-        font-size: 11px;
-        line-height: 1.2;
-      }
-
-      .hizli-alt {
-        display: none;
-      }
-
-
-      .ana-grid {
-        gap: 10px;
-      }
-
-      .kart {
-        border-radius: 14px;
-      }
-
-      .kart-baslik {
-        min-height: 46px;
-
-        padding: 0 13px;
-      }
-
-      .kart-baslik h2 {
-        font-size: 12px;
-      }
-
-      .metin-buton {
-        font-size: 10px;
-      }
-
-
-      /* MOBİL DERS SATIRI */
-
-      .ders-listesi {
-        padding: 3px 0;
-      }
-
-      .ders-satir {
-        grid-template-columns:
-          54px minmax(0, 1fr);
-
-        gap: 10px;
-
-        min-height: 72px;
-
-        padding: 10px 12px;
-
-        position: relative;
-      }
-
-      .ders-saat {
-        width: 50px;
-
-        padding: 8px 4px;
-
-        border-radius: 9px;
-
-        font-size: 10px;
-      }
-
-      .ders-ogrenci {
-        padding-right: 72px;
-
-        font-size: 11px;
-      }
-
-      .ders-detay {
-        margin-top: 4px;
-
-        padding-right: 4px;
-
-        gap: 3px 8px;
-
-        font-size: 9px;
-      }
-
-      .durum-rozet {
-        position: absolute;
-
-        top: 10px;
-        right: 10px;
-
-        min-width: auto;
-
-        padding: 5px 7px;
-
-        font-size: 8px;
-      }
-
-      .ders-yukleniyor {
-        min-height: 145px;
-
-        font-size: 10px;
-      }
-
-
-      .bos-durum {
-        min-height: 145px;
-
-        padding: 18px 14px;
-      }
-
-      .bos-durum-baslik {
-        font-size: 11px;
-      }
-
-      .bos-durum-aciklama {
-        margin-top: 4px;
-
-        font-size: 10px;
-      }
-
-
-      .sekme-satiri {
-        margin-bottom: 10px;
-      }
-
-      .sekme {
-        padding: 8px 11px;
-
-        font-size: 10px;
-
-        border-radius: 9px;
-      }
-
-      .arama-alani {
-        margin-bottom: 10px;
-      }
-
-      .arama-alani input {
-        height: 42px;
-
-        border-radius: 11px;
-
-        font-size: 13px;
-      }
-
-      .ana-islem-buton {
-        height: 36px;
-
-        padding: 0 11px;
-
-        font-size: 10px;
-      }
-
-
-      .modul-grid {
-        grid-template-columns:
-          repeat(2, 1fr);
-
-        gap: 8px;
-      }
-
-      .modul-kart {
-        min-height: 104px;
-
-        padding: 12px;
-
-        border-radius: 13px;
-      }
-
-      .modul-baslik {
-        margin-top: 10px;
-
-        font-size: 11px;
-      }
-
-      .modul-aciklama {
-        font-size: 9px;
-      }
-
+      .marka { gap: 10px; }
+      .marka-logo { width: 38px; height: 38px; border-radius: 12px; }
+      .marka-baslik { font-size: 14px; }
+      .marka-alt { display: none; }
+      .profil-buton { width: 38px; height: 38px; border-radius: 12px; }
+
+      .icerik { width: calc(100% - 22px); padding-top: 16px; }
+      .sayfa-baslik-alani { align-items: flex-start; margin-bottom: 14px; }
+      .sayfa-baslik { font-size: 20px; line-height: 1.15; }
+      .sayfa-aciklama { margin-top: 4px; font-size: 11px; }
+      .tarih-etiketi { display: none; }
+
+      .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-bottom: 10px; }
+      .kpi-kart { min-height: 88px; padding: 12px; border-radius: 14px; }
+      .kpi-baslik { max-width: calc(100% - 32px); font-size: 10px; line-height: 1.25; }
+      .ikon-kutu { width: 27px; height: 27px; border-radius: 8px; }
+      .ikon-kutu svg { width: 14px; height: 14px; }
+      .kpi-deger { margin-top: 10px; font-size: 20px; line-height: 1; }
+      .kpi-kart:last-child { grid-column: span 2; min-height: 74px; }
+
+      .hizli-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+      .hizli-buton { min-height: 60px; gap: 9px; padding: 9px 10px; border-radius: 13px; }
+      .hizli-ikon { width: 34px; height: 34px; border-radius: 10px; }
+      .hizli-ikon svg { width: 17px; height: 17px; }
+      .hizli-baslik { font-size: 11px; line-height: 1.2; }
+      .hizli-alt { display: none; }
+
+      .ana-grid { gap: 10px; }
+      .kart { border-radius: 14px; }
+      .kart-baslik { min-height: 46px; padding: 0 13px; }
+      .kart-baslik h2 { font-size: 12px; }
+      .metin-buton { font-size: 10px; }
+
+      .ders-listesi { padding: 3px 0; }
+      .ders-satir { grid-template-columns: 54px minmax(0,1fr); gap: 10px; min-height: 72px; padding: 10px 12px; position: relative; }
+      .ders-saat { width: 50px; padding: 8px 4px; border-radius: 9px; font-size: 10px; }
+      .ders-ogrenci { padding-right: 72px; font-size: 11px; }
+      .ders-detay { margin-top: 4px; padding-right: 4px; gap: 3px 8px; font-size: 9px; }
+      .durum-rozet { position: absolute; top: 10px; right: 10px; min-width: auto; padding: 5px 7px; font-size: 8px; }
+
+      .tahsilat-satir { min-height: 64px; padding: 10px 12px; gap: 10px; }
+      .tahsilat-ogrenci { font-size: 11px; }
+      .tahsilat-detay { margin-top: 4px; font-size: 9px; gap: 3px 7px; }
+      .tahsilat-tutar { font-size: 12px; }
+
+      .bos-durum, .ders-yukleniyor, .tahsilat-yukleniyor { min-height: 145px; padding: 18px 14px; font-size: 10px; }
+      .bos-durum-baslik { font-size: 11px; }
+      .bos-durum-aciklama { margin-top: 4px; font-size: 10px; }
+
+      .sekme-satiri { margin-bottom: 10px; }
+      .sekme { padding: 8px 11px; font-size: 10px; border-radius: 9px; }
+      .arama-alani { margin-bottom: 10px; }
+      .arama-alani input { height: 42px; border-radius: 11px; font-size: 13px; }
+      .ana-islem-buton { height: 36px; padding: 0 11px; font-size: 10px; }
+
+      .modul-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
+      .modul-kart { min-height: 104px; padding: 12px; border-radius: 13px; }
+      .modul-baslik { margin-top: 10px; font-size: 11px; }
+      .modul-aciklama { font-size: 9px; }
 
       .alt-nav {
-        bottom:
-          calc(7px + env(safe-area-inset-bottom));
-
+        bottom: calc(7px + env(safe-area-inset-bottom));
         width: calc(100% - 16px);
         height: 60px;
-
         padding: 4px;
-
         border-radius: 17px;
       }
 
-      .nav-buton {
-        gap: 3px;
+      .nav-buton { gap: 3px; border-radius: 11px; font-size: 8.5px; }
+      .nav-buton svg { width: 18px; height: 18px; }
+      .toast { bottom: calc(78px + env(safe-area-inset-bottom)); font-size: 11px; }
 
-        border-radius: 11px;
-
-        font-size: 8.5px;
-      }
-
-      .nav-buton svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      .toast {
-        bottom:
-          calc(78px + env(safe-area-inset-bottom));
-
-        font-size: 11px;
-      }
-
-
-      .giris-karti {
-        padding: 32px 22px;
-
-        border-radius: 22px;
-      }
-
-      .giris-logo {
-        width: 62px;
-        height: 62px;
-
-        border-radius: 19px;
-
-        font-size: 23px;
-      }
-
-      .giris-baslik {
-        font-size: 21px;
-      }
-
-      .giris-aciklama {
-        margin-bottom: 26px;
-
-        font-size: 13px;
-      }
-
+      .giris-karti { padding: 32px 22px; border-radius: 22px; }
+      .giris-logo { width: 62px; height: 62px; border-radius: 19px; }
+      .giris-baslik { font-size: 21px; }
+      .giris-aciklama { margin-bottom: 26px; font-size: 13px; }
     }
-
   </style>
 </head>
-
 <body>
-
-
   <div id="acilisEkrani">
-    <div class="acilis-logo">BS</div>
+    <div class="acilis-logo">
+      <img src="bs-app-icon-192.png" alt="">
+    </div>
   </div>
 
-
   <section id="girisEkrani">
-
     <div class="giris-karti">
-
-      <div class="giris-logo">BS</div>
-
-      <div class="giris-baslik">
-        BS Ofis Yönetim Sistemi
+      <div class="giris-logo">
+        <img src="bs-app-icon-192.png" alt="">
       </div>
 
-      <div class="giris-aciklama">
-        Yönetim paneline güvenli Google hesabınızla giriş yapın.
-      </div>
+      <div class="giris-baslik">BS Eğitim Yönetimi</div>
+      <div class="giris-aciklama">Yönetim paneline güvenli Google hesabınızla giriş yapın.</div>
 
-      <button
-        class="google-buton"
-        id="googleGirisButon"
-        type="button"
-      >
-
-        <svg
-          class="google-logo"
-          viewBox="0 0 24 24"
-        >
+      <button class="google-buton" id="googleGirisButon" type="button">
+        <svg class="google-logo" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M21.35 12.19c0-.64-.06-1.25-.16-1.84H12v3.48h5.25a4.49 4.49 0 0 1-1.95 2.94v2.26h3.16c1.85-1.7 2.89-4.21 2.89-6.84z"/>
           <path fill="#34A853" d="M12 21.73c2.64 0 4.86-.88 6.48-2.38l-3.16-2.45c-.88.59-2 .94-3.32.94-2.55 0-4.71-1.72-5.48-4.03H3.26v2.53A9.79 9.79 0 0 0 12 21.73z"/>
           <path fill="#FBBC05" d="M6.52 13.81A5.88 5.88 0 0 1 6.21 12c0-.63.11-1.24.31-1.81V7.66H3.26A9.75 9.75 0 0 0 2.21 12c0 1.57.38 3.05 1.05 4.34l3.26-2.53z"/>
           <path fill="#EA4335" d="M12 6.16c1.44 0 2.73.5 3.74 1.47l2.8-2.8C16.85 3.25 14.64 2.27 12 2.27a9.79 9.79 0 0 0-8.74 5.39l3.26 2.53C7.29 7.88 9.45 6.16 12 6.16z"/>
         </svg>
-
-        <span id="googleButonMetni">
-          Google ile Giriş Yap
-        </span>
-
+        <span id="googleButonMetni">Google ile Giriş Yap</span>
       </button>
 
-      <div
-        class="giris-durum"
-        id="girisDurum"
-      ></div>
-
-      <div class="giris-alt">
-        BS Ofis • Güvenli Yönetim Paneli
-      </div>
-
+      <div class="giris-durum" id="girisDurum"></div>
+      <div class="giris-alt">BS Eğitim • Güvenli Yönetim Paneli</div>
     </div>
-
   </section>
 
-
   <div id="uygulama">
-
-
     <header class="ust-bar">
-
       <div class="marka">
-
         <div class="marka-logo">
-          BS
+          <img src="bs-app-icon-192.png" alt="">
         </div>
-
         <div>
-
-          <div class="marka-baslik">
-            BS Ofis Yönetim Sistemi
-          </div>
-
-          <div class="marka-alt">
-            Yönetim Paneli
-          </div>
-
+          <div class="marka-baslik">BS Eğitim Yönetimi</div>
+          <div class="marka-alt">Yönetim Paneli</div>
         </div>
-
       </div>
 
-
       <div class="profil-alani">
-
         <div class="profil-metin">
-
-          <div
-            class="profil-isim"
-            id="profilIsim"
-          ></div>
-
-          <div
-            class="profil-rol"
-            id="profilRol"
-          >
-            Yönetici
-          </div>
-
+          <div class="profil-isim" id="profilIsim"></div>
+          <div class="profil-rol" id="profilRol">Yönetici</div>
         </div>
 
-        <button
-          class="profil-buton"
-          id="profilButon"
-          type="button"
-        >
+        <button class="profil-buton" id="profilButon" type="button">
           <span id="profilHarf">B</span>
         </button>
 
-        <div
-          class="profil-menu"
-          id="profilMenu"
-        >
-
+        <div class="profil-menu" id="profilMenu">
           <div class="profil-menu-bilgi">
-
-            <div
-              class="profil-menu-isim"
-              id="profilMenuIsim"
-            ></div>
-
-            <div
-              class="profil-menu-rol"
-              id="profilMenuRol"
-            >
-              Yönetici
-            </div>
-
+            <div class="profil-menu-isim" id="profilMenuIsim"></div>
+            <div class="profil-menu-rol" id="profilMenuRol">Yönetici</div>
           </div>
-
-          <button
-            id="cikisButon"
-            type="button"
-          >
-            Çıkış Yap
-          </button>
-
+          <button id="cikisButon" type="button">Çıkış Yap</button>
         </div>
-
       </div>
-
     </header>
 
-
     <main class="icerik">
-
-
       <!-- ANA SAYFA -->
-
-      <section
-        class="gorunum aktif"
-        id="gorunum-anasayfa"
-      >
-
+      <section class="gorunum aktif" id="gorunum-anasayfa">
         <div class="sayfa-baslik-alani">
-
           <div>
-
-            <div
-              class="sayfa-baslik"
-              id="karsilamaMetni"
-            >
-              Ana Sayfa
-            </div>
-
-            <div class="sayfa-aciklama">
-              Ofisin bugünkü operasyon ve finans özeti.
-            </div>
-
+            <div class="sayfa-baslik" id="karsilamaMetni">Ana Sayfa</div>
+            <div class="sayfa-aciklama">Ofisin bugünkü operasyon ve finans özeti.</div>
           </div>
-
-          <div
-            class="tarih-etiketi"
-            id="bugunTarih"
-          ></div>
-
+          <div class="tarih-etiketi" id="bugunTarih"></div>
         </div>
 
-
         <div class="kpi-grid">
-
           <article class="kpi-kart">
             <div class="kpi-ust">
               <div class="kpi-baslik">Bugünkü Dersler</div>
@@ -1784,17 +862,15 @@
             <div class="kpi-deger" id="kpiBugunkuDersler">…</div>
           </article>
 
-
           <article class="kpi-kart">
             <div class="kpi-ust">
               <div class="kpi-baslik">Bu Ay Tahsilat</div>
               <div class="ikon-kutu">
-               <span style="font-size:18px;font-weight:800;line-height:1;">₺</span>
+                <span style="font-size:18px;font-weight:800;line-height:1;">₺</span>
               </div>
             </div>
-            <div class="kpi-deger">—</div>
+            <div class="kpi-deger" id="kpiBuAyTahsilat">…</div>
           </article>
-
 
           <article class="kpi-kart">
             <div class="kpi-ust">
@@ -1806,9 +882,8 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger">—</div>
+            <div class="kpi-deger" id="kpiBuAyCiro">…</div>
           </article>
-
 
           <article class="kpi-kart">
             <div class="kpi-ust">
@@ -1824,7 +899,6 @@
             <div class="kpi-deger">—</div>
           </article>
 
-
           <article class="kpi-kart">
             <div class="kpi-ust">
               <div class="kpi-baslik">Borçlu Öğrenci</div>
@@ -1837,24 +911,18 @@
             </div>
             <div class="kpi-deger">—</div>
           </article>
-
         </div>
 
-
         <div class="hizli-grid">
-
           <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
             </div>
             <div>
               <div class="hizli-baslik">Ders Oluştur</div>
               <div class="hizli-alt">Yeni ders planla</div>
             </div>
           </button>
-
 
           <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
@@ -1865,7 +933,6 @@
               <div class="hizli-alt">Ödeme kaydet</div>
             </div>
           </button>
-
 
           <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
@@ -1881,7 +948,6 @@
             </div>
           </button>
 
-
           <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
               <svg viewBox="0 0 24 24">
@@ -1890,100 +956,40 @@
               </svg>
             </div>
             <div>
-              <div class="hizli-baslik">Haftayı Oluştur</div>
+              <div class="hizli-baslik">Haftalık Dersleri Oluştur</div>
               <div class="hizli-alt">Sabit programdan</div>
             </div>
           </button>
-
         </div>
-
 
         <div class="ana-grid">
-
-          <!-- GERÇEK BUGÜNKÜ DERSLER -->
-
           <article class="kart">
-
             <div class="kart-baslik">
-
               <h2>Bugünkü Dersler</h2>
-
-              <button
-                class="metin-buton"
-                type="button"
-                data-git="dersler"
-              >
-                Tümünü Gör
-              </button>
-
+              <button class="metin-buton" type="button" data-git="dersler">Tümünü Gör</button>
             </div>
-
-            <div
-              id="bugunkuDersListesi"
-              class="ders-yukleniyor"
-            >
-              Dersler yükleniyor…
-            </div>
-
+            <div id="bugunkuDersListesi" class="ders-yukleniyor">Dersler yükleniyor…</div>
           </article>
-
-
-          <!-- TAHSİLAT ŞİMDİLİK BEKLİYOR -->
 
           <article class="kart">
-
             <div class="kart-baslik">
-
               <h2>Son Tahsilatlar</h2>
-
-              <button
-                class="metin-buton"
-                type="button"
-                data-git="tahsilat"
-              >
-                Tümünü Gör
-              </button>
-
+              <button class="metin-buton" type="button" data-git="tahsilat">Tümünü Gör</button>
             </div>
-
-            <div class="bos-durum">
-
-              <div class="bos-durum-baslik">
-                Tahsilatlar bağlanmaya hazır
-              </div>
-
-              <div class="bos-durum-aciklama">
-                Gerçek tahsilatlar sonraki aşamada bağlanacak.
-              </div>
-
-            </div>
-
+            <div id="sonTahsilatListesi" class="tahsilat-yukleniyor">Tahsilatlar yükleniyor…</div>
           </article>
-
         </div>
-
       </section>
 
-
       <!-- DERSLER -->
-
       <section class="gorunum" id="gorunum-dersler">
-
         <div class="sayfa-baslik-alani">
-
           <div>
             <div class="sayfa-baslik">Dersler</div>
-            <div class="sayfa-aciklama">
-              Günlük program ve öğretmen takvimleri.
-            </div>
+            <div class="sayfa-aciklama">Günlük program ve öğretmen takvimleri.</div>
           </div>
-
-          <button class="ana-islem-buton" type="button" data-yakinda>
-            + Ders Oluştur
-          </button>
-
+          <button class="ana-islem-buton" type="button" data-yakinda>+ Ders Oluştur</button>
         </div>
-
 
         <div class="sekme-satiri">
           <button class="sekme aktif">Bugün</button>
@@ -1991,1252 +997,750 @@
           <button class="sekme">Genel Takvim</button>
         </div>
 
-
         <div class="kart">
-
           <div class="bos-durum">
-
-            <div class="bos-durum-baslik">
-              Ders ekranı hazır
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Tam ders listesi sonraki aşamada bağlanacak.
-            </div>
-
+            <div class="bos-durum-baslik">Ders ekranı hazır</div>
+            <div class="bos-durum-aciklama">Tam ders listesi sonraki aşamada bağlanacak.</div>
           </div>
-
         </div>
-
       </section>
-
 
       <!-- ÖĞRENCİLER -->
-
       <section class="gorunum" id="gorunum-ogrenciler">
-
         <div class="sayfa-baslik-alani">
-
           <div>
             <div class="sayfa-baslik">Öğrenciler</div>
-            <div class="sayfa-aciklama">
-              Öğrenci kayıtları ve finans durumu.
-            </div>
+            <div class="sayfa-aciklama">Öğrenci kayıtları ve finans durumu.</div>
           </div>
-
-          <button class="ana-islem-buton" type="button" data-yakinda>
-            + Öğrenci Ekle
-          </button>
-
+          <button class="ana-islem-buton" type="button" data-yakinda>+ Öğrenci Ekle</button>
         </div>
-
 
         <div class="arama-alani">
-
           <div class="arama-ikon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"/>
-              <path d="M20 20l-4-4"/>
-            </svg>
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           </div>
-
-          <input
-            type="search"
-            placeholder="Öğrenci ara..."
-          >
-
+          <input type="search" placeholder="Öğrenci ara...">
         </div>
-
 
         <div class="kart">
-
           <div class="bos-durum">
-
-            <div class="bos-durum-baslik">
-              Öğrenci listesi hazır
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Gerçek öğrenci kayıtları buraya bağlanacak.
-            </div>
-
+            <div class="bos-durum-baslik">Öğrenci listesi hazır</div>
+            <div class="bos-durum-aciklama">Gerçek öğrenci kayıtları buraya bağlanacak.</div>
           </div>
-
         </div>
-
       </section>
-
 
       <!-- TAHSİLAT -->
-
       <section class="gorunum" id="gorunum-tahsilat">
-
         <div class="sayfa-baslik-alani">
-
           <div>
             <div class="sayfa-baslik">Tahsilatlar</div>
-            <div class="sayfa-aciklama">
-              Öğrenci ödemeleri ve tahsilat geçmişi.
-            </div>
+            <div class="sayfa-aciklama">Öğrenci ödemeleri ve tahsilat geçmişi.</div>
           </div>
-
-          <button class="ana-islem-buton" type="button" data-yakinda>
-            + Tahsilat Gir
-          </button>
-
+          <button class="ana-islem-buton" type="button" data-yakinda>+ Tahsilat Gir</button>
         </div>
-
 
         <div class="kart">
-
-          <div class="bos-durum">
-
-            <div class="bos-durum-baslik">
-              Tahsilat ekranı hazır
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Gerçek tahsilat kayıtları buraya bağlanacak.
-            </div>
-
+          <div class="kart-baslik">
+            <h2>Tahsilat Geçmişi</h2>
+            <span class="sayfa-aciklama" id="tahsilatKayitSayisi"></span>
           </div>
-
+          <div id="tumTahsilatListesi" class="tahsilat-yukleniyor">Tahsilatlar yükleniyor…</div>
         </div>
-
       </section>
 
-
       <!-- MENÜ -->
-
       <section class="gorunum" id="gorunum-menu">
-
         <div class="sayfa-baslik-alani">
-
           <div>
             <div class="sayfa-baslik">Menü</div>
             <div class="sayfa-aciklama">Tüm yönetim modülleri.</div>
           </div>
-
         </div>
 
-
         <div class="modul-grid">
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Sabit Program</div>
             <div class="modul-aciklama">Haftalık ders planları</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Öğretmenler</div>
             <div class="modul-aciklama">Öğretmen kayıtları</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Ödevler</div>
             <div class="modul-aciklama">Öğrenci ödev takibi</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Giderler</div>
             <div class="modul-aciklama">Kurum gider yönetimi</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Öğretmen Ödemeleri</div>
             <div class="modul-aciklama">Hakediş ve ödeme</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Kasa</div>
             <div class="modul-aciklama">Hesap ve hareketler</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Raporlar</div>
             <div class="modul-aciklama">Yönetim raporları</div>
           </div>
-
           <div class="modul-kart" data-yakinda>
             <div class="modul-baslik">Ayarlar</div>
             <div class="modul-aciklama">Sistem ayarları</div>
           </div>
-
         </div>
-
       </section>
-
-
     </main>
 
-
     <nav class="alt-nav">
-
       <button class="nav-buton aktif" data-gorunum="anasayfa" type="button">
-        <svg viewBox="0 0 24 24">
-          <path d="M3 11l9-8 9 8"/>
-          <path d="M5 10v10h14V10"/>
-          <path d="M9 20v-6h6v6"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
         <span>Ana Sayfa</span>
       </button>
 
-
       <button class="nav-buton" data-gorunum="dersler" type="button">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="5" width="18" height="16" rx="2"/>
-          <path d="M16 3v4M8 3v4M3 11h18"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
         <span>Dersler</span>
       </button>
 
-
       <button class="nav-buton" data-gorunum="ogrenciler" type="button">
-        <svg viewBox="0 0 24 24">
-          <circle cx="9" cy="8" r="4"/>
-          <path d="M3 21c1-5 3-7 6-7"/>
-          <circle cx="17" cy="9" r="3"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M3 21c1-5 3-7 6-7"/><circle cx="17" cy="9" r="3"/></svg>
         <span>Öğrenciler</span>
       </button>
-
 
       <button class="nav-buton" data-gorunum="tahsilat" type="button">
         <span style="font-size:20px;font-weight:800;line-height:1;">₺</span>
         <span>Tahsilat</span>
       </button>
 
-
       <button class="nav-buton" data-gorunum="menu" type="button">
-        <svg viewBox="0 0 24 24">
-          <path d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         <span>Menü</span>
       </button>
-
     </nav>
-
   </div>
 
+  <div class="toast" id="toast">Bu özellik sonraki aşamada bağlanacak.</div>
 
-  <div class="toast" id="toast">
-    Bu özellik sonraki aşamada bağlanacak.
-  </div>
-
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-  ></script>
-
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL = "https://igmtuouhdozkgwmdxlme.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf";
+    const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";
 
-    /* ==================================================
-       SUPABASE
-    ================================================== */
-
-    const SUPABASE_URL =
-      "https://igmtuouhdozkgwmdxlme.supabase.co";
-
-    const SUPABASE_PUBLISHABLE_KEY =
-      "sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf";
-
-    const UYGULAMA_URL =
-      "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";
-
-
-    const bsSupabase =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
+    const bsSupabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
         }
-      );
+      }
+    );
 
-
-    /* ==================================================
-       ELEMENTLER
-    ================================================== */
-
-    const acilisEkrani =
-      document.getElementById("acilisEkrani");
-
-    const girisEkrani =
-      document.getElementById("girisEkrani");
-
-    const uygulama =
-      document.getElementById("uygulama");
-
-    const googleGirisButon =
-      document.getElementById("googleGirisButon");
-
-    const googleButonMetni =
-      document.getElementById("googleButonMetni");
-
-    const girisDurum =
-      document.getElementById("girisDurum");
-
-    const profilIsim =
-      document.getElementById("profilIsim");
-
-    const profilRol =
-      document.getElementById("profilRol");
-
-    const profilHarf =
-      document.getElementById("profilHarf");
-
-    const profilMenu =
-      document.getElementById("profilMenu");
-
-    const profilMenuIsim =
-      document.getElementById("profilMenuIsim");
-
-    const profilMenuRol =
-      document.getElementById("profilMenuRol");
-
-    const profilButon =
-      document.getElementById("profilButon");
-
-    const cikisButon =
-      document.getElementById("cikisButon");
-
-    const karsilamaMetni =
-      document.getElementById("karsilamaMetni");
-
-    const bugunTarih =
-      document.getElementById("bugunTarih");
-
-    const toast =
-      document.getElementById("toast");
-
-    const kpiBugunkuDersler =
-      document.getElementById("kpiBugunkuDersler");
-
-    const bugunkuDersListesi =
-      document.getElementById("bugunkuDersListesi");
-
-
-    /* ==================================================
-       TARİH — İSTANBUL
-    ================================================== */
+    const acilisEkrani = document.getElementById("acilisEkrani");
+    const girisEkrani = document.getElementById("girisEkrani");
+    const uygulama = document.getElementById("uygulama");
+    const googleGirisButon = document.getElementById("googleGirisButon");
+    const googleButonMetni = document.getElementById("googleButonMetni");
+    const girisDurum = document.getElementById("girisDurum");
+    const profilIsim = document.getElementById("profilIsim");
+    const profilRol = document.getElementById("profilRol");
+    const profilHarf = document.getElementById("profilHarf");
+    const profilMenu = document.getElementById("profilMenu");
+    const profilMenuIsim = document.getElementById("profilMenuIsim");
+    const profilMenuRol = document.getElementById("profilMenuRol");
+    const profilButon = document.getElementById("profilButon");
+    const cikisButon = document.getElementById("cikisButon");
+    const karsilamaMetni = document.getElementById("karsilamaMetni");
+    const bugunTarih = document.getElementById("bugunTarih");
+    const toast = document.getElementById("toast");
+    const kpiBugunkuDersler = document.getElementById("kpiBugunkuDersler");
+    const kpiBuAyTahsilat = document.getElementById("kpiBuAyTahsilat");
+    const kpiBuAyCiro = document.getElementById("kpiBuAyCiro");
+    const bugunkuDersListesi = document.getElementById("bugunkuDersListesi");
+    const sonTahsilatListesi = document.getElementById("sonTahsilatListesi");
+    const tumTahsilatListesi = document.getElementById("tumTahsilatListesi");
+    const tahsilatKayitSayisi = document.getElementById("tahsilatKayitSayisi");
 
     function istanbulBugunISO() {
-
-      const parcalar =
-        new Intl.DateTimeFormat(
-          "tr-TR",
-          {
-            timeZone: "Europe/Istanbul",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit"
-          }
-        )
-        .formatToParts(new Date());
-
+      const parcalar = new Intl.DateTimeFormat("tr-TR", {
+        timeZone: "Europe/Istanbul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(new Date());
 
       const degerler = {};
-
-      parcalar.forEach(
-        function (parca) {
-
-          degerler[parca.type] =
-            parca.value;
-
-        }
-      );
-
-
-      return (
-        degerler.year +
-        "-" +
-        degerler.month +
-        "-" +
-        degerler.day
-      );
-
-    }
-
-
-    function tarihYaz() {
-
-      const yazi =
-        new Intl.DateTimeFormat(
-          "tr-TR",
-          {
-            timeZone: "Europe/Istanbul",
-            weekday: "long",
-            day: "numeric",
-            month: "long"
-          }
-        )
-        .format(new Date());
-
-
-      bugunTarih.textContent =
-        yazi.charAt(0).toUpperCase() +
-        yazi.slice(1);
-
-    }
-
-
-    /* ==================================================
-       EKRANLAR
-    ================================================== */
-
-    function acilisiKapat() {
-
-      acilisEkrani.style.display =
-        "none";
-
-    }
-
-
-    function girisiGoster() {
-
-      acilisiKapat();
-
-      uygulama.style.display =
-        "none";
-
-      girisEkrani.style.display =
-        "flex";
-
-      googleGirisButon.disabled =
-        false;
-
-      googleButonMetni.textContent =
-        "Google ile Giriş Yap";
-
-    }
-
-
-    function uygulamayiGoster(profil) {
-
-      acilisiKapat();
-
-      girisEkrani.style.display =
-        "none";
-
-      uygulama.style.display =
-        "block";
-
-
-      profilIsim.textContent =
-        profil.ad_soyad;
-
-      profilRol.textContent =
-        profil.rol;
-
-      profilMenuIsim.textContent =
-        profil.ad_soyad;
-
-      profilMenuRol.textContent =
-        profil.rol;
-
-
-      const ilkAd =
-        profil.ad_soyad
-          .trim()
-          .split(" ")[0];
-
-
-      profilHarf.textContent =
-        ilkAd
-          .charAt(0)
-          .toLocaleUpperCase("tr-TR");
-
-
-      karsilamaMetni.textContent =
-        "Merhaba, " + ilkAd;
-
-
-      tarihYaz();
-
-    }
-
-
-    /* ==================================================
-       KULLANICI YETKİSİ
-    ================================================== */
-
-    async function profiliGetir(user) {
-
-      const {
-        data,
-        error
-      } =
-        await bsSupabase
-          .from("kullanici_profilleri")
-          .select("ad_soyad, rol, aktif")
-          .eq("auth_user_id", user.id)
-          .single();
-
-
-      if (error || !data) {
-
-        throw new Error(
-          "Bu Google hesabı için geçerli bir BS Ofis kullanıcı profili bulunamadı."
-        );
-
-      }
-
-
-      if (
-        data.aktif !== true ||
-        data.rol !== "Yönetici"
-      ) {
-
-        throw new Error(
-          "Bu hesabın yönetim paneline erişim yetkisi bulunmuyor."
-        );
-
-      }
-
-
-      return data;
-
-    }
-
-
-    async function oturumuDogrula(user) {
-
-      try {
-
-        const profil =
-          await profiliGetir(user);
-
-        girisDurum.style.display =
-          "none";
-
-        uygulamayiGoster(profil);
-
-        await bugunkuDersleriGetir();
-
-      } catch (error) {
-
-        await bsSupabase.auth.signOut();
-
-        girisiGoster();
-
-        girisDurum.textContent =
-          error.message;
-
-        girisDurum.style.display =
-          "block";
-
-      }
-
-    }
-
-
-    /* ==================================================
-       BUGÜNKÜ DERSLER — GERÇEK VERİ
-    ================================================== */
-
-    function saatKisalt(saat) {
-
-      if (!saat) {
-        return "—";
-      }
-
-      return saat.substring(0, 5);
-
-    }
-
-
-    function guvenliMetin(deger) {
-
-      if (
-        deger === null ||
-        deger === undefined ||
-        deger === ""
-      ) {
-        return "—";
-      }
-
-      return String(deger);
-
-    }
-
-
-    function durumSinifi(durum) {
-
-      if (durum === "Planlandı") {
-        return "durum-planlandi";
-      }
-
-      if (durum === "Yapıldı") {
-        return "durum-yapildi";
-      }
-
-      if (durum === "İptal") {
-        return "durum-iptal";
-      }
-
-      return "durum-diger";
-
-    }
-
-
-    async function bugunkuDersleriGetir() {
-
-      kpiBugunkuDersler.textContent =
-        "…";
-
-      bugunkuDersListesi.className =
-        "ders-yukleniyor";
-
-      bugunkuDersListesi.textContent =
-        "Dersler yükleniyor…";
-
-
-      const bugun =
-        istanbulBugunISO();
-
-
-      const {
-        data: dersler,
-        error: dersHata
-      } =
-        await bsSupabase
-          .from("dersler")
-          .select(`
-            ders_id,
-            tarih,
-            baslangic_saati,
-            bitis_saati,
-            ogrenci_id,
-            ogretmen_id,
-            brans_id,
-            derslik_id,
-            ders_yeri,
-            ders_durumu
-          `)
-          .eq("tarih", bugun)
-          .order(
-            "baslangic_saati",
-            {
-              ascending: true
-            }
-          );
-
-
-      if (dersHata) {
-
-        console.error(
-          "Bugünkü dersler alınamadı:",
-          dersHata
-        );
-
-        kpiBugunkuDersler.textContent =
-          "!";
-
-        bugunkuDersListesi.className =
-          "bos-durum";
-
-        bugunkuDersListesi.innerHTML =
-          `
-            <div class="bos-durum-baslik">
-              Dersler yüklenemedi
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Supabase bağlantısı kontrol edilmeli.
-            </div>
-          `;
-
-        return;
-
-      }
-
-
-      const [
-        ogrenciSonuc,
-        ogretmenSonuc,
-        bransSonuc,
-        derslikSonuc
-      ] =
-        await Promise.all([
-
-          bsSupabase
-            .from("ogrenciler")
-            .select(
-              "ogrenci_id, ad_soyad"
-            ),
-
-          bsSupabase
-            .from("ogretmenler")
-            .select(
-              "ogretmen_id, ad_soyad"
-            ),
-
-          bsSupabase
-            .from("branslar")
-            .select(
-              "brans_id, brans_adi"
-            ),
-
-          bsSupabase
-            .from("derslikler")
-            .select(
-              "derslik_id, mekan_adi"
-            )
-
-        ]);
-
-
-      if (
-        ogrenciSonuc.error ||
-        ogretmenSonuc.error ||
-        bransSonuc.error ||
-        derslikSonuc.error
-      ) {
-
-        console.error(
-          "Ders ilişkili kayıtları alınamadı.",
-          {
-            ogrenci: ogrenciSonuc.error,
-            ogretmen: ogretmenSonuc.error,
-            brans: bransSonuc.error,
-            derslik: derslikSonuc.error
-          }
-        );
-
-        kpiBugunkuDersler.textContent =
-          "!";
-
-        bugunkuDersListesi.className =
-          "bos-durum";
-
-        bugunkuDersListesi.innerHTML =
-          `
-            <div class="bos-durum-baslik">
-              Ders bilgileri yüklenemedi
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Öğrenci veya öğretmen bağlantısı kontrol edilmeli.
-            </div>
-          `;
-
-        return;
-
-      }
-
-
-      const ogrenciHarita =
-        new Map(
-          ogrenciSonuc.data.map(
-            function (kayit) {
-
-              return [
-                kayit.ogrenci_id,
-                kayit.ad_soyad
-              ];
-
-            }
-          )
-        );
-
-
-      const ogretmenHarita =
-        new Map(
-          ogretmenSonuc.data.map(
-            function (kayit) {
-
-              return [
-                kayit.ogretmen_id,
-                kayit.ad_soyad
-              ];
-
-            }
-          )
-        );
-
-
-      const bransHarita =
-        new Map(
-          bransSonuc.data.map(
-            function (kayit) {
-
-              return [
-                kayit.brans_id,
-                kayit.brans_adi
-              ];
-
-            }
-          )
-        );
-
-
-      const derslikHarita =
-        new Map(
-          derslikSonuc.data.map(
-            function (kayit) {
-
-              return [
-                kayit.derslik_id,
-                kayit.mekan_adi
-              ];
-
-            }
-          )
-        );
-
-
-      kpiBugunkuDersler.textContent =
-        dersler.length;
-
-
-      if (dersler.length === 0) {
-
-        bugunkuDersListesi.className =
-          "bos-durum";
-
-        bugunkuDersListesi.innerHTML =
-          `
-            <div class="bos-durum-baslik">
-              Bugün ders bulunmuyor
-            </div>
-
-            <div class="bos-durum-aciklama">
-              Bugün için oluşturulmuş ders kaydı yok.
-            </div>
-          `;
-
-        return;
-
-      }
-
-
-      bugunkuDersListesi.className =
-        "ders-listesi";
-
-      bugunkuDersListesi.innerHTML =
-        "";
-
-
-      dersler.forEach(
-        function (ders) {
-
-          const ogrenci =
-            ogrenciHarita.get(
-              ders.ogrenci_id
-            ) || "Öğrenci bulunamadı";
-
-
-          const ogretmen =
-            ogretmenHarita.get(
-              ders.ogretmen_id
-            ) || "Öğretmen bulunamadı";
-
-
-          const brans =
-            bransHarita.get(
-              ders.brans_id
-            ) || "Branş belirtilmedi";
-
-
-          const derslik =
-            derslikHarita.get(
-              ders.derslik_id
-            ) ||
-            ders.ders_yeri ||
-            "Yer belirtilmedi";
-
-
-          const satir =
-            document.createElement(
-              "div"
-            );
-
-
-          satir.className =
-            "ders-satir";
-
-
-          satir.innerHTML =
-            `
-              <div class="ders-saat">
-                ${saatKisalt(ders.baslangic_saati)}
-                <br>
-                ${saatKisalt(ders.bitis_saati)}
-              </div>
-
-              <div>
-
-                <div class="ders-ogrenci">
-                  ${guvenliMetin(ogrenci)}
-                </div>
-
-                <div class="ders-detay">
-
-                  <span>
-                    ${guvenliMetin(ogretmen)}
-                  </span>
-
-                  <span>
-                    ${guvenliMetin(brans)}
-                  </span>
-
-                  <span>
-                    ${guvenliMetin(derslik)}
-                  </span>
-
-                </div>
-
-              </div>
-
-              <div
-                class="durum-rozet ${durumSinifi(ders.ders_durumu)}"
-              >
-                ${guvenliMetin(ders.ders_durumu)}
-              </div>
-            `;
-
-
-          bugunkuDersListesi.appendChild(
-            satir
-          );
-
-        }
-      );
-
-    }
-
-
-    /* ==================================================
-       GOOGLE GİRİŞ
-    ================================================== */
-
-    googleGirisButon.addEventListener(
-      "click",
-      async function () {
-
-        girisDurum.style.display =
-          "none";
-
-        googleGirisButon.disabled =
-          true;
-
-        googleButonMetni.textContent =
-          "Google açılıyor...";
-
-
-        const { error } =
-          await bsSupabase.auth
-            .signInWithOAuth({
-
-              provider: "google",
-
-              options: {
-
-                redirectTo:
-                  UYGULAMA_URL,
-
-                queryParams: {
-                  prompt:
-                    "select_account"
-                }
-
-              }
-
-            });
-
-
-        if (error) {
-
-          googleGirisButon.disabled =
-            false;
-
-          googleButonMetni.textContent =
-            "Google ile Giriş Yap";
-
-          girisDurum.textContent =
-            "Google ile giriş başlatılamadı.";
-
-          girisDurum.style.display =
-            "block";
-
-        }
-
-      }
-    );
-
-
-    /* ==================================================
-       ÇIKIŞ
-    ================================================== */
-
-    cikisButon.addEventListener(
-      "click",
-      async function () {
-
-        profilMenu.classList
-          .remove("acik");
-
-        await bsSupabase.auth
-          .signOut();
-
-        girisiGoster();
-
-      }
-    );
-
-
-    /* ==================================================
-       PROFİL MENÜSÜ
-    ================================================== */
-
-    profilButon.addEventListener(
-      "click",
-      function (event) {
-
-        event.stopPropagation();
-
-        profilMenu.classList
-          .toggle("acik");
-
-      }
-    );
-
-
-    document.addEventListener(
-      "click",
-      function () {
-
-        profilMenu.classList
-          .remove("acik");
-
-      }
-    );
-
-
-    profilMenu.addEventListener(
-      "click",
-      function (event) {
-
-        event.stopPropagation();
-
-      }
-    );
-
-
-    /* ==================================================
-       NAVİGASYON
-    ================================================== */
-
-    function gorunumeGit(ad) {
-
-      document
-        .querySelectorAll(".gorunum")
-        .forEach(
-          function (gorunum) {
-
-            gorunum.classList
-              .remove("aktif");
-
-          }
-        );
-
-
-      document
-        .querySelectorAll(".nav-buton")
-        .forEach(
-          function (buton) {
-
-            buton.classList
-              .remove("aktif");
-
-          }
-        );
-
-
-      const hedef =
-        document.getElementById(
-          "gorunum-" + ad
-        );
-
-
-      const buton =
-        document.querySelector(
-          '[data-gorunum="' +
-          ad +
-          '"]'
-        );
-
-
-      if (hedef) {
-
-        hedef.classList
-          .add("aktif");
-
-      }
-
-
-      if (buton) {
-
-        buton.classList
-          .add("aktif");
-
-      }
-
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+      parcalar.forEach(function (parca) {
+        degerler[parca.type] = parca.value;
       });
 
+      return degerler.year + "-" + degerler.month + "-" + degerler.day;
     }
 
+    function aySinirlari() {
+      const bugun = istanbulBugunISO();
+      const yil = Number(bugun.slice(0,4));
+      const ay = Number(bugun.slice(5,7));
+      const sonrakiYil = ay === 12 ? yil + 1 : yil;
+      const sonrakiAy = ay === 12 ? 1 : ay + 1;
 
-    document
-      .querySelectorAll(".nav-buton")
-      .forEach(
-        function (buton) {
+      return {
+        baslangic: yil + "-" + String(ay).padStart(2,"0") + "-01",
+        sonraki: sonrakiYil + "-" + String(sonrakiAy).padStart(2,"0") + "-01",
+        yilAy: yil + "-" + String(ay).padStart(2,"0")
+      };
+    }
 
-          buton.addEventListener(
-            "click",
-            function () {
+    function tarihYaz() {
+      const yazi = new Intl.DateTimeFormat("tr-TR", {
+        timeZone: "Europe/Istanbul",
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      }).format(new Date());
 
-              gorunumeGit(
-                buton.dataset.gorunum
-              );
+      bugunTarih.textContent = yazi.charAt(0).toUpperCase() + yazi.slice(1);
+    }
 
-            }
-          );
+    function paraYaz(tutar) {
+      const sayi = Number(tutar || 0);
+      return new Intl.NumberFormat("tr-TR", {
+        style: "currency",
+        currency: "TRY",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(Number.isFinite(sayi) ? sayi : 0);
+    }
 
-        }
+    function tarihKisa(deger) {
+      if (!deger) return "—";
+      const metin = String(deger).slice(0,10);
+      const parca = metin.split("-");
+      if (parca.length !== 3) return metin;
+      return parca[2] + "." + parca[1] + "." + parca[0];
+    }
+
+    function saatKisalt(saat) {
+      if (!saat) return "—";
+      return String(saat).substring(0,5);
+    }
+
+    function guvenliMetin(deger) {
+      if (deger === null || deger === undefined || deger === "") return "—";
+      return String(deger);
+    }
+
+    function htmlKacir(deger) {
+      return guvenliMetin(deger)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function anahtarNorm(deger) {
+      return String(deger || "")
+        .toLocaleLowerCase("tr-TR")
+        .replaceAll("ı","i")
+        .replaceAll("ğ","g")
+        .replaceAll("ü","u")
+        .replaceAll("ş","s")
+        .replaceAll("ö","o")
+        .replaceAll("ç","c")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function kayitAlani(kayit, adaylar) {
+      const anahtarlar = Object.keys(kayit || {});
+      const harita = new Map();
+
+      anahtarlar.forEach(function (anahtar) {
+        harita.set(anahtarNorm(anahtar), anahtar);
+      });
+
+      for (const aday of adaylar) {
+        const gercek = harita.get(anahtarNorm(aday));
+        if (gercek !== undefined) return kayit[gercek];
+      }
+
+      return null;
+    }
+
+    function evetMi(deger) {
+      if (deger === true || deger === 1) return true;
+      const metin = String(deger || "").toLocaleLowerCase("tr-TR").trim();
+      return metin === "true" || metin === "evet" || metin === "1";
+    }
+
+    function acilisiKapat() {
+      acilisEkrani.style.display = "none";
+    }
+
+    function girisiGoster() {
+      acilisiKapat();
+      uygulama.style.display = "none";
+      girisEkrani.style.display = "flex";
+      googleGirisButon.disabled = false;
+      googleButonMetni.textContent = "Google ile Giriş Yap";
+    }
+
+    function uygulamayiGoster(profil) {
+      acilisiKapat();
+      girisEkrani.style.display = "none";
+      uygulama.style.display = "block";
+
+      profilIsim.textContent = profil.ad_soyad;
+      profilRol.textContent = profil.rol;
+      profilMenuIsim.textContent = profil.ad_soyad;
+      profilMenuRol.textContent = profil.rol;
+
+      const ilkAd = profil.ad_soyad.trim().split(" ")[0];
+      profilHarf.textContent = ilkAd.charAt(0).toLocaleUpperCase("tr-TR");
+      karsilamaMetni.textContent = "Merhaba, " + ilkAd;
+      tarihYaz();
+    }
+
+    async function profiliGetir(user) {
+      const { data, error } = await bsSupabase
+        .from("kullanici_profilleri")
+        .select("ad_soyad, rol, aktif")
+        .eq("auth_user_id", user.id)
+        .single();
+
+      if (error || !data) {
+        throw new Error("Bu Google hesabı için geçerli bir BS Eğitim kullanıcı profili bulunamadı.");
+      }
+
+      if (data.aktif !== true || data.rol !== "Yönetici") {
+        throw new Error("Bu hesabın yönetim paneline erişim yetkisi bulunmuyor.");
+      }
+
+      return data;
+    }
+
+    async function oturumuDogrula(user) {
+      try {
+        const profil = await profiliGetir(user);
+        girisDurum.style.display = "none";
+        uygulamayiGoster(profil);
+
+        await Promise.all([
+          bugunkuDersleriGetir(),
+          tahsilatlariGetir(),
+          buAyCiroyuGetir()
+        ]);
+      } catch (error) {
+        console.error(error);
+        await bsSupabase.auth.signOut();
+        girisiGoster();
+        girisDurum.textContent = error.message;
+        girisDurum.style.display = "block";
+      }
+    }
+
+    function durumSinifi(durum) {
+      if (durum === "Planlandı") return "durum-planlandi";
+      if (durum === "Yapıldı") return "durum-yapildi";
+      if (durum === "İptal") return "durum-iptal";
+      return "durum-diger";
+    }
+
+    async function bugunkuDersleriGetir() {
+      kpiBugunkuDersler.textContent = "…";
+      bugunkuDersListesi.className = "ders-yukleniyor";
+      bugunkuDersListesi.textContent = "Dersler yükleniyor…";
+
+      const bugun = istanbulBugunISO();
+
+      const { data: dersler, error: dersHata } = await bsSupabase
+        .from("dersler")
+        .select(`
+          ders_id,
+          tarih,
+          baslangic_saati,
+          bitis_saati,
+          ogrenci_id,
+          ogretmen_id,
+          brans_id,
+          derslik_id,
+          ders_yeri,
+          ders_durumu
+        `)
+        .eq("tarih", bugun)
+        .order("baslangic_saati", { ascending: true });
+
+      if (dersHata) {
+        console.error("Bugünkü dersler alınamadı:", dersHata);
+        kpiBugunkuDersler.textContent = "!";
+        bugunkuDersListesi.className = "bos-durum";
+        bugunkuDersListesi.innerHTML = `
+          <div class="bos-durum-baslik">Dersler yüklenemedi</div>
+          <div class="bos-durum-aciklama">Supabase bağlantısı kontrol edilmeli.</div>
+        `;
+        return;
+      }
+
+      const [ogrenciSonuc, ogretmenSonuc, bransSonuc, derslikSonuc] = await Promise.all([
+        bsSupabase.from("ogrenciler").select("ogrenci_id, ad_soyad"),
+        bsSupabase.from("ogretmenler").select("ogretmen_id, ad_soyad"),
+        bsSupabase.from("branslar").select("brans_id, brans_adi"),
+        bsSupabase.from("derslikler").select("derslik_id, mekan_adi")
+      ]);
+
+      if (ogrenciSonuc.error || ogretmenSonuc.error || bransSonuc.error || derslikSonuc.error) {
+        console.error("Ders ilişkili kayıtları alınamadı.", {
+          ogrenci: ogrenciSonuc.error,
+          ogretmen: ogretmenSonuc.error,
+          brans: bransSonuc.error,
+          derslik: derslikSonuc.error
+        });
+
+        kpiBugunkuDersler.textContent = "!";
+        bugunkuDersListesi.className = "bos-durum";
+        bugunkuDersListesi.innerHTML = `
+          <div class="bos-durum-baslik">Ders bilgileri yüklenemedi</div>
+          <div class="bos-durum-aciklama">Öğrenci veya öğretmen bağlantısı kontrol edilmeli.</div>
+        `;
+        return;
+      }
+
+      const ogrenciHarita = new Map(ogrenciSonuc.data.map(k => [k.ogrenci_id, k.ad_soyad]));
+      const ogretmenHarita = new Map(ogretmenSonuc.data.map(k => [k.ogretmen_id, k.ad_soyad]));
+      const bransHarita = new Map(bransSonuc.data.map(k => [k.brans_id, k.brans_adi]));
+      const derslikHarita = new Map(derslikSonuc.data.map(k => [k.derslik_id, k.mekan_adi]));
+
+      kpiBugunkuDersler.textContent = dersler.length;
+
+      if (dersler.length === 0) {
+        bugunkuDersListesi.className = "bos-durum";
+        bugunkuDersListesi.innerHTML = `
+          <div class="bos-durum-baslik">Bugün ders bulunmuyor</div>
+          <div class="bos-durum-aciklama">Bugün için oluşturulmuş ders kaydı yok.</div>
+        `;
+        return;
+      }
+
+      bugunkuDersListesi.className = "ders-listesi";
+      bugunkuDersListesi.innerHTML = "";
+
+      dersler.forEach(function (ders) {
+        const ogrenci = ogrenciHarita.get(ders.ogrenci_id) || "Öğrenci bulunamadı";
+        const ogretmen = ogretmenHarita.get(ders.ogretmen_id) || "Öğretmen bulunamadı";
+        const brans = bransHarita.get(ders.brans_id) || "Branş belirtilmedi";
+        const derslik = derslikHarita.get(ders.derslik_id) || ders.ders_yeri || "Yer belirtilmedi";
+
+        const satir = document.createElement("div");
+        satir.className = "ders-satir";
+        satir.innerHTML = `
+          <div class="ders-saat">
+            ${htmlKacir(saatKisalt(ders.baslangic_saati))}<br>
+            ${htmlKacir(saatKisalt(ders.bitis_saati))}
+          </div>
+          <div>
+            <div class="ders-ogrenci">${htmlKacir(ogrenci)}</div>
+            <div class="ders-detay">
+              <span>${htmlKacir(ogretmen)}</span>
+              <span>${htmlKacir(brans)}</span>
+              <span>${htmlKacir(derslik)}</span>
+            </div>
+          </div>
+          <div class="durum-rozet ${durumSinifi(ders.ders_durumu)}">
+            ${htmlKacir(ders.ders_durumu)}
+          </div>
+        `;
+
+        bugunkuDersListesi.appendChild(satir);
+      });
+    }
+
+    async function buAyCiroyuGetir() {
+      kpiBuAyCiro.textContent = "…";
+      const sinir = aySinirlari();
+
+      const { data, error } = await bsSupabase
+        .from("dersler")
+        .select("tarih, ogrenci_toplam_tutar, ders_durumu")
+        .eq("ders_durumu", "Yapıldı")
+        .gte("tarih", sinir.baslangic)
+        .lt("tarih", sinir.sonraki);
+
+      if (error) {
+        console.error("Bu ay ciro alınamadı:", error);
+        kpiBuAyCiro.textContent = "!";
+        return;
+      }
+
+      const toplam = (data || []).reduce(function (birikim, kayit) {
+        return birikim + (Number(kayit.ogrenci_toplam_tutar) || 0);
+      }, 0);
+
+      kpiBuAyCiro.textContent = paraYaz(toplam);
+    }
+
+    function tahsilatTarih(kayit) {
+      return kayitAlani(kayit, ["tahsilat_tarihi", "tarih", "payment_date"]);
+    }
+
+    function tahsilatOgrenciId(kayit) {
+      return kayitAlani(kayit, ["ogrenci_id", "student_id", "ogrenciid", "studentid"]);
+    }
+
+    function tahsilatTutar(kayit) {
+      return Number(kayitAlani(kayit, ["tutar", "amount"])) || 0;
+    }
+
+    function tahsilatOdemeYontemi(kayit) {
+      return kayitAlani(kayit, ["odeme_yontemi", "odemeyontemi", "payment_method"]);
+    }
+
+    function tahsilatAciklama(kayit) {
+      return kayitAlani(kayit, ["aciklama", "description", "not"]);
+    }
+
+    function tahsilatIptalMi(kayit) {
+      return evetMi(kayitAlani(kayit, ["iptal_mi", "iptalmi", "cancelled", "is_cancelled"]));
+    }
+
+    function tahsilatOlusturma(kayit) {
+      return kayitAlani(kayit, ["olusturulma_zamani", "created_at", "createdat"]);
+    }
+
+    function tahsilatSiralamaDegeri(kayit) {
+      const tarih = String(tahsilatTarih(kayit) || "");
+      const olusturma = String(tahsilatOlusturma(kayit) || "");
+      return tarih + "|" + olusturma;
+    }
+
+    function tahsilatSatiriOlustur(kayit, ogrenciHarita) {
+      const ogrenciId = tahsilatOgrenciId(kayit);
+      const ogrenci = ogrenciHarita.get(ogrenciId) || "Öğrenci";
+      const tarih = tarihKisa(tahsilatTarih(kayit));
+      const yontem = tahsilatOdemeYontemi(kayit);
+      const aciklama = tahsilatAciklama(kayit);
+
+      const satir = document.createElement("div");
+      satir.className = "tahsilat-satir";
+      satir.innerHTML = `
+        <div>
+          <div class="tahsilat-ogrenci">${htmlKacir(ogrenci)}</div>
+          <div class="tahsilat-detay">
+            <span>${htmlKacir(tarih)}</span>
+            ${yontem ? `<span>${htmlKacir(yontem)}</span>` : ""}
+            ${aciklama ? `<span>${htmlKacir(aciklama)}</span>` : ""}
+          </div>
+        </div>
+        <div class="tahsilat-tutar">${htmlKacir(paraYaz(tahsilatTutar(kayit)))}</div>
+      `;
+      return satir;
+    }
+
+    function tahsilatListele(hedef, kayitlar, ogrenciHarita, bosBaslik, bosAciklama) {
+      if (!hedef) return;
+
+      if (!kayitlar.length) {
+        hedef.className = "bos-durum";
+        hedef.innerHTML = `
+          <div class="bos-durum-baslik">${htmlKacir(bosBaslik)}</div>
+          <div class="bos-durum-aciklama">${htmlKacir(bosAciklama)}</div>
+        `;
+        return;
+      }
+
+      hedef.className = "tahsilat-listesi";
+      hedef.innerHTML = "";
+      kayitlar.forEach(function (kayit) {
+        hedef.appendChild(tahsilatSatiriOlustur(kayit, ogrenciHarita));
+      });
+    }
+
+    async function tahsilatlariGetir() {
+      kpiBuAyTahsilat.textContent = "…";
+      sonTahsilatListesi.className = "tahsilat-yukleniyor";
+      sonTahsilatListesi.textContent = "Tahsilatlar yükleniyor…";
+      tumTahsilatListesi.className = "tahsilat-yukleniyor";
+      tumTahsilatListesi.textContent = "Tahsilatlar yükleniyor…";
+
+      const [{ data: tahsilatlar, error: tahsilatHata }, ogrenciSonuc] = await Promise.all([
+        bsSupabase.from("tahsilatlar").select("*"),
+        bsSupabase.from("ogrenciler").select("ogrenci_id, ad_soyad")
+      ]);
+
+      if (tahsilatHata) {
+        console.error("Tahsilatlar alınamadı:", tahsilatHata);
+        kpiBuAyTahsilat.textContent = "!";
+        sonTahsilatListesi.className = "bos-durum";
+        sonTahsilatListesi.innerHTML = `
+          <div class="bos-durum-baslik">Tahsilatlar yüklenemedi</div>
+          <div class="bos-durum-aciklama">Supabase tahsilat tablosu veya yetkileri kontrol edilmeli.</div>
+        `;
+        tumTahsilatListesi.className = "bos-durum";
+        tumTahsilatListesi.innerHTML = sonTahsilatListesi.innerHTML;
+        return;
+      }
+
+      if (ogrenciSonuc.error) {
+        console.error("Tahsilat öğrencileri alınamadı:", ogrenciSonuc.error);
+      }
+
+      const ogrenciHarita = new Map(
+        (ogrenciSonuc.data || []).map(function (kayit) {
+          return [kayit.ogrenci_id, kayit.ad_soyad];
+        })
       );
 
+      const aktifTahsilatlar = (tahsilatlar || [])
+        .filter(function (kayit) { return !tahsilatIptalMi(kayit); })
+        .sort(function (a,b) {
+          return tahsilatSiralamaDegeri(b).localeCompare(tahsilatSiralamaDegeri(a));
+        });
 
-    document
-      .querySelectorAll("[data-git]")
-      .forEach(
-        function (buton) {
+      const yilAy = aySinirlari().yilAy;
+      const buAyKayitlari = aktifTahsilatlar.filter(function (kayit) {
+        const tarih = String(tahsilatTarih(kayit) || "");
+        return tarih.slice(0,7) === yilAy;
+      });
 
-          buton.addEventListener(
-            "click",
-            function () {
+      const buAyToplam = buAyKayitlari.reduce(function (birikim, kayit) {
+        return birikim + tahsilatTutar(kayit);
+      }, 0);
 
-              gorunumeGit(
-                buton.dataset.git
-              );
+      kpiBuAyTahsilat.textContent = paraYaz(buAyToplam);
+      tahsilatKayitSayisi.textContent = aktifTahsilatlar.length + " kayıt";
 
-            }
-          );
-
-        }
+      tahsilatListele(
+        sonTahsilatListesi,
+        aktifTahsilatlar.slice(0,5),
+        ogrenciHarita,
+        "Henüz tahsilat yok",
+        "Kayıtlı tahsilat bulunmuyor."
       );
 
+      tahsilatListele(
+        tumTahsilatListesi,
+        aktifTahsilatlar,
+        ogrenciHarita,
+        "Henüz tahsilat yok",
+        "Kayıtlı tahsilat bulunmuyor."
+      );
+    }
 
-    /* ==================================================
-       YAKINDA
-    ================================================== */
+    googleGirisButon.addEventListener("click", async function () {
+      girisDurum.style.display = "none";
+      googleGirisButon.disabled = true;
+      googleButonMetni.textContent = "Google açılıyor...";
+
+      const { error } = await bsSupabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: UYGULAMA_URL,
+          queryParams: { prompt: "select_account" }
+        }
+      });
+
+      if (error) {
+        googleGirisButon.disabled = false;
+        googleButonMetni.textContent = "Google ile Giriş Yap";
+        girisDurum.textContent = "Google ile giriş başlatılamadı.";
+        girisDurum.style.display = "block";
+      }
+    });
+
+    cikisButon.addEventListener("click", async function () {
+      profilMenu.classList.remove("acik");
+      await bsSupabase.auth.signOut();
+      girisiGoster();
+    });
+
+    profilButon.addEventListener("click", function (event) {
+      event.stopPropagation();
+      profilMenu.classList.toggle("acik");
+    });
+
+    document.addEventListener("click", function () {
+      profilMenu.classList.remove("acik");
+    });
+
+    profilMenu.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+
+    function gorunumeGit(ad) {
+      document.querySelectorAll(".gorunum").forEach(function (gorunum) {
+        gorunum.classList.remove("aktif");
+      });
+
+      document.querySelectorAll(".nav-buton").forEach(function (buton) {
+        buton.classList.remove("aktif");
+      });
+
+      const hedef = document.getElementById("gorunum-" + ad);
+      const buton = document.querySelector('[data-gorunum="' + ad + '"]');
+
+      if (hedef) hedef.classList.add("aktif");
+      if (buton) buton.classList.add("aktif");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".nav-buton").forEach(function (buton) {
+      buton.addEventListener("click", function () {
+        gorunumeGit(buton.dataset.gorunum);
+      });
+    });
+
+    document.querySelectorAll("[data-git]").forEach(function (buton) {
+      buton.addEventListener("click", function () {
+        gorunumeGit(buton.dataset.git);
+      });
+    });
 
     let toastTimer;
 
-
     function yakindaGoster() {
-
       clearTimeout(toastTimer);
-
       toast.classList.add("goster");
-
-
-      toastTimer =
-        setTimeout(
-          function () {
-
-            toast.classList.remove(
-              "goster"
-            );
-
-          },
-          1800
-        );
-
+      toastTimer = setTimeout(function () {
+        toast.classList.remove("goster");
+      }, 1800);
     }
 
-
-    document
-      .querySelectorAll("[data-yakinda]")
-      .forEach(
-        function (eleman) {
-
-          eleman.addEventListener(
-            "click",
-            yakindaGoster
-          );
-
-        }
-      );
-
-
-    /* ==================================================
-       BAŞLAT
-    ================================================== */
+    document.querySelectorAll("[data-yakinda]").forEach(function (eleman) {
+      eleman.addEventListener("click", yakindaGoster);
+    });
 
     async function baslat() {
+      const { data, error } = await bsSupabase.auth.getSession();
 
-      const {
-        data,
-        error
-      } =
-        await bsSupabase.auth
-          .getSession();
-
-
-      if (
-        error ||
-        !data ||
-        !data.session ||
-        !data.session.user
-      ) {
-
+      if (error || !data || !data.session || !data.session.user) {
         girisiGoster();
-
         return;
-
       }
 
-
-      await oturumuDogrula(
-        data.session.user
-      );
-
+      await oturumuDogrula(data.session.user);
     }
-
 
     baslat();
 
-
-    /* ==================================================
-       SERVICE WORKER
-    ================================================== */
-
     if ("serviceWorker" in navigator) {
-
-      window.addEventListener(
-        "load",
-        function () {
-
-          navigator.serviceWorker.register(
-            "/bs-ofis-yonetim-sistemi/sw.js"
-          );
-
-        }
-      );
-
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register("/bs-ofis-yonetim-sistemi/sw.js", { updateViaCache: "none" })
+          .then(function (kayit) {
+            kayit.update();
+          })
+          .catch(function (hata) {
+            console.error("Service Worker kaydedilemedi:", hata);
+          });
+      });
     }
-
   </script>
-
 </body>
 </html>

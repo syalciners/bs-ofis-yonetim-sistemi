@@ -2,8 +2,16 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2563eb">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#2563eb"
+  >
 
   <title>BS Ofis Yönetim Sistemi</title>
 
@@ -16,6 +24,7 @@
 
     body {
       min-height: 100vh;
+
       font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -92,7 +101,6 @@
       font-size: 25px;
       line-height: 1.25;
       font-weight: 750;
-
       color: #0f172a;
     }
 
@@ -165,6 +173,7 @@
 
       right: 14px;
       top: 50%;
+
       transform: translateY(-50%);
 
       border: none;
@@ -178,7 +187,8 @@
       cursor: pointer;
     }
 
-    .giris-buton {
+    .giris-buton,
+    .cikis-buton {
       width: 100%;
       height: 54px;
 
@@ -187,28 +197,48 @@
       border: none;
       border-radius: 13px;
 
-      background: #2563eb;
-      color: white;
-
       font-size: 16px;
       font-weight: 700;
 
       cursor: pointer;
 
-      box-shadow:
-        0 10px 24px rgba(37, 99, 235, 0.22);
-
       transition:
         transform 0.15s,
-        background 0.2s;
+        background 0.2s,
+        opacity 0.2s;
+    }
+
+    .giris-buton {
+      background: #2563eb;
+      color: white;
+
+      box-shadow:
+        0 10px 24px rgba(37, 99, 235, 0.22);
     }
 
     .giris-buton:hover {
       background: #1d4ed8;
     }
 
-    .giris-buton:active {
+    .giris-buton:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .giris-buton:active,
+    .cikis-buton:active {
       transform: scale(0.99);
+    }
+
+    .cikis-buton {
+      margin-top: 22px;
+
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .cikis-buton:hover {
+      background: #e2e8f0;
     }
 
     .durum {
@@ -219,11 +249,89 @@
 
       border-radius: 10px;
 
+      font-size: 13px;
+      line-height: 1.45;
+
+      text-align: center;
+    }
+
+    .durum.hata {
+      display: block;
+
+      background: #fef2f2;
+      color: #b91c1c;
+
+      border: 1px solid #fecaca;
+    }
+
+    .durum.bilgi {
+      display: block;
+
       background: #eff6ff;
       color: #1d4ed8;
 
-      font-size: 13px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .basari-alani {
+      display: none;
       text-align: center;
+    }
+
+    .basari-ikon {
+      width: 64px;
+      height: 64px;
+
+      margin: 0 auto 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: #dcfce7;
+      color: #15803d;
+
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .basari-baslik {
+      font-size: 23px;
+      font-weight: 750;
+
+      color: #0f172a;
+    }
+
+    .kullanici-adi {
+      margin-top: 10px;
+
+      font-size: 17px;
+      font-weight: 650;
+
+      color: #2563eb;
+    }
+
+    .rol {
+      margin-top: 5px;
+
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .basari-aciklama {
+      margin-top: 20px;
+      padding: 14px;
+
+      border-radius: 12px;
+
+      background: #f8fafc;
+
+      font-size: 13px;
+      line-height: 1.5;
+
+      color: #475569;
     }
 
     .alt-bilgi {
@@ -256,87 +364,130 @@
 
   <main class="giris-karti">
 
-    <div class="logo-alani">
+    <div
+      id="girisAlani"
+    >
 
-      <div class="logo">
-        BS
+      <div class="logo-alani">
+
+        <div class="logo">
+          BS
+        </div>
+
+        <h1>
+          BS Ofis Yönetim Sistemi
+        </h1>
+
+        <p class="alt-baslik">
+          Yönetim paneline erişmek için giriş yapın.
+        </p>
+
       </div>
 
-      <h1>
-        BS Ofis Yönetim Sistemi
-      </h1>
+      <form id="girisFormu">
 
-      <p class="alt-baslik">
-        Yönetim paneline erişmek için giriş yapın.
-      </p>
+        <div class="form-grubu">
+
+          <label for="email">
+            E-posta
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="E-posta adresiniz"
+            required
+          >
+
+        </div>
+
+        <div class="form-grubu">
+
+          <label for="sifre">
+            Şifre
+          </label>
+
+          <div class="sifre-alani">
+
+            <input
+              id="sifre"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Şifreniz"
+              required
+            >
+
+            <button
+              class="sifre-goster"
+              type="button"
+              id="sifreGoster"
+            >
+              Göster
+            </button>
+
+          </div>
+
+        </div>
+
+        <button
+          class="giris-buton"
+          type="submit"
+          id="girisButon"
+        >
+          Giriş Yap
+        </button>
+
+        <div
+          class="durum"
+          id="durum"
+        ></div>
+
+      </form>
 
     </div>
 
 
-    <form id="girisFormu">
+    <div
+      class="basari-alani"
+      id="basariAlani"
+    >
 
-      <div class="form-grubu">
-
-        <label for="email">
-          E-posta
-        </label>
-
-        <input
-          id="email"
-          type="email"
-          autocomplete="email"
-          placeholder="E-posta adresiniz"
-          required
-        >
-
+      <div class="basari-ikon">
+        ✓
       </div>
 
-
-      <div class="form-grubu">
-
-        <label for="sifre">
-          Şifre
-        </label>
-
-        <div class="sifre-alani">
-
-          <input
-            id="sifre"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Şifreniz"
-            required
-          >
-
-          <button
-            class="sifre-goster"
-            type="button"
-            id="sifreGoster"
-          >
-            Göster
-          </button>
-
-        </div>
-
+      <div class="basari-baslik">
+        Giriş Başarılı
       </div>
-
-
-      <button
-        class="giris-buton"
-        type="submit"
-      >
-        Giriş Yap
-      </button>
-
 
       <div
-        class="durum"
-        id="durum"
-      >
-        Giriş bağlantısı sonraki adımda etkinleştirilecek.
+        class="kullanici-adi"
+        id="kullaniciAdi"
+      ></div>
+
+      <div
+        class="rol"
+        id="kullaniciRol"
+      ></div>
+
+      <div class="basari-aciklama">
+        Supabase bağlantısı ve yönetici yetkilendirmesi
+        başarıyla doğrulandı.
+        <br><br>
+        Ana yönetim paneli bir sonraki aşamada
+        bu ekrana bağlanacak.
       </div>
 
-    </form>
+      <button
+        class="cikis-buton"
+        type="button"
+        id="cikisButon"
+      >
+        Çıkış Yap
+      </button>
+
+    </div>
 
 
     <div class="alt-bilgi">
@@ -346,7 +497,44 @@
   </main>
 
 
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
   <script>
+
+    const SUPABASE_URL =
+      "https://igmtuouhdozkgwmdxlme.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf";
+
+
+    const bsSupabase =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true
+          }
+        }
+      );
+
+
+    const girisAlani =
+      document.getElementById("girisAlani");
+
+    const basariAlani =
+      document.getElementById("basariAlani");
+
+    const girisFormu =
+      document.getElementById("girisFormu");
+
+    const emailAlani =
+      document.getElementById("email");
 
     const sifreAlani =
       document.getElementById("sifre");
@@ -354,26 +542,170 @@
     const sifreGoster =
       document.getElementById("sifreGoster");
 
-    const girisFormu =
-      document.getElementById("girisFormu");
+    const girisButon =
+      document.getElementById("girisButon");
 
     const durum =
       document.getElementById("durum");
+
+    const kullaniciAdi =
+      document.getElementById("kullaniciAdi");
+
+    const kullaniciRol =
+      document.getElementById("kullaniciRol");
+
+    const cikisButon =
+      document.getElementById("cikisButon");
+
+
+    function durumGoster(
+      mesaj,
+      tur = "bilgi"
+    ) {
+
+      durum.textContent = mesaj;
+
+      durum.className =
+        "durum " + tur;
+
+    }
+
+
+    function durumTemizle() {
+
+      durum.textContent = "";
+      durum.className = "durum";
+
+    }
+
+
+    function girisEkraniniGoster() {
+
+      basariAlani.style.display = "none";
+      girisAlani.style.display = "block";
+
+      sifreAlani.value = "";
+
+      girisButon.disabled = false;
+      girisButon.textContent = "Giriş Yap";
+
+    }
+
+
+    function basariEkraniniGoster(
+      profil
+    ) {
+
+      girisAlani.style.display = "none";
+      basariAlani.style.display = "block";
+
+      kullaniciAdi.textContent =
+        profil.ad_soyad;
+
+      kullaniciRol.textContent =
+        profil.rol;
+
+    }
+
+
+    async function kullaniciYetkisiniKontrolEt(
+      user
+    ) {
+
+      const {
+        data,
+        error
+      } =
+        await bsSupabase
+          .from("kullanici_profilleri")
+          .select(
+            "ad_soyad, rol, aktif"
+          )
+          .eq(
+            "auth_user_id",
+            user.id
+          )
+          .single();
+
+
+      if (error || !data) {
+
+        throw new Error(
+          "Bu kullanıcı için geçerli bir BS Ofis profili bulunamadı."
+        );
+
+      }
+
+
+      if (
+        data.aktif !== true ||
+        data.rol !== "Yönetici"
+      ) {
+
+        throw new Error(
+          "Bu hesap yönetim paneline erişim yetkisine sahip değil."
+        );
+
+      }
+
+
+      return data;
+
+    }
+
+
+    async function oturumuDogrula(
+      user
+    ) {
+
+      try {
+
+        const profil =
+          await kullaniciYetkisiniKontrolEt(
+            user
+          );
+
+        durumTemizle();
+
+        basariEkraniniGoster(
+          profil
+        );
+
+      } catch (error) {
+
+        await bsSupabase.auth.signOut();
+
+        girisEkraniniGoster();
+
+        durumGoster(
+          error.message,
+          "hata"
+        );
+
+      }
+
+    }
 
 
     sifreGoster.addEventListener(
       "click",
       function () {
 
-        if (sifreAlani.type === "password") {
+        if (
+          sifreAlani.type === "password"
+        ) {
 
           sifreAlani.type = "text";
-          sifreGoster.textContent = "Gizle";
+
+          sifreGoster.textContent =
+            "Gizle";
 
         } else {
 
           sifreAlani.type = "password";
-          sifreGoster.textContent = "Göster";
+
+          sifreGoster.textContent =
+            "Göster";
 
         }
 
@@ -383,14 +715,158 @@
 
     girisFormu.addEventListener(
       "submit",
-      function (event) {
+      async function (event) {
 
         event.preventDefault();
 
-        durum.style.display = "block";
+        durumTemizle();
+
+        const email =
+          emailAlani.value
+            .trim()
+            .toLowerCase();
+
+        const password =
+          sifreAlani.value;
+
+
+        girisButon.disabled = true;
+
+        girisButon.textContent =
+          "Giriş yapılıyor...";
+
+
+        const {
+          data,
+          error
+        } =
+          await bsSupabase.auth
+            .signInWithPassword({
+              email: email,
+              password: password
+            });
+
+
+        if (error) {
+
+          girisButon.disabled = false;
+
+          girisButon.textContent =
+            "Giriş Yap";
+
+
+          let mesaj =
+            "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.";
+
+
+          if (
+            error.message
+              .toLowerCase()
+              .includes("invalid login")
+          ) {
+
+            mesaj =
+              "E-posta veya şifre hatalı.";
+
+          }
+
+
+          if (
+            error.message
+              .toLowerCase()
+              .includes("email not confirmed")
+          ) {
+
+            mesaj =
+              "E-posta hesabı henüz doğrulanmamış.";
+
+          }
+
+
+          durumGoster(
+            mesaj,
+            "hata"
+          );
+
+          return;
+
+        }
+
+
+        if (
+          !data ||
+          !data.user
+        ) {
+
+          girisButon.disabled = false;
+
+          girisButon.textContent =
+            "Giriş Yap";
+
+          durumGoster(
+            "Kullanıcı oturumu oluşturulamadı.",
+            "hata"
+          );
+
+          return;
+
+        }
+
+
+        await oturumuDogrula(
+          data.user
+        );
 
       }
     );
+
+
+    cikisButon.addEventListener(
+      "click",
+      async function () {
+
+        await bsSupabase.auth.signOut();
+
+        girisEkraniniGoster();
+
+        durumTemizle();
+
+      }
+    );
+
+
+    async function mevcutOturumuKontrolEt() {
+
+      const {
+        data,
+        error
+      } =
+        await bsSupabase.auth
+          .getSession();
+
+
+      if (
+        error ||
+        !data ||
+        !data.session ||
+        !data.session.user
+      ) {
+
+        girisEkraniniGoster();
+
+        return;
+
+      }
+
+
+      await oturumuDogrula(
+        data.session.user
+      );
+
+    }
+
+
+    mevcutOturumuKontrolEt();
 
   </script>
 

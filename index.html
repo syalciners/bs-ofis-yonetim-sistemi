@@ -22,6 +22,16 @@
       padding: 0;
     }
 
+    :root {
+      --mavi: #2563eb;
+      --mavi-koyu: #1d4ed8;
+      --arka-plan: #f4f7fb;
+      --kart: #ffffff;
+      --yazi: #0f172a;
+      --ikincil: #64748b;
+      --kenar: #e2e8f0;
+    }
+
     body {
       min-height: 100vh;
 
@@ -34,6 +44,28 @@
         Arial,
         sans-serif;
 
+      background: var(--arka-plan);
+      color: var(--yazi);
+    }
+
+    button {
+      font: inherit;
+    }
+
+
+    /* =========================
+       GİRİŞ EKRANI
+    ========================= */
+
+    #girisEkrani {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 24px;
+
       background:
         radial-gradient(
           circle at top left,
@@ -45,23 +77,15 @@
           #f8fafc 0%,
           #eff6ff 100%
         );
-
-      color: #0f172a;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 24px;
     }
 
     .giris-karti {
       width: 100%;
       max-width: 430px;
 
-      background: rgba(255,255,255,0.96);
+      background: rgba(255,255,255,0.97);
 
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--kenar);
       border-radius: 24px;
 
       padding: 42px 36px;
@@ -70,12 +94,7 @@
         0 24px 60px rgba(15,23,42,0.10);
     }
 
-    .logo-alani {
-      text-align: center;
-      margin-bottom: 34px;
-    }
-
-    .logo {
+    .giris-logo {
       width: 72px;
       height: 72px;
 
@@ -87,7 +106,7 @@
 
       border-radius: 20px;
 
-      background: #2563eb;
+      background: var(--mavi);
       color: white;
 
       font-size: 27px;
@@ -97,20 +116,20 @@
         0 12px 28px rgba(37,99,235,0.28);
     }
 
-    h1 {
+    .giris-baslik {
+      text-align: center;
+
       font-size: 25px;
-      line-height: 1.25;
       font-weight: 750;
-      color: #0f172a;
     }
 
-    .alt-baslik {
-      margin-top: 9px;
+    .giris-alt-baslik {
+      margin: 9px 0 32px;
+
+      text-align: center;
 
       font-size: 14px;
-      line-height: 1.5;
-
-      color: #64748b;
+      color: var(--ikincil);
     }
 
     .google-buton {
@@ -120,7 +139,7 @@
       border: 1px solid #cbd5e1;
       border-radius: 13px;
 
-      background: #ffffff;
+      background: white;
       color: #1e293b;
 
       display: flex;
@@ -135,20 +154,10 @@
 
       box-shadow:
         0 6px 18px rgba(15,23,42,0.06);
-
-      transition:
-        background 0.2s,
-        border-color 0.2s,
-        transform 0.15s;
     }
 
     .google-buton:hover {
       background: #f8fafc;
-      border-color: #94a3b8;
-    }
-
-    .google-buton:active {
-      transform: scale(0.99);
     }
 
     .google-buton:disabled {
@@ -159,7 +168,6 @@
     .google-logo {
       width: 21px;
       height: 21px;
-      flex-shrink: 0;
     }
 
     .durum {
@@ -185,99 +193,7 @@
       border: 1px solid #fecaca;
     }
 
-    .durum.bilgi {
-      display: block;
-
-      background: #eff6ff;
-      color: #1d4ed8;
-
-      border: 1px solid #bfdbfe;
-    }
-
-    .basari-alani {
-      display: none;
-      text-align: center;
-    }
-
-    .basari-ikon {
-      width: 64px;
-      height: 64px;
-
-      margin: 0 auto 20px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 50%;
-
-      background: #dcfce7;
-      color: #15803d;
-
-      font-size: 30px;
-      font-weight: 700;
-    }
-
-    .basari-baslik {
-      font-size: 23px;
-      font-weight: 750;
-
-      color: #0f172a;
-    }
-
-    .kullanici-adi {
-      margin-top: 10px;
-
-      font-size: 17px;
-      font-weight: 650;
-
-      color: #2563eb;
-    }
-
-    .rol {
-      margin-top: 5px;
-
-      font-size: 14px;
-      color: #64748b;
-    }
-
-    .basari-aciklama {
-      margin-top: 20px;
-      padding: 14px;
-
-      border-radius: 12px;
-
-      background: #f8fafc;
-
-      font-size: 13px;
-      line-height: 1.5;
-
-      color: #475569;
-    }
-
-    .cikis-buton {
-      width: 100%;
-      height: 52px;
-
-      margin-top: 22px;
-
-      border: none;
-      border-radius: 12px;
-
-      background: #f1f5f9;
-      color: #334155;
-
-      font-size: 15px;
-      font-weight: 700;
-
-      cursor: pointer;
-    }
-
-    .cikis-buton:hover {
-      background: #e2e8f0;
-    }
-
-    .alt-bilgi {
+    .giris-alt-bilgi {
       margin-top: 30px;
 
       text-align: center;
@@ -286,44 +202,480 @@
       color: #94a3b8;
     }
 
-    @media (max-width: 520px) {
-      body {
-        padding: 16px;
+
+    /* =========================
+       YÖNETİM PANELİ
+    ========================= */
+
+    #panelEkrani {
+      display: none;
+      min-height: 100vh;
+
+      padding-bottom: 92px;
+    }
+
+    .ust-bar {
+      height: 76px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 28px;
+
+      background: white;
+
+      border-bottom: 1px solid var(--kenar);
+
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .marka {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .mini-logo {
+      width: 44px;
+      height: 44px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 13px;
+
+      background: var(--mavi);
+      color: white;
+
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .marka-baslik {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .marka-alt {
+      margin-top: 2px;
+
+      font-size: 12px;
+      color: var(--ikincil);
+    }
+
+    .kullanici-alani {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .kullanici-bilgi {
+      text-align: right;
+    }
+
+    .kullanici-isim {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .kullanici-rol {
+      margin-top: 2px;
+
+      font-size: 12px;
+      color: var(--ikincil);
+    }
+
+    .cikis {
+      height: 38px;
+
+      padding: 0 15px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 10px;
+
+      background: white;
+      color: #475569;
+
+      font-size: 13px;
+      font-weight: 650;
+
+      cursor: pointer;
+    }
+
+    .cikis:hover {
+      background: #f8fafc;
+    }
+
+
+    /* =========================
+       ANA İÇERİK
+    ========================= */
+
+    .icerik {
+      width: min(1180px, calc(100% - 40px));
+
+      margin: 0 auto;
+      padding-top: 30px;
+    }
+
+    .karsilama {
+      margin-bottom: 26px;
+    }
+
+    .karsilama h1 {
+      font-size: 27px;
+      font-weight: 760;
+    }
+
+    .karsilama p {
+      margin-top: 6px;
+
+      font-size: 14px;
+      color: var(--ikincil);
+    }
+
+
+    /* =========================
+       KPI
+    ========================= */
+
+    .kpi-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+      gap: 14px;
+
+      margin-bottom: 22px;
+    }
+
+    .kpi-kart {
+      min-height: 126px;
+
+      padding: 20px;
+
+      background: var(--kart);
+
+      border: 1px solid var(--kenar);
+      border-radius: 17px;
+    }
+
+    .kpi-ust {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-baslik {
+      font-size: 13px;
+      font-weight: 650;
+
+      color: var(--ikincil);
+    }
+
+    .kpi-ikon {
+      width: 35px;
+      height: 35px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 10px;
+
+      background: #eff6ff;
+
+      font-size: 17px;
+    }
+
+    .kpi-deger {
+      margin-top: 18px;
+
+      font-size: 27px;
+      font-weight: 780;
+
+      color: var(--yazi);
+    }
+
+
+    /* =========================
+       ANA KARTLAR
+    ========================= */
+
+    .ana-grid {
+      display: grid;
+
+      grid-template-columns:
+        1.35fr 1fr;
+
+      gap: 18px;
+    }
+
+    .panel-kart {
+      background: var(--kart);
+
+      border: 1px solid var(--kenar);
+      border-radius: 18px;
+
+      overflow: hidden;
+    }
+
+    .panel-kart-baslik {
+      min-height: 62px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 20px;
+
+      border-bottom: 1px solid var(--kenar);
+    }
+
+    .panel-kart-baslik h2 {
+      font-size: 16px;
+      font-weight: 730;
+    }
+
+    .panel-link {
+      border: none;
+      background: none;
+
+      color: var(--mavi);
+
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .bos-alan {
+      min-height: 245px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px;
+
+      text-align: center;
+    }
+
+    .bos-ikon {
+      width: 48px;
+      height: 48px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      margin-bottom: 13px;
+
+      border-radius: 14px;
+
+      background: #f1f5f9;
+
+      font-size: 22px;
+    }
+
+    .bos-baslik {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .bos-aciklama {
+      max-width: 280px;
+
+      margin-top: 6px;
+
+      font-size: 12px;
+      line-height: 1.5;
+
+      color: var(--ikincil);
+    }
+
+
+    /* =========================
+       ALT MENÜ
+    ========================= */
+
+    .alt-menu {
+      position: fixed;
+
+      left: 50%;
+      bottom: 16px;
+
+      transform: translateX(-50%);
+
+      width: min(700px, calc(100% - 28px));
+      height: 68px;
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(5, 1fr);
+
+      padding: 6px;
+
+      background: rgba(255,255,255,0.96);
+
+      border: 1px solid var(--kenar);
+      border-radius: 20px;
+
+      box-shadow:
+        0 15px 40px rgba(15,23,42,0.13);
+
+      backdrop-filter: blur(14px);
+
+      z-index: 30;
+    }
+
+    .menu-buton {
+      border: none;
+      border-radius: 14px;
+
+      background: transparent;
+      color: #64748b;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 4px;
+
+      font-size: 11px;
+      font-weight: 650;
+
+      cursor: pointer;
+    }
+
+    .menu-buton span:first-child {
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .menu-buton.aktif {
+      background: #eff6ff;
+      color: var(--mavi);
+    }
+
+
+    /* =========================
+       TABLET
+    ========================= */
+
+    @media (max-width: 980px) {
+
+      .kpi-grid {
+        grid-template-columns:
+          repeat(3, 1fr);
       }
 
-      .giris-karti {
-        padding: 34px 24px;
-        border-radius: 20px;
+      .ana-grid {
+        grid-template-columns: 1fr;
       }
 
-      h1 {
+    }
+
+
+    /* =========================
+       TELEFON
+    ========================= */
+
+    @media (max-width: 650px) {
+
+      .ust-bar {
+        height: 66px;
+
+        padding: 0 15px;
+      }
+
+      .marka-baslik {
+        font-size: 15px;
+      }
+
+      .marka-alt,
+      .kullanici-bilgi {
+        display: none;
+      }
+
+      .mini-logo {
+        width: 39px;
+        height: 39px;
+
+        border-radius: 11px;
+      }
+
+      .icerik {
+        width: calc(100% - 24px);
+
+        padding-top: 22px;
+      }
+
+      .karsilama h1 {
         font-size: 22px;
       }
+
+      .kpi-grid {
+        grid-template-columns:
+          repeat(2, 1fr);
+
+        gap: 10px;
+      }
+
+      .kpi-kart {
+        min-height: 112px;
+
+        padding: 15px;
+      }
+
+      .kpi-deger {
+        font-size: 23px;
+      }
+
+      .alt-menu {
+        bottom: 10px;
+
+        height: 64px;
+      }
+
+      .menu-buton {
+        font-size: 10px;
+      }
+
     }
+
   </style>
 </head>
 
 <body>
 
-  <main class="giris-karti">
 
-    <div id="girisAlani">
+  <!-- ==================================
+       GOOGLE GİRİŞ EKRANI
+  =================================== -->
 
-      <div class="logo-alani">
+  <section id="girisEkrani">
 
-        <div class="logo">
-          BS
-        </div>
+    <div class="giris-karti">
 
-        <h1>
-          BS Ofis Yönetim Sistemi
-        </h1>
-
-        <p class="alt-baslik">
-          Yönetim paneline Google hesabınızla giriş yapın.
-        </p>
-
+      <div class="giris-logo">
+        BS
       </div>
+
+      <div class="giris-baslik">
+        BS Ofis Yönetim Sistemi
+      </div>
+
+      <div class="giris-alt-baslik">
+        Yönetim paneline Google hesabınızla giriş yapın.
+      </div>
+
 
       <button
         class="google-buton"
@@ -334,7 +686,6 @@
         <svg
           class="google-logo"
           viewBox="0 0 24 24"
-          aria-hidden="true"
         >
           <path
             fill="#4285F4"
@@ -360,61 +711,343 @@
 
       </button>
 
+
       <div
         class="durum"
         id="durum"
       ></div>
 
+
+      <div class="giris-alt-bilgi">
+        BS Ofis • Güvenli Yönetim Paneli
+      </div>
+
     </div>
 
+  </section>
 
-    <div
-      class="basari-alani"
-      id="basariAlani"
-    >
 
-      <div class="basari-ikon">
-        ✓
+
+  <!-- ==================================
+       YÖNETİM PANELİ
+  =================================== -->
+
+  <section id="panelEkrani">
+
+
+    <header class="ust-bar">
+
+      <div class="marka">
+
+        <div class="mini-logo">
+          BS
+        </div>
+
+        <div>
+          <div class="marka-baslik">
+            BS Ofis Yönetim Sistemi
+          </div>
+
+          <div class="marka-alt">
+            Yönetim Paneli
+          </div>
+        </div>
+
       </div>
 
-      <div class="basari-baslik">
-        Giriş Başarılı
+
+      <div class="kullanici-alani">
+
+        <div class="kullanici-bilgi">
+
+          <div
+            class="kullanici-isim"
+            id="ustKullaniciAdi"
+          ></div>
+
+          <div
+            class="kullanici-rol"
+            id="ustKullaniciRol"
+          >
+            Yönetici
+          </div>
+
+        </div>
+
+        <button
+          class="cikis"
+          id="cikisButon"
+          type="button"
+        >
+          Çıkış
+        </button>
+
       </div>
 
-      <div
-        class="kullanici-adi"
-        id="kullaniciAdi"
-      ></div>
+    </header>
 
-      <div
-        class="rol"
-        id="kullaniciRol"
-      ></div>
 
-      <div class="basari-aciklama">
-        Google hesabınız doğrulandı ve
-        BS Ofis yönetici yetkiniz kontrol edildi.
-        <br><br>
-        Ana yönetim paneli bir sonraki aşamada
-        bu ekrana bağlanacak.
-      </div>
+
+    <main class="icerik">
+
+
+      <section class="karsilama">
+
+        <h1 id="karsilamaMetni">
+          Ana Sayfa
+        </h1>
+
+        <p>
+          Ofisin bugünkü operasyon ve finans özeti.
+        </p>
+
+      </section>
+
+
+
+      <section class="kpi-grid">
+
+        <article class="kpi-kart">
+
+          <div class="kpi-ust">
+            <div class="kpi-baslik">
+              Bugünkü Dersler
+            </div>
+
+            <div class="kpi-ikon">
+              📅
+            </div>
+          </div>
+
+          <div
+            class="kpi-deger"
+            id="kpiBugunkuDersler"
+          >
+            —
+          </div>
+
+        </article>
+
+
+        <article class="kpi-kart">
+
+          <div class="kpi-ust">
+            <div class="kpi-baslik">
+              Bu Ay Tahsilat
+            </div>
+
+            <div class="kpi-ikon">
+              ₺
+            </div>
+          </div>
+
+          <div
+            class="kpi-deger"
+            id="kpiTahsilat"
+          >
+            —
+          </div>
+
+        </article>
+
+
+        <article class="kpi-kart">
+
+          <div class="kpi-ust">
+            <div class="kpi-baslik">
+              Bu Ay Ciro
+            </div>
+
+            <div class="kpi-ikon">
+              ↗
+            </div>
+          </div>
+
+          <div
+            class="kpi-deger"
+            id="kpiCiro"
+          >
+            —
+          </div>
+
+        </article>
+
+
+        <article class="kpi-kart">
+
+          <div class="kpi-ust">
+            <div class="kpi-baslik">
+              Kasa Bakiyesi
+            </div>
+
+            <div class="kpi-ikon">
+              💼
+            </div>
+          </div>
+
+          <div
+            class="kpi-deger"
+            id="kpiKasa"
+          >
+            —
+          </div>
+
+        </article>
+
+
+        <article class="kpi-kart">
+
+          <div class="kpi-ust">
+            <div class="kpi-baslik">
+              Borçlu Öğrenci
+            </div>
+
+            <div class="kpi-ikon">
+              👤
+            </div>
+          </div>
+
+          <div
+            class="kpi-deger"
+            id="kpiBorclu"
+          >
+            —
+          </div>
+
+        </article>
+
+      </section>
+
+
+
+      <section class="ana-grid">
+
+
+        <article class="panel-kart">
+
+          <div class="panel-kart-baslik">
+
+            <h2>
+              Bugünkü Dersler
+            </h2>
+
+            <button class="panel-link">
+              Tümünü Gör
+            </button>
+
+          </div>
+
+
+          <div class="bos-alan">
+
+            <div class="bos-ikon">
+              📅
+            </div>
+
+            <div class="bos-baslik">
+              Ders verileri bağlanacak
+            </div>
+
+            <div class="bos-aciklama">
+              Bir sonraki adımda bugünün gerçek derslerini
+              Supabase üzerinden bu alana getireceğiz.
+            </div>
+
+          </div>
+
+        </article>
+
+
+
+        <article class="panel-kart">
+
+          <div class="panel-kart-baslik">
+
+            <h2>
+              Son Tahsilatlar
+            </h2>
+
+            <button class="panel-link">
+              Tümünü Gör
+            </button>
+
+          </div>
+
+
+          <div class="bos-alan">
+
+            <div class="bos-ikon">
+              ₺
+            </div>
+
+            <div class="bos-baslik">
+              Tahsilat verileri bağlanacak
+            </div>
+
+            <div class="bos-aciklama">
+              Son tahsilatlar bu kartta öğrenci adı,
+              tarih ve tutar ile gösterilecek.
+            </div>
+
+          </div>
+
+        </article>
+
+
+      </section>
+
+
+    </main>
+
+
+
+    <nav class="alt-menu">
 
       <button
-        class="cikis-buton"
+        class="menu-buton aktif"
         type="button"
-        id="cikisButon"
       >
-        Çıkış Yap
+        <span>⌂</span>
+        <span>Ana Sayfa</span>
       </button>
 
-    </div>
+      <button
+        class="menu-buton"
+        type="button"
+      >
+        <span>▣</span>
+        <span>Dersler</span>
+      </button>
+
+      <button
+        class="menu-buton"
+        type="button"
+      >
+        <span>👥</span>
+        <span>Öğrenciler</span>
+      </button>
+
+      <button
+        class="menu-buton"
+        type="button"
+      >
+        <span>₺</span>
+        <span>Tahsilat</span>
+      </button>
+
+      <button
+        class="menu-buton"
+        type="button"
+      >
+        <span>☰</span>
+        <span>Menü</span>
+      </button>
+
+    </nav>
 
 
-    <div class="alt-bilgi">
-      BS Ofis • Güvenli Yönetim Paneli
-    </div>
+  </section>
 
-  </main>
 
 
   <script
@@ -448,11 +1081,11 @@
       );
 
 
-    const girisAlani =
-      document.getElementById("girisAlani");
+    const girisEkrani =
+      document.getElementById("girisEkrani");
 
-    const basariAlani =
-      document.getElementById("basariAlani");
+    const panelEkrani =
+      document.getElementById("panelEkrani");
 
     const googleGirisButon =
       document.getElementById("googleGirisButon");
@@ -463,23 +1096,23 @@
     const durum =
       document.getElementById("durum");
 
-    const kullaniciAdi =
-      document.getElementById("kullaniciAdi");
-
-    const kullaniciRol =
-      document.getElementById("kullaniciRol");
-
     const cikisButon =
       document.getElementById("cikisButon");
 
+    const ustKullaniciAdi =
+      document.getElementById("ustKullaniciAdi");
 
-    function durumGoster(
-      mesaj,
-      tur = "bilgi"
-    ) {
+    const ustKullaniciRol =
+      document.getElementById("ustKullaniciRol");
+
+    const karsilamaMetni =
+      document.getElementById("karsilamaMetni");
+
+
+    function durumGoster(mesaj) {
 
       durum.textContent = mesaj;
-      durum.className = "durum " + tur;
+      durum.className = "durum hata";
 
     }
 
@@ -494,8 +1127,8 @@
 
     function girisEkraniniGoster() {
 
-      basariAlani.style.display = "none";
-      girisAlani.style.display = "block";
+      panelEkrani.style.display = "none";
+      girisEkrani.style.display = "flex";
 
       googleGirisButon.disabled = false;
 
@@ -505,18 +1138,24 @@
     }
 
 
-    function basariEkraniniGoster(
-      profil
-    ) {
+    function paneliGoster(profil) {
 
-      girisAlani.style.display = "none";
-      basariAlani.style.display = "block";
+      girisEkrani.style.display = "none";
+      panelEkrani.style.display = "block";
 
-      kullaniciAdi.textContent =
+      ustKullaniciAdi.textContent =
         profil.ad_soyad;
 
-      kullaniciRol.textContent =
+      ustKullaniciRol.textContent =
         profil.rol;
+
+      const ilkAd =
+        profil.ad_soyad
+          .trim()
+          .split(" ")[0];
+
+      karsilamaMetni.textContent =
+        "Merhaba, " + ilkAd;
 
     }
 
@@ -567,9 +1206,7 @@
     }
 
 
-    async function oturumuDogrula(
-      user
-    ) {
+    async function oturumuDogrula(user) {
 
       try {
 
@@ -580,7 +1217,7 @@
 
         durumTemizle();
 
-        basariEkraniniGoster(
+        paneliGoster(
           profil
         );
 
@@ -591,8 +1228,7 @@
         girisEkraniniGoster();
 
         durumGoster(
-          error.message,
-          "hata"
+          error.message
         );
 
       }
@@ -623,7 +1259,6 @@
                 redirectTo: UYGULAMA_URL,
 
                 queryParams: {
-                  access_type: "offline",
                   prompt: "select_account"
                 }
               }
@@ -638,8 +1273,7 @@
             "Google ile Giriş Yap";
 
           durumGoster(
-            "Google ile giriş başlatılamadı.",
-            "hata"
+            "Google ile giriş başlatılamadı."
           );
 
         }
@@ -690,28 +1324,6 @@
       );
 
     }
-
-
-    bsSupabase.auth.onAuthStateChange(
-      async function (
-        event,
-        session
-      ) {
-
-        if (
-          event === "SIGNED_IN" &&
-          session &&
-          session.user
-        ) {
-
-          await oturumuDogrula(
-            session.user
-          );
-
-        }
-
-      }
-    );
 
 
     mevcutOturumuKontrolEt();

@@ -33,20 +33,12 @@
 
       --kenar: #e2e8f0;
 
-      --yesil: #16a34a;
-      --yesil-acik: #f0fdf4;
-
-      --turuncu: #ea580c;
-      --turuncu-acik: #fff7ed;
-
-      --kirmizi: #dc2626;
-      --kirmizi-acik: #fef2f2;
-
       --golge:
         0 12px 35px rgba(15, 23, 42, 0.07);
     }
 
-    html {
+    html,
+    body {
       min-height: 100%;
       background: var(--arka-plan);
     }
@@ -64,7 +56,6 @@
         Arial,
         sans-serif;
 
-      background: var(--arka-plan);
       color: var(--yazi);
 
       -webkit-font-smoothing: antialiased;
@@ -82,10 +73,6 @@
 
     svg {
       display: block;
-    }
-
-    .gizli {
-      display: none !important;
     }
 
 
@@ -130,19 +117,6 @@
 
       box-shadow:
         0 18px 38px rgba(37, 99, 235, 0.28);
-
-      animation: nefes 1.4s ease-in-out infinite;
-    }
-
-    @keyframes nefes {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.05);
-      }
     }
 
 
@@ -209,9 +183,6 @@
 
       font-size: 26px;
       font-weight: 850;
-
-      box-shadow:
-        0 15px 32px rgba(37, 99, 235, 0.26);
     }
 
     .giris-baslik {
@@ -253,25 +224,6 @@
       font-weight: 750;
 
       cursor: pointer;
-
-      transition:
-        background 0.15s,
-        transform 0.12s,
-        border-color 0.15s;
-    }
-
-    .google-buton:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-    }
-
-    .google-buton:active {
-      transform: scale(0.99);
-    }
-
-    .google-buton:disabled {
-      opacity: 0.6;
-      cursor: wait;
     }
 
     .google-logo {
@@ -287,7 +239,7 @@
 
       border-radius: 11px;
 
-      background: var(--kirmizi-acik);
+      background: #fef2f2;
       border: 1px solid #fecaca;
 
       color: #b91c1c;
@@ -332,7 +284,7 @@
       top: 0;
       z-index: 50;
 
-      height: 74px;
+      min-height: 74px;
 
       display: flex;
       align-items: center;
@@ -343,9 +295,9 @@
         26px
         0;
 
-      background: rgba(255, 255, 255, 0.93);
+      background: rgba(255, 255, 255, 0.94);
 
-      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      border-bottom: 1px solid var(--kenar);
 
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -404,12 +356,6 @@
     }
 
     .profil-isim {
-      max-width: 220px;
-
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-
       font-size: 13px;
       font-weight: 750;
     }
@@ -504,10 +450,6 @@
       cursor: pointer;
     }
 
-    .profil-menu button:hover {
-      background: #f8fafc;
-    }
-
 
     /* ==================================================
        İÇERİK
@@ -541,7 +483,6 @@
 
     .sayfa-baslik {
       font-size: 27px;
-      line-height: 1.15;
       font-weight: 820;
     }
 
@@ -551,7 +492,6 @@
       color: var(--ikincil);
 
       font-size: 13px;
-      line-height: 1.4;
     }
 
     .tarih-etiketi {
@@ -589,7 +529,7 @@
 
       padding: 18px;
 
-      background: var(--kart);
+      background: white;
 
       border: 1px solid var(--kenar);
       border-radius: 17px;
@@ -607,7 +547,6 @@
       color: var(--ikincil);
 
       font-size: 12px;
-      line-height: 1.3;
       font-weight: 680;
     }
 
@@ -632,7 +571,6 @@
       height: 17px;
 
       stroke: currentColor;
-
       fill: none;
 
       stroke-width: 2;
@@ -682,24 +620,6 @@
       cursor: pointer;
 
       text-align: left;
-
-      transition:
-        transform 0.12s,
-        border-color 0.15s,
-        box-shadow 0.15s;
-    }
-
-    .hizli-buton:hover {
-      transform: translateY(-1px);
-
-      border-color: #cbd5e1;
-
-      box-shadow:
-        0 8px 22px rgba(15, 23, 42, 0.06);
-    }
-
-    .hizli-buton:active {
-      transform: scale(0.99);
     }
 
     .hizli-ikon {
@@ -744,7 +664,7 @@
 
 
     /* ==================================================
-       İÇERİK KARTLARI
+       KARTLAR
     ================================================== */
 
     .ana-grid {
@@ -759,7 +679,7 @@
     .kart {
       overflow: hidden;
 
-      background: var(--kart);
+      background: white;
 
       border: 1px solid var(--kenar);
       border-radius: 18px;
@@ -771,8 +691,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      gap: 12px;
 
       padding: 0 18px;
 
@@ -833,8 +751,6 @@
       stroke: currentColor;
 
       stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
     .bos-durum-baslik {
@@ -870,10 +786,6 @@
       scrollbar-width: none;
     }
 
-    .sekme-satiri::-webkit-scrollbar {
-      display: none;
-    }
-
     .sekme {
       flex-shrink: 0;
 
@@ -887,8 +799,6 @@
 
       font-size: 12px;
       font-weight: 700;
-
-      cursor: pointer;
     }
 
     .sekme.aktif {
@@ -914,16 +824,8 @@
       border-radius: 13px;
 
       background: white;
-      color: var(--yazi);
 
       outline: none;
-    }
-
-    .arama-alani input:focus {
-      border-color: #93c5fd;
-
-      box-shadow:
-        0 0 0 4px rgba(37, 99, 235, 0.08);
     }
 
     .arama-ikon {
@@ -945,18 +847,10 @@
       stroke: currentColor;
 
       stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
     .ana-islem-buton {
       height: 42px;
-
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      gap: 7px;
 
       padding: 0 15px;
 
@@ -968,17 +862,11 @@
 
       font-size: 12px;
       font-weight: 750;
-
-      cursor: pointer;
-    }
-
-    .ana-islem-buton:hover {
-      background: var(--mavi-koyu);
     }
 
 
     /* ==================================================
-       MENÜ MODÜLLERİ
+       MODÜLLER
     ================================================== */
 
     .modul-grid {
@@ -995,25 +883,12 @@
 
       padding: 18px;
 
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
       border: 1px solid var(--kenar);
       border-radius: 17px;
 
       background: white;
 
       cursor: pointer;
-
-      transition:
-        transform 0.12s,
-        border-color 0.15s;
-    }
-
-    .modul-kart:hover {
-      transform: translateY(-1px);
-      border-color: #cbd5e1;
     }
 
     .modul-ikon {
@@ -1038,8 +913,6 @@
       stroke: currentColor;
 
       stroke-width: 1.9;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
     .modul-baslik {
@@ -1055,12 +928,11 @@
       color: var(--ikincil);
 
       font-size: 11px;
-      line-height: 1.4;
     }
 
 
     /* ==================================================
-       ALT NAVİGASYON
+       ALT NAV
     ================================================== */
 
     .alt-nav {
@@ -1087,9 +959,9 @@
       padding: 6px;
 
       background:
-        rgba(255, 255, 255, 0.95);
+        rgba(255, 255, 255, 0.96);
 
-      border: 1px solid rgba(226, 232, 240, 0.95);
+      border: 1px solid var(--kenar);
       border-radius: 20px;
 
       box-shadow:
@@ -1129,8 +1001,6 @@
       stroke: currentColor;
 
       stroke-width: 1.9;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
     .nav-buton.aktif {
@@ -1140,7 +1010,7 @@
 
 
     /* ==================================================
-       BİLDİRİM
+       TOAST
     ================================================== */
 
     .toast {
@@ -1150,12 +1020,9 @@
       bottom:
         calc(96px + env(safe-area-inset-bottom));
 
-      transform:
-        translate(-50%, 20px);
+      transform: translate(-50%, 20px);
 
       z-index: 300;
-
-      max-width: calc(100% - 32px);
 
       padding: 11px 16px;
 
@@ -1177,9 +1044,7 @@
 
     .toast.goster {
       opacity: 1;
-
-      transform:
-        translate(-50%, 0);
+      transform: translate(-50%, 0);
     }
 
 
@@ -1206,7 +1071,6 @@
 
     }
 
-
     @media (max-width: 820px) {
 
       .ana-grid {
@@ -1221,7 +1085,7 @@
 
 
     /* ==================================================
-       MOBİL
+       MOBİL — KOMPAKT UYGULAMA DÜZENİ
     ================================================== */
 
     @media (max-width: 640px) {
@@ -1232,8 +1096,8 @@
       }
 
       .ust-bar {
-        height:
-          calc(62px + env(safe-area-inset-top));
+        min-height:
+          calc(58px + env(safe-area-inset-top));
 
         padding:
           env(safe-area-inset-top)
@@ -1241,11 +1105,17 @@
           0;
       }
 
+      .marka {
+        gap: 10px;
+      }
+
       .marka-logo {
         width: 38px;
         height: 38px;
 
         border-radius: 12px;
+
+        font-size: 15px;
       }
 
       .marka-baslik {
@@ -1264,152 +1134,318 @@
       }
 
       .icerik {
-        width: calc(100% - 24px);
+        width: calc(100% - 22px);
 
-        padding-top: 20px;
+        padding-top: 16px;
       }
 
       .sayfa-baslik-alani {
         align-items: flex-start;
 
-        margin-bottom: 18px;
+        margin-bottom: 14px;
       }
 
       .sayfa-baslik {
-        font-size: 22px;
+        font-size: 20px;
+        line-height: 1.15;
       }
 
       .sayfa-aciklama {
-        font-size: 12px;
+        margin-top: 4px;
+
+        font-size: 11px;
       }
 
       .tarih-etiketi {
         display: none;
       }
 
+
+      /* KPI daha kompakt */
+
       .kpi-grid {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
 
-        gap: 10px;
+        gap: 8px;
+
+        margin-bottom: 10px;
       }
 
       .kpi-kart {
-        min-height: 105px;
-
-        padding: 14px;
-      }
-
-      .kpi-baslik {
-        font-size: 11px;
-      }
-
-      .ikon-kutu {
-        width: 30px;
-        height: 30px;
-
-        border-radius: 9px;
-      }
-
-      .kpi-deger {
-        margin-top: 14px;
-
-        font-size: 22px;
-      }
-
-      .kpi-kart:last-child {
-        grid-column: span 2;
-      }
-
-      .hizli-grid {
-        grid-template-columns: 1fr 1fr;
-
-        gap: 9px;
-      }
-
-      .hizli-buton {
-        min-height: 74px;
+        min-height: 88px;
 
         padding: 12px;
-
-        gap: 10px;
 
         border-radius: 14px;
       }
 
-      .hizli-ikon {
-        width: 37px;
-        height: 37px;
+      .kpi-baslik {
+        max-width: calc(100% - 32px);
 
-        border-radius: 11px;
+        font-size: 10px;
+        line-height: 1.25;
+      }
+
+      .ikon-kutu {
+        width: 27px;
+        height: 27px;
+
+        border-radius: 8px;
+      }
+
+      .ikon-kutu svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .kpi-deger {
+        margin-top: 10px;
+
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .kpi-kart:last-child {
+        grid-column: span 2;
+
+        min-height: 74px;
+      }
+
+
+      /* Hızlı işlemler */
+
+      .hizli-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+
+        margin-bottom: 12px;
+      }
+
+      .hizli-buton {
+        min-height: 60px;
+
+        gap: 9px;
+
+        padding: 9px 10px;
+
+        border-radius: 13px;
+      }
+
+      .hizli-ikon {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 10px;
+      }
+
+      .hizli-ikon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .hizli-baslik {
+        font-size: 11px;
+        line-height: 1.2;
       }
 
       .hizli-alt {
         display: none;
       }
 
+
+      /* Kartlar */
+
+      .ana-grid {
+        gap: 10px;
+      }
+
       .kart {
-        border-radius: 16px;
+        border-radius: 14px;
       }
 
       .kart-baslik {
-        min-height: 54px;
+        min-height: 46px;
 
-        padding: 0 15px;
+        padding: 0 13px;
+      }
+
+      .kart-baslik h2 {
+        font-size: 12px;
+      }
+
+      .metin-buton {
+        font-size: 10px;
       }
 
       .bos-durum {
-        min-height: 190px;
+        min-height: 145px;
 
-        padding: 24px 18px;
+        padding: 18px 14px;
       }
+
+      .bos-durum-ikon {
+        width: 38px;
+        height: 38px;
+
+        margin-bottom: 9px;
+
+        border-radius: 11px;
+      }
+
+      .bos-durum-ikon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .bos-durum-baslik {
+        font-size: 11px;
+      }
+
+      .bos-durum-aciklama {
+        margin-top: 4px;
+
+        font-size: 10px;
+      }
+
+
+      /* Mobil sekmeler */
+
+      .sekme-satiri {
+        margin-bottom: 10px;
+      }
+
+      .sekme {
+        padding: 8px 11px;
+
+        font-size: 10px;
+
+        border-radius: 9px;
+      }
+
+      .arama-alani {
+        margin-bottom: 10px;
+      }
+
+      .arama-alani input {
+        height: 42px;
+
+        border-radius: 11px;
+
+        font-size: 13px;
+      }
+
+      .ana-islem-buton {
+        height: 36px;
+
+        padding: 0 11px;
+
+        font-size: 10px;
+      }
+
+
+      /* Modül ekranı */
 
       .modul-grid {
         grid-template-columns:
           repeat(2, 1fr);
 
-        gap: 10px;
+        gap: 8px;
       }
 
       .modul-kart {
-        min-height: 125px;
+        min-height: 104px;
 
-        padding: 15px;
+        padding: 12px;
 
-        border-radius: 15px;
+        border-radius: 13px;
       }
+
+      .modul-ikon {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 10px;
+      }
+
+      .modul-ikon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .modul-baslik {
+        margin-top: 10px;
+
+        font-size: 11px;
+      }
+
+      .modul-aciklama {
+        font-size: 9px;
+      }
+
+
+      /* Gerçek mobil tab bar */
 
       .alt-nav {
         bottom:
-          calc(8px + env(safe-area-inset-bottom));
+          calc(7px + env(safe-area-inset-bottom));
 
-        width: calc(100% - 18px);
-        height: 64px;
+        width: calc(100% - 16px);
+        height: 60px;
 
-        padding: 5px;
+        padding: 4px;
 
-        border-radius: 18px;
+        border-radius: 17px;
       }
 
       .nav-buton {
-        font-size: 9px;
+        gap: 3px;
 
-        border-radius: 12px;
+        border-radius: 11px;
+
+        font-size: 8.5px;
       }
 
       .nav-buton svg {
-        width: 19px;
-        height: 19px;
+        width: 18px;
+        height: 18px;
       }
 
+      .toast {
+        bottom:
+          calc(78px + env(safe-area-inset-bottom));
+
+        font-size: 11px;
+      }
+
+
+      /* Mobil giriş */
+
       .giris-karti {
-        padding: 34px 23px;
+        padding: 32px 22px;
 
         border-radius: 22px;
       }
 
+      .giris-logo {
+        width: 62px;
+        height: 62px;
+
+        border-radius: 19px;
+
+        font-size: 23px;
+      }
+
       .giris-baslik {
-        font-size: 22px;
+        font-size: 21px;
+      }
+
+      .giris-aciklama {
+        margin-bottom: 26px;
+
+        font-size: 13px;
       }
 
     }
@@ -1420,30 +1456,16 @@
 <body>
 
 
-  <!-- ================================================
-       AÇILIŞ
-  ================================================= -->
-
   <div id="acilisEkrani">
-
-    <div class="acilis-logo">
-      BS
-    </div>
-
+    <div class="acilis-logo">BS</div>
   </div>
 
-
-  <!-- ================================================
-       GİRİŞ
-  ================================================= -->
 
   <section id="girisEkrani">
 
     <div class="giris-karti">
 
-      <div class="giris-logo">
-        BS
-      </div>
+      <div class="giris-logo">BS</div>
 
       <div class="giris-baslik">
         BS Ofis Yönetim Sistemi
@@ -1463,22 +1485,10 @@
           class="google-logo"
           viewBox="0 0 24 24"
         >
-          <path
-            fill="#4285F4"
-            d="M21.35 12.19c0-.64-.06-1.25-.16-1.84H12v3.48h5.25a4.49 4.49 0 0 1-1.95 2.94v2.26h3.16c1.85-1.7 2.89-4.21 2.89-6.84z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 21.73c2.64 0 4.86-.88 6.48-2.38l-3.16-2.45c-.88.59-2 .94-3.32.94-2.55 0-4.71-1.72-5.48-4.03H3.26v2.53A9.79 9.79 0 0 0 12 21.73z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M6.52 13.81A5.88 5.88 0 0 1 6.21 12c0-.63.11-1.24.31-1.81V7.66H3.26A9.75 9.75 0 0 0 2.21 12c0 1.57.38 3.05 1.05 4.34l3.26-2.53z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 6.16c1.44 0 2.73.5 3.74 1.47l2.8-2.8C16.85 3.25 14.64 2.27 12 2.27a9.79 9.79 0 0 0-8.74 5.39l3.26 2.53C7.29 7.88 9.45 6.16 12 6.16z"
-          />
+          <path fill="#4285F4" d="M21.35 12.19c0-.64-.06-1.25-.16-1.84H12v3.48h5.25a4.49 4.49 0 0 1-1.95 2.94v2.26h3.16c1.85-1.7 2.89-4.21 2.89-6.84z"/>
+          <path fill="#34A853" d="M12 21.73c2.64 0 4.86-.88 6.48-2.38l-3.16-2.45c-.88.59-2 .94-3.32.94-2.55 0-4.71-1.72-5.48-4.03H3.26v2.53A9.79 9.79 0 0 0 12 21.73z"/>
+          <path fill="#FBBC05" d="M6.52 13.81A5.88 5.88 0 0 1 6.21 12c0-.63.11-1.24.31-1.81V7.66H3.26A9.75 9.75 0 0 0 2.21 12c0 1.57.38 3.05 1.05 4.34l3.26-2.53z"/>
+          <path fill="#EA4335" d="M12 6.16c1.44 0 2.73.5 3.74 1.47l2.8-2.8C16.85 3.25 14.64 2.27 12 2.27a9.79 9.79 0 0 0-8.74 5.39l3.26 2.53C7.29 7.88 9.45 6.16 12 6.16z"/>
         </svg>
 
         <span id="googleButonMetni">
@@ -1501,14 +1511,8 @@
   </section>
 
 
-  <!-- ================================================
-       UYGULAMA
-  ================================================= -->
-
   <div id="uygulama">
 
-
-    <!-- ÜST BAR -->
 
     <header class="ust-bar">
 
@@ -1556,11 +1560,8 @@
           id="profilButon"
           type="button"
         >
-          <span id="profilHarf">
-            B
-          </span>
+          <span id="profilHarf">B</span>
         </button>
-
 
         <div
           class="profil-menu"
@@ -1597,13 +1598,10 @@
     </header>
 
 
-
     <main class="icerik">
 
 
-      <!-- ============================================
-           ANA SAYFA
-      ============================================= -->
+      <!-- ANA SAYFA -->
 
       <section
         class="gorunum aktif"
@@ -1635,293 +1633,140 @@
         </div>
 
 
-        <!-- KPI -->
-
         <div class="kpi-grid">
 
           <article class="kpi-kart">
-
             <div class="kpi-ust">
-
-              <div class="kpi-baslik">
-                Bugünkü Dersler
-              </div>
-
+              <div class="kpi-baslik">Bugünkü Dersler</div>
               <div class="ikon-kutu">
-
                 <svg viewBox="0 0 24 24">
-                  <rect
-                    x="3"
-                    y="5"
-                    width="18"
-                    height="16"
-                    rx="2"
-                  />
+                  <rect x="3" y="5" width="18" height="16" rx="2"/>
                   <path d="M16 3v4M8 3v4M3 11h18"/>
                 </svg>
-
               </div>
-
             </div>
-
-            <div
-              class="kpi-deger"
-              id="kpiBugunkuDersler"
-            >
-              —
-            </div>
-
+            <div class="kpi-deger" id="kpiBugunkuDersler">—</div>
           </article>
 
 
           <article class="kpi-kart">
-
             <div class="kpi-ust">
-
-              <div class="kpi-baslik">
-                Bu Ay Tahsilat
-              </div>
-
+              <div class="kpi-baslik">Bu Ay Tahsilat</div>
               <div class="ikon-kutu">
-
                 <svg viewBox="0 0 24 24">
-                  <path d="M6 3h12"/>
-                  <path d="M7 7h10"/>
                   <path d="M12 3v18"/>
-                  <path d="M8 13c0 2 1.8 3 4 3s4-1 4-3-1.8-3-4-3-4-1-4-3"/>
+                  <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
                 </svg>
-
               </div>
-
             </div>
-
-            <div
-              class="kpi-deger"
-              id="kpiTahsilat"
-            >
-              —
-            </div>
-
+            <div class="kpi-deger" id="kpiTahsilat">—</div>
           </article>
 
 
           <article class="kpi-kart">
-
             <div class="kpi-ust">
-
-              <div class="kpi-baslik">
-                Bu Ay Ciro
-              </div>
-
+              <div class="kpi-baslik">Bu Ay Ciro</div>
               <div class="ikon-kutu">
-
                 <svg viewBox="0 0 24 24">
                   <path d="M4 18L10 12L14 16L21 8"/>
                   <path d="M15 8h6v6"/>
                 </svg>
-
               </div>
-
             </div>
-
-            <div
-              class="kpi-deger"
-              id="kpiCiro"
-            >
-              —
-            </div>
-
+            <div class="kpi-deger" id="kpiCiro">—</div>
           </article>
 
 
           <article class="kpi-kart">
-
             <div class="kpi-ust">
-
-              <div class="kpi-baslik">
-                Kasa Bakiyesi
-              </div>
-
+              <div class="kpi-baslik">Kasa Bakiyesi</div>
               <div class="ikon-kutu">
-
                 <svg viewBox="0 0 24 24">
                   <path d="M3 7h18v12H3z"/>
                   <path d="M7 7V5h10v2"/>
                   <path d="M15 13h3"/>
                 </svg>
-
               </div>
-
             </div>
-
-            <div
-              class="kpi-deger"
-              id="kpiKasa"
-            >
-              —
-            </div>
-
+            <div class="kpi-deger" id="kpiKasa">—</div>
           </article>
 
 
           <article class="kpi-kart">
-
             <div class="kpi-ust">
-
-              <div class="kpi-baslik">
-                Borçlu Öğrenci
-              </div>
-
+              <div class="kpi-baslik">Borçlu Öğrenci</div>
               <div class="ikon-kutu">
-
                 <svg viewBox="0 0 24 24">
                   <circle cx="12" cy="8" r="4"/>
                   <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
                 </svg>
-
               </div>
-
             </div>
-
-            <div
-              class="kpi-deger"
-              id="kpiBorclu"
-            >
-              —
-            </div>
-
+            <div class="kpi-deger" id="kpiBorclu">—</div>
           </article>
 
         </div>
 
 
-        <!-- HIZLI İŞLEMLER -->
-
         <div class="hizli-grid">
 
-          <button
-            class="hizli-buton"
-            type="button"
-            data-yakinda
-          >
-
+          <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
-
               <svg viewBox="0 0 24 24">
                 <path d="M12 5v14M5 12h14"/>
               </svg>
-
             </div>
-
             <div>
-
-              <div class="hizli-baslik">
-                Ders Oluştur
-              </div>
-
-              <div class="hizli-alt">
-                Yeni ders planla
-              </div>
-
+              <div class="hizli-baslik">Ders Oluştur</div>
+              <div class="hizli-alt">Yeni ders planla</div>
             </div>
-
           </button>
 
 
-          <button
-            class="hizli-buton"
-            type="button"
-            data-yakinda
-          >
-
+          <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
-
               <svg viewBox="0 0 24 24">
                 <path d="M12 3v18"/>
                 <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
               </svg>
-
             </div>
-
             <div>
-
-              <div class="hizli-baslik">
-                Tahsilat Gir
-              </div>
-
-              <div class="hizli-alt">
-                Ödeme kaydet
-              </div>
-
+              <div class="hizli-baslik">Tahsilat Gir</div>
+              <div class="hizli-alt">Ödeme kaydet</div>
             </div>
-
           </button>
 
 
-          <button
-            class="hizli-buton"
-            type="button"
-            data-yakinda
-          >
-
+          <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
-
               <svg viewBox="0 0 24 24">
                 <circle cx="9" cy="8" r="4"/>
                 <path d="M3 21c1-5 3-7 6-7"/>
                 <path d="M17 11v8M13 15h8"/>
               </svg>
-
             </div>
-
             <div>
-
-              <div class="hizli-baslik">
-                Öğrenci Ekle
-              </div>
-
-              <div class="hizli-alt">
-                Yeni kayıt oluştur
-              </div>
-
+              <div class="hizli-baslik">Öğrenci Ekle</div>
+              <div class="hizli-alt">Yeni kayıt oluştur</div>
             </div>
-
           </button>
 
 
-          <button
-            class="hizli-buton"
-            type="button"
-            data-yakinda
-          >
-
+          <button class="hizli-buton" type="button" data-yakinda>
             <div class="hizli-ikon">
-
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="17" rx="2"/>
                 <path d="M8 2v4M16 2v4M3 10h18"/>
               </svg>
-
             </div>
-
             <div>
-
-              <div class="hizli-baslik">
-                Haftayı Oluştur
-              </div>
-
-              <div class="hizli-alt">
-                Sabit programdan
-              </div>
-
+              <div class="hizli-baslik">Haftayı Oluştur</div>
+              <div class="hizli-alt">Sabit programdan</div>
             </div>
-
           </button>
 
         </div>
 
-
-        <!-- ANA KARTLAR -->
 
         <div class="ana-grid">
 
@@ -1929,9 +1774,7 @@
 
             <div class="kart-baslik">
 
-              <h2>
-                Bugünkü Dersler
-              </h2>
+              <h2>Bugünkü Dersler</h2>
 
               <button
                 class="metin-buton"
@@ -1946,12 +1789,10 @@
             <div class="bos-durum">
 
               <div class="bos-durum-ikon">
-
                 <svg viewBox="0 0 24 24">
                   <rect x="3" y="5" width="18" height="16" rx="2"/>
                   <path d="M16 3v4M8 3v4M3 11h18"/>
                 </svg>
-
               </div>
 
               <div class="bos-durum-baslik">
@@ -1959,8 +1800,7 @@
               </div>
 
               <div class="bos-durum-aciklama">
-                Bir sonraki aşamada bugünün gerçek derslerini
-                burada göstereceğiz.
+                Gerçek dersler sonraki aşamada bağlanacak.
               </div>
 
             </div>
@@ -1972,9 +1812,7 @@
 
             <div class="kart-baslik">
 
-              <h2>
-                Son Tahsilatlar
-              </h2>
+              <h2>Son Tahsilatlar</h2>
 
               <button
                 class="metin-buton"
@@ -1989,12 +1827,10 @@
             <div class="bos-durum">
 
               <div class="bos-durum-ikon">
-
                 <svg viewBox="0 0 24 24">
                   <path d="M12 3v18"/>
                   <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
                 </svg>
-
               </div>
 
               <div class="bos-durum-baslik">
@@ -2002,8 +1838,7 @@
               </div>
 
               <div class="bos-durum-aciklama">
-                Son tahsilatları öğrenci, tarih ve tutar
-                bilgileriyle burada göstereceğiz.
+                Gerçek tahsilatlar sonraki aşamada bağlanacak.
               </div>
 
             </div>
@@ -2015,35 +1850,20 @@
       </section>
 
 
+      <!-- DERSLER -->
 
-      <!-- ============================================
-           DERSLER
-      ============================================= -->
-
-      <section
-        class="gorunum"
-        id="gorunum-dersler"
-      >
+      <section class="gorunum" id="gorunum-dersler">
 
         <div class="sayfa-baslik-alani">
 
           <div>
-
-            <div class="sayfa-baslik">
-              Dersler
-            </div>
-
+            <div class="sayfa-baslik">Dersler</div>
             <div class="sayfa-aciklama">
               Günlük program ve öğretmen takvimleri.
             </div>
-
           </div>
 
-          <button
-            class="ana-islem-buton"
-            type="button"
-            data-yakinda
-          >
+          <button class="ana-islem-buton" type="button" data-yakinda>
             + Ders Oluştur
           </button>
 
@@ -2051,19 +1871,9 @@
 
 
         <div class="sekme-satiri">
-
-          <button class="sekme aktif">
-            Bugün
-          </button>
-
-          <button class="sekme">
-            Öğretmen Takvimi
-          </button>
-
-          <button class="sekme">
-            Genel Takvim
-          </button>
-
+          <button class="sekme aktif">Bugün</button>
+          <button class="sekme">Öğretmen Takvimi</button>
+          <button class="sekme">Genel Takvim</button>
         </div>
 
 
@@ -2071,22 +1881,12 @@
 
           <div class="bos-durum">
 
-            <div class="bos-durum-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="5" width="18" height="16" rx="2"/>
-                <path d="M16 3v4M8 3v4M3 11h18"/>
-              </svg>
-
-            </div>
-
             <div class="bos-durum-baslik">
               Ders ekranı hazır
             </div>
 
             <div class="bos-durum-aciklama">
-              Gerçek ders listesi ve takvim görünümü
-              bu alana bağlanacak.
+              Gerçek ders listesi buraya bağlanacak.
             </div>
 
           </div>
@@ -2096,35 +1896,20 @@
       </section>
 
 
+      <!-- ÖĞRENCİLER -->
 
-      <!-- ============================================
-           ÖĞRENCİLER
-      ============================================= -->
-
-      <section
-        class="gorunum"
-        id="gorunum-ogrenciler"
-      >
+      <section class="gorunum" id="gorunum-ogrenciler">
 
         <div class="sayfa-baslik-alani">
 
           <div>
-
-            <div class="sayfa-baslik">
-              Öğrenciler
-            </div>
-
+            <div class="sayfa-baslik">Öğrenciler</div>
             <div class="sayfa-aciklama">
-              Öğrenci kayıtları, iletişim ve finans durumu.
+              Öğrenci kayıtları ve finans durumu.
             </div>
-
           </div>
 
-          <button
-            class="ana-islem-buton"
-            type="button"
-            data-yakinda
-          >
+          <button class="ana-islem-buton" type="button" data-yakinda>
             + Öğrenci Ekle
           </button>
 
@@ -2134,12 +1919,10 @@
         <div class="arama-alani">
 
           <div class="arama-ikon">
-
             <svg viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"/>
               <path d="M20 20l-4-4"/>
             </svg>
-
           </div>
 
           <input
@@ -2154,24 +1937,12 @@
 
           <div class="bos-durum">
 
-            <div class="bos-durum-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <circle cx="9" cy="8" r="4"/>
-                <path d="M3 21c1-5 3-7 6-7"/>
-                <circle cx="17" cy="9" r="3"/>
-                <path d="M14 21c1-4 2-6 5-6"/>
-              </svg>
-
-            </div>
-
             <div class="bos-durum-baslik">
               Öğrenci listesi hazır
             </div>
 
             <div class="bos-durum-aciklama">
-              Supabase öğrenci kayıtları sonraki aşamada
-              bu ekrana bağlanacak.
+              Gerçek öğrenci kayıtları buraya bağlanacak.
             </div>
 
           </div>
@@ -2181,35 +1952,20 @@
       </section>
 
 
+      <!-- TAHSİLAT -->
 
-      <!-- ============================================
-           TAHSİLAT
-      ============================================= -->
-
-      <section
-        class="gorunum"
-        id="gorunum-tahsilat"
-      >
+      <section class="gorunum" id="gorunum-tahsilat">
 
         <div class="sayfa-baslik-alani">
 
           <div>
-
-            <div class="sayfa-baslik">
-              Tahsilatlar
-            </div>
-
+            <div class="sayfa-baslik">Tahsilatlar</div>
             <div class="sayfa-aciklama">
               Öğrenci ödemeleri ve tahsilat geçmişi.
             </div>
-
           </div>
 
-          <button
-            class="ana-islem-buton"
-            type="button"
-            data-yakinda
-          >
+          <button class="ana-islem-buton" type="button" data-yakinda>
             + Tahsilat Gir
           </button>
 
@@ -2220,22 +1976,12 @@
 
           <div class="bos-durum">
 
-            <div class="bos-durum-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M12 3v18"/>
-                <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
-              </svg>
-
-            </div>
-
             <div class="bos-durum-baslik">
               Tahsilat ekranı hazır
             </div>
 
             <div class="bos-durum-aciklama">
-              Gerçek tahsilat kayıtları ve ödeme işlemleri
-              bu alana bağlanacak.
+              Gerçek tahsilat kayıtları buraya bağlanacak.
             </div>
 
           </div>
@@ -2245,28 +1991,15 @@
       </section>
 
 
+      <!-- MENÜ -->
 
-      <!-- ============================================
-           MENÜ
-      ============================================= -->
-
-      <section
-        class="gorunum"
-        id="gorunum-menu"
-      >
+      <section class="gorunum" id="gorunum-menu">
 
         <div class="sayfa-baslik-alani">
 
           <div>
-
-            <div class="sayfa-baslik">
-              Menü
-            </div>
-
-            <div class="sayfa-aciklama">
-              Tüm yönetim modülleri.
-            </div>
-
+            <div class="sayfa-baslik">Menü</div>
+            <div class="sayfa-aciklama">Tüm yönetim modülleri.</div>
           </div>
 
         </div>
@@ -2274,224 +2007,45 @@
 
         <div class="modul-grid">
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Sabit Program
-              </div>
-
-              <div class="modul-aciklama">
-                Haftalık ders planları
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Sabit Program</div>
+            <div class="modul-aciklama">Haftalık ders planları</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Öğretmenler
-              </div>
-
-              <div class="modul-aciklama">
-                Öğretmen kayıtları
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Öğretmenler</div>
+            <div class="modul-aciklama">Öğretmen kayıtları</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M5 4h14v16H5z"/>
-                <path d="M8 8h8M8 12h8M8 16h5"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Ödevler
-              </div>
-
-              <div class="modul-aciklama">
-                Öğrenci ödev takibi
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Ödevler</div>
+            <div class="modul-aciklama">Öğrenci ödev takibi</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M4 20V8h16v12"/>
-                <path d="M7 8V5h10v3"/>
-                <path d="M8 13h8"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Giderler
-              </div>
-
-              <div class="modul-aciklama">
-                Kurum gider yönetimi
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Giderler</div>
+            <div class="modul-aciklama">Kurum gider yönetimi</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
-                <path d="M17 4l3 3"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Öğretmen Ödemeleri
-              </div>
-
-              <div class="modul-aciklama">
-                Hakediş ve ödeme
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Öğretmen Ödemeleri</div>
+            <div class="modul-aciklama">Hakediş ve ödeme</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M3 7h18v12H3z"/>
-                <path d="M7 7V5h10v2"/>
-                <path d="M15 13h3"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Kasa
-              </div>
-
-              <div class="modul-aciklama">
-                Hesap ve hareketler
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Kasa</div>
+            <div class="modul-aciklama">Hesap ve hareketler</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <path d="M4 20V10"/>
-                <path d="M10 20V4"/>
-                <path d="M16 20v-7"/>
-                <path d="M22 20H2"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Raporlar
-              </div>
-
-              <div class="modul-aciklama">
-                Yönetim ve finans raporları
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Raporlar</div>
+            <div class="modul-aciklama">Yönetim raporları</div>
           </div>
 
-
           <div class="modul-kart" data-yakinda>
-
-            <div class="modul-ikon">
-
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19 12a7 7 0 01-.1 1"/>
-                <path d="M17 17l1.5 1.5"/>
-                <path d="M7 17l-1.5 1.5"/>
-                <path d="M5 12H3"/>
-                <path d="M7 7L5.5 5.5"/>
-                <path d="M12 5V3"/>
-                <path d="M17 7l1.5-1.5"/>
-              </svg>
-
-            </div>
-
-            <div>
-
-              <div class="modul-baslik">
-                Ayarlar
-              </div>
-
-              <div class="modul-aciklama">
-                Sistem ayarları
-              </div>
-
-            </div>
-
+            <div class="modul-baslik">Ayarlar</div>
+            <div class="modul-aciklama">Sistem ayarları</div>
           </div>
-
 
         </div>
 
@@ -2501,108 +2055,61 @@
     </main>
 
 
-
-    <!-- ================================================
-         ALT NAVİGASYON
-    ================================================= -->
-
     <nav class="alt-nav">
 
-      <button
-        class="nav-buton aktif"
-        data-gorunum="anasayfa"
-        type="button"
-      >
-
+      <button class="nav-buton aktif" data-gorunum="anasayfa" type="button">
         <svg viewBox="0 0 24 24">
           <path d="M3 11l9-8 9 8"/>
           <path d="M5 10v10h14V10"/>
           <path d="M9 20v-6h6v6"/>
         </svg>
-
         <span>Ana Sayfa</span>
-
       </button>
 
 
-      <button
-        class="nav-buton"
-        data-gorunum="dersler"
-        type="button"
-      >
-
+      <button class="nav-buton" data-gorunum="dersler" type="button">
         <svg viewBox="0 0 24 24">
           <rect x="3" y="5" width="18" height="16" rx="2"/>
           <path d="M16 3v4M8 3v4M3 11h18"/>
         </svg>
-
         <span>Dersler</span>
-
       </button>
 
 
-      <button
-        class="nav-buton"
-        data-gorunum="ogrenciler"
-        type="button"
-      >
-
+      <button class="nav-buton" data-gorunum="ogrenciler" type="button">
         <svg viewBox="0 0 24 24">
           <circle cx="9" cy="8" r="4"/>
           <path d="M3 21c1-5 3-7 6-7"/>
           <circle cx="17" cy="9" r="3"/>
-          <path d="M14 21c1-4 2-6 5-6"/>
         </svg>
-
         <span>Öğrenciler</span>
-
       </button>
 
 
-      <button
-        class="nav-buton"
-        data-gorunum="tahsilat"
-        type="button"
-      >
-
+      <button class="nav-buton" data-gorunum="tahsilat" type="button">
         <svg viewBox="0 0 24 24">
           <path d="M12 3v18"/>
           <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
         </svg>
-
         <span>Tahsilat</span>
-
       </button>
 
 
-      <button
-        class="nav-buton"
-        data-gorunum="menu"
-        type="button"
-      >
-
+      <button class="nav-buton" data-gorunum="menu" type="button">
         <svg viewBox="0 0 24 24">
           <path d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
-
         <span>Menü</span>
-
       </button>
 
     </nav>
 
-
   </div>
 
 
-
-  <div
-    class="toast"
-    id="toast"
-  >
+  <div class="toast" id="toast">
     Bu özellik sonraki aşamada bağlanacak.
   </div>
-
 
 
   <script
@@ -2611,10 +2118,6 @@
 
 
   <script>
-
-    /* ==================================================
-       SUPABASE
-    ================================================== */
 
     const SUPABASE_URL =
       "https://igmtuouhdozkgwmdxlme.supabase.co";
@@ -2639,10 +2142,6 @@
         }
       );
 
-
-    /* ==================================================
-       ELEMENTLER
-    ================================================== */
 
     const acilisEkrani =
       document.getElementById("acilisEkrani");
@@ -2696,14 +2195,9 @@
       document.getElementById("toast");
 
 
-    /* ==================================================
-       TARİH
-    ================================================== */
-
     function tarihYaz() {
 
-      const simdi =
-        new Date();
+      const simdi = new Date();
 
       const yazi =
         simdi.toLocaleDateString(
@@ -2721,10 +2215,6 @@
 
     }
 
-
-    /* ==================================================
-       EKRANLAR
-    ================================================== */
 
     function acilisiKapat() {
 
@@ -2753,9 +2243,7 @@
     }
 
 
-    function uygulamayiGoster(
-      profil
-    ) {
+    function uygulamayiGoster(profil) {
 
       acilisiKapat();
 
@@ -2800,36 +2288,20 @@
     }
 
 
-    /* ==================================================
-       YETKİ
-    ================================================== */
-
-    async function profiliGetir(
-      user
-    ) {
+    async function profiliGetir(user) {
 
       const {
         data,
         error
       } =
         await bsSupabase
-          .from(
-            "kullanici_profilleri"
-          )
-          .select(
-            "ad_soyad, rol, aktif"
-          )
-          .eq(
-            "auth_user_id",
-            user.id
-          )
+          .from("kullanici_profilleri")
+          .select("ad_soyad, rol, aktif")
+          .eq("auth_user_id", user.id)
           .single();
 
 
-      if (
-        error ||
-        !data
-      ) {
+      if (error || !data) {
 
         throw new Error(
           "Bu Google hesabı için geçerli bir BS Ofis kullanıcı profili bulunamadı."
@@ -2855,28 +2327,21 @@
     }
 
 
-    async function oturumuDogrula(
-      user
-    ) {
+    async function oturumuDogrula(user) {
 
       try {
 
         const profil =
-          await profiliGetir(
-            user
-          );
+          await profiliGetir(user);
 
         girisDurum.style.display =
           "none";
 
-        uygulamayiGoster(
-          profil
-        );
+        uygulamayiGoster(profil);
 
       } catch (error) {
 
-        await bsSupabase.auth
-          .signOut();
+        await bsSupabase.auth.signOut();
 
         girisiGoster();
 
@@ -2890,10 +2355,6 @@
 
     }
 
-
-    /* ==================================================
-       GOOGLE GİRİŞ
-    ================================================== */
 
     googleGirisButon.addEventListener(
       "click",
@@ -2909,9 +2370,7 @@
           "Google açılıyor...";
 
 
-        const {
-          error
-        } =
+        const { error } =
           await bsSupabase.auth
             .signInWithOAuth({
 
@@ -2952,10 +2411,6 @@
     );
 
 
-    /* ==================================================
-       ÇIKIŞ
-    ================================================== */
-
     cikisButon.addEventListener(
       "click",
       async function () {
@@ -2971,10 +2426,6 @@
       }
     );
 
-
-    /* ==================================================
-       PROFİL MENÜSÜ
-    ================================================== */
 
     profilButon.addEventListener(
       "click",
@@ -3010,18 +2461,10 @@
     );
 
 
-    /* ==================================================
-       ALT NAVİGASYON
-    ================================================== */
-
-    function gorunumeGit(
-      ad
-    ) {
+    function gorunumeGit(ad) {
 
       document
-        .querySelectorAll(
-          ".gorunum"
-        )
+        .querySelectorAll(".gorunum")
         .forEach(
           function (gorunum) {
 
@@ -3033,9 +2476,7 @@
 
 
       document
-        .querySelectorAll(
-          ".nav-buton"
-        )
+        .querySelectorAll(".nav-buton")
         .forEach(
           function (buton) {
 
@@ -3085,9 +2526,7 @@
 
 
     document
-      .querySelectorAll(
-        ".nav-buton"
-      )
+      .querySelectorAll(".nav-buton")
       .forEach(
         function (buton) {
 
@@ -3107,9 +2546,7 @@
 
 
     document
-      .querySelectorAll(
-        "[data-git]"
-      )
+      .querySelectorAll("[data-git]")
       .forEach(
         function (buton) {
 
@@ -3128,29 +2565,21 @@
       );
 
 
-    /* ==================================================
-       YAKINDA BİLDİRİMİ
-    ================================================== */
-
     let toastTimer;
 
 
     function yakindaGoster() {
 
-      clearTimeout(
-        toastTimer
-      );
+      clearTimeout(toastTimer);
 
-      toast.classList
-        .add("goster");
+      toast.classList.add("goster");
 
 
       toastTimer =
         setTimeout(
           function () {
 
-            toast.classList
-              .remove("goster");
+            toast.classList.remove("goster");
 
           },
           1800
@@ -3160,9 +2589,7 @@
 
 
     document
-      .querySelectorAll(
-        "[data-yakinda]"
-      )
+      .querySelectorAll("[data-yakinda]")
       .forEach(
         function (eleman) {
 
@@ -3174,10 +2601,6 @@
         }
       );
 
-
-    /* ==================================================
-       OTURUM KONTROLÜ
-    ================================================== */
 
     async function baslat() {
 

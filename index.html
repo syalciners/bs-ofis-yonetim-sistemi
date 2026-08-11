@@ -2634,7 +2634,13 @@
 
 
     baslat();
-
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register(
+      "/bs-ofis-yonetim-sistemi/sw.js"
+    );
+  });
+}
   </script>
 
 </body>

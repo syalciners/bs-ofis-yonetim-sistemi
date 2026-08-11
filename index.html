@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
+
+  <title>BS Ofis Yönetim Sistemi</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          #dbeafe 0%,
+          transparent 35%
+        ),
+        linear-gradient(
+          135deg,
+          #f8fafc 0%,
+          #eff6ff 100%
+        );
+
+      color: #0f172a;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 24px;
+    }
+
+    .giris-karti {
+      width: 100%;
+      max-width: 430px;
+
+      background: rgba(255, 255, 255, 0.96);
+
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+
+      padding: 42px 36px;
+
+      box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.10);
+    }
+
+    .logo-alani {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+
+      margin: 0 auto 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 20px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 27px;
+      font-weight: 800;
+
+      box-shadow:
+        0 12px 28px rgba(37, 99, 235, 0.28);
+    }
+
+    h1 {
+      font-size: 25px;
+      line-height: 1.25;
+      font-weight: 750;
+
+      color: #0f172a;
+    }
+
+    .alt-baslik {
+      margin-top: 9px;
+
+      font-size: 14px;
+      line-height: 1.5;
+
+      color: #64748b;
+    }
+
+    .form-grubu {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 14px;
+      font-weight: 650;
+
+      color: #334155;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+
+      padding: 0 16px;
+
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+
+      background: #ffffff;
+
+      font-size: 16px;
+      color: #0f172a;
+
+      outline: none;
+
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+
+      box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.10);
+    }
+
+    input::placeholder {
+      color: #94a3b8;
+    }
+
+    .sifre-alani {
+      position: relative;
+    }
+
+    .sifre-alani input {
+      padding-right: 72px;
+    }
+
+    .sifre-goster {
+      position: absolute;
+
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      border: none;
+      background: transparent;
+
+      color: #2563eb;
+
+      font-size: 13px;
+      font-weight: 650;
+
+      cursor: pointer;
+    }
+
+    .giris-buton {
+      width: 100%;
+      height: 54px;
+
+      margin-top: 6px;
+
+      border: none;
+      border-radius: 13px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 16px;
+      font-weight: 700;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 10px 24px rgba(37, 99, 235, 0.22);
+
+      transition:
+        transform 0.15s,
+        background 0.2s;
+    }
+
+    .giris-buton:hover {
+      background: #1d4ed8;
+    }
+
+    .giris-buton:active {
+      transform: scale(0.99);
+    }
+
+    .durum {
+      display: none;
+
+      margin-top: 18px;
+      padding: 12px 14px;
+
+      border-radius: 10px;
+
+      background: #eff6ff;
+      color: #1d4ed8;
+
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .alt-bilgi {
+      margin-top: 30px;
+
+      text-align: center;
+
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 16px;
+      }
+
+      .giris-karti {
+        padding: 34px 24px;
+        border-radius: 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="giris-karti">
+
+    <div class="logo-alani">
+
+      <div class="logo">
+        BS
+      </div>
+
+      <h1>
+        BS Ofis Yönetim Sistemi
+      </h1>
+
+      <p class="alt-baslik">
+        Yönetim paneline erişmek için giriş yapın.
+      </p>
+
+    </div>
+
+
+    <form id="girisFormu">
+
+      <div class="form-grubu">
+
+        <label for="email">
+          E-posta
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+          placeholder="E-posta adresiniz"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-grubu">
+
+        <label for="sifre">
+          Şifre
+        </label>
+
+        <div class="sifre-alani">
+
+          <input
+            id="sifre"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Şifreniz"
+            required
+          >
+
+          <button
+            class="sifre-goster"
+            type="button"
+            id="sifreGoster"
+          >
+            Göster
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="giris-buton"
+        type="submit"
+      >
+        Giriş Yap
+      </button>
+
+
+      <div
+        class="durum"
+        id="durum"
+      >
+        Giriş bağlantısı sonraki adımda etkinleştirilecek.
+      </div>
+
+    </form>
+
+
+    <div class="alt-bilgi">
+      BS Ofis • Güvenli Yönetim Paneli
+    </div>
+
+  </main>
+
+
+  <script>
+
+    const sifreAlani =
+      document.getElementById("sifre");
+
+    const sifreGoster =
+      document.getElementById("sifreGoster");
+
+    const girisFormu =
+      document.getElementById("girisFormu");
+
+    const durum =
+      document.getElementById("durum");
+
+
+    sifreGoster.addEventListener(
+      "click",
+      function () {
+
+        if (sifreAlani.type === "password") {
+
+          sifreAlani.type = "text";
+          sifreGoster.textContent = "Gizle";
+
+        } else {
+
+          sifreAlani.type = "password";
+          sifreGoster.textContent = "Göster";
+
+        }
+
+      }
+    );
+
+
+    girisFormu.addEventListener(
+      "submit",
+      function (event) {
+
+        event.preventDefault();
+
+        durum.style.display = "block";
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>

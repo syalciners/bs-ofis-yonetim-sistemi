@@ -5,13 +5,10 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#2563eb"
-  >
+  <meta name="theme-color" content="#f5f7fb">
 
   <title>BS Ofis Yönetim Sistemi</title>
 
@@ -25,15 +22,38 @@
     :root {
       --mavi: #2563eb;
       --mavi-koyu: #1d4ed8;
-      --arka-plan: #f4f7fb;
+      --mavi-acik: #eff6ff;
+
+      --arka-plan: #f5f7fb;
       --kart: #ffffff;
+
       --yazi: #0f172a;
       --ikincil: #64748b;
+      --soluk: #94a3b8;
+
       --kenar: #e2e8f0;
+
+      --yesil: #16a34a;
+      --yesil-acik: #f0fdf4;
+
+      --turuncu: #ea580c;
+      --turuncu-acik: #fff7ed;
+
+      --kirmizi: #dc2626;
+      --kirmizi-acik: #fef2f2;
+
+      --golge:
+        0 12px 35px rgba(15, 23, 42, 0.07);
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--arka-plan);
     }
 
     body {
       min-height: 100vh;
+      min-height: 100dvh;
 
       font-family:
         -apple-system,
@@ -46,25 +66,42 @@
 
       background: var(--arka-plan);
       color: var(--yazi);
+
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
     }
 
-    button {
+    button,
+    input {
       font: inherit;
     }
 
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    /* =========================
-       GİRİŞ EKRANI
-    ========================= */
+    svg {
+      display: block;
+    }
 
-    #girisEkrani {
-      min-height: 100vh;
+    .gizli {
+      display: none !important;
+    }
+
+
+    /* ==================================================
+       AÇILIŞ
+    ================================================== */
+
+    #acilisEkrani {
+      position: fixed;
+      inset: 0;
+
+      z-index: 1000;
 
       display: flex;
       align-items: center;
       justify-content: center;
-
-      padding: 24px;
 
       background:
         radial-gradient(
@@ -72,92 +109,164 @@
           #dbeafe 0%,
           transparent 35%
         ),
-        linear-gradient(
-          135deg,
-          #f8fafc 0%,
-          #eff6ff 100%
-        );
+        var(--arka-plan);
+    }
+
+    .acilis-logo {
+      width: 72px;
+      height: 72px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 22px;
+
+      background: var(--mavi);
+      color: white;
+
+      font-size: 26px;
+      font-weight: 850;
+
+      box-shadow:
+        0 18px 38px rgba(37, 99, 235, 0.28);
+
+      animation: nefes 1.4s ease-in-out infinite;
+    }
+
+    @keyframes nefes {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+
+    /* ==================================================
+       GİRİŞ
+    ================================================== */
+
+    #girisEkrani {
+      min-height: 100vh;
+      min-height: 100dvh;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        max(24px, env(safe-area-inset-top))
+        20px
+        max(24px, env(safe-area-inset-bottom));
+
+      background:
+        radial-gradient(
+          circle at 15% 10%,
+          #dbeafe 0%,
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 85% 85%,
+          #e0e7ff 0%,
+          transparent 28%
+        ),
+        #f8fafc;
     }
 
     .giris-karti {
       width: 100%;
       max-width: 430px;
 
-      background: rgba(255,255,255,0.97);
-
-      border: 1px solid var(--kenar);
-      border-radius: 24px;
-
       padding: 42px 36px;
 
+      background: rgba(255, 255, 255, 0.96);
+
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 26px;
+
       box-shadow:
-        0 24px 60px rgba(15,23,42,0.10);
+        0 28px 70px rgba(15, 23, 42, 0.12);
     }
 
     .giris-logo {
       width: 72px;
       height: 72px;
 
-      margin: 0 auto 18px;
+      margin: 0 auto 20px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      border-radius: 20px;
+      border-radius: 22px;
 
       background: var(--mavi);
       color: white;
 
-      font-size: 27px;
-      font-weight: 800;
+      font-size: 26px;
+      font-weight: 850;
 
       box-shadow:
-        0 12px 28px rgba(37,99,235,0.28);
+        0 15px 32px rgba(37, 99, 235, 0.26);
     }
 
     .giris-baslik {
       text-align: center;
 
       font-size: 25px;
-      font-weight: 750;
+      line-height: 1.25;
+      font-weight: 800;
     }
 
-    .giris-alt-baslik {
-      margin: 9px 0 32px;
+    .giris-aciklama {
+      margin: 10px 0 34px;
 
       text-align: center;
 
       font-size: 14px;
+      line-height: 1.55;
+
       color: var(--ikincil);
     }
 
     .google-buton {
       width: 100%;
-      height: 56px;
-
-      border: 1px solid #cbd5e1;
-      border-radius: 13px;
-
-      background: white;
-      color: #1e293b;
+      height: 58px;
 
       display: flex;
       align-items: center;
       justify-content: center;
+
       gap: 12px;
 
-      font-size: 16px;
-      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+
+      background: white;
+      color: #1e293b;
+
+      font-size: 15px;
+      font-weight: 750;
 
       cursor: pointer;
 
-      box-shadow:
-        0 6px 18px rgba(15,23,42,0.06);
+      transition:
+        background 0.15s,
+        transform 0.12s,
+        border-color 0.15s;
     }
 
     .google-buton:hover {
       background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .google-buton:active {
+      transform: scale(0.99);
     }
 
     .google-buton:disabled {
@@ -170,13 +279,18 @@
       height: 21px;
     }
 
-    .durum {
+    .giris-durum {
       display: none;
 
       margin-top: 18px;
       padding: 12px 14px;
 
-      border-radius: 10px;
+      border-radius: 11px;
+
+      background: var(--kirmizi-acik);
+      border: 1px solid #fecaca;
+
+      color: #b91c1c;
 
       font-size: 13px;
       line-height: 1.45;
@@ -184,61 +298,67 @@
       text-align: center;
     }
 
-    .durum.hata {
-      display: block;
-
-      background: #fef2f2;
-      color: #b91c1c;
-
-      border: 1px solid #fecaca;
-    }
-
-    .giris-alt-bilgi {
+    .giris-alt {
       margin-top: 30px;
 
       text-align: center;
 
+      color: var(--soluk);
       font-size: 12px;
-      color: #94a3b8;
     }
 
 
-    /* =========================
-       YÖNETİM PANELİ
-    ========================= */
+    /* ==================================================
+       UYGULAMA
+    ================================================== */
 
-    #panelEkrani {
+    #uygulama {
       display: none;
-      min-height: 100vh;
 
-      padding-bottom: 92px;
+      min-height: 100vh;
+      min-height: 100dvh;
+
+      padding-bottom:
+        calc(98px + env(safe-area-inset-bottom));
     }
+
+
+    /* ==================================================
+       ÜST BAR
+    ================================================== */
 
     .ust-bar {
-      height: 76px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+
+      height: 74px;
 
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      padding: 0 28px;
+      padding:
+        env(safe-area-inset-top)
+        26px
+        0;
 
-      background: white;
+      background: rgba(255, 255, 255, 0.93);
 
-      border-bottom: 1px solid var(--kenar);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 
-      position: sticky;
-      top: 0;
-      z-index: 20;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .marka {
       display: flex;
       align-items: center;
-      gap: 13px;
+
+      gap: 12px;
     }
 
-    .mini-logo {
+    .marka-logo {
       width: 44px;
       height: 44px;
 
@@ -246,59 +366,137 @@
       align-items: center;
       justify-content: center;
 
-      border-radius: 13px;
+      border-radius: 14px;
 
       background: var(--mavi);
       color: white;
 
-      font-size: 17px;
-      font-weight: 800;
+      font-size: 16px;
+      font-weight: 850;
+
+      box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.18);
     }
 
     .marka-baslik {
-      font-size: 18px;
-      font-weight: 750;
+      font-size: 17px;
+      font-weight: 800;
     }
 
     .marka-alt {
       margin-top: 2px;
 
-      font-size: 12px;
       color: var(--ikincil);
+      font-size: 12px;
     }
 
-    .kullanici-alani {
+    .profil-alani {
+      position: relative;
+
       display: flex;
       align-items: center;
-      gap: 14px;
+
+      gap: 10px;
     }
 
-    .kullanici-bilgi {
+    .profil-metin {
       text-align: right;
     }
 
-    .kullanici-isim {
-      font-size: 14px;
-      font-weight: 700;
+    .profil-isim {
+      max-width: 220px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      font-size: 13px;
+      font-weight: 750;
     }
 
-    .kullanici-rol {
+    .profil-rol {
       margin-top: 2px;
 
-      font-size: 12px;
       color: var(--ikincil);
+      font-size: 11px;
     }
 
-    .cikis {
-      height: 38px;
+    .profil-buton {
+      width: 42px;
+      height: 42px;
 
-      padding: 0 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       border: 1px solid var(--kenar);
-      border-radius: 10px;
+      border-radius: 13px;
+
+      background: white;
+      color: var(--mavi);
+
+      font-size: 14px;
+      font-weight: 800;
+
+      cursor: pointer;
+    }
+
+    .profil-menu {
+      position: absolute;
+
+      top: 50px;
+      right: 0;
+
+      width: 210px;
+
+      display: none;
+
+      padding: 8px;
+
+      background: white;
+
+      border: 1px solid var(--kenar);
+      border-radius: 14px;
+
+      box-shadow: var(--golge);
+    }
+
+    .profil-menu.acik {
+      display: block;
+    }
+
+    .profil-menu-bilgi {
+      padding: 10px 10px 12px;
+
+      border-bottom: 1px solid var(--kenar);
+
+      margin-bottom: 6px;
+    }
+
+    .profil-menu-isim {
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .profil-menu-rol {
+      margin-top: 3px;
+
+      color: var(--ikincil);
+      font-size: 11px;
+    }
+
+    .profil-menu button {
+      width: 100%;
+
+      padding: 11px 10px;
+
+      border: none;
+      border-radius: 9px;
 
       background: white;
       color: #475569;
+
+      text-align: left;
 
       font-size: 13px;
       font-weight: 650;
@@ -306,42 +504,74 @@
       cursor: pointer;
     }
 
-    .cikis:hover {
+    .profil-menu button:hover {
       background: #f8fafc;
     }
 
 
-    /* =========================
-       ANA İÇERİK
-    ========================= */
+    /* ==================================================
+       İÇERİK
+    ================================================== */
 
     .icerik {
       width: min(1180px, calc(100% - 40px));
 
       margin: 0 auto;
-      padding-top: 30px;
+
+      padding-top: 28px;
     }
 
-    .karsilama {
-      margin-bottom: 26px;
+    .gorunum {
+      display: none;
     }
 
-    .karsilama h1 {
+    .gorunum.aktif {
+      display: block;
+    }
+
+    .sayfa-baslik-alani {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+
+      gap: 16px;
+
+      margin-bottom: 24px;
+    }
+
+    .sayfa-baslik {
       font-size: 27px;
-      font-weight: 760;
+      line-height: 1.15;
+      font-weight: 820;
     }
 
-    .karsilama p {
-      margin-top: 6px;
+    .sayfa-aciklama {
+      margin-top: 7px;
 
-      font-size: 14px;
       color: var(--ikincil);
+
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .tarih-etiketi {
+      padding: 9px 12px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 10px;
+
+      background: white;
+
+      color: var(--ikincil);
+
+      font-size: 12px;
+      font-weight: 650;
     }
 
 
-    /* =========================
+    /* ==================================================
        KPI
-    ========================= */
+    ================================================== */
 
     .kpi-grid {
       display: grid;
@@ -349,15 +579,15 @@
       grid-template-columns:
         repeat(5, minmax(0, 1fr));
 
-      gap: 14px;
+      gap: 13px;
 
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .kpi-kart {
-      min-height: 126px;
+      min-height: 120px;
 
-      padding: 20px;
+      padding: 18px;
 
       background: var(--kart);
 
@@ -369,18 +599,23 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      gap: 8px;
     }
 
     .kpi-baslik {
-      font-size: 13px;
-      font-weight: 650;
-
       color: var(--ikincil);
+
+      font-size: 12px;
+      line-height: 1.3;
+      font-weight: 680;
     }
 
-    .kpi-ikon {
-      width: 35px;
-      height: 35px;
+    .ikon-kutu {
+      width: 34px;
+      height: 34px;
+
+      flex-shrink: 0;
 
       display: flex;
       align-items: center;
@@ -388,24 +623,129 @@
 
       border-radius: 10px;
 
-      background: #eff6ff;
+      background: var(--mavi-acik);
+      color: var(--mavi);
+    }
 
-      font-size: 17px;
+    .ikon-kutu svg {
+      width: 17px;
+      height: 17px;
+
+      stroke: currentColor;
+
+      fill: none;
+
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .kpi-deger {
       margin-top: 18px;
 
-      font-size: 27px;
-      font-weight: 780;
-
-      color: var(--yazi);
+      font-size: 26px;
+      font-weight: 820;
     }
 
 
-    /* =========================
-       ANA KARTLAR
-    ========================= */
+    /* ==================================================
+       HIZLI İŞLEMLER
+    ================================================== */
+
+    .hizli-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
+      gap: 12px;
+
+      margin-bottom: 18px;
+    }
+
+    .hizli-buton {
+      min-height: 82px;
+
+      display: flex;
+      align-items: center;
+
+      gap: 13px;
+
+      padding: 15px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 16px;
+
+      background: white;
+      color: var(--yazi);
+
+      cursor: pointer;
+
+      text-align: left;
+
+      transition:
+        transform 0.12s,
+        border-color 0.15s,
+        box-shadow 0.15s;
+    }
+
+    .hizli-buton:hover {
+      transform: translateY(-1px);
+
+      border-color: #cbd5e1;
+
+      box-shadow:
+        0 8px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .hizli-buton:active {
+      transform: scale(0.99);
+    }
+
+    .hizli-ikon {
+      width: 42px;
+      height: 42px;
+
+      flex-shrink: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: var(--mavi-acik);
+      color: var(--mavi);
+    }
+
+    .hizli-ikon svg {
+      width: 20px;
+      height: 20px;
+
+      fill: none;
+      stroke: currentColor;
+
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .hizli-baslik {
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .hizli-alt {
+      margin-top: 3px;
+
+      color: var(--ikincil);
+      font-size: 11px;
+    }
+
+
+    /* ==================================================
+       İÇERİK KARTLARI
+    ================================================== */
 
     .ana-grid {
       display: grid;
@@ -413,61 +753,65 @@
       grid-template-columns:
         1.35fr 1fr;
 
-      gap: 18px;
+      gap: 16px;
     }
 
-    .panel-kart {
+    .kart {
+      overflow: hidden;
+
       background: var(--kart);
 
       border: 1px solid var(--kenar);
       border-radius: 18px;
-
-      overflow: hidden;
     }
 
-    .panel-kart-baslik {
-      min-height: 62px;
+    .kart-baslik {
+      min-height: 58px;
 
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      padding: 0 20px;
+      gap: 12px;
+
+      padding: 0 18px;
 
       border-bottom: 1px solid var(--kenar);
     }
 
-    .panel-kart-baslik h2 {
-      font-size: 16px;
-      font-weight: 730;
+    .kart-baslik h2 {
+      font-size: 15px;
+      font-weight: 760;
     }
 
-    .panel-link {
+    .metin-buton {
       border: none;
-      background: none;
+      background: transparent;
 
       color: var(--mavi);
 
-      font-size: 13px;
-      font-weight: 650;
+      font-size: 12px;
+      font-weight: 700;
+
+      cursor: pointer;
     }
 
-    .bos-alan {
-      min-height: 245px;
+    .bos-durum {
+      min-height: 220px;
 
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
 
-      padding: 30px;
+      padding: 28px;
 
       text-align: center;
     }
 
-    .bos-ikon {
-      width: 48px;
-      height: 48px;
+    .bos-durum-ikon {
+      width: 46px;
+      height: 46px;
 
       display: flex;
       align-items: center;
@@ -475,41 +819,260 @@
 
       margin-bottom: 13px;
 
-      border-radius: 14px;
+      border-radius: 13px;
 
       background: #f1f5f9;
-
-      font-size: 22px;
+      color: #64748b;
     }
 
-    .bos-baslik {
-      font-size: 14px;
-      font-weight: 700;
+    .bos-durum-ikon svg {
+      width: 22px;
+      height: 22px;
+
+      fill: none;
+      stroke: currentColor;
+
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    .bos-aciklama {
-      max-width: 280px;
+    .bos-durum-baslik {
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .bos-durum-aciklama {
+      max-width: 320px;
 
       margin-top: 6px;
 
+      color: var(--ikincil);
+
       font-size: 12px;
       line-height: 1.5;
-
-      color: var(--ikincil);
     }
 
 
-    /* =========================
-       ALT MENÜ
-    ========================= */
+    /* ==================================================
+       ALT SAYFALAR
+    ================================================== */
 
-    .alt-menu {
+    .sekme-satiri {
+      display: flex;
+
+      gap: 7px;
+
+      margin-bottom: 16px;
+
+      overflow-x: auto;
+
+      scrollbar-width: none;
+    }
+
+    .sekme-satiri::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sekme {
+      flex-shrink: 0;
+
+      padding: 10px 14px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 11px;
+
+      background: white;
+      color: var(--ikincil);
+
+      font-size: 12px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .sekme.aktif {
+      border-color: #bfdbfe;
+
+      background: var(--mavi-acik);
+      color: var(--mavi);
+    }
+
+    .arama-alani {
+      position: relative;
+
+      margin-bottom: 16px;
+    }
+
+    .arama-alani input {
+      width: 100%;
+      height: 48px;
+
+      padding: 0 16px 0 45px;
+
+      border: 1px solid var(--kenar);
+      border-radius: 13px;
+
+      background: white;
+      color: var(--yazi);
+
+      outline: none;
+    }
+
+    .arama-alani input:focus {
+      border-color: #93c5fd;
+
+      box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .arama-ikon {
+      position: absolute;
+
+      left: 16px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      color: var(--soluk);
+    }
+
+    .arama-ikon svg {
+      width: 18px;
+      height: 18px;
+
+      fill: none;
+      stroke: currentColor;
+
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .ana-islem-buton {
+      height: 42px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 7px;
+
+      padding: 0 15px;
+
+      border: none;
+      border-radius: 11px;
+
+      background: var(--mavi);
+      color: white;
+
+      font-size: 12px;
+      font-weight: 750;
+
+      cursor: pointer;
+    }
+
+    .ana-islem-buton:hover {
+      background: var(--mavi-koyu);
+    }
+
+
+    /* ==================================================
+       MENÜ MODÜLLERİ
+    ================================================== */
+
+    .modul-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
+      gap: 13px;
+    }
+
+    .modul-kart {
+      min-height: 132px;
+
+      padding: 18px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      border: 1px solid var(--kenar);
+      border-radius: 17px;
+
+      background: white;
+
+      cursor: pointer;
+
+      transition:
+        transform 0.12s,
+        border-color 0.15s;
+    }
+
+    .modul-kart:hover {
+      transform: translateY(-1px);
+      border-color: #cbd5e1;
+    }
+
+    .modul-ikon {
+      width: 40px;
+      height: 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: var(--mavi-acik);
+      color: var(--mavi);
+    }
+
+    .modul-ikon svg {
+      width: 20px;
+      height: 20px;
+
+      fill: none;
+      stroke: currentColor;
+
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .modul-baslik {
+      margin-top: 16px;
+
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .modul-aciklama {
+      margin-top: 4px;
+
+      color: var(--ikincil);
+
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+
+    /* ==================================================
+       ALT NAVİGASYON
+    ================================================== */
+
+    .alt-nav {
       position: fixed;
 
       left: 50%;
-      bottom: 16px;
+      bottom:
+        calc(14px + env(safe-area-inset-bottom));
 
       transform: translateX(-50%);
+
+      z-index: 100;
 
       width: min(700px, calc(100% - 28px));
       height: 68px;
@@ -519,27 +1082,25 @@
       grid-template-columns:
         repeat(5, 1fr);
 
+      gap: 3px;
+
       padding: 6px;
 
-      background: rgba(255,255,255,0.96);
+      background:
+        rgba(255, 255, 255, 0.95);
 
-      border: 1px solid var(--kenar);
+      border: 1px solid rgba(226, 232, 240, 0.95);
       border-radius: 20px;
 
       box-shadow:
-        0 15px 40px rgba(15,23,42,0.13);
+        0 18px 45px rgba(15, 23, 42, 0.14);
 
-      backdrop-filter: blur(14px);
-
-      z-index: 30;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    .menu-buton {
-      border: none;
-      border-radius: 14px;
-
-      background: transparent;
-      color: #64748b;
+    .nav-buton {
+      min-width: 0;
 
       display: flex;
       flex-direction: column;
@@ -548,104 +1109,307 @@
 
       gap: 4px;
 
-      font-size: 11px;
-      font-weight: 650;
+      border: none;
+      border-radius: 14px;
+
+      background: transparent;
+      color: #64748b;
+
+      font-size: 10px;
+      font-weight: 680;
 
       cursor: pointer;
     }
 
-    .menu-buton span:first-child {
-      font-size: 19px;
-      line-height: 1;
+    .nav-buton svg {
+      width: 20px;
+      height: 20px;
+
+      fill: none;
+      stroke: currentColor;
+
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    .menu-buton.aktif {
-      background: #eff6ff;
+    .nav-buton.aktif {
+      background: var(--mavi-acik);
       color: var(--mavi);
     }
 
 
-    /* =========================
-       TABLET
-    ========================= */
+    /* ==================================================
+       BİLDİRİM
+    ================================================== */
 
-    @media (max-width: 980px) {
+    .toast {
+      position: fixed;
+
+      left: 50%;
+      bottom:
+        calc(96px + env(safe-area-inset-bottom));
+
+      transform:
+        translate(-50%, 20px);
+
+      z-index: 300;
+
+      max-width: calc(100% - 32px);
+
+      padding: 11px 16px;
+
+      border-radius: 11px;
+
+      background: #0f172a;
+      color: white;
+
+      font-size: 12px;
+      font-weight: 650;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transition:
+        opacity 0.18s,
+        transform 0.18s;
+    }
+
+    .toast.goster {
+      opacity: 1;
+
+      transform:
+        translate(-50%, 0);
+    }
+
+
+    /* ==================================================
+       TABLET
+    ================================================== */
+
+    @media (max-width: 1050px) {
 
       .kpi-grid {
         grid-template-columns:
           repeat(3, 1fr);
       }
 
-      .ana-grid {
-        grid-template-columns: 1fr;
+      .hizli-grid {
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+
+      .modul-grid {
+        grid-template-columns:
+          repeat(3, 1fr);
       }
 
     }
 
 
-    /* =========================
-       TELEFON
-    ========================= */
+    @media (max-width: 820px) {
 
-    @media (max-width: 650px) {
-
-      .ust-bar {
-        height: 66px;
-
-        padding: 0 15px;
+      .ana-grid {
+        grid-template-columns: 1fr;
       }
 
-      .marka-baslik {
-        font-size: 15px;
-      }
-
-      .marka-alt,
-      .kullanici-bilgi {
+      .profil-metin {
         display: none;
       }
 
-      .mini-logo {
-        width: 39px;
-        height: 39px;
+    }
 
-        border-radius: 11px;
+
+    /* ==================================================
+       MOBİL
+    ================================================== */
+
+    @media (max-width: 640px) {
+
+      #uygulama {
+        padding-bottom:
+          calc(88px + env(safe-area-inset-bottom));
+      }
+
+      .ust-bar {
+        height:
+          calc(62px + env(safe-area-inset-top));
+
+        padding:
+          env(safe-area-inset-top)
+          14px
+          0;
+      }
+
+      .marka-logo {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 12px;
+      }
+
+      .marka-baslik {
+        font-size: 14px;
+      }
+
+      .marka-alt {
+        display: none;
+      }
+
+      .profil-buton {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 12px;
       }
 
       .icerik {
         width: calc(100% - 24px);
 
-        padding-top: 22px;
+        padding-top: 20px;
       }
 
-      .karsilama h1 {
+      .sayfa-baslik-alani {
+        align-items: flex-start;
+
+        margin-bottom: 18px;
+      }
+
+      .sayfa-baslik {
         font-size: 22px;
       }
 
+      .sayfa-aciklama {
+        font-size: 12px;
+      }
+
+      .tarih-etiketi {
+        display: none;
+      }
+
       .kpi-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 10px;
+      }
+
+      .kpi-kart {
+        min-height: 105px;
+
+        padding: 14px;
+      }
+
+      .kpi-baslik {
+        font-size: 11px;
+      }
+
+      .ikon-kutu {
+        width: 30px;
+        height: 30px;
+
+        border-radius: 9px;
+      }
+
+      .kpi-deger {
+        margin-top: 14px;
+
+        font-size: 22px;
+      }
+
+      .kpi-kart:last-child {
+        grid-column: span 2;
+      }
+
+      .hizli-grid {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 9px;
+      }
+
+      .hizli-buton {
+        min-height: 74px;
+
+        padding: 12px;
+
+        gap: 10px;
+
+        border-radius: 14px;
+      }
+
+      .hizli-ikon {
+        width: 37px;
+        height: 37px;
+
+        border-radius: 11px;
+      }
+
+      .hizli-alt {
+        display: none;
+      }
+
+      .kart {
+        border-radius: 16px;
+      }
+
+      .kart-baslik {
+        min-height: 54px;
+
+        padding: 0 15px;
+      }
+
+      .bos-durum {
+        min-height: 190px;
+
+        padding: 24px 18px;
+      }
+
+      .modul-grid {
         grid-template-columns:
           repeat(2, 1fr);
 
         gap: 10px;
       }
 
-      .kpi-kart {
-        min-height: 112px;
+      .modul-kart {
+        min-height: 125px;
 
         padding: 15px;
+
+        border-radius: 15px;
       }
 
-      .kpi-deger {
-        font-size: 23px;
-      }
+      .alt-nav {
+        bottom:
+          calc(8px + env(safe-area-inset-bottom));
 
-      .alt-menu {
-        bottom: 10px;
-
+        width: calc(100% - 18px);
         height: 64px;
+
+        padding: 5px;
+
+        border-radius: 18px;
       }
 
-      .menu-buton {
-        font-size: 10px;
+      .nav-buton {
+        font-size: 9px;
+
+        border-radius: 12px;
+      }
+
+      .nav-buton svg {
+        width: 19px;
+        height: 19px;
+      }
+
+      .giris-karti {
+        padding: 34px 23px;
+
+        border-radius: 22px;
+      }
+
+      .giris-baslik {
+        font-size: 22px;
       }
 
     }
@@ -656,9 +1420,22 @@
 <body>
 
 
-  <!-- ==================================
-       GOOGLE GİRİŞ EKRANI
-  =================================== -->
+  <!-- ================================================
+       AÇILIŞ
+  ================================================= -->
+
+  <div id="acilisEkrani">
+
+    <div class="acilis-logo">
+      BS
+    </div>
+
+  </div>
+
+
+  <!-- ================================================
+       GİRİŞ
+  ================================================= -->
 
   <section id="girisEkrani">
 
@@ -672,15 +1449,14 @@
         BS Ofis Yönetim Sistemi
       </div>
 
-      <div class="giris-alt-baslik">
-        Yönetim paneline Google hesabınızla giriş yapın.
+      <div class="giris-aciklama">
+        Yönetim paneline güvenli Google hesabınızla giriş yapın.
       </div>
-
 
       <button
         class="google-buton"
-        type="button"
         id="googleGirisButon"
+        type="button"
       >
 
         <svg
@@ -711,14 +1487,12 @@
 
       </button>
 
-
       <div
-        class="durum"
-        id="durum"
+        class="giris-durum"
+        id="girisDurum"
       ></div>
 
-
-      <div class="giris-alt-bilgi">
+      <div class="giris-alt">
         BS Ofis • Güvenli Yönetim Paneli
       </div>
 
@@ -727,23 +1501,25 @@
   </section>
 
 
+  <!-- ================================================
+       UYGULAMA
+  ================================================= -->
 
-  <!-- ==================================
-       YÖNETİM PANELİ
-  =================================== -->
+  <div id="uygulama">
 
-  <section id="panelEkrani">
 
+    <!-- ÜST BAR -->
 
     <header class="ust-bar">
 
       <div class="marka">
 
-        <div class="mini-logo">
+        <div class="marka-logo">
           BS
         </div>
 
         <div>
+
           <div class="marka-baslik">
             BS Ofis Yönetim Sistemi
           </div>
@@ -751,23 +1527,24 @@
           <div class="marka-alt">
             Yönetim Paneli
           </div>
+
         </div>
 
       </div>
 
 
-      <div class="kullanici-alani">
+      <div class="profil-alani">
 
-        <div class="kullanici-bilgi">
+        <div class="profil-metin">
 
           <div
-            class="kullanici-isim"
-            id="ustKullaniciAdi"
+            class="profil-isim"
+            id="profilIsim"
           ></div>
 
           <div
-            class="kullanici-rol"
-            id="ustKullaniciRol"
+            class="profil-rol"
+            id="profilRol"
           >
             Yönetici
           </div>
@@ -775,12 +1552,45 @@
         </div>
 
         <button
-          class="cikis"
-          id="cikisButon"
+          class="profil-buton"
+          id="profilButon"
           type="button"
         >
-          Çıkış
+          <span id="profilHarf">
+            B
+          </span>
         </button>
+
+
+        <div
+          class="profil-menu"
+          id="profilMenu"
+        >
+
+          <div class="profil-menu-bilgi">
+
+            <div
+              class="profil-menu-isim"
+              id="profilMenuIsim"
+            ></div>
+
+            <div
+              class="profil-menu-rol"
+              id="profilMenuRol"
+            >
+              Yönetici
+            </div>
+
+          </div>
+
+          <button
+            id="cikisButon"
+            type="button"
+          >
+            Çıkış Yap
+          </button>
+
+        </div>
 
       </div>
 
@@ -791,208 +1601,899 @@
     <main class="icerik">
 
 
-      <section class="karsilama">
+      <!-- ============================================
+           ANA SAYFA
+      ============================================= -->
 
-        <h1 id="karsilamaMetni">
-          Ana Sayfa
-        </h1>
+      <section
+        class="gorunum aktif"
+        id="gorunum-anasayfa"
+      >
 
-        <p>
-          Ofisin bugünkü operasyon ve finans özeti.
-        </p>
+        <div class="sayfa-baslik-alani">
+
+          <div>
+
+            <div
+              class="sayfa-baslik"
+              id="karsilamaMetni"
+            >
+              Ana Sayfa
+            </div>
+
+            <div class="sayfa-aciklama">
+              Ofisin bugünkü operasyon ve finans özeti.
+            </div>
+
+          </div>
+
+          <div
+            class="tarih-etiketi"
+            id="bugunTarih"
+          ></div>
+
+        </div>
+
+
+        <!-- KPI -->
+
+        <div class="kpi-grid">
+
+          <article class="kpi-kart">
+
+            <div class="kpi-ust">
+
+              <div class="kpi-baslik">
+                Bugünkü Dersler
+              </div>
+
+              <div class="ikon-kutu">
+
+                <svg viewBox="0 0 24 24">
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="16"
+                    rx="2"
+                  />
+                  <path d="M16 3v4M8 3v4M3 11h18"/>
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div
+              class="kpi-deger"
+              id="kpiBugunkuDersler"
+            >
+              —
+            </div>
+
+          </article>
+
+
+          <article class="kpi-kart">
+
+            <div class="kpi-ust">
+
+              <div class="kpi-baslik">
+                Bu Ay Tahsilat
+              </div>
+
+              <div class="ikon-kutu">
+
+                <svg viewBox="0 0 24 24">
+                  <path d="M6 3h12"/>
+                  <path d="M7 7h10"/>
+                  <path d="M12 3v18"/>
+                  <path d="M8 13c0 2 1.8 3 4 3s4-1 4-3-1.8-3-4-3-4-1-4-3"/>
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div
+              class="kpi-deger"
+              id="kpiTahsilat"
+            >
+              —
+            </div>
+
+          </article>
+
+
+          <article class="kpi-kart">
+
+            <div class="kpi-ust">
+
+              <div class="kpi-baslik">
+                Bu Ay Ciro
+              </div>
+
+              <div class="ikon-kutu">
+
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 18L10 12L14 16L21 8"/>
+                  <path d="M15 8h6v6"/>
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div
+              class="kpi-deger"
+              id="kpiCiro"
+            >
+              —
+            </div>
+
+          </article>
+
+
+          <article class="kpi-kart">
+
+            <div class="kpi-ust">
+
+              <div class="kpi-baslik">
+                Kasa Bakiyesi
+              </div>
+
+              <div class="ikon-kutu">
+
+                <svg viewBox="0 0 24 24">
+                  <path d="M3 7h18v12H3z"/>
+                  <path d="M7 7V5h10v2"/>
+                  <path d="M15 13h3"/>
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div
+              class="kpi-deger"
+              id="kpiKasa"
+            >
+              —
+            </div>
+
+          </article>
+
+
+          <article class="kpi-kart">
+
+            <div class="kpi-ust">
+
+              <div class="kpi-baslik">
+                Borçlu Öğrenci
+              </div>
+
+              <div class="ikon-kutu">
+
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div
+              class="kpi-deger"
+              id="kpiBorclu"
+            >
+              —
+            </div>
+
+          </article>
+
+        </div>
+
+
+        <!-- HIZLI İŞLEMLER -->
+
+        <div class="hizli-grid">
+
+          <button
+            class="hizli-buton"
+            type="button"
+            data-yakinda
+          >
+
+            <div class="hizli-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="hizli-baslik">
+                Ders Oluştur
+              </div>
+
+              <div class="hizli-alt">
+                Yeni ders planla
+              </div>
+
+            </div>
+
+          </button>
+
+
+          <button
+            class="hizli-buton"
+            type="button"
+            data-yakinda
+          >
+
+            <div class="hizli-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3v18"/>
+                <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="hizli-baslik">
+                Tahsilat Gir
+              </div>
+
+              <div class="hizli-alt">
+                Ödeme kaydet
+              </div>
+
+            </div>
+
+          </button>
+
+
+          <button
+            class="hizli-buton"
+            type="button"
+            data-yakinda
+          >
+
+            <div class="hizli-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <circle cx="9" cy="8" r="4"/>
+                <path d="M3 21c1-5 3-7 6-7"/>
+                <path d="M17 11v8M13 15h8"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="hizli-baslik">
+                Öğrenci Ekle
+              </div>
+
+              <div class="hizli-alt">
+                Yeni kayıt oluştur
+              </div>
+
+            </div>
+
+          </button>
+
+
+          <button
+            class="hizli-buton"
+            type="button"
+            data-yakinda
+          >
+
+            <div class="hizli-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="17" rx="2"/>
+                <path d="M8 2v4M16 2v4M3 10h18"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="hizli-baslik">
+                Haftayı Oluştur
+              </div>
+
+              <div class="hizli-alt">
+                Sabit programdan
+              </div>
+
+            </div>
+
+          </button>
+
+        </div>
+
+
+        <!-- ANA KARTLAR -->
+
+        <div class="ana-grid">
+
+          <article class="kart">
+
+            <div class="kart-baslik">
+
+              <h2>
+                Bugünkü Dersler
+              </h2>
+
+              <button
+                class="metin-buton"
+                type="button"
+                data-git="dersler"
+              >
+                Tümünü Gör
+              </button>
+
+            </div>
+
+            <div class="bos-durum">
+
+              <div class="bos-durum-ikon">
+
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="16" rx="2"/>
+                  <path d="M16 3v4M8 3v4M3 11h18"/>
+                </svg>
+
+              </div>
+
+              <div class="bos-durum-baslik">
+                Dersler bağlanmaya hazır
+              </div>
+
+              <div class="bos-durum-aciklama">
+                Bir sonraki aşamada bugünün gerçek derslerini
+                burada göstereceğiz.
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <article class="kart">
+
+            <div class="kart-baslik">
+
+              <h2>
+                Son Tahsilatlar
+              </h2>
+
+              <button
+                class="metin-buton"
+                type="button"
+                data-git="tahsilat"
+              >
+                Tümünü Gör
+              </button>
+
+            </div>
+
+            <div class="bos-durum">
+
+              <div class="bos-durum-ikon">
+
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 3v18"/>
+                  <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
+                </svg>
+
+              </div>
+
+              <div class="bos-durum-baslik">
+                Tahsilatlar bağlanmaya hazır
+              </div>
+
+              <div class="bos-durum-aciklama">
+                Son tahsilatları öğrenci, tarih ve tutar
+                bilgileriyle burada göstereceğiz.
+              </div>
+
+            </div>
+
+          </article>
+
+        </div>
 
       </section>
 
 
 
-      <section class="kpi-grid">
+      <!-- ============================================
+           DERSLER
+      ============================================= -->
 
-        <article class="kpi-kart">
+      <section
+        class="gorunum"
+        id="gorunum-dersler"
+      >
 
-          <div class="kpi-ust">
-            <div class="kpi-baslik">
-              Bugünkü Dersler
+        <div class="sayfa-baslik-alani">
+
+          <div>
+
+            <div class="sayfa-baslik">
+              Dersler
             </div>
 
-            <div class="kpi-ikon">
-              📅
+            <div class="sayfa-aciklama">
+              Günlük program ve öğretmen takvimleri.
             </div>
+
           </div>
 
-          <div
-            class="kpi-deger"
-            id="kpiBugunkuDersler"
+          <button
+            class="ana-islem-buton"
+            type="button"
+            data-yakinda
           >
-            —
-          </div>
+            + Ders Oluştur
+          </button>
 
-        </article>
+        </div>
 
 
-        <article class="kpi-kart">
+        <div class="sekme-satiri">
 
-          <div class="kpi-ust">
-            <div class="kpi-baslik">
-              Bu Ay Tahsilat
+          <button class="sekme aktif">
+            Bugün
+          </button>
+
+          <button class="sekme">
+            Öğretmen Takvimi
+          </button>
+
+          <button class="sekme">
+            Genel Takvim
+          </button>
+
+        </div>
+
+
+        <div class="kart">
+
+          <div class="bos-durum">
+
+            <div class="bos-durum-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="16" rx="2"/>
+                <path d="M16 3v4M8 3v4M3 11h18"/>
+              </svg>
+
             </div>
 
-            <div class="kpi-ikon">
-              ₺
-            </div>
-          </div>
-
-          <div
-            class="kpi-deger"
-            id="kpiTahsilat"
-          >
-            —
-          </div>
-
-        </article>
-
-
-        <article class="kpi-kart">
-
-          <div class="kpi-ust">
-            <div class="kpi-baslik">
-              Bu Ay Ciro
+            <div class="bos-durum-baslik">
+              Ders ekranı hazır
             </div>
 
-            <div class="kpi-ikon">
-              ↗
-            </div>
-          </div>
-
-          <div
-            class="kpi-deger"
-            id="kpiCiro"
-          >
-            —
-          </div>
-
-        </article>
-
-
-        <article class="kpi-kart">
-
-          <div class="kpi-ust">
-            <div class="kpi-baslik">
-              Kasa Bakiyesi
+            <div class="bos-durum-aciklama">
+              Gerçek ders listesi ve takvim görünümü
+              bu alana bağlanacak.
             </div>
 
-            <div class="kpi-ikon">
-              💼
-            </div>
           </div>
 
-          <div
-            class="kpi-deger"
-            id="kpiKasa"
-          >
-            —
-          </div>
-
-        </article>
-
-
-        <article class="kpi-kart">
-
-          <div class="kpi-ust">
-            <div class="kpi-baslik">
-              Borçlu Öğrenci
-            </div>
-
-            <div class="kpi-ikon">
-              👤
-            </div>
-          </div>
-
-          <div
-            class="kpi-deger"
-            id="kpiBorclu"
-          >
-            —
-          </div>
-
-        </article>
+        </div>
 
       </section>
 
 
 
-      <section class="ana-grid">
+      <!-- ============================================
+           ÖĞRENCİLER
+      ============================================= -->
 
+      <section
+        class="gorunum"
+        id="gorunum-ogrenciler"
+      >
 
-        <article class="panel-kart">
+        <div class="sayfa-baslik-alani">
 
-          <div class="panel-kart-baslik">
+          <div>
 
-            <h2>
-              Bugünkü Dersler
-            </h2>
-
-            <button class="panel-link">
-              Tümünü Gör
-            </button>
-
-          </div>
-
-
-          <div class="bos-alan">
-
-            <div class="bos-ikon">
-              📅
+            <div class="sayfa-baslik">
+              Öğrenciler
             </div>
 
-            <div class="bos-baslik">
-              Ders verileri bağlanacak
-            </div>
-
-            <div class="bos-aciklama">
-              Bir sonraki adımda bugünün gerçek derslerini
-              Supabase üzerinden bu alana getireceğiz.
+            <div class="sayfa-aciklama">
+              Öğrenci kayıtları, iletişim ve finans durumu.
             </div>
 
           </div>
 
-        </article>
+          <button
+            class="ana-islem-buton"
+            type="button"
+            data-yakinda
+          >
+            + Öğrenci Ekle
+          </button>
+
+        </div>
+
+
+        <div class="arama-alani">
+
+          <div class="arama-ikon">
+
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M20 20l-4-4"/>
+            </svg>
+
+          </div>
+
+          <input
+            type="search"
+            placeholder="Öğrenci ara..."
+          >
+
+        </div>
+
+
+        <div class="kart">
+
+          <div class="bos-durum">
+
+            <div class="bos-durum-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <circle cx="9" cy="8" r="4"/>
+                <path d="M3 21c1-5 3-7 6-7"/>
+                <circle cx="17" cy="9" r="3"/>
+                <path d="M14 21c1-4 2-6 5-6"/>
+              </svg>
+
+            </div>
+
+            <div class="bos-durum-baslik">
+              Öğrenci listesi hazır
+            </div>
+
+            <div class="bos-durum-aciklama">
+              Supabase öğrenci kayıtları sonraki aşamada
+              bu ekrana bağlanacak.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
 
 
 
-        <article class="panel-kart">
+      <!-- ============================================
+           TAHSİLAT
+      ============================================= -->
 
-          <div class="panel-kart-baslik">
+      <section
+        class="gorunum"
+        id="gorunum-tahsilat"
+      >
 
-            <h2>
-              Son Tahsilatlar
-            </h2>
+        <div class="sayfa-baslik-alani">
 
-            <button class="panel-link">
-              Tümünü Gör
-            </button>
+          <div>
+
+            <div class="sayfa-baslik">
+              Tahsilatlar
+            </div>
+
+            <div class="sayfa-aciklama">
+              Öğrenci ödemeleri ve tahsilat geçmişi.
+            </div>
+
+          </div>
+
+          <button
+            class="ana-islem-buton"
+            type="button"
+            data-yakinda
+          >
+            + Tahsilat Gir
+          </button>
+
+        </div>
+
+
+        <div class="kart">
+
+          <div class="bos-durum">
+
+            <div class="bos-durum-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3v18"/>
+                <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
+              </svg>
+
+            </div>
+
+            <div class="bos-durum-baslik">
+              Tahsilat ekranı hazır
+            </div>
+
+            <div class="bos-durum-aciklama">
+              Gerçek tahsilat kayıtları ve ödeme işlemleri
+              bu alana bağlanacak.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ============================================
+           MENÜ
+      ============================================= -->
+
+      <section
+        class="gorunum"
+        id="gorunum-menu"
+      >
+
+        <div class="sayfa-baslik-alani">
+
+          <div>
+
+            <div class="sayfa-baslik">
+              Menü
+            </div>
+
+            <div class="sayfa-aciklama">
+              Tüm yönetim modülleri.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="modul-grid">
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Sabit Program
+              </div>
+
+              <div class="modul-aciklama">
+                Haftalık ders planları
+              </div>
+
+            </div>
 
           </div>
 
 
-          <div class="bos-alan">
+          <div class="modul-kart" data-yakinda>
 
-            <div class="bos-ikon">
-              ₺
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
+              </svg>
+
             </div>
 
-            <div class="bos-baslik">
-              Tahsilat verileri bağlanacak
-            </div>
+            <div>
 
-            <div class="bos-aciklama">
-              Son tahsilatlar bu kartta öğrenci adı,
-              tarih ve tutar ile gösterilecek.
+              <div class="modul-baslik">
+                Öğretmenler
+              </div>
+
+              <div class="modul-aciklama">
+                Öğretmen kayıtları
+              </div>
+
             </div>
 
           </div>
 
-        </article>
 
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M5 4h14v16H5z"/>
+                <path d="M8 8h8M8 12h8M8 16h5"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Ödevler
+              </div>
+
+              <div class="modul-aciklama">
+                Öğrenci ödev takibi
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M4 20V8h16v12"/>
+                <path d="M7 8V5h10v3"/>
+                <path d="M8 13h8"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Giderler
+              </div>
+
+              <div class="modul-aciklama">
+                Kurum gider yönetimi
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
+                <path d="M17 4l3 3"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Öğretmen Ödemeleri
+              </div>
+
+              <div class="modul-aciklama">
+                Hakediş ve ödeme
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M3 7h18v12H3z"/>
+                <path d="M7 7V5h10v2"/>
+                <path d="M15 13h3"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Kasa
+              </div>
+
+              <div class="modul-aciklama">
+                Hesap ve hareketler
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <path d="M4 20V10"/>
+                <path d="M10 20V4"/>
+                <path d="M16 20v-7"/>
+                <path d="M22 20H2"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Raporlar
+              </div>
+
+              <div class="modul-aciklama">
+                Yönetim ve finans raporları
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="modul-kart" data-yakinda>
+
+            <div class="modul-ikon">
+
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19 12a7 7 0 01-.1 1"/>
+                <path d="M17 17l1.5 1.5"/>
+                <path d="M7 17l-1.5 1.5"/>
+                <path d="M5 12H3"/>
+                <path d="M7 7L5.5 5.5"/>
+                <path d="M12 5V3"/>
+                <path d="M17 7l1.5-1.5"/>
+              </svg>
+
+            </div>
+
+            <div>
+
+              <div class="modul-baslik">
+                Ayarlar
+              </div>
+
+              <div class="modul-aciklama">
+                Sistem ayarları
+              </div>
+
+            </div>
+
+          </div>
+
+
+        </div>
 
       </section>
 
@@ -1001,52 +2502,106 @@
 
 
 
-    <nav class="alt-menu">
+    <!-- ================================================
+         ALT NAVİGASYON
+    ================================================= -->
+
+    <nav class="alt-nav">
 
       <button
-        class="menu-buton aktif"
+        class="nav-buton aktif"
+        data-gorunum="anasayfa"
         type="button"
       >
-        <span>⌂</span>
+
+        <svg viewBox="0 0 24 24">
+          <path d="M3 11l9-8 9 8"/>
+          <path d="M5 10v10h14V10"/>
+          <path d="M9 20v-6h6v6"/>
+        </svg>
+
         <span>Ana Sayfa</span>
+
       </button>
 
+
       <button
-        class="menu-buton"
+        class="nav-buton"
+        data-gorunum="dersler"
         type="button"
       >
-        <span>▣</span>
+
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="16" rx="2"/>
+          <path d="M16 3v4M8 3v4M3 11h18"/>
+        </svg>
+
         <span>Dersler</span>
+
       </button>
 
+
       <button
-        class="menu-buton"
+        class="nav-buton"
+        data-gorunum="ogrenciler"
         type="button"
       >
-        <span>👥</span>
+
+        <svg viewBox="0 0 24 24">
+          <circle cx="9" cy="8" r="4"/>
+          <path d="M3 21c1-5 3-7 6-7"/>
+          <circle cx="17" cy="9" r="3"/>
+          <path d="M14 21c1-4 2-6 5-6"/>
+        </svg>
+
         <span>Öğrenciler</span>
+
       </button>
 
+
       <button
-        class="menu-buton"
+        class="nav-buton"
+        data-gorunum="tahsilat"
         type="button"
       >
-        <span>₺</span>
+
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3v18"/>
+          <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
+        </svg>
+
         <span>Tahsilat</span>
+
       </button>
 
+
       <button
-        class="menu-buton"
+        class="nav-buton"
+        data-gorunum="menu"
         type="button"
       >
-        <span>☰</span>
+
+        <svg viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+
         <span>Menü</span>
+
       </button>
 
     </nav>
 
 
-  </section>
+  </div>
+
+
+
+  <div
+    class="toast"
+    id="toast"
+  >
+    Bu özellik sonraki aşamada bağlanacak.
+  </div>
 
 
 
@@ -1056,6 +2611,10 @@
 
 
   <script>
+
+    /* ==================================================
+       SUPABASE
+    ================================================== */
 
     const SUPABASE_URL =
       "https://igmtuouhdozkgwmdxlme.supabase.co";
@@ -1081,11 +2640,18 @@
       );
 
 
+    /* ==================================================
+       ELEMENTLER
+    ================================================== */
+
+    const acilisEkrani =
+      document.getElementById("acilisEkrani");
+
     const girisEkrani =
       document.getElementById("girisEkrani");
 
-    const panelEkrani =
-      document.getElementById("panelEkrani");
+    const uygulama =
+      document.getElementById("uygulama");
 
     const googleGirisButon =
       document.getElementById("googleGirisButon");
@@ -1093,44 +2659,93 @@
     const googleButonMetni =
       document.getElementById("googleButonMetni");
 
-    const durum =
-      document.getElementById("durum");
+    const girisDurum =
+      document.getElementById("girisDurum");
+
+    const profilIsim =
+      document.getElementById("profilIsim");
+
+    const profilRol =
+      document.getElementById("profilRol");
+
+    const profilHarf =
+      document.getElementById("profilHarf");
+
+    const profilMenu =
+      document.getElementById("profilMenu");
+
+    const profilMenuIsim =
+      document.getElementById("profilMenuIsim");
+
+    const profilMenuRol =
+      document.getElementById("profilMenuRol");
+
+    const profilButon =
+      document.getElementById("profilButon");
 
     const cikisButon =
       document.getElementById("cikisButon");
 
-    const ustKullaniciAdi =
-      document.getElementById("ustKullaniciAdi");
-
-    const ustKullaniciRol =
-      document.getElementById("ustKullaniciRol");
-
     const karsilamaMetni =
       document.getElementById("karsilamaMetni");
 
+    const bugunTarih =
+      document.getElementById("bugunTarih");
 
-    function durumGoster(mesaj) {
+    const toast =
+      document.getElementById("toast");
 
-      durum.textContent = mesaj;
-      durum.className = "durum hata";
+
+    /* ==================================================
+       TARİH
+    ================================================== */
+
+    function tarihYaz() {
+
+      const simdi =
+        new Date();
+
+      const yazi =
+        simdi.toLocaleDateString(
+          "tr-TR",
+          {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+          }
+        );
+
+      bugunTarih.textContent =
+        yazi.charAt(0).toUpperCase() +
+        yazi.slice(1);
 
     }
 
 
-    function durumTemizle() {
+    /* ==================================================
+       EKRANLAR
+    ================================================== */
 
-      durum.textContent = "";
-      durum.className = "durum";
+    function acilisiKapat() {
+
+      acilisEkrani.style.display =
+        "none";
 
     }
 
 
-    function girisEkraniniGoster() {
+    function girisiGoster() {
 
-      panelEkrani.style.display = "none";
-      girisEkrani.style.display = "flex";
+      acilisiKapat();
 
-      googleGirisButon.disabled = false;
+      uygulama.style.display =
+        "none";
+
+      girisEkrani.style.display =
+        "flex";
+
+      googleGirisButon.disabled =
+        false;
 
       googleButonMetni.textContent =
         "Google ile Giriş Yap";
@@ -1138,29 +2753,58 @@
     }
 
 
-    function paneliGoster(profil) {
+    function uygulamayiGoster(
+      profil
+    ) {
 
-      girisEkrani.style.display = "none";
-      panelEkrani.style.display = "block";
+      acilisiKapat();
 
-      ustKullaniciAdi.textContent =
+      girisEkrani.style.display =
+        "none";
+
+      uygulama.style.display =
+        "block";
+
+
+      profilIsim.textContent =
         profil.ad_soyad;
 
-      ustKullaniciRol.textContent =
+      profilRol.textContent =
         profil.rol;
+
+      profilMenuIsim.textContent =
+        profil.ad_soyad;
+
+      profilMenuRol.textContent =
+        profil.rol;
+
 
       const ilkAd =
         profil.ad_soyad
           .trim()
           .split(" ")[0];
 
+
+      profilHarf.textContent =
+        ilkAd
+          .charAt(0)
+          .toLocaleUpperCase("tr-TR");
+
+
       karsilamaMetni.textContent =
         "Merhaba, " + ilkAd;
+
+
+      tarihYaz();
 
     }
 
 
-    async function kullaniciYetkisiniKontrolEt(
+    /* ==================================================
+       YETKİ
+    ================================================== */
+
+    async function profiliGetir(
       user
     ) {
 
@@ -1169,7 +2813,9 @@
         error
       } =
         await bsSupabase
-          .from("kullanici_profilleri")
+          .from(
+            "kullanici_profilleri"
+          )
           .select(
             "ad_soyad, rol, aktif"
           )
@@ -1180,7 +2826,10 @@
           .single();
 
 
-      if (error || !data) {
+      if (
+        error ||
+        !data
+      ) {
 
         throw new Error(
           "Bu Google hesabı için geçerli bir BS Ofis kullanıcı profili bulunamadı."
@@ -1195,7 +2844,7 @@
       ) {
 
         throw new Error(
-          "Bu Google hesabı yönetim paneline erişim yetkisine sahip değil."
+          "Bu hesabın yönetim paneline erişim yetkisi bulunmuyor."
         );
 
       }
@@ -1206,43 +2855,55 @@
     }
 
 
-    async function oturumuDogrula(user) {
+    async function oturumuDogrula(
+      user
+    ) {
 
       try {
 
         const profil =
-          await kullaniciYetkisiniKontrolEt(
+          await profiliGetir(
             user
           );
 
-        durumTemizle();
+        girisDurum.style.display =
+          "none";
 
-        paneliGoster(
+        uygulamayiGoster(
           profil
         );
 
       } catch (error) {
 
-        await bsSupabase.auth.signOut();
+        await bsSupabase.auth
+          .signOut();
 
-        girisEkraniniGoster();
+        girisiGoster();
 
-        durumGoster(
-          error.message
-        );
+        girisDurum.textContent =
+          error.message;
+
+        girisDurum.style.display =
+          "block";
 
       }
 
     }
 
 
+    /* ==================================================
+       GOOGLE GİRİŞ
+    ================================================== */
+
     googleGirisButon.addEventListener(
       "click",
       async function () {
 
-        durumTemizle();
+        girisDurum.style.display =
+          "none";
 
-        googleGirisButon.disabled = true;
+        googleGirisButon.disabled =
+          true;
 
         googleButonMetni.textContent =
           "Google açılıyor...";
@@ -1253,28 +2914,37 @@
         } =
           await bsSupabase.auth
             .signInWithOAuth({
+
               provider: "google",
 
               options: {
-                redirectTo: UYGULAMA_URL,
+
+                redirectTo:
+                  UYGULAMA_URL,
 
                 queryParams: {
-                  prompt: "select_account"
+                  prompt:
+                    "select_account"
                 }
+
               }
+
             });
 
 
         if (error) {
 
-          googleGirisButon.disabled = false;
+          googleGirisButon.disabled =
+            false;
 
           googleButonMetni.textContent =
             "Google ile Giriş Yap";
 
-          durumGoster(
-            "Google ile giriş başlatılamadı."
-          );
+          girisDurum.textContent =
+            "Google ile giriş başlatılamadı.";
+
+          girisDurum.style.display =
+            "block";
 
         }
 
@@ -1282,27 +2952,241 @@
     );
 
 
+    /* ==================================================
+       ÇIKIŞ
+    ================================================== */
+
     cikisButon.addEventListener(
       "click",
       async function () {
 
-        await bsSupabase.auth.signOut();
+        profilMenu.classList
+          .remove("acik");
 
-        girisEkraniniGoster();
+        await bsSupabase.auth
+          .signOut();
 
-        durumTemizle();
+        girisiGoster();
 
       }
     );
 
 
-    async function mevcutOturumuKontrolEt() {
+    /* ==================================================
+       PROFİL MENÜSÜ
+    ================================================== */
+
+    profilButon.addEventListener(
+      "click",
+      function (event) {
+
+        event.stopPropagation();
+
+        profilMenu.classList
+          .toggle("acik");
+
+      }
+    );
+
+
+    document.addEventListener(
+      "click",
+      function () {
+
+        profilMenu.classList
+          .remove("acik");
+
+      }
+    );
+
+
+    profilMenu.addEventListener(
+      "click",
+      function (event) {
+
+        event.stopPropagation();
+
+      }
+    );
+
+
+    /* ==================================================
+       ALT NAVİGASYON
+    ================================================== */
+
+    function gorunumeGit(
+      ad
+    ) {
+
+      document
+        .querySelectorAll(
+          ".gorunum"
+        )
+        .forEach(
+          function (gorunum) {
+
+            gorunum.classList
+              .remove("aktif");
+
+          }
+        );
+
+
+      document
+        .querySelectorAll(
+          ".nav-buton"
+        )
+        .forEach(
+          function (buton) {
+
+            buton.classList
+              .remove("aktif");
+
+          }
+        );
+
+
+      const hedef =
+        document.getElementById(
+          "gorunum-" + ad
+        );
+
+
+      const buton =
+        document.querySelector(
+          '[data-gorunum="' +
+          ad +
+          '"]'
+        );
+
+
+      if (hedef) {
+
+        hedef.classList
+          .add("aktif");
+
+      }
+
+
+      if (buton) {
+
+        buton.classList
+          .add("aktif");
+
+      }
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    document
+      .querySelectorAll(
+        ".nav-buton"
+      )
+      .forEach(
+        function (buton) {
+
+          buton.addEventListener(
+            "click",
+            function () {
+
+              gorunumeGit(
+                buton.dataset.gorunum
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+    document
+      .querySelectorAll(
+        "[data-git]"
+      )
+      .forEach(
+        function (buton) {
+
+          buton.addEventListener(
+            "click",
+            function () {
+
+              gorunumeGit(
+                buton.dataset.git
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+    /* ==================================================
+       YAKINDA BİLDİRİMİ
+    ================================================== */
+
+    let toastTimer;
+
+
+    function yakindaGoster() {
+
+      clearTimeout(
+        toastTimer
+      );
+
+      toast.classList
+        .add("goster");
+
+
+      toastTimer =
+        setTimeout(
+          function () {
+
+            toast.classList
+              .remove("goster");
+
+          },
+          1800
+        );
+
+    }
+
+
+    document
+      .querySelectorAll(
+        "[data-yakinda]"
+      )
+      .forEach(
+        function (eleman) {
+
+          eleman.addEventListener(
+            "click",
+            yakindaGoster
+          );
+
+        }
+      );
+
+
+    /* ==================================================
+       OTURUM KONTROLÜ
+    ================================================== */
+
+    async function baslat() {
 
       const {
         data,
         error
       } =
-        await bsSupabase.auth.getSession();
+        await bsSupabase.auth
+          .getSession();
 
 
       if (
@@ -1312,7 +3196,7 @@
         !data.session.user
       ) {
 
-        girisEkraniniGoster();
+        girisiGoster();
 
         return;
 
@@ -1326,7 +3210,7 @@
     }
 
 
-    mevcutOturumuKontrolEt();
+    baslat();
 
   </script>
 

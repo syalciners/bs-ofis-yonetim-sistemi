@@ -59,7 +59,7 @@
       width: 100%;
       max-width: 430px;
 
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(255,255,255,0.96);
 
       border: 1px solid #e2e8f0;
       border-radius: 24px;
@@ -67,7 +67,7 @@
       padding: 42px 36px;
 
       box-shadow:
-        0 24px 60px rgba(15, 23, 42, 0.10);
+        0 24px 60px rgba(15,23,42,0.10);
     }
 
     .logo-alani {
@@ -94,7 +94,7 @@
       font-weight: 800;
 
       box-shadow:
-        0 12px 28px rgba(37, 99, 235, 0.28);
+        0 12px 28px rgba(37,99,235,0.28);
     }
 
     h1 {
@@ -113,132 +113,53 @@
       color: #64748b;
     }
 
-    .form-grubu {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-
-      margin-bottom: 8px;
-
-      font-size: 14px;
-      font-weight: 650;
-
-      color: #334155;
-    }
-
-    input {
+    .google-buton {
       width: 100%;
-      height: 52px;
-
-      padding: 0 16px;
+      height: 56px;
 
       border: 1px solid #cbd5e1;
-      border-radius: 12px;
+      border-radius: 13px;
 
       background: #ffffff;
+      color: #1e293b;
 
-      font-size: 16px;
-      color: #0f172a;
-
-      outline: none;
-
-      transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
-    }
-
-    input:focus {
-      border-color: #2563eb;
-
-      box-shadow:
-        0 0 0 4px rgba(37, 99, 235, 0.10);
-    }
-
-    input::placeholder {
-      color: #94a3b8;
-    }
-
-    .sifre-alani {
-      position: relative;
-    }
-
-    .sifre-alani input {
-      padding-right: 72px;
-    }
-
-    .sifre-goster {
-      position: absolute;
-
-      right: 14px;
-      top: 50%;
-
-      transform: translateY(-50%);
-
-      border: none;
-      background: transparent;
-
-      color: #2563eb;
-
-      font-size: 13px;
-      font-weight: 650;
-
-      cursor: pointer;
-    }
-
-    .giris-buton,
-    .cikis-buton {
-      width: 100%;
-      height: 54px;
-
-      margin-top: 6px;
-
-      border: none;
-      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
 
       font-size: 16px;
       font-weight: 700;
 
       cursor: pointer;
 
-      transition:
-        transform 0.15s,
-        background 0.2s,
-        opacity 0.2s;
-    }
-
-    .giris-buton {
-      background: #2563eb;
-      color: white;
-
       box-shadow:
-        0 10px 24px rgba(37, 99, 235, 0.22);
+        0 6px 18px rgba(15,23,42,0.06);
+
+      transition:
+        background 0.2s,
+        border-color 0.2s,
+        transform 0.15s;
     }
 
-    .giris-buton:hover {
-      background: #1d4ed8;
+    .google-buton:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
     }
 
-    .giris-buton:disabled {
-      cursor: wait;
-      opacity: 0.65;
-    }
-
-    .giris-buton:active,
-    .cikis-buton:active {
+    .google-buton:active {
       transform: scale(0.99);
     }
 
-    .cikis-buton {
-      margin-top: 22px;
-
-      background: #f1f5f9;
-      color: #334155;
+    .google-buton:disabled {
+      opacity: 0.6;
+      cursor: wait;
     }
 
-    .cikis-buton:hover {
-      background: #e2e8f0;
+    .google-logo {
+      width: 21px;
+      height: 21px;
+      flex-shrink: 0;
     }
 
     .durum {
@@ -334,6 +255,28 @@
       color: #475569;
     }
 
+    .cikis-buton {
+      width: 100%;
+      height: 52px;
+
+      margin-top: 22px;
+
+      border: none;
+      border-radius: 12px;
+
+      background: #f1f5f9;
+      color: #334155;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .cikis-buton:hover {
+      background: #e2e8f0;
+    }
+
     .alt-bilgi {
       margin-top: 30px;
 
@@ -364,9 +307,7 @@
 
   <main class="giris-karti">
 
-    <div
-      id="girisAlani"
-    >
+    <div id="girisAlani">
 
       <div class="logo-alani">
 
@@ -379,71 +320,50 @@
         </h1>
 
         <p class="alt-baslik">
-          Yönetim paneline erişmek için giriş yapın.
+          Yönetim paneline Google hesabınızla giriş yapın.
         </p>
 
       </div>
 
-      <form id="girisFormu">
+      <button
+        class="google-buton"
+        type="button"
+        id="googleGirisButon"
+      >
 
-        <div class="form-grubu">
-
-          <label for="email">
-            E-posta
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            autocomplete="email"
-            placeholder="E-posta adresiniz"
-            required
-          >
-
-        </div>
-
-        <div class="form-grubu">
-
-          <label for="sifre">
-            Şifre
-          </label>
-
-          <div class="sifre-alani">
-
-            <input
-              id="sifre"
-              type="password"
-              autocomplete="current-password"
-              placeholder="Şifreniz"
-              required
-            >
-
-            <button
-              class="sifre-goster"
-              type="button"
-              id="sifreGoster"
-            >
-              Göster
-            </button>
-
-          </div>
-
-        </div>
-
-        <button
-          class="giris-buton"
-          type="submit"
-          id="girisButon"
+        <svg
+          class="google-logo"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
         >
-          Giriş Yap
-        </button>
+          <path
+            fill="#4285F4"
+            d="M21.35 12.19c0-.64-.06-1.25-.16-1.84H12v3.48h5.25a4.49 4.49 0 0 1-1.95 2.94v2.26h3.16c1.85-1.7 2.89-4.21 2.89-6.84z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 21.73c2.64 0 4.86-.88 6.48-2.38l-3.16-2.45c-.88.59-2 .94-3.32.94-2.55 0-4.71-1.72-5.48-4.03H3.26v2.53A9.79 9.79 0 0 0 12 21.73z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M6.52 13.81A5.88 5.88 0 0 1 6.21 12c0-.63.11-1.24.31-1.81V7.66H3.26A9.75 9.75 0 0 0 2.21 12c0 1.57.38 3.05 1.05 4.34l3.26-2.53z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 6.16c1.44 0 2.73.5 3.74 1.47l2.8-2.8C16.85 3.25 14.64 2.27 12 2.27a9.79 9.79 0 0 0-8.74 5.39l3.26 2.53C7.29 7.88 9.45 6.16 12 6.16z"
+          />
+        </svg>
 
-        <div
-          class="durum"
-          id="durum"
-        ></div>
+        <span id="googleButonMetni">
+          Google ile Giriş Yap
+        </span>
 
-      </form>
+      </button>
+
+      <div
+        class="durum"
+        id="durum"
+      ></div>
 
     </div>
 
@@ -472,8 +392,8 @@
       ></div>
 
       <div class="basari-aciklama">
-        Supabase bağlantısı ve yönetici yetkilendirmesi
-        başarıyla doğrulandı.
+        Google hesabınız doğrulandı ve
+        BS Ofis yönetici yetkiniz kontrol edildi.
         <br><br>
         Ana yönetim paneli bir sonraki aşamada
         bu ekrana bağlanacak.
@@ -510,6 +430,9 @@
     const SUPABASE_PUBLISHABLE_KEY =
       "sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf";
 
+    const UYGULAMA_URL =
+      "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";
+
 
     const bsSupabase =
       window.supabase.createClient(
@@ -518,7 +441,8 @@
         {
           auth: {
             persistSession: true,
-            autoRefreshToken: true
+            autoRefreshToken: true,
+            detectSessionInUrl: true
           }
         }
       );
@@ -530,20 +454,11 @@
     const basariAlani =
       document.getElementById("basariAlani");
 
-    const girisFormu =
-      document.getElementById("girisFormu");
+    const googleGirisButon =
+      document.getElementById("googleGirisButon");
 
-    const emailAlani =
-      document.getElementById("email");
-
-    const sifreAlani =
-      document.getElementById("sifre");
-
-    const sifreGoster =
-      document.getElementById("sifreGoster");
-
-    const girisButon =
-      document.getElementById("girisButon");
+    const googleButonMetni =
+      document.getElementById("googleButonMetni");
 
     const durum =
       document.getElementById("durum");
@@ -564,9 +479,7 @@
     ) {
 
       durum.textContent = mesaj;
-
-      durum.className =
-        "durum " + tur;
+      durum.className = "durum " + tur;
 
     }
 
@@ -584,10 +497,10 @@
       basariAlani.style.display = "none";
       girisAlani.style.display = "block";
 
-      sifreAlani.value = "";
+      googleGirisButon.disabled = false;
 
-      girisButon.disabled = false;
-      girisButon.textContent = "Giriş Yap";
+      googleButonMetni.textContent =
+        "Google ile Giriş Yap";
 
     }
 
@@ -631,7 +544,7 @@
       if (error || !data) {
 
         throw new Error(
-          "Bu kullanıcı için geçerli bir BS Ofis profili bulunamadı."
+          "Bu Google hesabı için geçerli bir BS Ofis kullanıcı profili bulunamadı."
         );
 
       }
@@ -643,7 +556,7 @@
       ) {
 
         throw new Error(
-          "Bu hesap yönetim paneline erişim yetkisine sahip değil."
+          "Bu Google hesabı yönetim paneline erişim yetkisine sahip değil."
         );
 
       }
@@ -687,135 +600,49 @@
     }
 
 
-    sifreGoster.addEventListener(
+    googleGirisButon.addEventListener(
       "click",
-      function () {
-
-        if (
-          sifreAlani.type === "password"
-        ) {
-
-          sifreAlani.type = "text";
-
-          sifreGoster.textContent =
-            "Gizle";
-
-        } else {
-
-          sifreAlani.type = "password";
-
-          sifreGoster.textContent =
-            "Göster";
-
-        }
-
-      }
-    );
-
-
-    girisFormu.addEventListener(
-      "submit",
-      async function (event) {
-
-        event.preventDefault();
+      async function () {
 
         durumTemizle();
 
-        const email =
-          emailAlani.value
-            .trim()
-            .toLowerCase();
+        googleGirisButon.disabled = true;
 
-        const password =
-          sifreAlani.value;
-
-
-        girisButon.disabled = true;
-
-        girisButon.textContent =
-          "Giriş yapılıyor...";
+        googleButonMetni.textContent =
+          "Google açılıyor...";
 
 
         const {
-          data,
           error
         } =
           await bsSupabase.auth
-            .signInWithPassword({
-              email: email,
-              password: password
+            .signInWithOAuth({
+              provider: "google",
+
+              options: {
+                redirectTo: UYGULAMA_URL,
+
+                queryParams: {
+                  access_type: "offline",
+                  prompt: "select_account"
+                }
+              }
             });
 
 
         if (error) {
 
-          girisButon.disabled = false;
+          googleGirisButon.disabled = false;
 
-          girisButon.textContent =
-            "Giriş Yap";
-
-
-          let mesaj =
-            "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.";
-
-
-          if (
-            error.message
-              .toLowerCase()
-              .includes("invalid login")
-          ) {
-
-            mesaj =
-              "E-posta veya şifre hatalı.";
-
-          }
-
-
-          if (
-            error.message
-              .toLowerCase()
-              .includes("email not confirmed")
-          ) {
-
-            mesaj =
-              "E-posta hesabı henüz doğrulanmamış.";
-
-          }
-
+          googleButonMetni.textContent =
+            "Google ile Giriş Yap";
 
           durumGoster(
-            mesaj,
+            "Google ile giriş başlatılamadı.",
             "hata"
           );
 
-          return;
-
         }
-
-
-        if (
-          !data ||
-          !data.user
-        ) {
-
-          girisButon.disabled = false;
-
-          girisButon.textContent =
-            "Giriş Yap";
-
-          durumGoster(
-            "Kullanıcı oturumu oluşturulamadı.",
-            "hata"
-          );
-
-          return;
-
-        }
-
-
-        await oturumuDogrula(
-          data.user
-        );
 
       }
     );
@@ -841,8 +668,7 @@
         data,
         error
       } =
-        await bsSupabase.auth
-          .getSession();
+        await bsSupabase.auth.getSession();
 
 
       if (
@@ -864,6 +690,28 @@
       );
 
     }
+
+
+    bsSupabase.auth.onAuthStateChange(
+      async function (
+        event,
+        session
+      ) {
+
+        if (
+          event === "SIGNED_IN" &&
+          session &&
+          session.user
+        ) {
+
+          await oturumuDogrula(
+            session.user
+          );
+
+        }
+
+      }
+    );
 
 
     mevcutOturumuKontrolEt();

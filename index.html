@@ -11,11 +11,13 @@
   <meta name="theme-color" content="#f5f7fb">
 
   <title>BS Ofis Yönetim Sistemi</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="shortcut icon" href="favicon.ico">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
+
   <style>
     * {
       box-sizing: border-box;
@@ -36,6 +38,15 @@
       --soluk: #94a3b8;
 
       --kenar: #e2e8f0;
+
+      --yesil: #16a34a;
+      --yesil-acik: #f0fdf4;
+
+      --turuncu: #ea580c;
+      --turuncu-acik: #fff7ed;
+
+      --kirmizi: #dc2626;
+      --kirmizi-acik: #fef2f2;
 
       --golge:
         0 12px 35px rgba(15, 23, 42, 0.07);
@@ -310,7 +321,6 @@
     .marka {
       display: flex;
       align-items: center;
-
       gap: 12px;
     }
 
@@ -351,7 +361,6 @@
 
       display: flex;
       align-items: center;
-
       gap: 10px;
     }
 
@@ -668,7 +677,7 @@
 
 
     /* ==================================================
-       KARTLAR
+       GENEL KART
     ================================================== */
 
     .ana-grid {
@@ -771,6 +780,127 @@
 
       font-size: 12px;
       line-height: 1.5;
+    }
+
+
+    /* ==================================================
+       BUGÜNKÜ DERSLER
+    ================================================== */
+
+    .ders-listesi {
+      padding: 6px 0;
+    }
+
+    .ders-satir {
+      display: grid;
+
+      grid-template-columns:
+        76px minmax(0, 1fr) auto;
+
+      align-items: center;
+
+      gap: 14px;
+
+      min-height: 78px;
+
+      padding: 12px 18px;
+
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .ders-satir:last-child {
+      border-bottom: none;
+    }
+
+    .ders-saat {
+      width: 64px;
+
+      padding: 9px 7px;
+
+      border-radius: 11px;
+
+      background: var(--mavi-acik);
+      color: var(--mavi);
+
+      text-align: center;
+
+      font-size: 12px;
+      line-height: 1.3;
+      font-weight: 800;
+    }
+
+    .ders-ogrenci {
+      font-size: 13px;
+      font-weight: 800;
+
+      color: var(--yazi);
+    }
+
+    .ders-detay {
+      margin-top: 5px;
+
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 5px 12px;
+
+      color: var(--ikincil);
+
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .ders-detay span {
+      white-space: nowrap;
+    }
+
+    .durum-rozet {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 78px;
+
+      padding: 7px 10px;
+
+      border-radius: 999px;
+
+      font-size: 10px;
+      font-weight: 750;
+
+      white-space: nowrap;
+    }
+
+    .durum-planlandi {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .durum-yapildi {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+
+    .durum-iptal {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .durum-diger {
+      background: #f8fafc;
+      color: #64748b;
+    }
+
+    .ders-yukleniyor {
+      min-height: 210px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: var(--ikincil);
+
+      font-size: 12px;
     }
 
 
@@ -893,30 +1023,6 @@
       background: white;
 
       cursor: pointer;
-    }
-
-    .modul-ikon {
-      width: 40px;
-      height: 40px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-
-      background: var(--mavi-acik);
-      color: var(--mavi);
-    }
-
-    .modul-ikon svg {
-      width: 20px;
-      height: 20px;
-
-      fill: none;
-      stroke: currentColor;
-
-      stroke-width: 1.9;
     }
 
     .modul-baslik {
@@ -1089,7 +1195,7 @@
 
 
     /* ==================================================
-       MOBİL — KOMPAKT UYGULAMA DÜZENİ
+       MOBİL
     ================================================== */
 
     @media (max-width: 640px) {
@@ -1165,8 +1271,6 @@
       }
 
 
-      /* KPI daha kompakt */
-
       .kpi-grid {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
@@ -1217,8 +1321,6 @@
       }
 
 
-      /* Hızlı işlemler */
-
       .hizli-grid {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
@@ -1260,8 +1362,6 @@
       }
 
 
-      /* Kartlar */
-
       .ana-grid {
         gap: 10px;
       }
@@ -1284,24 +1384,76 @@
         font-size: 10px;
       }
 
+
+      /* MOBİL DERS SATIRI */
+
+      .ders-listesi {
+        padding: 3px 0;
+      }
+
+      .ders-satir {
+        grid-template-columns:
+          54px minmax(0, 1fr);
+
+        gap: 10px;
+
+        min-height: 72px;
+
+        padding: 10px 12px;
+
+        position: relative;
+      }
+
+      .ders-saat {
+        width: 50px;
+
+        padding: 8px 4px;
+
+        border-radius: 9px;
+
+        font-size: 10px;
+      }
+
+      .ders-ogrenci {
+        padding-right: 72px;
+
+        font-size: 11px;
+      }
+
+      .ders-detay {
+        margin-top: 4px;
+
+        padding-right: 4px;
+
+        gap: 3px 8px;
+
+        font-size: 9px;
+      }
+
+      .durum-rozet {
+        position: absolute;
+
+        top: 10px;
+        right: 10px;
+
+        min-width: auto;
+
+        padding: 5px 7px;
+
+        font-size: 8px;
+      }
+
+      .ders-yukleniyor {
+        min-height: 145px;
+
+        font-size: 10px;
+      }
+
+
       .bos-durum {
         min-height: 145px;
 
         padding: 18px 14px;
-      }
-
-      .bos-durum-ikon {
-        width: 38px;
-        height: 38px;
-
-        margin-bottom: 9px;
-
-        border-radius: 11px;
-      }
-
-      .bos-durum-ikon svg {
-        width: 18px;
-        height: 18px;
       }
 
       .bos-durum-baslik {
@@ -1314,8 +1466,6 @@
         font-size: 10px;
       }
 
-
-      /* Mobil sekmeler */
 
       .sekme-satiri {
         margin-bottom: 10px;
@@ -1350,8 +1500,6 @@
       }
 
 
-      /* Modül ekranı */
-
       .modul-grid {
         grid-template-columns:
           repeat(2, 1fr);
@@ -1367,18 +1515,6 @@
         border-radius: 13px;
       }
 
-      .modul-ikon {
-        width: 34px;
-        height: 34px;
-
-        border-radius: 10px;
-      }
-
-      .modul-ikon svg {
-        width: 17px;
-        height: 17px;
-      }
-
       .modul-baslik {
         margin-top: 10px;
 
@@ -1389,8 +1525,6 @@
         font-size: 9px;
       }
 
-
-      /* Gerçek mobil tab bar */
 
       .alt-nav {
         bottom:
@@ -1424,8 +1558,6 @@
         font-size: 11px;
       }
 
-
-      /* Mobil giriş */
 
       .giris-karti {
         padding: 32px 22px;
@@ -1649,7 +1781,7 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger" id="kpiBugunkuDersler">—</div>
+            <div class="kpi-deger" id="kpiBugunkuDersler">…</div>
           </article>
 
 
@@ -1663,7 +1795,7 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger" id="kpiTahsilat">—</div>
+            <div class="kpi-deger">—</div>
           </article>
 
 
@@ -1677,7 +1809,7 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger" id="kpiCiro">—</div>
+            <div class="kpi-deger">—</div>
           </article>
 
 
@@ -1692,7 +1824,7 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger" id="kpiKasa">—</div>
+            <div class="kpi-deger">—</div>
           </article>
 
 
@@ -1706,7 +1838,7 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-deger" id="kpiBorclu">—</div>
+            <div class="kpi-deger">—</div>
           </article>
 
         </div>
@@ -1774,6 +1906,8 @@
 
         <div class="ana-grid">
 
+          <!-- GERÇEK BUGÜNKÜ DERSLER -->
+
           <article class="kart">
 
             <div class="kart-baslik">
@@ -1790,27 +1924,17 @@
 
             </div>
 
-            <div class="bos-durum">
-
-              <div class="bos-durum-ikon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="3" y="5" width="18" height="16" rx="2"/>
-                  <path d="M16 3v4M8 3v4M3 11h18"/>
-                </svg>
-              </div>
-
-              <div class="bos-durum-baslik">
-                Dersler bağlanmaya hazır
-              </div>
-
-              <div class="bos-durum-aciklama">
-                Gerçek dersler sonraki aşamada bağlanacak.
-              </div>
-
+            <div
+              id="bugunkuDersListesi"
+              class="ders-yukleniyor"
+            >
+              Dersler yükleniyor…
             </div>
 
           </article>
 
+
+          <!-- TAHSİLAT ŞİMDİLİK BEKLİYOR -->
 
           <article class="kart">
 
@@ -1829,13 +1953,6 @@
             </div>
 
             <div class="bos-durum">
-
-              <div class="bos-durum-ikon">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 3v18"/>
-                  <path d="M7 7h7a3 3 0 010 6H9a3 3 0 000 6h8"/>
-                </svg>
-              </div>
 
               <div class="bos-durum-baslik">
                 Tahsilatlar bağlanmaya hazır
@@ -1890,7 +2007,7 @@
             </div>
 
             <div class="bos-durum-aciklama">
-              Gerçek ders listesi buraya bağlanacak.
+              Tam ders listesi sonraki aşamada bağlanacak.
             </div>
 
           </div>
@@ -2123,6 +2240,10 @@
 
   <script>
 
+    /* ==================================================
+       SUPABASE
+    ================================================== */
+
     const SUPABASE_URL =
       "https://igmtuouhdozkgwmdxlme.supabase.co";
 
@@ -2146,6 +2267,10 @@
         }
       );
 
+
+    /* ==================================================
+       ELEMENTLER
+    ================================================== */
 
     const acilisEkrani =
       document.getElementById("acilisEkrani");
@@ -2198,20 +2323,69 @@
     const toast =
       document.getElementById("toast");
 
+    const kpiBugunkuDersler =
+      document.getElementById("kpiBugunkuDersler");
+
+    const bugunkuDersListesi =
+      document.getElementById("bugunkuDersListesi");
+
+
+    /* ==================================================
+       TARİH — İSTANBUL
+    ================================================== */
+
+    function istanbulBugunISO() {
+
+      const parcalar =
+        new Intl.DateTimeFormat(
+          "tr-TR",
+          {
+            timeZone: "Europe/Istanbul",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }
+        )
+        .formatToParts(new Date());
+
+
+      const degerler = {};
+
+      parcalar.forEach(
+        function (parca) {
+
+          degerler[parca.type] =
+            parca.value;
+
+        }
+      );
+
+
+      return (
+        degerler.year +
+        "-" +
+        degerler.month +
+        "-" +
+        degerler.day
+      );
+
+    }
+
 
     function tarihYaz() {
 
-      const simdi = new Date();
-
       const yazi =
-        simdi.toLocaleDateString(
+        new Intl.DateTimeFormat(
           "tr-TR",
           {
+            timeZone: "Europe/Istanbul",
             weekday: "long",
             day: "numeric",
             month: "long"
           }
-        );
+        )
+        .format(new Date());
+
 
       bugunTarih.textContent =
         yazi.charAt(0).toUpperCase() +
@@ -2219,6 +2393,10 @@
 
     }
 
+
+    /* ==================================================
+       EKRANLAR
+    ================================================== */
 
     function acilisiKapat() {
 
@@ -2292,6 +2470,10 @@
     }
 
 
+    /* ==================================================
+       KULLANICI YETKİSİ
+    ================================================== */
+
     async function profiliGetir(user) {
 
       const {
@@ -2343,6 +2525,8 @@
 
         uygulamayiGoster(profil);
 
+        await bugunkuDersleriGetir();
+
       } catch (error) {
 
         await bsSupabase.auth.signOut();
@@ -2359,6 +2543,386 @@
 
     }
 
+
+    /* ==================================================
+       BUGÜNKÜ DERSLER — GERÇEK VERİ
+    ================================================== */
+
+    function saatKisalt(saat) {
+
+      if (!saat) {
+        return "—";
+      }
+
+      return saat.substring(0, 5);
+
+    }
+
+
+    function guvenliMetin(deger) {
+
+      if (
+        deger === null ||
+        deger === undefined ||
+        deger === ""
+      ) {
+        return "—";
+      }
+
+      return String(deger);
+
+    }
+
+
+    function durumSinifi(durum) {
+
+      if (durum === "Planlandı") {
+        return "durum-planlandi";
+      }
+
+      if (durum === "Yapıldı") {
+        return "durum-yapildi";
+      }
+
+      if (durum === "İptal") {
+        return "durum-iptal";
+      }
+
+      return "durum-diger";
+
+    }
+
+
+    async function bugunkuDersleriGetir() {
+
+      kpiBugunkuDersler.textContent =
+        "…";
+
+      bugunkuDersListesi.className =
+        "ders-yukleniyor";
+
+      bugunkuDersListesi.textContent =
+        "Dersler yükleniyor…";
+
+
+      const bugun =
+        istanbulBugunISO();
+
+
+      const {
+        data: dersler,
+        error: dersHata
+      } =
+        await bsSupabase
+          .from("dersler")
+          .select(`
+            ders_id,
+            tarih,
+            baslangic_saati,
+            bitis_saati,
+            ogrenci_id,
+            ogretmen_id,
+            brans_id,
+            derslik_id,
+            ders_yeri,
+            ders_durumu
+          `)
+          .eq("tarih", bugun)
+          .order(
+            "baslangic_saati",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (dersHata) {
+
+        console.error(
+          "Bugünkü dersler alınamadı:",
+          dersHata
+        );
+
+        kpiBugunkuDersler.textContent =
+          "!";
+
+        bugunkuDersListesi.className =
+          "bos-durum";
+
+        bugunkuDersListesi.innerHTML =
+          `
+            <div class="bos-durum-baslik">
+              Dersler yüklenemedi
+            </div>
+
+            <div class="bos-durum-aciklama">
+              Supabase bağlantısı kontrol edilmeli.
+            </div>
+          `;
+
+        return;
+
+      }
+
+
+      const [
+        ogrenciSonuc,
+        ogretmenSonuc,
+        bransSonuc,
+        derslikSonuc
+      ] =
+        await Promise.all([
+
+          bsSupabase
+            .from("ogrenciler")
+            .select(
+              "ogrenci_id, ad_soyad"
+            ),
+
+          bsSupabase
+            .from("ogretmenler")
+            .select(
+              "ogretmen_id, ad_soyad"
+            ),
+
+          bsSupabase
+            .from("branslar")
+            .select(
+              "brans_id, brans_adi"
+            ),
+
+          bsSupabase
+            .from("derslikler")
+            .select(
+              "derslik_id, mekan_adi"
+            )
+
+        ]);
+
+
+      if (
+        ogrenciSonuc.error ||
+        ogretmenSonuc.error ||
+        bransSonuc.error ||
+        derslikSonuc.error
+      ) {
+
+        console.error(
+          "Ders ilişkili kayıtları alınamadı.",
+          {
+            ogrenci: ogrenciSonuc.error,
+            ogretmen: ogretmenSonuc.error,
+            brans: bransSonuc.error,
+            derslik: derslikSonuc.error
+          }
+        );
+
+        kpiBugunkuDersler.textContent =
+          "!";
+
+        bugunkuDersListesi.className =
+          "bos-durum";
+
+        bugunkuDersListesi.innerHTML =
+          `
+            <div class="bos-durum-baslik">
+              Ders bilgileri yüklenemedi
+            </div>
+
+            <div class="bos-durum-aciklama">
+              Öğrenci veya öğretmen bağlantısı kontrol edilmeli.
+            </div>
+          `;
+
+        return;
+
+      }
+
+
+      const ogrenciHarita =
+        new Map(
+          ogrenciSonuc.data.map(
+            function (kayit) {
+
+              return [
+                kayit.ogrenci_id,
+                kayit.ad_soyad
+              ];
+
+            }
+          )
+        );
+
+
+      const ogretmenHarita =
+        new Map(
+          ogretmenSonuc.data.map(
+            function (kayit) {
+
+              return [
+                kayit.ogretmen_id,
+                kayit.ad_soyad
+              ];
+
+            }
+          )
+        );
+
+
+      const bransHarita =
+        new Map(
+          bransSonuc.data.map(
+            function (kayit) {
+
+              return [
+                kayit.brans_id,
+                kayit.brans_adi
+              ];
+
+            }
+          )
+        );
+
+
+      const derslikHarita =
+        new Map(
+          derslikSonuc.data.map(
+            function (kayit) {
+
+              return [
+                kayit.derslik_id,
+                kayit.mekan_adi
+              ];
+
+            }
+          )
+        );
+
+
+      kpiBugunkuDersler.textContent =
+        dersler.length;
+
+
+      if (dersler.length === 0) {
+
+        bugunkuDersListesi.className =
+          "bos-durum";
+
+        bugunkuDersListesi.innerHTML =
+          `
+            <div class="bos-durum-baslik">
+              Bugün ders bulunmuyor
+            </div>
+
+            <div class="bos-durum-aciklama">
+              Bugün için oluşturulmuş ders kaydı yok.
+            </div>
+          `;
+
+        return;
+
+      }
+
+
+      bugunkuDersListesi.className =
+        "ders-listesi";
+
+      bugunkuDersListesi.innerHTML =
+        "";
+
+
+      dersler.forEach(
+        function (ders) {
+
+          const ogrenci =
+            ogrenciHarita.get(
+              ders.ogrenci_id
+            ) || "Öğrenci bulunamadı";
+
+
+          const ogretmen =
+            ogretmenHarita.get(
+              ders.ogretmen_id
+            ) || "Öğretmen bulunamadı";
+
+
+          const brans =
+            bransHarita.get(
+              ders.brans_id
+            ) || "Branş belirtilmedi";
+
+
+          const derslik =
+            derslikHarita.get(
+              ders.derslik_id
+            ) ||
+            ders.ders_yeri ||
+            "Yer belirtilmedi";
+
+
+          const satir =
+            document.createElement(
+              "div"
+            );
+
+
+          satir.className =
+            "ders-satir";
+
+
+          satir.innerHTML =
+            `
+              <div class="ders-saat">
+                ${saatKisalt(ders.baslangic_saati)}
+                <br>
+                ${saatKisalt(ders.bitis_saati)}
+              </div>
+
+              <div>
+
+                <div class="ders-ogrenci">
+                  ${guvenliMetin(ogrenci)}
+                </div>
+
+                <div class="ders-detay">
+
+                  <span>
+                    ${guvenliMetin(ogretmen)}
+                  </span>
+
+                  <span>
+                    ${guvenliMetin(brans)}
+                  </span>
+
+                  <span>
+                    ${guvenliMetin(derslik)}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div
+                class="durum-rozet ${durumSinifi(ders.ders_durumu)}"
+              >
+                ${guvenliMetin(ders.ders_durumu)}
+              </div>
+            `;
+
+
+          bugunkuDersListesi.appendChild(
+            satir
+          );
+
+        }
+      );
+
+    }
+
+
+    /* ==================================================
+       GOOGLE GİRİŞ
+    ================================================== */
 
     googleGirisButon.addEventListener(
       "click",
@@ -2415,6 +2979,10 @@
     );
 
 
+    /* ==================================================
+       ÇIKIŞ
+    ================================================== */
+
     cikisButon.addEventListener(
       "click",
       async function () {
@@ -2430,6 +2998,10 @@
       }
     );
 
+
+    /* ==================================================
+       PROFİL MENÜSÜ
+    ================================================== */
 
     profilButon.addEventListener(
       "click",
@@ -2464,6 +3036,10 @@
       }
     );
 
+
+    /* ==================================================
+       NAVİGASYON
+    ================================================== */
 
     function gorunumeGit(ad) {
 
@@ -2569,6 +3145,10 @@
       );
 
 
+    /* ==================================================
+       YAKINDA
+    ================================================== */
+
     let toastTimer;
 
 
@@ -2583,7 +3163,9 @@
         setTimeout(
           function () {
 
-            toast.classList.remove("goster");
+            toast.classList.remove(
+              "goster"
+            );
 
           },
           1800
@@ -2605,6 +3187,10 @@
         }
       );
 
+
+    /* ==================================================
+       BAŞLAT
+    ================================================== */
 
     async function baslat() {
 
@@ -2638,13 +3224,27 @@
 
 
     baslat();
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function () {
-    navigator.serviceWorker.register(
-      "/bs-ofis-yonetim-sistemi/sw.js"
-    );
-  });
-}
+
+
+    /* ==================================================
+       SERVICE WORKER
+    ================================================== */
+
+    if ("serviceWorker" in navigator) {
+
+      window.addEventListener(
+        "load",
+        function () {
+
+          navigator.serviceWorker.register(
+            "/bs-ofis-yonetim-sistemi/sw.js"
+          );
+
+        }
+      );
+
+    }
+
   </script>
 
 </body>

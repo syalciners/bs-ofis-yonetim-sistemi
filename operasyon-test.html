@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BS Eğitim">
+  <title>BS Eğitim • Test</title>
+  <link rel="manifest" href="operasyon-test.webmanifest?v=204">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=204">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=204">
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#f5f7fb;overflow:hidden}
+    body{padding:0;overscroll-behavior:none}
+    iframe{display:block;width:100%;height:100dvh;border:0;background:#f5f7fb}
+  </style>
+</head>
+<body>
+  <iframe id="app" src="operasyon-v1-2.html?v=204" title="BS Eğitim Operasyon Test"></iframe>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('operasyon-test-sw.js?v=204').catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>

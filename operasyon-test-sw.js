@@ -1,8 +1,9 @@
-const CACHE_NAME = 'bs-ofis-operasyon-test-v206';
+const CACHE_NAME = 'bs-ofis-operasyon-test-v207';
 const APP_SHELL = [
-  '/bs-ofis-yonetim-sistemi/operasyon-test.html?v=206',
-  '/bs-ofis-yonetim-sistemi/index.html?v=206&pwa_test=1',
-  '/bs-ofis-yonetim-sistemi/operasyon-test.webmanifest?v=206',
+  '/bs-ofis-yonetim-sistemi/operasyon-test.html?v=207',
+  '/bs-ofis-yonetim-sistemi/index.html?v=207',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v207.js?v=207',
+  '/bs-ofis-yonetim-sistemi/operasyon-test.webmanifest?v=207',
   '/bs-ofis-yonetim-sistemi/bs-app-icon-192.png',
   '/bs-ofis-yonetim-sistemi/bs-app-icon-512.png',
   '/bs-ofis-yonetim-sistemi/apple-touch-icon.png',

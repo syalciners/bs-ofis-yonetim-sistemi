@@ -23,7 +23,7 @@
     let html=await r.text();
     html=html.replace('<link rel="manifest" href="manifest.webmanifest">','<link rel="manifest" href="operasyon-test.webmanifest?v=207">');
     html=html.replace('const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";','const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=207";');
-    html=html.replace('</body>','<script src="operasyon-test-v207.js?v=207"><\\/script></body>');
+    html=html.replace('</body>','<script src="operasyon-test-v207.js?v=207"><\/script></body>');
     document.open();
     document.write(html);
     document.close();

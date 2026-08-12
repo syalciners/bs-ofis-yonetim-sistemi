@@ -4,106 +4,137 @@ Son güncelleme: 13.08.2026
 
 ## Canlı sürüm güvenlik sınırı
 
-- Canlı uygulama: `index.html`
-- Kullanıcı tarafından geri dönüş noktası olarak doğrulanan temel commit: `09552e4f048ec9696576fbdfa232944056d4e8b5`
-- Canlı `index.html` test modülleri doğrulanmadan değiştirilmez.
-- Yeni geliştirmeler `operasyon-test.html` üzerinden izole test PWA içinde yürütülür.
+- Canlı uygulama `index.html` korunmaktadır.
+- Kullanıcı tarafından geri dönüş noktası olarak doğrulanan temel commit: `09552e4f048ec9696576fbdfa232944056d4e8b5`.
+- Yeni yapı kullanıcı doğrulaması tamamlanana kadar canlı `index.html` üzerine taşınmaz.
+- Geliştirme ve kabul testi `operasyon-test.html` üzerinden yürütülür.
 
-## Güncel test PWA
+## Güncel çalışır aday
 
-Güncel test sürümü: **V226**
+**Sürüm: V250**
 
-Aktif servisler:
+Test adresi:
 
-- `servisler/referans-servisi-v1.js`
-- `servisler/ders-program-servisi-v1.js`
-- `servisler/ogrenci-servisi-v1.js`
-- `servisler/finans-servisi-v1.js`
-- `servisler/ogretmen-servisi-v1.js`
+`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=250`
 
-Aktif modüller:
-
-- Dersler: bugün, öğretmen takvimi, genel takvim
-- Ders detay paneli
-- Ders oluştur kısa akışı + otomatik sabit program doldurma + çakışma ön kontrolü
-- Öğrenci listesi, öğrenci 360° detay ve düzenleme
-- Haftalık Dersleri Oluştur kuru çalışma ekranı
-- Tahsilat listesi ve finans KPI'ları
-- Tahsilat Gir kısa formu
-- Öğretmenler ekranı: kişi bazında bu ay hakediş, ders birimi, haftalık program ve yapılan dersler
-
-Eski `operasyon-test-v207.js`, `v208.js`, `v209.js`, `v212.js` katmanları aktif yükleme zincirinden çıkarılmıştır. Yeni geliştirmelerde yeni Vxxx overlay dosyaları oluşturulmaz; `servisler/` ve `moduller/` yapısı kullanılır.
+Mimari artık eski Vxxx overlay dosyalarına bağlı değildir. Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıcı tarafında yalnız publishable key + authenticated kullanıcı ile kullanılır; service-role anahtarı tarayıcıya verilmez.
 
 ## Kullanıcı deneyimi standardı
 
-- Günlük işlem hedefi en fazla 3 dokunuş.
-- Sistem bildiği alanları kullanıcıya tekrar seçtirmez.
-- Teknik ID ve entegrasyon alanları kullanıcıya gösterilmez.
-- Tablet öncelikli, telefon ve web uyumlu tasarım korunur.
-- Formlarda yalnız zorunlu günlük alanlar önde tutulur; detaylar gerektiğinde açılır.
+- Günlük işlemler mümkün olduğunca 1–3 dokunuşta tamamlanır.
+- Sistem bildiği alanları otomatik doldurur.
+- Teknik ID ve entegrasyon alanları günlük kullanıcı arayüzünde gösterilmez.
+- Tablet öncelikli, telefon ve web uyumlu yapı korunur.
+- İleri tarih, hesap, açıklama gibi ikincil alanlar gerektiğinde açılır.
+- Kritik işlemlerde kullanıcı ön kontrol görür; sunucu kayıt sırasında aynı kuralları yeniden doğrular.
 
-Örnek hedef akışlar:
+Hedef kısa akışlar:
 
-- Ders Oluştur → Öğrenci → Oluştur
-- Tahsilat Gir → Öğrenci → Tutar → Kaydet
-- Haftalık Dersleri Oluştur → Özet → Oluştur
+- Ders Oluştur → Öğrenci → gerekirse Saat → Dersi Oluştur
+- Tahsilat Gir → Öğrenci → Tutar → Tahsilatı Kaydet
+- Haftalık Dersleri Oluştur → Özet → X Dersi Oluştur
+- Giderler → Gider Ekle → Kategori → Tutar → Kaydet
+- Öğretmen Ödemeleri → Ödeme Gir → Öğretmen → Kaydet
+
+## Çalışan okuma / yönetim ekranları
+
+- Ana Sayfa ve KPI'lar
+- Bugünkü Dersler
+- Öğretmen Takvimi
+- Genel Takvim
+- Ders detay paneli
+- Öğrenciler, öğrenci 360° detay ve düzenleme
+- Sabit Program
+- Öğretmenler ve öğretmen detay/hakediş ekranı
+- Tahsilatlar
+- Kasa
+- Giderler
+- Öğretmen Ödemeleri
+- Ödevler
+- Raporlar
+- Ayarlar / sistem durumu
+
+## Çalışan gerçek yazma işlemleri
+
+Aşağıdaki işlemler Supabase'deki yönetici kontrollü güvenli RPC katmanına bağlanmıştır:
+
+1. Öğrenci ekleme
+2. Öğrenci düzenleme (mevcut RLS kontrollü modül)
+3. Öğretmen ekleme / düzenleme
+4. Sabit program ekleme / düzenleme
+5. Manuel / ek ders oluşturma
+6. Ders durumu güncelleme
+7. Haftalık dersleri sabit programdan toplu oluşturma
+8. Tahsilat + kasa hareketini tek atomik işlemde kaydetme
+9. Gider + kasa hareketini tek atomik işlemde kaydetme
+10. Öğretmen ödemesi + kasa hareketini tek atomik işlemde kaydetme
+11. Ödev ekleme
+12. Ödev durumunu güncelleme
+
+## Güvenli yazma ilkeleri
+
+- RPC'ler yalnız authenticated yönetici erişimine açıktır; `anon` çalıştırma yetkisi kaldırılmıştır.
+- Finansal çift kayıt üretebilecek işlemler tek transaction içinde yapılır.
+- Tahsilat, gider ve öğretmen ödemesinde istemci tarafından üretilen işlem kimlikleri yeniden denemede korunur; aynı işlem ikinci kez gönderilse çift kayıt oluşmaz.
+- Haftalık ders üretiminde aynı `program_id + tarih` varsa yeni kayıt oluşturulmaz.
+- Ders oluştururken öğrenci/öğretmen çakışması ve derslik kapasitesi sunucu tarafında yeniden kontrol edilir.
+- Sabit program kayıtlarında öğrenci/öğretmen çakışması ve derslik kapasitesi 60 dakikalık takvim slotu üzerinden kontrol edilir.
 
 ## Doğrulanan iş kuralları
 
 ### Takvim / ders süresi
 
-- Takvim ve çakışma hesabı: **1 ders = 60 dakikalık slot**.
+- Takvim ve çakışma hesabı: **1 ders = 60 dakikalık rezervasyon slotu**.
 - Finansal gerçekleşme kuralı: **50 dakikalık gerçekleşen ders = 1 finansal ders birimi**.
-- Bu ayrım kullanıcı arayüzüne teknik detay olarak yansıtılmaz.
-
-### Ders çakışmaları
-
-Aynı saat aralığında öğrenci, öğretmen ve derslik kapasitesi kontrol edilir. `İptal`, `Ertelendi` ve `Öğretmen İptali` durumları çakışma hesabına dahil edilmez.
+- `İptal`, `Ertelendi` ve `Öğretmen İptali` durumları takvim çakışma hesabına dahil edilmez.
 
 ### Finans
 
-- Öğrenci borcu: `Yapıldı` derslerin öğrenci toplam tutarı - tahsilatlar.
-- Kasa: açılış bakiyesi + iptal olmayan gelir hareketleri - iptal olmayan gider hareketleri.
-- Tahsilat gerçek nakit gelir kaynağıdır; ders kaydı tek başına tahsilat oluşturmaz.
+- Öğrenci borcu: `Yapıldı` derslerin öğrenci toplam tutarı − tahsilatlar.
+- Kasa: açılış bakiyesi + iptal olmayan gelir hareketleri − iptal olmayan gider hareketleri.
+- Tahsilat gerçek nakit gelir kaynağıdır; ders kaydı tek başına tahsilat değildir.
+- Öğrenci ücreti ve öğretmen hakedişi raporlarda yalnız `Yapıldı` derslerle gerçekleşir.
 
-## Güvenli yazma altyapısı
+## Test ve veri bütünlüğü
 
-### Tahsilat
+Güvenli RPC'ler transaction + rollback ile sınanmıştır. Testlerde:
 
-Supabase'de `tahsilat_kaydet_guvenli_v1` RPC kurulmuştur.
+- öğrenci ekleme,
+- manuel ders oluşturma,
+- ders durumu değiştirme,
+- tahsilat + kasa,
+- gider + kasa,
+- öğretmen ödemesi + kasa,
+- öğretmen kaydı,
+- sabit program kaydı,
+- ödev kaydı ve durum değişikliği
 
-- Tahsilat ve kasa hareketini tek transaction içinde oluşturur.
-- Yönetici yetkisini veritabanı tarafında kontrol eder.
-- Nakit → `KASA-001`, Havale/EFT → `KASA-002` eşlemesi doğrulanmıştır.
-- Transaction/rollback testinde iki kayıt birlikte oluşmuş ve rollback sonrası test verisi kalmamıştır.
-- Frontend gerçek tahsilat yazması henüz açılmamıştır.
+işlemleri doğrulanmış ve rollback sonrasında test kaydı bırakılmamıştır.
 
-### Haftalık Dersleri Oluştur
+İdempotency testlerinde aynı işlem kimliğiyle tekrar çağrılan öğrenci, ders, tahsilat, gider ve öğretmen ödeme işlemlerinin ikinci kayıt üretmediği doğrulanmıştır. Haftalık ders üretimi aynı hafta ikinci çağrıda mevcut dersleri tekrar oluşturmamıştır.
 
-Supabase'de `haftalik_dersleri_olustur_guvenli_v1` RPC kurulmuştur.
+## Görselleştirmeler
 
-- Sabit programdan güncel ücret/hakediş değerlerini kullanır.
-- `program_id + hedef tarih` mevcutsa ikinci kayıt üretmez.
-- Öğrenci/öğretmen/derslik çakışmalarını transaction içinde yeniden doğrular.
-- Yeni dersler `Planlandı` olarak oluşturulur.
-- 10.08.2026 haftası rollback test sonucu: 18 aktif program, 2 oluşturulabilir, 16 zaten mevcut, 0 çakışma, 0 hata.
-- Rollback sonrası gerçek ders sayısı değişmemiştir.
-- Frontend toplu gerçek yazma henüz açılmamıştır.
+Ana Sayfa'ya responsive yönetim görselleri eklenmiştir:
 
-## Geçiş / veri otoritesi
+- Son 6 ay Tahsilat / Gerçekleşen Ciro / Öğretmen Hakedişi karşılaştırmalı grafiği
+- Kasa hesaplarının bakiye dağılımı
 
-AppSheet hâlâ günlük kullanımda olduğundan geçiş döneminde veri otoritesi dikkatle korunmalıdır. Supabase'e açılan yeni yazmaların Google Sheets/AppSheet tarafından sonradan ezilmemesi veya iki sistemde farklı kayıt oluşmaması için gerçek yazma butonları modül bazında kontrollü açılacaktır.
+Görseller aynı merkezi rapor ve finans servislerinden veri alır; ayrı finans hesabı üretmez.
 
-Final hedefte günlük kullanıcı işlemleri yeni PWA üzerinden yürütülecek; AppSheet günlük arayüz olarak kullanılmayacaktır.
+## Teknik doğrulama
 
-## Sıradaki odak
+`.github/workflows/pwa-dogrulama.yml` ile her servis/modül JavaScript dosyası ve test kabuğunun inline JavaScript'i `node --check` ile doğrulanır. V250 aday zincirinin GitHub Actions JavaScript doğrulaması başarıyla tamamlanmıştır.
 
-1. Öğretmenler V226 ekranının kullanım doğrulaması
-2. Haftalık Dersleri Oluştur gerçek yazma için geçiş otoritesi ve tek kayıt testi
-3. Manuel / Ek Ders gerçek yazma RPC'si
-4. Tahsilat gerçek yazma butonunun RPC'ye bağlanması
-5. Ders durumu güncelleme ve merkezi finans kuralı
-6. Öğrenci Ekle kısa akışı
-7. Kasa, Giderler, Öğretmen Ödemeleri ve Raporlar modülleri
+## Geçiş notu
 
-Her kritik yazma: **kuru çalışma → tek kayıt testi → gerçek kullanım → yedek/sabitleme** sırasıyla ilerler.
+V250 yeni PWA'nın Supabase-merkezli çalışır aday sürümüdür. Kullanıcı kabul testi tamamlanmadan canlı `index.html` değiştirilmez. Geçiş süresince aynı gerçek işlemin hem AppSheet hem PWA üzerinden çift girilmemesi gerekir. Nihai hedef günlük operasyonun yeni PWA üzerinden yürütülmesidir.
+
+## Kabul sonrası
+
+Kullanıcı V250'nin telefon, tablet ve web kullanımını doğruladıktan sonra:
+
+1. son çalışan commit sabitlenir,
+2. veri senkron/otorite geçişi son kez kontrol edilir,
+3. canlı `index.html` güvenli geçiş planıyla yeni modüler yapıya taşınır,
+4. AppSheet günlük arayüz olmaktan çıkarılır.

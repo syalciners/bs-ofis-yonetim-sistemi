@@ -1,13 +1,14 @@
-const CACHE_NAME = 'bs-ofis-operasyon-test-v212';
+const CACHE_NAME = 'bs-ofis-operasyon-test-v213';
 const APP_SHELL = [
-  '/bs-ofis-yonetim-sistemi/operasyon-test.html?v=212',
-  '/bs-ofis-yonetim-sistemi/index.html?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test-v207.js?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test-v208.js?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test-v209.js?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test-v211.js?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test-v212.js?v=212',
-  '/bs-ofis-yonetim-sistemi/operasyon-test.webmanifest?v=212',
+  '/bs-ofis-yonetim-sistemi/operasyon-test.html?v=213',
+  '/bs-ofis-yonetim-sistemi/index.html?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v207.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v208.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v209.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v211.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v212.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test-v213.js?v=213',
+  '/bs-ofis-yonetim-sistemi/operasyon-test.webmanifest?v=213',
   '/bs-ofis-yonetim-sistemi/bs-app-icon-192.png',
   '/bs-ofis-yonetim-sistemi/bs-app-icon-512.png',
   '/bs-ofis-yonetim-sistemi/apple-touch-icon.png',

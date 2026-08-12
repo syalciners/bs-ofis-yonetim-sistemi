@@ -1,4 +1,4 @@
-const CACHE_NAME = "bs-ofis-v2";
+const CACHE_NAME = "bs-ofis-v3";
 
 const APP_SHELL = [
   "/bs-ofis-yonetim-sistemi/",
@@ -14,7 +14,6 @@ self.addEventListener("install", function (event) {
       return cache.addAll(APP_SHELL);
     })
   );
-
   self.skipWaiting();
 });
 
@@ -32,48 +31,34 @@ self.addEventListener("activate", function (event) {
       );
     })
   );
-
   self.clients.claim();
 });
 
 self.addEventListener("fetch", function (event) {
-  if (event.request.method !== "GET") {
-    return;
-  }
+  if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
 
-  // Supabase ve diğer dış servis yanıtlarını cache'leme.
-  // Finans ve operasyon verileri her zaman canlı kaynaktan gelmeli.
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  // Supabase ve diğer harici servis yanıtları asla önbelleğe alınmaz.
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
         if (response && response.ok) {
-          const responseClone = response.clone();
-
+          const copy = response.clone();
           caches.open(CACHE_NAME).then(function (cache) {
-            cache.put(event.request, responseClone);
+            cache.put(event.request, copy);
           });
         }
-
         return response;
       })
       .catch(function () {
-        return caches.match(event.request).then(function (cachedResponse) {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
+        return caches.match(event.request).then(function (cached) {
+          if (cached) return cached;
           if (event.request.mode === "navigate") {
-            return caches.match(
-              "/bs-ofis-yonetim-sistemi/index.html"
-            );
+            return caches.match("/bs-ofis-yonetim-sistemi/index.html");
           }
-
           return Response.error();
         });
       })

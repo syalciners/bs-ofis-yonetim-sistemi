@@ -66,6 +66,22 @@
     return data;
   }
 
+  async function sabitProgramlariGetir(){
+    const [programSonuc,ref]=await Promise.all([
+      bsSupabase.from('sabit_ders_programi')
+        .select('program_id,ogrenci_id,ogretmen_id,brans_id,derslik_id,haftanin_gunu,baslangic_saati,ders_sayisi,ogrenci_birim_ucreti,ogretmen_birim_hakedisi,baslangic_tarihi,bitis_tarihi,program_durumu,aciklama')
+        .eq('program_durumu','Aktif'),
+      referanslar()
+    ]);
+    if(programSonuc.error) throw programSonuc.error;
+    const programlar=(programSonuc.data||[]).sort((a,b)=>{
+      const ga=GUN_OFFSET[a.haftanin_gunu]??99,gb=GUN_OFFSET[b.haftanin_gunu]??99;
+      if(ga!==gb) return ga-gb;
+      return String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||''));
+    });
+    return {programlar,referanslar:ref,gunSirasi:Object.keys(GUN_OFFSET)};
+  }
+
   async function ogrenciProgramVarsayilaniGetir(ogrenciId,tarih){
     if(!ogrenciId||!tarih) return {eslesenler:[],varsayilan:null};
     const {data,error}=await bsSupabase.from('sabit_ders_programi')
@@ -213,6 +229,7 @@
     referanslar,
     dersleriGetir,
     dersDetayGetir,
+    sabitProgramlariGetir,
     ogrenciProgramVarsayilaniGetir,
     manuelDersOnKontrol,
     haftalikOnizleme

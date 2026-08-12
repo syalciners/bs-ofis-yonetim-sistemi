@@ -9,16 +9,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="BS Eğitim">
   <title>BS Eğitim Yönetimi • Test</title>
-  <link rel="manifest" href="operasyon-test.webmanifest?v=205">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=205">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=205">
-  <style>
-    html,body{margin:0;width:100%;height:100%;background:#f5f7fb;overflow:hidden}
-    body{padding:0;overscroll-behavior:none}
-    iframe{display:block;width:100%;height:100dvh;border:0;background:#f5f7fb}
-  </style>
+  <link rel="manifest" href="operasyon-test.webmanifest?v=206">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=206">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=206">
+  <style>html,body{margin:0;width:100%;height:100%;background:#f5f7fb}</style>
 </head>
 <body>
-  <iframe id="app" src="index.html?v=205" title="BS Eğitim Yönetimi Test"></iframe>
+<script>
+(function () {
+  var hedef = 'index.html?v=206&pwa_test=1';
+  function ac() { window.location.replace(hedef); }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('operasyon-test-sw.js?v=206').then(ac).catch(ac);
+  } else {
+    ac();
+  }
+})();
+</script>
 </body>
 </html>

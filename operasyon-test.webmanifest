@@ -4,24 +4,14 @@
   "short_name": "BS Eğitim",
   "description": "BS Eğitim yönetim sistemi test uygulaması",
   "lang": "tr-TR",
-  "start_url": "/bs-ofis-yonetim-sistemi/operasyon-test.html?v=205",
+  "start_url": "/bs-ofis-yonetim-sistemi/operasyon-test.html?v=206",
   "scope": "/bs-ofis-yonetim-sistemi/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f5f7fb",
   "theme_color": "#f5f7fb",
   "icons": [
-    {
-      "src": "bs-app-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "bs-app-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    {"src":"bs-app-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"bs-app-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }

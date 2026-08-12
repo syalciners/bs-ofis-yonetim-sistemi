@@ -1,5 +1,5 @@
 (function(){
-  const V='208';
+  const V='218';
 
   function stilEkle(){
     const style=document.createElement('style');
@@ -27,31 +27,11 @@
     const deger=kart&&kart.querySelector('.kpi-deger');
     if(!deger) return;
     deger.textContent='…';
+    if(!window.BSFinansServisi) throw new Error('Finans servisi yüklenmedi.');
 
-    const [hesapSonuc,hareketSonuc]=await Promise.all([
-      bsSupabase.from('kasa_hesaplari').select('hesap_id,hesap_adi,acilis_bakiyesi,aktif'),
-      bsSupabase.from('kasa_hareketleri').select('hesap_id,hareket_turu,tutar,iptal_mi')
-    ]);
-    if(hesapSonuc.error) throw hesapSonuc.error;
-    if(hareketSonuc.error) throw hareketSonuc.error;
-
-    const hareketler=hareketSonuc.data||[];
-    const hesaplar=(hesapSonuc.data||[]).filter(x=>x.aktif!==false);
-    const bakiyeListesi=hesaplar.map(h=>{
-      const net=hareketler
-        .filter(m=>m.hesap_id===h.hesap_id && m.iptal_mi!==true)
-        .reduce((t,m)=>{
-          const tutar=Number(m.tutar)||0;
-          if(m.hareket_turu==='Gelir') return t+tutar;
-          if(m.hareket_turu==='Gider') return t-tutar;
-          return t;
-        },Number(h.acilis_bakiyesi)||0);
-      return {ad:h.hesap_adi||h.hesap_id,bakiye:net};
-    });
-
-    const toplam=bakiyeListesi.reduce((t,x)=>t+x.bakiye,0);
-    deger.textContent=paraYaz(toplam);
-    kartBilgiEkle(kart,bakiyeListesi.map(x=>`<strong>${htmlKacir(x.ad)}</strong> ${htmlKacir(paraYaz(x.bakiye))}`).join(' • '));
+    const ozet=await BSFinansServisi.kasaOzetiGetir();
+    deger.textContent=paraYaz(ozet.toplam);
+    kartBilgiEkle(kart,ozet.hesaplar.map(x=>`<strong>${htmlKacir(x.ad)}</strong> ${htmlKacir(paraYaz(x.bakiye))}`).join(' • '));
   }
 
   async function borcKpisiniYukle(){
@@ -59,37 +39,18 @@
     const deger=kart&&kart.querySelector('.kpi-deger');
     if(!deger) return;
     deger.textContent='…';
+    if(!window.BSFinansServisi) throw new Error('Finans servisi yüklenmedi.');
 
-    const [ogrenciSonuc,dersSonuc,tahsilatSonuc]=await Promise.all([
-      bsSupabase.from('ogrenciler').select('ogrenci_id'),
-      bsSupabase.from('dersler').select('ogrenci_id,ogrenci_toplam_tutar,ders_durumu').eq('ders_durumu','Yapıldı'),
-      bsSupabase.from('tahsilatlar').select('ogrenci_id,tutar')
-    ]);
-    if(ogrenciSonuc.error) throw ogrenciSonuc.error;
-    if(dersSonuc.error) throw dersSonuc.error;
-    if(tahsilatSonuc.error) throw tahsilatSonuc.error;
-
-    const borc=new Map();
-    const odeme=new Map();
-    (dersSonuc.data||[]).forEach(x=>borc.set(x.ogrenci_id,(borc.get(x.ogrenci_id)||0)+(Number(x.ogrenci_toplam_tutar)||0)));
-    (tahsilatSonuc.data||[]).forEach(x=>odeme.set(x.ogrenci_id,(odeme.get(x.ogrenci_id)||0)+(Number(x.tutar)||0)));
-
-    let sayi=0;
-    let toplamKalan=0;
-    (ogrenciSonuc.data||[]).forEach(o=>{
-      const kalan=(borc.get(o.ogrenci_id)||0)-(odeme.get(o.ogrenci_id)||0);
-      if(kalan>0.009){sayi++;toplamKalan+=kalan;}
-    });
-
-    deger.textContent=String(sayi);
-    kartBilgiEkle(kart,`Toplam açık bakiye <strong>${htmlKacir(paraYaz(toplamKalan))}</strong>`);
+    const ozet=await BSFinansServisi.borcOzetiGetir();
+    deger.textContent=String(ozet.sayi);
+    kartBilgiEkle(kart,`Toplam açık bakiye <strong>${htmlKacir(paraYaz(ozet.toplamKalan))}</strong>`);
   }
 
   async function finansKpilariniYukle(){
     try{
       await Promise.all([kasaKpisiniYukle(),borcKpisiniYukle()]);
     }catch(err){
-      console.error('V208 finans KPI:',err);
+      console.error('V218 finans KPI:',err);
       const k4=document.querySelector('.kpi-grid .kpi-kart:nth-child(4) .kpi-deger');
       const k5=document.querySelector('.kpi-grid .kpi-kart:nth-child(5) .kpi-deger');
       if(k4) k4.textContent='!';
@@ -97,7 +58,7 @@
     }
   }
 
-  function baslatV208(){
+  function baslat(){
     stilEkle();
     let deneme=0;
     const timer=setInterval(async()=>{
@@ -112,5 +73,5 @@
     },250);
   }
 
-  baslatV208();
+  baslat();
 })();

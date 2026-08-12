@@ -26,8 +26,8 @@
       const [o,t,b,l]=await Promise.all([
         bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad,veli_adi,veli_telefon,ogrenci_telefon,email,kayit_tarihi,durum,notlar').order('ad_soyad'),
         bsSupabase.from('ogretmenler').select('ogretmen_id,ad_soyad,durum').order('ad_soyad'),
-        bsSupabase.from('branslar').select('brans_id,brans_adi'),
-        bsSupabase.from('derslikler').select('derslik_id,mekan_adi,kapasite')
+        bsSupabase.from('branslar').select('brans_id,brans_adi,aktif'),
+        bsSupabase.from('derslikler').select('derslik_id,mekan_adi,kapasite,aktif')
       ]);
       const hata=o.error||t.error||b.error||l.error;
       if(hata) throw hata;

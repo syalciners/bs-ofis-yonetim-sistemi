@@ -1,5 +1,5 @@
 (function(){
-  const V='212';
+  const V='218';
   let ogrenciler=new Map();
   let hesaplar=new Map();
   let kayitlar=[];
@@ -41,13 +41,6 @@
     document.head.appendChild(style);
   }
 
-  function aySiniri(ym){
-    const p=String(ym||'').split('-');
-    const y=Number(p[0]),m=Number(p[1]);
-    const sonraki=m===12?`${y+1}-01-01`:`${y}-${String(m+1).padStart(2,'0')}-01`;
-    return {bas:`${y}-${String(m).padStart(2,'0')}-01`,sonraki};
-  }
-
   function tarihEtiket(iso){
     try{return new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'short'}).format(new Date(String(iso).slice(0,10)+'T12:00:00+03:00'));}
     catch(e){return String(iso||'').slice(0,10);}
@@ -73,13 +66,10 @@
 
   async function referanslariGetir(){
     if(ogrenciler.size&&hesaplar.size) return;
-    const [o,h]=await Promise.all([
-      bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad'),
-      bsSupabase.from('kasa_hesaplari').select('hesap_id,hesap_adi')
-    ]);
-    if(o.error) throw o.error;if(h.error) throw h.error;
-    ogrenciler=new Map((o.data||[]).map(x=>[x.ogrenci_id,x.ad_soyad]));
-    hesaplar=new Map((h.data||[]).map(x=>[x.hesap_id,x.hesap_adi]));
+    if(!window.BSFinansServisi) throw new Error('Finans servisi yüklenmedi.');
+    const r=await BSFinansServisi.tahsilatReferanslariGetir();
+    ogrenciler=r.ogrenciMap;
+    hesaplar=r.hesapMap;
   }
 
   async function verileriYukle(){
@@ -88,21 +78,16 @@
     try{
       await referanslariGetir();
       const ym=document.getElementById('v212Ay').value||istanbulBugunISO().slice(0,7);
-      const s=aySiniri(ym);
-      const {data,error}=await bsSupabase.from('tahsilatlar').select('tahsilat_id,tarih,ogrenci_id,tutar,odeme_yontemi,aciklama,hesap_id').gte('tarih',s.bas).lt('tarih',s.sonraki).order('tarih',{ascending:false});
-      if(error) throw error;
-      kayitlar=data||[];
-      const toplam=kayitlar.reduce((t,x)=>t+(Number(x.tutar)||0),0);
-      const havale=kayitlar.filter(x=>String(x.odeme_yontemi||'').toLocaleLowerCase('tr-TR').includes('havale')).reduce((t,x)=>t+(Number(x.tutar)||0),0);
-      const nakit=kayitlar.filter(x=>String(x.odeme_yontemi||'').toLocaleLowerCase('tr-TR').includes('nakit')).reduce((t,x)=>t+(Number(x.tutar)||0),0);
+      const sonuc=await BSFinansServisi.tahsilatlariAyGetir(ym);
+      kayitlar=sonuc.kayitlar;
       const kartlar=document.querySelectorAll('#v212Kpi .v212-kpi-kart strong');
-      if(kartlar[0]) kartlar[0].textContent=paraYaz(toplam);
+      if(kartlar[0]) kartlar[0].textContent=paraYaz(sonuc.toplam);
       if(kartlar[1]) kartlar[1].textContent=String(kayitlar.length);
-      if(kartlar[2]) kartlar[2].textContent=paraYaz(havale);
-      if(kartlar[3]) kartlar[3].textContent=paraYaz(nakit);
+      if(kartlar[2]) kartlar[2].textContent=paraYaz(sonuc.havale);
+      if(kartlar[3]) kartlar[3].textContent=paraYaz(sonuc.nakit);
       listeyiCiz();
     }catch(err){
-      console.error('V212 tahsilatlar:',err);liste.className='v212-bos';liste.textContent='Tahsilatlar yüklenemedi. Bağlantı veya erişim yetkisi kontrol edilmeli.';
+      console.error('V218 tahsilatlar:',err);liste.className='v212-bos';liste.textContent='Tahsilatlar yüklenemedi. Bağlantı veya erişim yetkisi kontrol edilmeli.';
     }
   }
 

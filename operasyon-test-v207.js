@@ -74,23 +74,17 @@
 
   async function referanslariGetir(){
     if(durum.ogrenciler.length) return;
-    const [o,t,b,l]=await Promise.all([
-      bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad,veli_adi,veli_telefon,ogrenci_telefon,email,kayit_tarihi,durum,notlar').order('ad_soyad'),
-      bsSupabase.from('ogretmenler').select('ogretmen_id,ad_soyad,durum').order('ad_soyad'),
-      bsSupabase.from('branslar').select('brans_id,brans_adi'),
-      bsSupabase.from('derslikler').select('derslik_id,mekan_adi')
-    ]);
-    const hata=o.error||t.error||b.error||l.error;
-    if(hata) throw hata;
-    durum.ogrenciler=o.data||[]; durum.ogretmenler=t.data||[]; durum.branslar=b.data||[]; durum.derslikler=l.data||[];
+    if(!window.BSReferansServisi) throw new Error('Ortak referans servisi yüklenmedi.');
+    const r=await BSReferansServisi.yukle();
+    durum.ogrenciler=r.ogrenciler||[];
+    durum.ogretmenler=r.ogretmenler||[];
+    durum.branslar=r.branslar||[];
+    durum.derslikler=r.derslikler||[];
   }
 
   async function dersleriGetir(bas,sonraki,ogretmenId){
-    let q=bsSupabase.from('dersler').select('ders_id,tarih,baslangic_saati,bitis_saati,ogrenci_id,ogretmen_id,brans_id,derslik_id,ders_yeri,ders_durumu').gte('tarih',bas).lt('tarih',sonraki).order('tarih').order('baslangic_saati');
-    if(ogretmenId) q=q.eq('ogretmen_id',ogretmenId);
-    const {data,error}=await q;
-    if(error) throw error;
-    return data||[];
+    if(!window.BSDersProgramServisi) throw new Error('Ders/program servisi yüklenmedi.');
+    return BSDersProgramServisi.dersleriGetir(bas,sonraki,ogretmenId);
   }
 
   function grupListe(container,dersler,bas,gunSayisi){

@@ -45,6 +45,55 @@ const BS_SENKRON_V1 = Object.freeze({
       }
     },
     {
+      kaynak: 'Branches',
+      hedef: 'branslar',
+      kaynakAnahtar: 'BranchID',
+      hedefAnahtarAdayi: 'brans_id',
+      alanlar: {
+        BranchID: 'brans_id',
+        BransAdi: 'brans_adi',
+        VarsayilanOgretmenID: 'varsayilan_ogretmen_id',
+        Aktif: 'aktif'
+      }
+    },
+    {
+      kaynak: 'Locations',
+      hedef: 'derslikler',
+      kaynakAnahtar: 'LocationID',
+      hedefAnahtarAdayi: 'derslik_id',
+      alanlar: {
+        LocationID: 'derslik_id',
+        MekanAdi: 'mekan_adi',
+        MekanTuru: 'mekan_turu',
+        Kapasite: 'kapasite',
+        Aktif: 'aktif',
+        Aciklama: 'aciklama'
+      }
+    },
+    {
+      kaynak: 'DersProgrami',
+      hedef: 'ders_programi',
+      kaynakAnahtar: 'ProgramID',
+      hedefAnahtarAdayi: 'program_id',
+      alanlar: {
+        ProgramID: 'program_id',
+        StudentID: 'ogrenci_id',
+        TeacherID: 'ogretmen_id',
+        BranchID: 'brans_id',
+        LocationID: 'derslik_id',
+        HaftaninGunu: 'haftanin_gunu',
+        BaslangicSaati: 'baslangic_saati',
+        DersSayisiSaat: 'ders_sayisi',
+        OgrenciBirimUcreti: 'ogrenci_birim_ucreti',
+        OgretmenBirimHakedisi: 'ogretmen_birim_hakedisi',
+        BaslangicTarihi: 'baslangic_tarihi',
+        BitisTarihi: 'bitis_tarihi',
+        Aktif: 'aktif',
+        ProgramDurumu: 'program_durumu',
+        Aciklama: 'aciklama'
+      }
+    },
+    {
       kaynak: 'Lessons',
       hedef: 'dersler',
       kaynakAnahtar: 'LessonID',

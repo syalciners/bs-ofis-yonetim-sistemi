@@ -56,6 +56,16 @@
     return data||[];
   }
 
+  async function dersDetayGetir(dersId){
+    if(!dersId) throw new Error('Ders kimliği eksik.');
+    const {data,error}=await bsSupabase.from('dersler')
+      .select('ders_id,program_id,tarih,ogrenci_id,ogretmen_id,brans_id,derslik_id,ders_sayisi,ogrenci_birim_ucreti,ogretmen_birim_hakedisi,ogrenci_toplam_tutar,ogretmen_toplam_hakedis,ders_durumu,aciklama,baslangic_saati,bitis_saati,ders_turu,ders_yeri,zoom_toplanti_id,zoom_katilim_baglantisi,zoom_sifre,zoom_islem_durumu')
+      .eq('ders_id',dersId)
+      .single();
+    if(error) throw error;
+    return data;
+  }
+
   async function ogrenciProgramVarsayilaniGetir(ogrenciId,tarih){
     if(!ogrenciId||!tarih) return {eslesenler:[],varsayilan:null};
     const {data,error}=await bsSupabase.from('sabit_ders_programi')
@@ -202,6 +212,7 @@
     gunAdi,
     referanslar,
     dersleriGetir,
+    dersDetayGetir,
     ogrenciProgramVarsayilaniGetir,
     manuelDersOnKontrol,
     haftalikOnizleme

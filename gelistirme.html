@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>BS Eğitim • Geliştirme Kontrolü</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0} :root{--m:#2563eb;--ma:#eff6ff;--bg:#f5f7fb;--k:#fff;--y:#0f172a;--i:#64748b;--e:#e2e8f0;--r:#dc2626;--g:#16a34a}
+    body{min-height:100vh;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--y);-webkit-font-smoothing:antialiased}
+    header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--e);backdrop-filter:blur(14px)}
+    .brand{display:flex;align-items:center;gap:10px}.brand img{width:42px;height:42px;border-radius:13px}.brand b{font-size:16px}.brand small{display:block;margin-top:2px;color:var(--i)}
+    a.buton,button{border:0;border-radius:11px;padding:10px 13px;background:var(--m);color:#fff;text-decoration:none;font-weight:750;font-size:12px;cursor:pointer}
+    main{width:min(980px,calc(100% - 24px));margin:0 auto;padding:18px 0 36px}.uyari{display:none;padding:14px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;border-radius:14px;font-size:13px;line-height:1.5;margin-bottom:14px}.bilgi{padding:12px 14px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:14px;font-size:12px;line-height:1.5;margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}.kart{background:var(--k);border:1px solid var(--e);border-radius:16px;padding:16px}.etiket{font-size:11px;color:var(--i);font-weight:700}.deger{margin-top:10px;font-size:25px;font-weight:850}.alt{margin-top:5px;color:var(--i);font-size:11px}
+    .panel{background:#fff;border:1px solid var(--e);border-radius:16px;overflow:hidden;margin-top:12px}.panel h2{font-size:14px;padding:14px 16px;border-bottom:1px solid var(--e)}.satir{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid #f1f5f9}.satir:last-child{border-bottom:0}.ad{font-size:13px;font-weight:780}.detay{margin-top:3px;font-size:10.5px;color:var(--i);line-height:1.4}.tutar{font-size:13px;font-weight:820;white-space:nowrap}.borc{color:var(--r)}.alacak{color:var(--g)}
+    .diag{margin-top:12px;background:#0f172a;color:#e2e8f0;border-radius:14px;padding:12px;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow:auto}
+    @media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid .kart:last-child{grid-column:span 2}.brand small{display:none}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand"><img src="bs-app-icon-192.png" alt=""><div><b>BS Eğitim Geliştirme Kontrolü</b><small>Canlı sisteme yazma yapmaz • yalnız okuma</small></div></div>
+  <a class="buton" href="./">Ana Uygulama</a>
+</header>
+<main>
+  <div class="bilgi">Bu ekran geliştirme testi içindir. Supabase verilerini yalnızca okur; kayıt eklemez, güncellemez veya silmez.</div>
+  <div id="uyari" class="uyari"></div>
+  <div class="grid">
+    <div class="kart"><div class="etiket">Kasa Bakiyesi</div><div id="kasa" class="deger">…</div><div id="kasaAlt" class="alt">Hesaplanıyor</div></div>
+    <div class="kart"><div class="etiket">Borçlu Öğrenci</div><div id="borclu" class="deger">…</div><div id="borcluAlt" class="alt">Hesaplanıyor</div></div>
+    <div class="kart"><div class="etiket">Kontrol Edilen Tablolar</div><div id="tablo" class="deger">…</div><div class="alt">RLS dahil okuma kontrolü</div></div>
+  </div>
+
+  <section class="panel"><h2>Kasa Hesapları</h2><div id="kasaListe"><div class="satir"><div class="detay">Yükleniyor…</div></div></div></section>
+  <section class="panel"><h2>Borçlu Öğrenciler</h2><div id="ogrenciListe"><div class="satir"><div class="detay">Yükleniyor…</div></div></div></section>
+  <div id="diag" class="diag">Başlatılıyor…</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://igmtuouhdozkgwmdxlme.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+const norm=v=>String(v??"").toLocaleLowerCase("tr-TR").replaceAll("ı","i").replaceAll("ğ","g").replaceAll("ü","u").replaceAll("ş","s").replaceAll("ö","o").replaceAll("ç","c").replace(/[^a-z0-9]/g,"");
+function alan(k,adaylar){const h=new Map(Object.keys(k||{}).map(a=>[norm(a),a]));for(const aday of adaylar){const g=h.get(norm(aday));if(g!==undefined)return k[g]}return null}
+function evet(v){if(v===true||v===1)return true;const m=String(v??"").trim().toLocaleLowerCase("tr-TR");return m==="true"||m==="evet"||m==="1"}
+function iptal(k){return evet(alan(k,["iptal_mi","iptalmi","is_cancelled","cancelled"]))||String(alan(k,["durum","status"])||"")==="İptal"}
+function para(n){return new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",minimumFractionDigits:0,maximumFractionDigits:2}).format(Number(n)||0)}
+function esc(v){return String(v??"—").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+async function oku(ad){const {data,error}=await sb.from(ad).select("*");return {ad,data:data||[],error}}
+function gosterHata(m){$("uyari").textContent=m;$("uyari").style.display="block"}
+(async()=>{
+  const {data:oturum}=await sb.auth.getSession();
+  if(!oturum?.session?.user){gosterHata("Aktif oturum bulunamadı. Önce Ana Uygulama bağlantısından BS Eğitim'e giriş yapın; ardından bu sayfayı yeniden açın.");$("diag").textContent="Oturum yok.";return}
+
+  const adlar=["kasa_hesaplari","kasa_hareketleri","ogrenciler","dersler","tahsilatlar"];
+  const sonuc=await Promise.all(adlar.map(oku));
+  const map=Object.fromEntries(sonuc.map(x=>[x.ad,x]));
+  const ok=sonuc.filter(x=>!x.error).length;$("tablo").textContent=ok+"/"+adlar.length;
+  const hatalar=sonuc.filter(x=>x.error);
+  if(hatalar.length)gosterHata("Bazı tablolar okunamadı: "+hatalar.map(x=>x.ad).join(", ")+". Ayrıntı aşağıdaki tanılama alanında.");
+
+  const hesaplar=map.kasa_hesaplari.data.filter(h=>{const a=alan(h,["aktif_mi","aktifmi","active"]);return a===null||a===undefined||a===""||evet(a)});
+  const hareketler=map.kasa_hareketleri.data.filter(h=>!iptal(h));
+  let kasaTop=0;$("kasaListe").innerHTML="";
+  hesaplar.forEach(h=>{
+    const id=alan(h,["hesap_id","hesapid","account_id"]),ad=alan(h,["hesap_adi","hesapadi","account_name"])||"Kasa Hesabı",acilis=Number(alan(h,["acilis_bakiyesi","acilisbakiyesi","opening_balance"])||0);
+    const ilgili=hareketler.filter(k=>alan(k,["hesap_id","hesapid","account_id"])===id),giris=ilgili.filter(k=>alan(k,["hareket_turu","hareketturu","movement_type"])==="Gelir").reduce((s,k)=>s+Number(alan(k,["tutar","amount"])||0),0),cikis=ilgili.filter(k=>alan(k,["hareket_turu","hareketturu","movement_type"])==="Gider").reduce((s,k)=>s+Number(alan(k,["tutar","amount"])||0),0),bakiye=acilis+giris-cikis;kasaTop+=bakiye;
+    $("kasaListe").insertAdjacentHTML("beforeend",`<div class="satir"><div><div class="ad">${esc(ad)}</div><div class="detay">Açılış ${esc(para(acilis))} • Giriş ${esc(para(giris))} • Çıkış ${esc(para(cikis))}</div></div><div class="tutar">${esc(para(bakiye))}</div></div>`)
+  });
+  if(!hesaplar.length)$("kasaListe").innerHTML='<div class="satir"><div class="detay">Aktif kasa hesabı bulunamadı.</div></div>';
+  $("kasa").textContent=para(kasaTop);$("kasaAlt").textContent=hesaplar.length+" aktif hesap";
+
+  const dersBorcu=new Map(),odeme=new Map();
+  map.dersler.data.filter(d=>String(alan(d,["ders_durumu","dersdurumu","status"])||"")==="Yapıldı").forEach(d=>{const id=alan(d,["ogrenci_id","student_id","studentid"]),t=Number(alan(d,["ogrenci_toplam_tutar","ogrencitoplamtutar","student_total_amount"])||0);dersBorcu.set(id,(dersBorcu.get(id)||0)+t)});
+  map.tahsilatlar.data.filter(t=>!iptal(t)).forEach(t=>{const id=alan(t,["ogrenci_id","student_id","studentid"]),tutar=Number(alan(t,["tutar","amount"])||0);odeme.set(id,(odeme.get(id)||0)+tutar)});
+  const ogrenciler=map.ogrenciler.data.map(o=>{const id=alan(o,["ogrenci_id","student_id","studentid"]),ad=alan(o,["ad_soyad","adsoyad","name"])||"Öğrenci",borc=dersBorcu.get(id)||0,od=odeme.get(id)||0,explicit=alan(o,["kalan_bakiye","kalanbakiye"]),bakiye=explicit!==null&&explicit!==undefined&&explicit!==""?Number(explicit):borc-od;return{id,ad,borc,od,bakiye:Number(bakiye||0)}}).sort((a,b)=>b.bakiye-a.bakiye);
+  const borclu=ogrenciler.filter(o=>o.bakiye>.005);$("borclu").textContent=borclu.length;$("borcluAlt").textContent="Kalan bakiye > 0";$("ogrenciListe").innerHTML="";
+  borclu.forEach(o=>$("ogrenciListe").insertAdjacentHTML("beforeend",`<div class="satir"><div><div class="ad">${esc(o.ad)}</div><div class="detay">Ders ${esc(para(o.borc))} • Tahsilat ${esc(para(o.od))}</div></div><div class="tutar borc">${esc(para(o.bakiye))}</div></div>`));
+  if(!borclu.length)$("ogrenciListe").innerHTML='<div class="satir"><div class="detay">Borçlu öğrenci bulunmuyor.</div></div>';
+
+  $("diag").textContent=sonuc.map(x=>x.ad+": "+(x.error?"HATA • "+x.error.message:"OK • "+x.data.length+" kayıt")).join("\n");
+})();
+</script>
+</body>
+</html>

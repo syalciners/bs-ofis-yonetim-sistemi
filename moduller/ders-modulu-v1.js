@@ -18,6 +18,8 @@
       .bsders-gun-baslik.bugun{background:var(--mavi-acik);color:var(--mavi)}
       .bsders-gun .ders-satir:last-child{border-bottom:none}
       .bsders-sayac{font-size:11px;color:var(--ikincil);font-weight:700}
+      .bsders-clickable{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(37,99,235,.06)}
+      .bsders-clickable:active{background:#f8fafc}
       @media(max-width:640px){.bsders-toolbar{align-items:stretch}.bsders-select{width:100%;min-width:0}.bsders-gun-baslik{padding:9px 11px}}
     `;
     document.head.appendChild(s);
@@ -33,7 +35,7 @@
     const br=ref.bransMap.get(d.brans_id)||'Branş';
     const loc=ref.derslikMap.get(d.derslik_id);
     const yer=(loc&&loc.mekan_adi)||d.ders_yeri||'Yer';
-    return `<div class="ders-satir"><div class="ders-saat">${htmlKacir(saatKisalt(d.baslangic_saati))}<br>${htmlKacir(saatKisalt(d.bitis_saati))}</div><div><div class="ders-ogrenci">${htmlKacir(ogr)}</div><div class="ders-detay"><span>${htmlKacir(ogrt)}</span><span>${htmlKacir(br)}</span><span>${htmlKacir(yer)}</span></div></div><div class="durum-rozet ${durumSinifi(d.ders_durumu)}">${htmlKacir(d.ders_durumu||'—')}</div></div>`;
+    return `<div class="ders-satir bsders-clickable" data-bs-ders-id="${htmlKacir(d.ders_id||'')}"><div class="ders-saat">${htmlKacir(saatKisalt(d.baslangic_saati))}<br>${htmlKacir(saatKisalt(d.bitis_saati))}</div><div><div class="ders-ogrenci">${htmlKacir(ogr)}</div><div class="ders-detay"><span>${htmlKacir(ogrt)}</span><span>${htmlKacir(br)}</span><span>${htmlKacir(yer)}</span></div></div><div class="durum-rozet ${durumSinifi(d.ders_durumu)}">${htmlKacir(d.ders_durumu||'—')}</div></div>`;
   }
 
   function grupListe(container,dersler,bas,gunSayisi){

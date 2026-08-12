@@ -1,31 +1,9 @@
 (function(){
   if(window.BSOgrenciServisi) return;
 
-  let referansCache=null;
-  let referansPromise=null;
-
   async function referanslar(yenile=false){
-    if(!yenile && referansCache) return referansCache;
-    if(!yenile && referansPromise) return referansPromise;
-
-    referansPromise=(async()=>{
-      const [o,t,b]=await Promise.all([
-        bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad,veli_adi,veli_telefon,ogrenci_telefon,email,kayit_tarihi,durum,notlar').order('ad_soyad'),
-        bsSupabase.from('ogretmenler').select('ogretmen_id,ad_soyad'),
-        bsSupabase.from('branslar').select('brans_id,brans_adi')
-      ]);
-      const hata=o.error||t.error||b.error;
-      if(hata) throw hata;
-      referansCache={
-        ogrenciler:o.data||[],
-        ogretmenMap:new Map((t.data||[]).map(x=>[x.ogretmen_id,x.ad_soyad])),
-        bransMap:new Map((b.data||[]).map(x=>[x.brans_id,x.brans_adi]))
-      };
-      return referansCache;
-    })();
-
-    try{return await referansPromise;}
-    finally{referansPromise=null;}
+    if(!window.BSReferansServisi) throw new Error('Ortak referans servisi yüklenmedi.');
+    return BSReferansServisi.yukle(yenile);
   }
 
   async function ogrenciGetir(ogrenciId){
@@ -64,15 +42,13 @@
       .single();
     if(error) throw error;
     if(!data||data.ogrenci_id!==ogrenciId) throw new Error('Öğrenci kaydı doğrulanamadı.');
-
-    if(referansCache){
-      const i=referansCache.ogrenciler.findIndex(x=>x.ogrenci_id===ogrenciId);
-      if(i>=0) referansCache.ogrenciler[i]=data;
-    }
+    if(window.BSReferansServisi) BSReferansServisi.ogrenciGuncelle(data);
     return data;
   }
 
-  function cacheTemizle(){referansCache=null;referansPromise=null;}
+  function cacheTemizle(){
+    if(window.BSReferansServisi) BSReferansServisi.temizle();
+  }
 
   window.BSOgrenciServisi={
     referanslar,

@@ -16,7 +16,7 @@
     if(!yenile&&hesapCache) return hesapCache;
     if(!yenile&&hesapPromise) return hesapPromise;
     hesapPromise=(async()=>{
-      const {data,error}=await bsSupabase.from('kasa_hesaplari').select('hesap_id,hesap_adi,acilis_bakiyesi,aktif');
+      const {data,error}=await bsSupabase.from('kasa_hesaplari').select('hesap_id,hesap_adi,hesap_turu,banka_adi,acilis_bakiyesi,aktif');
       if(error) throw error;
       const hesaplar=data||[];
       hesapCache={hesaplar,hesapMap:new Map(hesaplar.map(x=>[x.hesap_id,x.hesap_adi]))};
@@ -41,9 +41,29 @@
           if(x.hareket_turu==='Gider') return toplam-tutar;
           return toplam;
         },Number(hesap.acilis_bakiyesi)||0);
-      return {hesap_id:hesap.hesap_id,ad:hesap.hesap_adi||hesap.hesap_id,bakiye};
+      return {hesap_id:hesap.hesap_id,ad:hesap.hesap_adi||hesap.hesap_id,tur:hesap.hesap_turu||'',banka:hesap.banka_adi||'',bakiye};
     });
     return {toplam:bakiyeListesi.reduce((t,x)=>t+x.bakiye,0),hesaplar:bakiyeListesi};
+  }
+
+  async function kasaDetayGetir(limit=50){
+    const [ozet,hareketSonuc,ref]=await Promise.all([
+      kasaOzetiGetir(),
+      bsSupabase.from('kasa_hareketleri')
+        .select('hareket_id,tarih,hareket_turu,kaynak_turu,kaynak_id,hesap_id,tutar,aciklama,ogrenci_id,ogretmen_id,iptal_mi,durum,olusturulma_zamani')
+        .order('tarih',{ascending:false})
+        .order('olusturulma_zamani',{ascending:false})
+        .limit(Math.max(10,Math.min(200,Number(limit)||50))),
+      window.BSReferansServisi?BSReferansServisi.yukle():Promise.resolve(null)
+    ]);
+    if(hareketSonuc.error) throw hareketSonuc.error;
+    const hareketler=(hareketSonuc.data||[]).filter(x=>x.iptal_mi!==true);
+    return {
+      ...ozet,
+      hareketler,
+      ogrenciMap:ref?ref.ogrenciMap:new Map(),
+      ogretmenMap:ref?ref.ogretmenMap:new Map()
+    };
   }
 
   async function borcOzetiGetir(){
@@ -102,6 +122,7 @@
     aySiniri,
     hesaplariGetir,
     kasaOzetiGetir,
+    kasaDetayGetir,
     borcOzetiGetir,
     tahsilatReferanslariGetir,
     tahsilatlariAyGetir,

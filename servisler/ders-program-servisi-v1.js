@@ -2,6 +2,7 @@
   if(window.BSDersProgramServisi) return;
 
   const GUN_OFFSET={Pazartesi:0,'Salı':1,'Çarşamba':2,'Perşembe':3,Cuma:4,Cumartesi:5,Pazar:6};
+  const GUN_ADI=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
   const HARIC_DURUMLAR=['İptal','Ertelendi','Öğretmen İptali'];
 
   function tarihEkle(iso,gun){
@@ -30,6 +31,11 @@
     return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
   }
 
+  function gunAdi(iso){
+    const d=new Date(String(iso)+'T12:00:00+03:00');
+    return GUN_ADI[d.getDay()]||'';
+  }
+
   function cakisir(a1,a2,b1,b2){return a1<b2&&b1<a2;}
 
   async function referanslar(yenile=false){
@@ -48,6 +54,87 @@
     const {data,error}=await q;
     if(error) throw error;
     return data||[];
+  }
+
+  async function ogrenciProgramVarsayilaniGetir(ogrenciId,tarih){
+    if(!ogrenciId||!tarih) return {eslesenler:[],varsayilan:null};
+    const {data,error}=await bsSupabase.from('sabit_ders_programi')
+      .select('program_id,ogrenci_id,ogretmen_id,brans_id,derslik_id,haftanin_gunu,baslangic_saati,ders_sayisi,baslangic_tarihi,bitis_tarihi,program_durumu')
+      .eq('ogrenci_id',ogrenciId)
+      .eq('program_durumu','Aktif');
+    if(error) throw error;
+    const gun=gunAdi(tarih);
+    const eslesenler=(data||[]).filter(p=>
+      p.haftanin_gunu===gun&&
+      (!p.baslangic_tarihi||tarih>=p.baslangic_tarihi)&&
+      (!p.bitis_tarihi||tarih<=p.bitis_tarihi)
+    );
+    return {eslesenler,varsayilan:eslesenler.length===1?eslesenler[0]:null};
+  }
+
+  async function manuelDersOnKontrol(girdi){
+    const tarih=String(girdi&&girdi.tarih||'').slice(0,10);
+    const baslangic=String(girdi&&girdi.baslangic_saati||'').slice(0,5);
+    const dersSayisi=Number(girdi&&girdi.ders_sayisi)||0;
+    const ogrenciId=girdi&&girdi.ogrenci_id;
+    const ogretmenId=girdi&&girdi.ogretmen_id;
+    const bransId=girdi&&girdi.brans_id;
+    const derslikId=girdi&&girdi.derslik_id;
+
+    if(!tarih||!baslangic||!ogrenciId||!ogretmenId||!bransId||!derslikId) throw new Error('Ders bilgileri eksik.');
+    if(![1,2,3,4].includes(dersSayisi)) throw new Error('Ders sayısı 1–4 arasında olmalı.');
+
+    const bas=dakika(baslangic);
+    const bit=bas+dersSayisi*60;
+    if(bas<0||bas>=1440||bit>1440) throw new Error('Ders saati gün sınırını aşıyor.');
+
+    const [dersler,ref]=await Promise.all([
+      dersleriGetir(tarih,tarihEkle(tarih,1)),
+      referanslar()
+    ]);
+    const aktif=dersler.filter(d=>!HARIC_DURUMLAR.includes(d.ders_durumu));
+    const cakisan=aktif.filter(d=>cakisir(bas,bit,dakika(d.baslangic_saati),dakika(d.bitis_saati)));
+    const nedenler=[];
+
+    cakisan.forEach(d=>{
+      const ortak=[];
+      if(d.ogrenci_id===ogrenciId) ortak.push('Öğrenci');
+      if(d.ogretmen_id===ogretmenId) ortak.push('Öğretmen');
+      if(!ortak.length) return;
+      nedenler.push({
+        tur:ortak.join(' + '),
+        ders_id:d.ders_id,
+        saat:`${String(d.baslangic_saati||'').slice(0,5)}–${String(d.bitis_saati||'').slice(0,5)}`,
+        ogrenci:ref.ogrenciMap.get(d.ogrenci_id)||'Öğrenci',
+        ogretmen:ref.ogretmenMap.get(d.ogretmen_id)||'Öğretmen'
+      });
+    });
+
+    const derslik=ref.derslikMap.get(derslikId);
+    const kapasite=Math.max(1,Number(derslik&&derslik.kapasite)||1);
+    const derslikEszamanli=cakisan.filter(d=>d.derslik_id===derslikId).length;
+    if(derslikEszamanli>=kapasite){
+      nedenler.push({
+        tur:'Derslik Kapasitesi',
+        ders_id:null,
+        saat:`${baslangic}–${saatYaz(bit)}`,
+        ogrenci:'',
+        ogretmen:'',
+        aciklama:`${derslik&&derslik.mekan_adi?derslik.mekan_adi:'Derslik'} kapasitesi ${kapasite}; aynı anda ${derslikEszamanli} ders var.`
+      });
+    }
+
+    return {
+      uygun:nedenler.length===0,
+      nedenler,
+      tarih,
+      baslangicSaati:baslangic,
+      bitisSaati:saatYaz(bit),
+      dersSayisi,
+      referanslar:ref,
+      derslikKapasitesi:kapasite,
+      derslikEszamanli
+    };
   }
 
   async function haftalikOnizleme(){
@@ -112,8 +199,11 @@
     tarihEkle,
     haftaSiniri,
     saatYaz,
+    gunAdi,
     referanslar,
     dersleriGetir,
+    ogrenciProgramVarsayilaniGetir,
+    manuelDersOnKontrol,
     haftalikOnizleme
   };
 })();

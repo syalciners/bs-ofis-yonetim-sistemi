@@ -1,6 +1,5 @@
 (function(){
   const V='209';
-  const GUN_OFFSET={Pazartesi:0,'Salı':1,'Çarşamba':2,'Perşembe':3,Cuma:4,Cumartesi:5,Pazar:6};
 
   function stilEkle(){
     const style=document.createElement('style');
@@ -35,12 +34,6 @@
     document.head.appendChild(style);
   }
 
-  function tarihEkle(iso,gun){const d=new Date(iso+'T12:00:00+03:00');d.setDate(d.getDate()+gun);return d.toISOString().slice(0,10);}
-  function haftaSiniri(){const bugun=istanbulBugunISO();const d=new Date(bugun+'T12:00:00+03:00');const g=d.getDay();const fark=g===0?-6:1-g;const bas=tarihEkle(bugun,fark);return {bas,son:tarihEkle(bas,6),sonraki:tarihEkle(bas,7)};}
-  function dakika(s){const p=String(s||'00:00').split(':');return Number(p[0]||0)*60+Number(p[1]||0);}
-  function saatYaz(dk){dk=Math.round(dk);const h=Math.floor(dk/60)%24;const m=dk%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
-  function cakisir(a1,a2,b1,b2){return a1<b2&&b1<a2;}
-
   function modalHazirla(){
     if(document.getElementById('v209Modal')) return;
     const el=document.createElement('div');
@@ -52,36 +45,23 @@
   }
 
   async function onizleme(){
-    const modal=document.getElementById('v209Modal');const icerik=document.getElementById('v209Icerik');
-    modal.classList.add('acik');icerik.innerHTML='<div class="v209-bos">Sabit program ve mevcut dersler kontrol ediliyor…</div>';
-    const h=haftaSiniri();document.getElementById('v209Hafta').textContent=tarihKisa(h.bas)+' – '+tarihKisa(h.son)+' • kuru kontrol';
+    const modal=document.getElementById('v209Modal');
+    const icerik=document.getElementById('v209Icerik');
+    modal.classList.add('acik');
+    icerik.innerHTML='<div class="v209-bos">Sabit program ve mevcut dersler kontrol ediliyor…</div>';
+
     try{
-      const [pSonuc,dSonuc,oSonuc,tSonuc,bSonuc,lSonuc]=await Promise.all([
-        bsSupabase.from('sabit_ders_programi').select('program_id,ogrenci_id,ogretmen_id,brans_id,derslik_id,haftanin_gunu,baslangic_saati,ders_sayisi,baslangic_tarihi,bitis_tarihi,program_durumu'),
-        bsSupabase.from('dersler').select('ders_id,program_id,tarih,ogrenci_id,ogretmen_id,derslik_id,baslangic_saati,bitis_saati,ders_durumu').gte('tarih',h.bas).lt('tarih',h.sonraki),
-        bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad'),
-        bsSupabase.from('ogretmenler').select('ogretmen_id,ad_soyad'),
-        bsSupabase.from('branslar').select('brans_id,brans_adi'),
-        bsSupabase.from('derslikler').select('derslik_id,mekan_adi,kapasite')
-      ]);
-      const hata=pSonuc.error||dSonuc.error||oSonuc.error||tSonuc.error||bSonuc.error||lSonuc.error;if(hata) throw hata;
-      const dersler=dSonuc.data||[];
-      const programlar=(pSonuc.data||[]).filter(p=>p.program_durumu==='Aktif' && (!p.baslangic_tarihi||p.baslangic_tarihi<=h.son) && (!p.bitis_tarihi||p.bitis_tarihi>=h.bas));
-      const om=new Map((oSonuc.data||[]).map(x=>[x.ogrenci_id,x.ad_soyad]));const tm=new Map((tSonuc.data||[]).map(x=>[x.ogretmen_id,x.ad_soyad]));const bm=new Map((bSonuc.data||[]).map(x=>[x.brans_id,x.brans_adi]));const lm=new Map((lSonuc.data||[]).map(x=>[x.derslik_id,x]));
-      const adaylar=[];let zaten=0;
-      programlar.forEach(p=>{
-        const off=GUN_OFFSET[p.haftanin_gunu];if(off===undefined) return;const tarih=tarihEkle(h.bas,off);
-        if((p.baslangic_tarihi&&tarih<p.baslangic_tarihi)||(p.bitis_tarihi&&tarih>p.bitis_tarihi)) return;
-        const varMi=dersler.some(d=>d.program_id===p.program_id&&String(d.tarih).slice(0,10)===tarih);if(varMi){zaten++;return;}
-        const bas=dakika(p.baslangic_saati),bit=bas+(Number(p.ders_sayisi)||1)*60;
-        const aktifDers=dersler.filter(d=>String(d.tarih).slice(0,10)===tarih&&!['İptal','Ertelendi','Öğretmen İptali'].includes(d.ders_durumu));
-        const kisiCakisma=aktifDers.some(d=>cakisir(bas,bit,dakika(d.baslangic_saati),dakika(d.bitis_saati))&&(d.ogretmen_id===p.ogretmen_id||d.ogrenci_id===p.ogrenci_id));
-        const loc=lm.get(p.derslik_id);const kapasite=Math.max(1,Number(loc&&loc.kapasite)||1);const eszamanli=aktifDers.filter(d=>d.derslik_id===p.derslik_id&&cakisir(bas,bit,dakika(d.baslangic_saati),dakika(d.bitis_saati))).length;
-        adaylar.push({p,tarih,bas,bit,cakisma:kisiCakisma||eszamanli>=kapasite});
-      });
-      const cakisma=adaylar.filter(x=>x.cakisma).length;const olusacak=adaylar.length-cakisma;
-      icerik.innerHTML=`<div class="v209-kpi"><div class="v209-kart"><span>Aktif Program</span><strong>${programlar.length}</strong></div><div class="v209-kart"><span>Oluşacak</span><strong>${olusacak}</strong></div><div class="v209-kart"><span>Zaten Var</span><strong>${zaten}</strong></div><div class="v209-kart"><span>Çakışma</span><strong>${cakisma}</strong></div></div><div class="v209-liste"><div class="v209-liste-baslik">Oluşturulacak Dersler</div>${adaylar.filter(x=>!x.cakisma).length?adaylar.filter(x=>!x.cakisma).map(x=>`<div class="v209-satir"><div class="v209-saat">${htmlKacir(saatYaz(x.bas))}<br>${htmlKacir(saatYaz(x.bit))}</div><div><div class="v209-ad">${htmlKacir(om.get(x.p.ogrenci_id)||'Öğrenci')}</div><div class="v209-detay"><span>${htmlKacir(tarihKisa(x.tarih))}</span><span>${htmlKacir(tm.get(x.p.ogretmen_id)||'Öğretmen')}</span><span>${htmlKacir(bm.get(x.p.brans_id)||'Branş')}</span><span>${htmlKacir((lm.get(x.p.derslik_id)||{}).mekan_adi||'Yer')}</span></div></div><span class="v209-rozet">Hazır</span></div>`).join(''):'<div class="v209-bos">Bu hafta oluşturulacak yeni ders yok.</div>'}</div><div class="v209-uyari"><strong>Önizleme modu.</strong> Bu ekran hiçbir kayıt yazmaz. Gerçek üretim butonunu, Google Sheets → Supabase güvenli yazma akışı tamamlandıktan sonra açacağız.</div>`;
-    }catch(err){console.error('V209 haftalık önizleme:',err);icerik.innerHTML='<div class="v209-bos">Haftalık program kontrol edilemedi. Bağlantı veya erişim yetkisi kontrol edilmeli.</div>';}
+      if(!window.BSDersProgramServisi) throw new Error('Ders/program servisi yüklenmedi.');
+      const sonuc=await BSDersProgramServisi.haftalikOnizleme();
+      const h=sonuc.hafta,ref=sonuc.referanslar;
+      document.getElementById('v209Hafta').textContent=tarihKisa(h.bas)+' – '+tarihKisa(h.son)+' • kuru kontrol';
+
+      const hazirlar=sonuc.adaylar.filter(x=>!x.cakisma);
+      icerik.innerHTML=`<div class="v209-kpi"><div class="v209-kart"><span>Aktif Program</span><strong>${sonuc.aktifProgram}</strong></div><div class="v209-kart"><span>Oluşacak</span><strong>${sonuc.olusacak}</strong></div><div class="v209-kart"><span>Zaten Var</span><strong>${sonuc.zaten}</strong></div><div class="v209-kart"><span>Çakışma</span><strong>${sonuc.cakisma}</strong></div></div><div class="v209-liste"><div class="v209-liste-baslik">Oluşturulacak Dersler</div>${hazirlar.length?hazirlar.map(x=>`<div class="v209-satir"><div class="v209-saat">${htmlKacir(BSDersProgramServisi.saatYaz(x.bas))}<br>${htmlKacir(BSDersProgramServisi.saatYaz(x.bit))}</div><div><div class="v209-ad">${htmlKacir(ref.ogrenciMap.get(x.p.ogrenci_id)||'Öğrenci')}</div><div class="v209-detay"><span>${htmlKacir(tarihKisa(x.tarih))}</span><span>${htmlKacir(ref.ogretmenMap.get(x.p.ogretmen_id)||'Öğretmen')}</span><span>${htmlKacir(ref.bransMap.get(x.p.brans_id)||'Branş')}</span><span>${htmlKacir((ref.derslikMap.get(x.p.derslik_id)||{}).mekan_adi||'Yer')}</span></div></div><span class="v209-rozet">Hazır</span></div>`).join(''):'<div class="v209-bos">Bu hafta oluşturulacak yeni ders yok.</div>'}</div><div class="v209-uyari"><strong>Önizleme modu.</strong> Bu ekran hiçbir kayıt yazmaz. Gerçek üretim butonunu güvenli ve tekrar çalıştırıldığında çift kayıt üretmeyen yazma akışı tamamlandıktan sonra açacağız.</div>`;
+    }catch(err){
+      console.error('V209 haftalık önizleme:',err);
+      icerik.innerHTML='<div class="v209-bos">Haftalık program kontrol edilemedi. Bağlantı veya erişim yetkisi kontrol edilmeli.</div>';
+    }
   }
 
   function butonuBagla(){

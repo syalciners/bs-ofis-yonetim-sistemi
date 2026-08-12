@@ -1,0 +1,119 @@
+(function(){
+  if(window.BSDersProgramServisi) return;
+
+  const GUN_OFFSET={Pazartesi:0,'Salı':1,'Çarşamba':2,'Perşembe':3,Cuma:4,Cumartesi:5,Pazar:6};
+  const HARIC_DURUMLAR=['İptal','Ertelendi','Öğretmen İptali'];
+
+  function tarihEkle(iso,gun){
+    const d=new Date(iso+'T12:00:00+03:00');
+    d.setDate(d.getDate()+gun);
+    return d.toISOString().slice(0,10);
+  }
+
+  function haftaSiniri(){
+    const bugun=istanbulBugunISO();
+    const d=new Date(bugun+'T12:00:00+03:00');
+    const g=d.getDay();
+    const fark=g===0?-6:1-g;
+    const bas=tarihEkle(bugun,fark);
+    return {bas,son:tarihEkle(bas,6),sonraki:tarihEkle(bas,7)};
+  }
+
+  function dakika(s){
+    const p=String(s||'00:00').split(':');
+    return Number(p[0]||0)*60+Number(p[1]||0);
+  }
+
+  function saatYaz(dk){
+    dk=Math.round(dk);
+    const h=Math.floor(dk/60)%24,m=dk%60;
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+
+  function cakisir(a1,a2,b1,b2){return a1<b2&&b1<a2;}
+
+  async function referanslar(yenile=false){
+    if(!window.BSReferansServisi) throw new Error('Ortak referans servisi yüklenmedi.');
+    return BSReferansServisi.yukle(yenile);
+  }
+
+  async function dersleriGetir(bas,sonraki,ogretmenId){
+    let q=bsSupabase.from('dersler')
+      .select('ders_id,program_id,tarih,baslangic_saati,bitis_saati,ogrenci_id,ogretmen_id,brans_id,derslik_id,ders_yeri,ders_durumu')
+      .gte('tarih',bas)
+      .lt('tarih',sonraki)
+      .order('tarih')
+      .order('baslangic_saati');
+    if(ogretmenId) q=q.eq('ogretmen_id',ogretmenId);
+    const {data,error}=await q;
+    if(error) throw error;
+    return data||[];
+  }
+
+  async function haftalikOnizleme(){
+    const h=haftaSiniri();
+    const [pSonuc,dersler,ref]=await Promise.all([
+      bsSupabase.from('sabit_ders_programi').select('program_id,ogrenci_id,ogretmen_id,brans_id,derslik_id,haftanin_gunu,baslangic_saati,ders_sayisi,baslangic_tarihi,bitis_tarihi,program_durumu'),
+      dersleriGetir(h.bas,h.sonraki),
+      referanslar()
+    ]);
+    if(pSonuc.error) throw pSonuc.error;
+
+    const programlar=(pSonuc.data||[]).filter(p=>
+      p.program_durumu==='Aktif'&&
+      (!p.baslangic_tarihi||p.baslangic_tarihi<=h.son)&&
+      (!p.bitis_tarihi||p.bitis_tarihi>=h.bas)
+    );
+
+    const adaylar=[];
+    let zaten=0;
+
+    programlar.forEach(p=>{
+      const off=GUN_OFFSET[p.haftanin_gunu];
+      if(off===undefined) return;
+      const tarih=tarihEkle(h.bas,off);
+      if((p.baslangic_tarihi&&tarih<p.baslangic_tarihi)||(p.bitis_tarihi&&tarih>p.bitis_tarihi)) return;
+
+      if(dersler.some(d=>d.program_id===p.program_id&&String(d.tarih).slice(0,10)===tarih)){
+        zaten++;
+        return;
+      }
+
+      const bas=dakika(p.baslangic_saati);
+      const bit=bas+(Number(p.ders_sayisi)||1)*60;
+      const aktifDers=dersler.filter(d=>String(d.tarih).slice(0,10)===tarih&&!HARIC_DURUMLAR.includes(d.ders_durumu));
+      const kisiCakisma=aktifDers.some(d=>
+        cakisir(bas,bit,dakika(d.baslangic_saati),dakika(d.bitis_saati))&&
+        (d.ogretmen_id===p.ogretmen_id||d.ogrenci_id===p.ogrenci_id)
+      );
+      const loc=ref.derslikMap.get(p.derslik_id);
+      const kapasite=Math.max(1,Number(loc&&loc.kapasite)||1);
+      const eszamanli=aktifDers.filter(d=>
+        d.derslik_id===p.derslik_id&&cakisir(bas,bit,dakika(d.baslangic_saati),dakika(d.bitis_saati))
+      ).length;
+
+      adaylar.push({p,tarih,bas,bit,cakisma:kisiCakisma||eszamanli>=kapasite});
+    });
+
+    const cakisma=adaylar.filter(x=>x.cakisma).length;
+    return {
+      hafta:h,
+      referanslar:ref,
+      programlar,
+      adaylar,
+      aktifProgram:programlar.length,
+      zaten,
+      cakisma,
+      olusacak:adaylar.length-cakisma
+    };
+  }
+
+  window.BSDersProgramServisi={
+    tarihEkle,
+    haftaSiniri,
+    saatYaz,
+    referanslar,
+    dersleriGetir,
+    haftalikOnizleme
+  };
+})();

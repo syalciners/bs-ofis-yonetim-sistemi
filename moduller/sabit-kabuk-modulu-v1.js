@@ -2,6 +2,10 @@
   if(window.BSSabitKabukModuluV1) return;
   window.BSSabitKabukModuluV1=true;
 
+  let ustBar=null;
+  let uygulama=null;
+  let kaynakSonrasi=null;
+
   function stilEkle(){
     if(document.getElementById('bsSabitKabukStil')) return;
     const s=document.createElement('style');
@@ -9,19 +13,23 @@
     s.textContent=`
       :root{--bs-sabit-ust-bosluk:74px}
       html{scroll-padding-top:var(--bs-sabit-ust-bosluk)}
+      html,body{max-width:100%;overflow-x:hidden!important}
       #uygulama{padding-top:var(--bs-sabit-ust-bosluk)!important}
-      .ust-bar{
+      body > .ust-bar{
         position:fixed!important;
         top:0!important;
         left:0!important;
         right:0!important;
         width:100%!important;
-        z-index:500!important;
+        max-width:none!important;
+        z-index:1200!important;
         margin:0!important;
+        transform:none!important;
+        will-change:auto!important;
       }
       .alt-nav{
         position:fixed!important;
-        z-index:500!important;
+        z-index:1100!important;
       }
       .sayfa-baslik-alani{
         position:static!important;
@@ -35,10 +43,26 @@
     document.head.appendChild(s);
   }
 
+  function uygulamaGorunurMu(){
+    if(!uygulama) return false;
+    const cs=getComputedStyle(uygulama);
+    return cs.display!=='none' && cs.visibility!=='hidden';
+  }
+
+  function gorunurluguEsitle(){
+    if(!ustBar) return;
+    ustBar.style.display=uygulamaGorunurMu()?'flex':'none';
+  }
+
+  function bodySeviyesineTasi(){
+    if(!ustBar || ustBar.parentElement===document.body) return;
+    kaynakSonrasi=ustBar.nextSibling;
+    document.body.appendChild(ustBar);
+  }
+
   function olc(){
-    const bar=document.querySelector('.ust-bar');
-    if(!bar) return;
-    const r=bar.getBoundingClientRect();
+    if(!ustBar || ustBar.style.display==='none') return;
+    const r=ustBar.getBoundingClientRect();
     if(r.height>0){
       document.documentElement.style.setProperty('--bs-sabit-ust-bosluk',Math.ceil(r.height)+'px');
     }
@@ -48,23 +72,30 @@
   function olcPlanla(){
     cancelAnimationFrame(raf);
     raf=requestAnimationFrame(()=>{
+      gorunurluguEsitle();
       olc();
-      requestAnimationFrame(olc);
+      requestAnimationFrame(()=>{
+        gorunurluguEsitle();
+        olc();
+      });
     });
   }
 
   function baslat(){
     stilEkle();
+    uygulama=document.getElementById('uygulama');
+    ustBar=document.querySelector('#uygulama > .ust-bar')||document.querySelector('body > .ust-bar')||document.querySelector('.ust-bar');
+    if(!uygulama || !ustBar) return;
+
+    bodySeviyesineTasi();
     olcPlanla();
 
-    const bar=document.querySelector('.ust-bar');
-    if(bar && window.ResizeObserver){
+    if(window.ResizeObserver){
       const ro=new ResizeObserver(olcPlanla);
-      ro.observe(bar);
+      ro.observe(ustBar);
     }
 
-    const uygulama=document.getElementById('uygulama');
-    if(uygulama && window.MutationObserver){
+    if(window.MutationObserver){
       const mo=new MutationObserver(olcPlanla);
       mo.observe(uygulama,{attributes:true,attributeFilter:['style','class']});
     }

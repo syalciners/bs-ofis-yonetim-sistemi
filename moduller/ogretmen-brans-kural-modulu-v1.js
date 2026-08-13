@@ -8,40 +8,47 @@
   }
 
   function doldur(select,liste,koru,ilk){
-    if(!select)return;
+    if(!select)return {degisti:false};
+    const onceki=select.value;
     select.innerHTML=`<option value="">${ilk||'Branş seçin'}</option>`+liste.map(x=>`<option value="${htmlKacir(x.brans_id)}">${htmlKacir(x.brans_adi)}</option>`).join('');
     if(koru&&liste.some(x=>x.brans_id===koru)) select.value=koru;
     else if(liste.length===1) select.value=liste[0].brans_id;
+    return {degisti:onceki!==select.value};
   }
 
-  async function filtrele(ogretmenSelect,bransSelect,koru){
+  async function filtrele(ogretmenSelect,bransSelect,koru,olayGonder=false){
     if(!ogretmenSelect||!bransSelect)return;
     const ogretmenId=ogretmenSelect.value;
-    if(!ogretmenId){doldur(bransSelect,[],null,'Önce öğretmen seçin');return;}
+    if(!ogretmenId){
+      const r=doldur(bransSelect,[],null,'Önce öğretmen seçin');
+      bransSelect.setCustomValidity('');
+      if(olayGonder&&r.degisti) bransSelect.dispatchEvent(new Event('change',{bubbles:true}));
+      return;
+    }
     try{
       const ref=await refGetir();
       const liste=typeof ref.ogretmenBranslariGetir==='function'?ref.ogretmenBranslariGetir(ogretmenId):[];
-      doldur(bransSelect,liste,koru||bransSelect.value,liste.length?'Branş seçin':'Bu öğretmene tanımlı branş yok');
-      if(!liste.length){
-        bransSelect.setCustomValidity('Bu öğretmene tanımlı aktif branş bulunmuyor.');
-      }else bransSelect.setCustomValidity('');
+      const r=doldur(bransSelect,liste,koru||bransSelect.value,liste.length?'Branş seçin':'Bu öğretmene tanımlı branş yok');
+      if(!liste.length) bransSelect.setCustomValidity('Bu öğretmene tanımlı aktif branş bulunmuyor.');
+      else bransSelect.setCustomValidity('');
+      if(olayGonder&&r.degisti) bransSelect.dispatchEvent(new Event('change',{bubbles:true}));
     }catch(e){console.error('Öğretmen branş filtresi:',e);}
   }
 
   function dersFormunuSenkronla(){
     const o=document.getElementById('bsdoOgretmen'),b=document.getElementById('bsdoBrans');
-    if(o&&b) filtrele(o,b,b.value);
+    if(o&&b) filtrele(o,b,b.value,true);
   }
 
   function programFormunuSenkronla(){
     const o=document.getElementById('bspgOgt'),b=document.getElementById('bspgBrans');
-    if(o&&b) filtrele(o,b,b.value);
+    if(o&&b) filtrele(o,b,b.value,false);
   }
 
   function bagla(){
     document.addEventListener('change',e=>{
-      if(e.target&&e.target.id==='bsdoOgretmen') filtrele(e.target,document.getElementById('bsdoBrans'));
-      if(e.target&&e.target.id==='bspgOgt') filtrele(e.target,document.getElementById('bspgBrans'));
+      if(e.target&&e.target.id==='bsdoOgretmen') filtrele(e.target,document.getElementById('bsdoBrans'),null,true);
+      if(e.target&&e.target.id==='bspgOgt') filtrele(e.target,document.getElementById('bspgBrans'),null,false);
       if(e.target&&['bsdoOgrenci','bsdoTarih'].includes(e.target.id)) setTimeout(dersFormunuSenkronla,450);
       if(e.target&&e.target.id==='bspgMevcut') setTimeout(programFormunuSenkronla,30);
     },true);

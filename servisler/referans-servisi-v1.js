@@ -4,11 +4,6 @@
   let cache=null;
   let yuklemePromise=null;
 
-  function norm(v){return String(v||'').trim().toLocaleLowerCase('tr-TR');}
-  function ogretmenBransAdlari(ogretmen){
-    return String(ogretmen&&ogretmen.branslar||'').split(/\s*\/\s*/).map(x=>x.trim()).filter(Boolean);
-  }
-
   function sonucHazirla(o,t,b,l){
     const ogrenciler=o||[],ogretmenler=t||[],branslar=b||[],derslikler=l||[];
     const ogretmenKayitMap=new Map(ogretmenler.map(x=>[x.ogretmen_id,x]));
@@ -23,11 +18,10 @@
       bransMap:new Map(branslar.map(x=>[x.brans_id,x.brans_adi])),
       derslikMap:new Map(derslikler.map(x=>[x.derslik_id,x])),
       ogretmenBranslariGetir(ogretmenId){
-        const o=ogretmenKayitMap.get(ogretmenId),izinli=new Set(ogretmenBransAdlari(o).map(norm));
-        return branslar.filter(x=>x.aktif!==false&&izinli.has(norm(x.brans_adi)));
+        return branslar.filter(x=>x.aktif!==false&&x.varsayilan_ogretmen_id===ogretmenId);
       },
       ogretmenBransiVerebilirMi(ogretmenId,bransId){
-        return this.ogretmenBranslariGetir(ogretmenId).some(x=>x.brans_id===bransId);
+        return branslar.some(x=>x.brans_id===bransId&&x.aktif!==false&&x.varsayilan_ogretmen_id===ogretmenId);
       }
     };
   }
@@ -40,7 +34,7 @@
       const [o,t,b,l]=await Promise.all([
         bsSupabase.from('ogrenciler').select('ogrenci_id,ad_soyad,veli_adi,veli_telefon,ogrenci_telefon,email,kayit_tarihi,durum,notlar').order('ad_soyad'),
         bsSupabase.from('ogretmenler').select('ogretmen_id,ad_soyad,branslar,durum').order('ad_soyad'),
-        bsSupabase.from('branslar').select('brans_id,brans_adi,aktif'),
+        bsSupabase.from('branslar').select('brans_id,brans_adi,varsayilan_ogretmen_id,aktif'),
         bsSupabase.from('derslikler').select('derslik_id,mekan_adi,kapasite,aktif')
       ]);
       const hata=o.error||t.error||b.error||l.error;

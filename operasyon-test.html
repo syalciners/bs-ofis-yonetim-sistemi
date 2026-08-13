@@ -8,26 +8,26 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="BS Eğitim">
-  <title>BS Eğitim Yönetimi • Aday V250</title>
-  <link rel="manifest" href="operasyon-test.webmanifest?v=250">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=250">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=250">
+  <title>BS Eğitim Yönetimi • Aday V251</title>
+  <link rel="manifest" href="operasyon-test.webmanifest?v=251">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=251">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=251">
   <style>html,body{margin:0;width:100%;min-height:100%;background:#f5f7fb}</style>
 </head>
 <body>
 <script>
 (async function(){
   try{
-    const r=await fetch('index.html?v=250',{cache:'no-store'});
+    const r=await fetch('index.html?v=251',{cache:'no-store'});
     if(!r.ok) throw new Error('Ana uygulama alınamadı: '+r.status);
     let html=await r.text();
-    html=html.replace('<link rel="manifest" href="manifest.webmanifest">','<link rel="manifest" href="operasyon-test.webmanifest?v=250">');
-    html=html.replace('const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";','const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=250";');
+    html=html.replace('<link rel="manifest" href="manifest.webmanifest">','<link rel="manifest" href="operasyon-test.webmanifest?v=251">');
+    html=html.replace('const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/";','const UYGULAMA_URL = "https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=251";');
     const scripts=[
       'servisler/referans-servisi-v1.js','servisler/ders-program-servisi-v1.js','servisler/ogrenci-servisi-v1.js','servisler/finans-servisi-v1.js','servisler/ogretmen-servisi-v1.js','servisler/ogretmen-odeme-servisi-v1.js','servisler/odev-servisi-v1.js','servisler/rapor-servisi-v1.js','servisler/gider-servisi-v1.js','servisler/islem-servisi-v1.js',
-      'moduller/ders-modulu-v1.js','moduller/ders-detay-modulu-v1.js','moduller/ders-olustur-modulu-v1.js','moduller/ogrenci-liste-modulu-v1.js','moduller/ogrenci-ekle-modulu-v1.js','moduller/haftalik-ders-modulu-v1.js','moduller/sabit-program-modulu-v1.js','moduller/sabit-program-gir-modulu-v1.js','moduller/ogrenci-modulu-v1.js','moduller/finans-modulu-v1.js','moduller/tahsilat-gir-modulu-v1.js','moduller/ogretmen-modulu-v1.js','moduller/ogretmen-yonetim-modulu-v1.js','moduller/ogretmen-odemeleri-modulu-v1.js','moduller/ogretmen-odeme-gir-modulu-v1.js','moduller/kasa-modulu-v1.js','moduller/odevler-modulu-v1.js','moduller/odev-islem-modulu-v1.js','moduller/raporlar-modulu-v1.js','moduller/giderler-modulu-v1.js','moduller/gider-ekle-modulu-v1.js','moduller/dashboard-gorsel-modulu-v1.js','moduller/ayarlar-modulu-v1.js','moduller/canli-yenileme-modulu-v1.js'
+      'moduller/ders-modulu-v1.js','moduller/ders-detay-modulu-v1.js','moduller/ders-olustur-modulu-v1.js','moduller/ogrenci-liste-modulu-v1.js','moduller/ogrenci-ekle-modulu-v1.js','moduller/haftalik-ders-modulu-v1.js','moduller/sabit-program-modulu-v1.js','moduller/sabit-program-gir-modulu-v1.js','moduller/ogrenci-modulu-v1.js','moduller/finans-modulu-v1.js','moduller/tahsilat-gir-modulu-v1.js','moduller/ogretmen-modulu-v1.js','moduller/ogretmen-yonetim-modulu-v1.js','moduller/ogretmen-odemeleri-modulu-v1.js','moduller/ogretmen-odeme-gir-modulu-v1.js','moduller/kasa-modulu-v1.js','moduller/odevler-modulu-v1.js','moduller/odev-islem-modulu-v1.js','moduller/raporlar-modulu-v1.js','moduller/giderler-modulu-v1.js','moduller/gider-ekle-modulu-v1.js','moduller/dashboard-gorsel-modulu-v1.js','moduller/ayarlar-modulu-v1.js','moduller/canli-yenileme-modulu-v1.js','moduller/mobil-ux-modulu-v1.js'
     ];
-    html=html.replace('</body>',scripts.map(src=>'<script src="'+src+'?v=250"><\/script>').join('')+'</body>');
+    html=html.replace('</body>',scripts.map(src=>'<script src="'+src+'?v=251"><\/script>').join('')+'</body>');
     document.open();document.write(html);document.close();
   }catch(e){
     document.body.innerHTML='<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;padding:32px;color:#0f172a"><h2>Uygulama açılamadı</h2><p style="color:#64748b;margin-top:10px">'+String(e.message||e)+'</p></div>';

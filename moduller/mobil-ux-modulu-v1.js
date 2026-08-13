@@ -11,10 +11,11 @@
         html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behavior-x:none}
         body{touch-action:pan-y}
         main,.icerik,.gorunum,.kart{max-width:100%;min-width:0;box-sizing:border-box}
-        input,select,textarea{font-size:16px!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+        input,select,textarea{font-size:16px!important;max-width:100%;min-width:0;box-sizing:border-box}
         [class*="-modal"]{max-width:100vw;overflow:hidden!important;overscroll-behavior:none;touch-action:pan-y}
         [class*="-sheet"]{width:100%!important;max-width:100vw!important;min-width:0!important;box-sizing:border-box;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;touch-action:pan-y}
         [class*="-sheet"] *{box-sizing:border-box;min-width:0}
+        [class*="-sheet"] input,[class*="-sheet"] select,[class*="-sheet"] textarea{width:100%;max-width:100%;min-width:0}
         [class*="-grid"],[class*="-ust"],[class*="-altbar"],[class*="-ozet"],[class*="-alan"]{max-width:100%;min-width:0}
         [class*="-alan"]>*,[class*="-grid"]>*{max-width:100%;min-width:0}
         button,a{max-width:100%;touch-action:manipulation}

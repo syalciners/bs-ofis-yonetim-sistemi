@@ -1,0 +1,35 @@
+{
+  "islem": "2026-08-13 Temmuz 2026 mükerrer ders temizliği",
+  "neden": "Aynı program_id + tarih için 2026-07-19 12:22 UTC civarında ikinci Planlandı kayıtları oluşmuş. Aşağıdaki kayıtların ödev referansı 0 ve finansal sonuç üreten Yapıldı/İptal kayıtları ayrı olarak korunmuştur.",
+  "silinecek_ders_idleri": [
+    "4cdebf93",
+    "1f863649",
+    "6e93de70",
+    "bac71a7c",
+    "7a810347",
+    "b97026c4",
+    "b1978c30",
+    "dfffef5d",
+    "863fdb69",
+    "045cb2f0"
+  ],
+  "korunan_ders_idleri": [
+    "c9cdf097",
+    "e3c73222",
+    "f6ea0d2e",
+    "e266d533",
+    "cab8ae59",
+    "9d298599",
+    "7bf56b56",
+    "5be2a32e",
+    "c284cff1",
+    "8ee76096"
+  ],
+  "kontrol": {
+    "mukerrer_grup_sayisi": 10,
+    "silinecek_kayit_sayisi": 10,
+    "silinecek_kayitlarin_odev_referansi": 0,
+    "silinecek_kayitlarin_durumu": "Planlandı",
+    "koruma_kurali": "Gerçekleşmiş/iptal edilmiş kayıt korunur; iki Planlandı bulunan tek grupta daha eski kayıt korunur."
+  }
+}

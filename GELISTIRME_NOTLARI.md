@@ -8,17 +8,17 @@ Son güncelleme: 13.08.2026
 - Kullanıcı tarafından geri dönüş noktası olarak doğrulanan temel commit: `09552e4f048ec9696576fbdfa232944056d4e8b5`.
 - Yeni modüler yapı kullanıcı kabulü tamamlanana kadar canlı `index.html` üzerine taşınmaz.
 - Geliştirme ve kabul testi `operasyon-test.html` üzerinden yürütülür.
-- Test kabuğu canlı Service Worker zincirini devralmaz; V269 test çalışmasında test SW kayıtları temizlenir ve canlı SW kaydı test kabuğunda devre dışı bırakılır.
+- Test kabuğu canlı Service Worker zincirini devralmaz; V270 test çalışmasında test SW kayıtları temizlenir ve canlı SW kaydı test kabuğunda devre dışı bırakılır.
 
 ## Güncel çalışır aday
 
-**Sürüm: V269**
+**Sürüm: V270**
 
 Test adresi:
 
-`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=269`
+`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=270`
 
-Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıcı tarafında yalnız publishable key + authenticated kullanıcı ile kullanılır; service-role anahtarı tarayıcıya verilmez.
+Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıcı tarafında yalnız publishable key + authenticated kullanıcı ile kullanılır; service-role anahtarı tarayıya verilmez.
 
 ## Ana çalışma modeli
 
@@ -102,7 +102,7 @@ Ders sonucu günlük kullanımda iki seçenektir:
 
 Branşın yetkili öğretmeni için **tek gerçek kaynak** `branslar.varsayilan_ogretmen_id` alanıdır.
 
-V269 stabilizasyonunda:
+V270 stabilizasyonunda:
 
 - `ogretmen_kaydet_guvenli_v2` oluşturuldu.
 - Öğretmen kaydı ve branş eşleştirmesi tek güvenli işlem mantığında yönetilir.
@@ -140,9 +140,9 @@ Yönetici kontrollü güvenli RPC katmanına bağlı işlemler:
 - Öğrenci ücreti ve öğretmen hakedişi yalnız `Yapıldı` derslerle gerçekleşir.
 - Ders sonucu için ayrıca manuel tahakkuk veya hakediş girişi yapılmaz.
 - Gider girişleri `giderler` tablosuna kategori ile, kasa çıkışı ise aynı işlemde `kasa_hareketleri` tablosuna yazılır.
-- V269 itibarıyla Giderler ekranındaki dağılım, genel `kaynak_turu` yerine gerçek `gider_kategorileri` eşleştirmesini kullanır; öğretmen ödemeleri ayrı grup olarak kalır.
+- V270 itibarıyla Giderler ekranındaki dağılım, genel `kaynak_turu` yerine gerçek `gider_kategorileri` eşleştirmesini kullanır; öğretmen ödemeleri ayrı grup olarak kalır.
 
-## V269 veri bütünlüğü stabilizasyonu
+## V270 veri bütünlüğü stabilizasyonu
 
 Genel kontrolde bulunan eski Temmuz mükerrerleri temizlendi:
 
@@ -167,7 +167,7 @@ Ayrıca genel kontrolde:
 - öğretmen ödemesi olup kasa hareketi olmayan kayıt: 0
 - Auth ↔ kullanıcı profili yetim kaydı: 0
 
-## Görselleştirmeler ve V269 tasarım standardı
+## Görselleştirmeler ve V270 tasarım standardı
 
 Ana Sayfa:
 
@@ -181,28 +181,28 @@ Ders ekranları:
 - Ders durumuna göre görsel durum işaretleri
 - Ders detayında tahakkuk / hakediş finansal sonuç kartları
 
-V269 tek aktif ürün görsel katmanı `urun-ailesi-gorsel-modulu-v1.js` üzerinden Dersler, Öğrenciler, Tahsilat, Sabit Program, Öğretmenler, Giderler, Raporlar, Kasa, Öğretmen Ödemeleri, Ödevler, Ayarlar ve Menü ekranlarını ortak kart/kenar/gölge/vurgu standardına getirir. Eski görsel modüller test yükleme zincirinde kullanılmaz.
+V270 tek aktif ürün görsel katmanı `urun-ailesi-gorsel-modulu-v1.js` üzerinden Dersler, Öğrenciler, Tahsilat, Sabit Program, Öğretmenler, Giderler, Raporlar, Kasa, Öğretmen Ödemeleri, Ödevler, Ayarlar ve Menü ekranlarını ortak kart/kenar/gölge/vurgu standardına getirir. Eski görsel modüller test yükleme zincirinde kullanılmaz.
 
-## V269 stabilizasyon modülü
+## Stabilizasyon modülü
 
-`v269-stabilizasyon-modulu-v1.js` yalnız kalan küçük uyumluluk düzenlemeleri için kullanılır:
+`v269-stabilizasyon-modulu-v1.js` dosya adı tarihsel olarak korunur; V270'te kalan küçük uyumluluk düzenlemelerini uygular:
 
 - öğrenci detayındaki ilk KPI'yı gerçek `Ders Birimi` olarak gösterme
 - sıradaki Planlandı dersi öğrenci detayında öne çıkarma
 - öğrenci telefonu yoksa veli arama/WhatsApp kısayollarını erişilebilir hale getirme
-- Ayarlar sürüm bilgisinin V269 ile uyumlu kalmasını güvenceye alma
+- Ayarlar sürüm bilgisinin V270 ile uyumlu kalmasını güvenceye alma
 
-Kaynak Ayarlar modülü de doğrudan V269'a güncellenmiştir; stabilizasyon düzeltmesi yedek güvence olarak kalır.
+Kaynak Ayarlar modülü de doğrudan V270'e güncellenmiştir; stabilizasyon düzeltmesi yedek güvence olarak kalır.
 
 ## Teknik doğrulama
 
 `.github/workflows/pwa-dogrulama.yml` servis/modül JavaScript dosyalarını ve test kabuğunun inline JavaScript'ini `node --check` ile doğrular.
 
-Her V269 kod değişikliğinden sonra GitHub Actions sonucu ve GitHub Pages yayını kontrol edilmeden aday sürüm tamamlandı kabul edilmez.
+Her V270 kod değişikliğinden sonra GitHub Actions sonucu ve GitHub Pages yayını kontrol edilmeden aday sürüm tamamlandı kabul edilmez.
 
 ## Güncel öncelik sırası
 
-1. V269 genel saha kullanımı: mobil / tablet / masaüstü
+1. V270 genel saha kullanımı: mobil / tablet / masaüstü
 2. Bu haftanın eksik Sabit Program derslerinin `Haftalık Dersleri Oluştur` ile tamamlanması ve hafta kilidinin gerçek kullanıcı akışında doğrulanması
 3. Yapıldı / İptal → öğrenci borcu → öğretmen hakedişi → rapor zincirinin uçtan uca kabul testi
 4. Tahsilat → kasa, Gider → kasa ve Öğretmen Ödemesi → kasa gerçek işlem kabul testleri

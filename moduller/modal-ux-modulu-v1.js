@@ -7,7 +7,7 @@
     const s=document.createElement('style');
     s.id='bsModalUXStil';
     s.textContent=`
-      /* V267 — Modal katmanı uygulama kabuğunun daima üzerinde kalır. */
+      /* V268 — Modal katmanı uygulama kabuğunun üzerinde; iOS öğrenci detay scroll'u ayrı güvence altında. */
       body > [class*="-modal"]{
         z-index:2000!important;
       }
@@ -16,8 +16,30 @@
       [class*="-sheet"]{
         overflow-x:hidden!important;
         overflow-y:auto!important;
-        overscroll-behavior:contain!important;
-        -webkit-overflow-scrolling:touch;
+        -webkit-overflow-scrolling:touch!important;
+      }
+
+      /* Öğrenci detayında iOS Safari için gerçek ve bağımsız scroll container. */
+      #bsOgrenciDetayModal{
+        height:100dvh!important;
+        max-height:100dvh!important;
+        overflow:hidden!important;
+        touch-action:pan-y!important;
+      }
+      #bsOgrenciDetayModal .bsogr-sheet{
+        height:min(91dvh,calc(100dvh - 12px))!important;
+        max-height:min(91dvh,calc(100dvh - 12px))!important;
+        min-height:0!important;
+        overflow-x:hidden!important;
+        overflow-y:scroll!important;
+        overscroll-behavior-y:auto!important;
+        touch-action:pan-y!important;
+        -webkit-overflow-scrolling:touch!important;
+        padding-bottom:calc(34px + env(safe-area-inset-bottom))!important;
+      }
+      #bsOgrenciDetayModal #bsOgrenciIcerik{
+        min-height:0!important;
+        touch-action:pan-y!important;
       }
 
       /* Sheet'in ilk başlık satırı içerik kayarken görünür kalır. */

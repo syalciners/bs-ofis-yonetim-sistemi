@@ -19,7 +19,7 @@
   async function ogrenciDetayGetir(ogrenciId){
     const [d,p]=await Promise.all([
       bsSupabase.from('dersler')
-        .select('tarih,baslangic_saati,bitis_saati,ogretmen_id,brans_id,ders_durumu,ogrenci_toplam_tutar')
+        .select('tarih,baslangic_saati,bitis_saati,ogretmen_id,brans_id,ders_durumu,ders_sayisi,ogrenci_toplam_tutar')
         .eq('ogrenci_id',ogrenciId)
         .order('tarih',{ascending:false})
         .order('baslangic_saati',{ascending:false}),
@@ -43,6 +43,7 @@
     if(error) throw error;
     if(!data||data.ogrenci_id!==ogrenciId) throw new Error('Öğrenci kaydı doğrulanamadı.');
     if(window.BSReferansServisi) BSReferansServisi.ogrenciGuncelle(data);
+    document.dispatchEvent(new CustomEvent('bs:veri-degisti',{detail:{konu:'ogrenci',kayit:data}}));
     return data;
   }
 

@@ -6,18 +6,26 @@ Son güncelleme: 13.08.2026
 
 - Canlı uygulama `index.html` korunmaktadır.
 - Kullanıcı tarafından geri dönüş noktası olarak doğrulanan temel commit: `09552e4f048ec9696576fbdfa232944056d4e8b5`.
-- Yeni yapı kullanıcı doğrulaması tamamlanana kadar canlı `index.html` üzerine taşınmaz.
+- Yeni modüler yapı kullanıcı kabulü tamamlanana kadar canlı `index.html` üzerine taşınmaz.
 - Geliştirme ve kabul testi `operasyon-test.html` üzerinden yürütülür.
+- Test kabuğu canlı Service Worker zincirini devralmaz; V269 test çalışmasında test SW kayıtları temizlenir ve canlı SW kaydı test kabuğunda devre dışı bırakılır.
 
 ## Güncel çalışır aday
 
-**Sürüm: V263**
+**Sürüm: V269**
 
 Test adresi:
 
-`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=263`
+`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=269`
 
 Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıcı tarafında yalnız publishable key + authenticated kullanıcı ile kullanılır; service-role anahtarı tarayıcıya verilmez.
+
+## Ana çalışma modeli
+
+- AppSheet Supabase'e bağlı değildir; AppSheet yalnız Google Sheets'e yazar.
+- Yeni PWA doğrudan Supabase üzerinde çalışır.
+- Kullanıcı kabulü tamamlanana kadar AppSheet/Google Sheets eski operasyon kaynağı olarak korunur.
+- Nihai geçişte Google Sheets ile Supabase son kez mutabık hale getirilecek ve günlük operasyon yeni PWA/Supabase üzerinden yürütülecektir.
 
 ## Kullanıcı deneyimi standardı
 
@@ -26,17 +34,17 @@ Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıc�
 - Teknik ID ve entegrasyon alanları günlük kullanıcı arayüzünde gösterilmez.
 - Tablet öncelikli, telefon ve web uyumlu yapı korunur.
 - Mobil alt formlar yatay kaymaz; yalnız dikey kaydırma kullanılır.
-- Form sheet başlığı ve ana kaydet alanı uzun formlarda erişilebilir kalacak biçimde sabitlenir.
+- Form sheet başlığı ve ana kaydet alanı uzun formlarda erişilebilir kalır.
 - Saat alanları mobil saat çarkı yerine klavyeden `SS:DD` biçiminde girilir; `0930` gibi girişler `09:30` biçimine dönüştürülür.
-- 1–5 seçenekli tekli seçimler açılır menü yerine yan yana küçük seçim butonlarıyla gösterilir; 6 ve üzeri seçenek açılır liste olarak kalır.
+- 1–5 seçenekli tekli seçimler açılır menü yerine küçük seçim butonlarıyla gösterilir; 6 ve üzeri seçenek açılır liste/arama olarak kalır.
 - Kritik işlemlerde istemci ön kontrol yapar; sunucu kayıt sırasında aynı kuralları yeniden doğrular.
-- Dersler, Öğrenciler, Tahsilat, Sabit Program, Öğretmenler, Giderler ve Raporlar ortak bir görsel tasarım sistemini kullanır: açık arka plan, yumuşak kartlar, mavi ana vurgu, durum bazlı yeşil/kırmızı vurgu ve mobilde kompakt bilgi hiyerarşisi.
+- Ana ekranlar aynı BS ürün ailesi görsel sistemini kullanır: açık zemin, beyaz kartlar, `#2563EB` ana vurgu, düşük gölge, durum bazlı yeşil/kırmızı vurgu ve mobilde kompakt bilgi hiyerarşisi.
 
 ## Ders ve program mimarisi
 
 ### Sabit Program
 
-Sabit Program haftalık takvimin şablonudur. Bir kayıt şunları içerir:
+Sabit Program tekrar eden ders şablonudur. Bir kayıt şunları içerir:
 
 - Öğrenci
 - Öğretmen
@@ -57,60 +65,72 @@ Tekrar sıklığı değerleri:
 - `2 Haftada Bir`
 - `Ayda Bir`
 
-`2 Haftada Bir` hesaplamasında başlangıç tarihinin haftası referans alınır. `Ayda Bir` için başlangıç tarihinin ay içindeki hafta sırası korunur; örneğin ikinci Salı seçilmişse sonraki aylarda ikinci Salı hedeflenir.
+`2 Haftada Bir` hesaplamasında başlangıç tarihinin haftası referans alınır. `Ayda Bir` için başlangıç tarihinin ay içindeki hafta sırası korunur.
 
-Sabit Program listesindeki derse dokunulduğunda aynı program doğrudan düzenleme formunda açılır.
+Sabit Program listesindeki derse dokunulduğunda yalnız şablon düzenlenir; daha önce oluşturulmuş haftalık ders kayıtları geriye dönük değişmez.
 
 ### Haftalık Dersleri Oluştur
 
 - Sabit Programdaki yalnız o haftaya düşen kayıtlar `dersler` tablosuna `Planlandı` olarak aktarılır.
 - `program_id + tarih` bulunan kayıt tekrar oluşturulmaz.
-- Aynı hafta için başarılı üretim yalnız bir kez çalışır.
-- Başarılı çalışmanın ardından `haftalik_ders_uretimleri` tablosuna hafta kilidi yazılır.
-- Ana Sayfa ve Sabit Programdaki haftalık oluşturma butonları sunucu kilit durumunu kontrol eder; haftanın üretimi tamamlandıysa buton kullanıcıya kilitli görünür ve yeniden üretim yapılmaz.
-- Sonraki hafta Pazartesi yeni hafta için tekrar kullanılabilir.
+- Başarılı üretimden sonra `haftalik_ders_uretimleri` tablosuna hafta kilidi yazılır.
+- Aynı hafta ikinci üretim sunucu tarafından reddedilir.
+- Sonraki Pazartesi yeni hafta için tekrar kullanılabilir.
+- Geçiş döneminden kalan haftalarda kilit satırı yoksa `haftalik_ders_uretim_durumu_v1`, o haftaya düşen tüm Sabit Program kayıtlarının zaten ders tablosunda olup olmadığını kontrol eder. Tamamı varsa geçiş kilidi kabul edilir; eksik varsa üretim butonu eksikleri tamamlamak için açık kalır.
 - Öğretmen-branş yetkisi, öğrenci/öğretmen zaman çakışması ve derslik kapasitesi sunucu tarafında doğrulanır.
 
 ### Haftalık Takvim / Öğretmen Takvimi / Bugünkü Dersler
 
 Bu üç ekran aynı `dersler` kayıtlarını farklı filtrelerle gösterir ve aynı Ders Detayı panelini açar.
 
-- Haftalık Takvim: haftanın tüm dersleri gerçek 7 günlük takvim kartları içinde gösterir.
+- Haftalık Takvim: haftanın tüm derslerini gösterir.
 - Öğretmen Takvimi: seçilen öğretmenin aynı haftalık takvim görünümüdür.
 - Bugünkü Dersler: yalnız bugünün derslerini gösterir.
 - Haftalık ve Öğretmen Takvimlerinde `Önceki / Bu Hafta / Sonraki` gezinmesi vardır.
 - Masaüstünde çok sütunlu takvim, telefonda dikey gün kartları kullanılır.
 
-Planlanmış bir ders detayından `Düzenle` seçilirse yalnız ilgili `ders_id` güncellenir. Bağlı `program_id` referans olarak korunur ve Sabit Program değiştirilmez. Düzenlemede tarih, öğrenci, öğretmen, branş, derslik, saat, ders sayısı, birim ücretler ve not değiştirilebilir; sunucu çakışma ve öğretmen-branş kurallarını tekrar denetler.
+Planlanmış bir ders detayından `Düzenle` seçilirse yalnız ilgili `ders_id` güncellenir. Bağlı `program_id` referans olarak korunur ve Sabit Program değiştirilmez.
 
 Ders sonucu günlük kullanımda iki seçenektir:
 
 - `Yapıldı`
 - `İptal`
 
-`Yapıldı` olduğunda ders kaydındaki öğrenci toplam tutarı öğrenci tahakkuku, öğretmen toplam hakedişi öğretmen hakedişi olarak finansal hesaplara dahil edilir. Ders detayında bu iki tutar açık şekilde gösterilir. `İptal` finansal tahakkuk/hakediş etkisi oluşturmaz ve ekranda sıfır finansal etki olarak görünür.
+`Yapıldı` olduğunda ders kaydındaki öğrenci toplam tutarı öğrenci tahakkuku, öğretmen toplam hakedişi öğretmen hakedişi olarak finansal hesaplara dahil edilir. `İptal` finansal tahakkuk/hakediş etkisi oluşturmaz.
 
 ## Öğretmen-branş kuralı
 
-Branşın yetkili öğretmeni `branslar.varsayilan_ogretmen_id` alanından belirlenir. Arayüz yalnız seçilen öğretmene tanımlı aktif branşları gösterir. Aynı kural Supabase güvenli RPC katmanında da zorunludur; arayüz atlanarak uyumsuz öğretmen-branş kaydı oluşturulamaz.
+Branşın yetkili öğretmeni için **tek gerçek kaynak** `branslar.varsayilan_ogretmen_id` alanıdır.
+
+V269 stabilizasyonunda:
+
+- `ogretmen_kaydet_guvenli_v2` oluşturuldu.
+- Öğretmen kaydı ve branş eşleştirmesi tek güvenli işlem mantığında yönetilir.
+- Başka öğretmene bağlı branş sessizce devralınamaz.
+- `ogretmenler.branslar` alanı artık yalnız görüntü/uyumluluk için merkezi branş eşleştirmesinden otomatik türetilir; kullanıcı serbest metinle branş yetkisi oluşturamaz.
+- Eski öğretmen branş metinleri mevcut `branslar.varsayilan_ogretmen_id` ilişkileriyle yeniden eşitlendi.
+- Öğretmen ekranındaki üst buton artık yalnız `+ Öğretmen Ekle` işlevindedir.
+- Mevcut öğretmen düzenleme işlemi öğretmen kartı → detay → `Düzenle` yolundan yapılır.
 
 ## Çalışan gerçek yazma işlemleri
 
 Yönetici kontrollü güvenli RPC katmanına bağlı işlemler:
 
 1. Öğrenci ekleme / düzenleme
-2. Öğretmen ekleme / düzenleme
+2. Öğretmen ekleme / düzenleme ve merkezi branş eşleştirmesi
 3. Sabit program ekleme / düzenleme
 4. Manuel / ek ders oluşturma
 5. Haftalık tek ders düzenleme
 6. Ders sonucunu Yapıldı / İptal olarak güncelleme
-7. Haftalık dersleri sabit programdan toplu oluşturma
+7. Haftalık dersleri Sabit Programdan toplu oluşturma
 8. Tahsilat + kasa hareketini atomik kaydetme
 9. Gider + kasa hareketini atomik kaydetme
 10. Öğretmen ödemesi + kasa hareketini atomik kaydetme
 11. Ödev ekleme / durum güncelleme
+12. Geçmiş işlemi olmayan öğrenci/öğretmeni güvenli silme; geçmişi olan kayıt fiziksel silinmez, pasife alınmalıdır
+13. Kullanıcı profilinin uygulama erişimini kaldırma
 
-## Takvim ve finans kuralları
+## Finans kuralları
 
 - Takvim ve çakışma hesabı: **1 ders = 60 dakikalık rezervasyon slotu**.
 - Finansal gerçekleşme kuralı: **50 dakikalık gerçekleşen ders = 1 finansal ders birimi**.
@@ -119,18 +139,37 @@ Yönetici kontrollü güvenli RPC katmanına bağlı işlemler:
 - Tahsilat gerçek nakit gelir kaynağıdır; ders kaydı tahsilat değildir.
 - Öğrenci ücreti ve öğretmen hakedişi yalnız `Yapıldı` derslerle gerçekleşir.
 - Ders sonucu için ayrıca manuel tahakkuk veya hakediş girişi yapılmaz.
+- Gider girişleri `giderler` tablosuna kategori ile, kasa çıkışı ise aynı işlemde `kasa_hareketleri` tablosuna yazılır.
+- V269 itibarıyla Giderler ekranındaki dağılım, genel `kaynak_turu` yerine gerçek `gider_kategorileri` eşleştirmesini kullanır; öğretmen ödemeleri ayrı grup olarak kalır.
 
-## Test ve veri bütünlüğü
+## V269 veri bütünlüğü stabilizasyonu
 
-- Mevcut 18 Sabit Program kaydı migration sonrası `Her Hafta` olarak korunmuştur.
-- Tekrar hesaplayıcısı `Her Hafta`, `2 Haftada Bir` ve `Ayda Bir` örnekleriyle doğrulanmıştır.
-- Haftalık üretim RPC'si transaction + rollback testiyle mevcut hafta üzerinde sınanmıştır: 18 bu haftaya düşen program, 16 mevcut ders, 2 oluşturulacak, 0 çakışma, 0 hatalı program sonucu alınmış; rollback sonrasında veri ve hafta kilidi bırakılmamıştır.
-- Kritik finansal yazmalar idempotent/transaction kurallarıyla korunmaya devam eder.
-- `ders-modulu-v1.js` dış modüllerin veri değişikliklerinden sonra çağırabildiği `yukle()` arayüzünü sağlar; ders oluşturma/durum güncelleme sonrası takvim yeniden yüklenebilir.
+Genel kontrolde bulunan eski Temmuz mükerrerleri temizlendi:
 
-## Görselleştirmeler
+- Aynı `program_id + tarih` için 10 eski mükerrer grup vardı.
+- Tüm silinecek adaylar `Planlandı`, sonradan toplu oluşturulmuş ve ödev referansı 0 olan kayıtlardı.
+- `Yapıldı` veya `İptal` durumundaki gerçek geçmiş kayıtlar korundu.
+- İki `Planlandı` bulunan tek grupta daha eski/orijinal kayıt korundu.
+- Temizlik öncesi teknik kimlik yedeği `yedekler/2026-08-13_mukerrer_ders_temizlik_yedegi.json` dosyasına kaydedildi.
+- Temizlik sonrası kalan mükerrer `program_id + tarih` grubu: **0**.
 
-Ana Sayfa responsive yönetim görselleri:
+Ayrıca genel kontrolde:
+
+- aktif Sabit Program öğretmen-branş uyumsuzluğu: 0
+- son dönem ders öğretmen-branş uyumsuzluğu: 0
+- bu haftada öğrenci zaman çakışması: 0
+- bu haftada öğretmen zaman çakışması: 0
+- bu haftada derslik kapasite çakışması: 0
+- ders sayısı geçersiz kayıt: 0
+- öğrenci toplam ücret hesap hatası: 0
+- öğretmen toplam hakediş hesap hatası: 0
+- tahsilat olup kasa hareketi olmayan kayıt: 0
+- öğretmen ödemesi olup kasa hareketi olmayan kayıt: 0
+- Auth ↔ kullanıcı profili yetim kaydı: 0
+
+## Görselleştirmeler ve V269 tasarım standardı
+
+Ana Sayfa:
 
 - Son 6 ay Tahsilat / Gerçekleşen Ciro / Öğretmen Hakedişi karşılaştırması
 - Kasa hesaplarının bakiye dağılımı
@@ -142,36 +181,34 @@ Ders ekranları:
 - Ders durumuna göre görsel durum işaretleri
 - Ders detayında tahakkuk / hakediş finansal sonuç kartları
 
-V263 ortak operasyon görsel standardı:
+V269 tek aktif ürün görsel katmanı `urun-ailesi-gorsel-modulu-v1.js` üzerinden Dersler, Öğrenciler, Tahsilat, Sabit Program, Öğretmenler, Giderler, Raporlar, Kasa, Öğretmen Ödemeleri, Ödevler, Ayarlar ve Menü ekranlarını ortak kart/kenar/gölge/vurgu standardına getirir. Eski görsel modüller test yükleme zincirinde kullanılmaz.
 
-- Öğrenci listesinde avatar baş harfleri, daha temiz arama alanı ve kompakt durum kartları
-- Tahsilatta filtre/kpi/geçmiş kartlarının tek tasarım dili
-- Sabit Programda gün bazlı kartlar, daha görünür tekrar rozetleri ve arama alanı
-- Öğretmenlerde profil kartları, avatar baş harfleri ve hakediş/ders birimi özetleri
-- Giderlerde kırmızı finans vurgusu ve daha okunabilir kasa çıkışı kartları
-- Raporlarda KPI kartları, durum rozetleri ve bölüm bazlı modern kart yerleşimi
-- Alt navigasyon ve bottom-sheet/modal arayüzlerinde ortak mobil davranış
+## V269 stabilizasyon modülü
+
+`v269-stabilizasyon-modulu-v1.js` yalnız kalan küçük uyumluluk düzenlemeleri için kullanılır:
+
+- öğrenci detayındaki ilk KPI'yı gerçek `Ders Birimi` olarak gösterme
+- sıradaki Planlandı dersi öğrenci detayında öne çıkarma
+- öğrenci telefonu yoksa veli arama/WhatsApp kısayollarını erişilebilir hale getirme
+- Ayarlar sürüm bilgisinin V269 ile uyumlu kalmasını güvenceye alma
+
+Kaynak Ayarlar modülü de doğrudan V269'a güncellenmiştir; stabilizasyon düzeltmesi yedek güvence olarak kalır.
 
 ## Teknik doğrulama
 
-`.github/workflows/pwa-dogrulama.yml` her servis/modül JavaScript dosyasını ve test kabuğunun inline JavaScript'ini `node --check` ile doğrular. V263 JavaScript doğrulaması başarıyla geçmiştir.
+`.github/workflows/pwa-dogrulama.yml` servis/modül JavaScript dosyalarını ve test kabuğunun inline JavaScript'ini `node --check` ile doğrular.
 
-V263 ile test Service Worker sürümü de aday sürümle eşitlendi; `operasyon-test.html`, manifest ve SW aynı `v=263` zincirini kullanır.
+Her V269 kod değişikliğinden sonra GitHub Actions sonucu ve GitHub Pages yayını kontrol edilmeden aday sürüm tamamlandı kabul edilmez.
 
-## Geçiş notu
+## Güncel öncelik sırası
 
-AppSheet Supabase'e bağlı değildir; AppSheet yalnız Google Sheets'e kayıt yapar. Yeni PWA doğrudan Supabase üzerinde çalışır. Kullanıcı kabulü tamamlanana kadar AppSheet/Google Sheets eski operasyon kaynağı olarak korunur. Nihai geçişte Google Sheets ile Supabase son kez mutabık hale getirilecek ve günlük operasyon yeni PWA/Supabase üzerinden yürütülecektir.
-
-## Öncelik sırası
-
-1. Günlük ders akışları ve takvim kullanımının saha testi
-2. Sabit Program / Haftalık Dersleri Oluştur gerçek kullanım testi
-3. Yapıldı / İptal sonrası borç, hakediş ve raporların uçtan uca doğrulanması
-4. Tahsilat, gider ve öğretmen ödeme gerçek işlem kabul testi
-5. Kasa, Öğretmen Ödemeleri ve Ödevler ekranlarının aynı görsel standarda alınması
-6. Telefon / tablet / masaüstü UX düzeltmeleri
-7. Google Sheets ↔ Supabase son veri mutabakatı
-8. Çalışan sürümün sabitlenmesi ve canlı PWA geçişi
+1. V269 genel saha kullanımı: mobil / tablet / masaüstü
+2. Bu haftanın eksik Sabit Program derslerinin `Haftalık Dersleri Oluştur` ile tamamlanması ve hafta kilidinin gerçek kullanıcı akışında doğrulanması
+3. Yapıldı / İptal → öğrenci borcu → öğretmen hakedişi → rapor zincirinin uçtan uca kabul testi
+4. Tahsilat → kasa, Gider → kasa ve Öğretmen Ödemesi → kasa gerçek işlem kabul testleri
+5. Öğretmen branş ekleme/düzenleme akışının saha testi
+6. Google Sheets ↔ Supabase son veri mutabakatı
+7. Çalışan sürümün sabitlenmesi ve canlı PWA geçişi
 
 ## Kabul sonrası
 

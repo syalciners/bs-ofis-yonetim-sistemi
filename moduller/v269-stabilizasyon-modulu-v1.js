@@ -27,12 +27,35 @@
     return kart&&kart.dataset?kart.dataset.ogrenciId||'':'';
   }
 
+  function whatsappNo(v){
+    let s=String(v||'').replace(/\D/g,'');
+    if(!s)return'';
+    if(s.startsWith('0090'))s=s.slice(2);
+    if(s.startsWith('0'))s='90'+s.slice(1);else if(s.length===10)s='90'+s;
+    return s;
+  }
+
+  function veliKisayollariEkle(profil){
+    if(!profil||profil.ogrenci_telefon||!profil.veli_telefon) return true;
+    const alan=document.querySelector('#bsOgrenciDetayModal .bsk-ogrenci-aksiyonlar');
+    if(!alan) return false;
+    if(alan.querySelector('[data-v269-veli-hizli]')) return true;
+    const veliButon=alan.querySelector('#bskVeliAc');
+    const ara=document.createElement('a');
+    ara.className='bsk-aksiyon';ara.dataset.v269VeliHizli='1';ara.href='tel:'+profil.veli_telefon;ara.textContent='Veli Ara';
+    const wa=document.createElement('a');
+    wa.className='bsk-aksiyon wa';wa.dataset.v269VeliHizli='1';wa.href='https://wa.me/'+whatsappNo(profil.veli_telefon);wa.target='_blank';wa.rel='noopener';wa.textContent='Veli WhatsApp';
+    alan.insertBefore(ara,veliButon||null);alan.insertBefore(wa,veliButon||null);
+    return true;
+  }
+
   async function ogrenciDetaySemantiginiDuzelt(ogrenciId){
     if(!ogrenciId||!window.BSOgrenciServisi||!window.BSReferansServisi) return;
     try{
-      const [sonuc,ref]=await Promise.all([
+      const [sonuc,ref,profil]=await Promise.all([
         BSOgrenciServisi.ogrenciDetayGetir(ogrenciId),
-        BSReferansServisi.yukle()
+        BSReferansServisi.yukle(),
+        BSOgrenciServisi.ogrenciGetir(ogrenciId)
       ]);
       const dersler=sonuc.dersler||[];
       const yapilan=dersler.filter(x=>x.ders_durumu==='Yapıldı');
@@ -55,11 +78,17 @@
         if(deger) deger.textContent=Number(dersBirimi||0).toLocaleString('tr-TR');
 
         let kart=icerik.querySelector('.bsogr-sonraki');
-        if(!sonraki){if(kart)kart.remove();return;}
-        if(!kart){kart=document.createElement('div');kart.className='bsogr-sonraki';icerik.insertBefore(kart,icerik.firstChild);}
-        const ogretmen=ref.ogretmenMap.get(sonraki.ogretmen_id)||'Öğretmen';
-        const brans=ref.bransMap.get(sonraki.brans_id)||'Branş';
-        kart.innerHTML='<small>Sıradaki Ders</small><strong>'+htmlKacir(tarihKisa(sonraki.tarih))+' • '+htmlKacir(saatKisalt(sonraki.baslangic_saati))+'–'+htmlKacir(saatKisalt(sonraki.bitis_saati))+'</strong><div>'+htmlKacir(ogretmen)+' • '+htmlKacir(brans)+'</div>';
+        if(!sonraki){if(kart)kart.remove();}
+        else{
+          if(!kart){kart=document.createElement('div');kart.className='bsogr-sonraki';icerik.insertBefore(kart,icerik.firstChild);}
+          const ogretmen=ref.ogretmenMap.get(sonraki.ogretmen_id)||'Öğretmen';
+          const brans=ref.bransMap.get(sonraki.brans_id)||'Branş';
+          kart.innerHTML='<small>Sıradaki Ders</small><strong>'+htmlKacir(tarihKisa(sonraki.tarih))+' • '+htmlKacir(saatKisalt(sonraki.baslangic_saati))+'–'+htmlKacir(saatKisalt(sonraki.bitis_saati))+'</strong><div>'+htmlKacir(ogretmen)+' • '+htmlKacir(brans)+'</div>';
+        }
+
+        let iletisimDeneme=0;
+        const iletisim=()=>{iletisimDeneme++;if(!veliKisayollariEkle(profil)&&iletisimDeneme<20)setTimeout(iletisim,60);};
+        iletisim();
       };
       uygula();
     }catch(e){console.warn('V269 öğrenci detay doğrulama:',e);}

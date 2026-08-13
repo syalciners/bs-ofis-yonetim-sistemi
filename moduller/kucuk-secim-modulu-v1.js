@@ -2,7 +2,7 @@
   if(window.BSKucukSecimModuluV1)return;
   window.BSKucukSecimModuluV1=true;
 
-  const MAX_SECENEK=4;
+  const MAX_SECENEK=5;
 
   function stilEkle(){
     if(document.getElementById('bsKucukSecimStil'))return;
@@ -32,10 +32,6 @@
     if(select.multiple||select.size>1)return false;
     const n=gercekSecenekler(select).length;
     return n>=1&&n<=MAX_SECENEK;
-  }
-
-  function grupBul(select){
-    return select.parentElement&&select.parentElement.classList.contains('bsks-wrap')?select.parentElement.querySelector('.bsks-grup'):null;
   }
 
   function secimiYansit(select,grup){

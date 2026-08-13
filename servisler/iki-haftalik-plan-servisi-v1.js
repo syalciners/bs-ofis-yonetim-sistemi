@@ -1,0 +1,1 @@
+(function(){ if(window.BSIkiHaftalikPlanServisiV1) return; window.BSIkiHaftalikPlanServisiV1={}; })();

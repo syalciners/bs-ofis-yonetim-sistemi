@@ -4,7 +4,7 @@
   "short_name": "BS Eğitim",
   "description": "BS Eğitim yönetim sistemi aday uygulaması",
   "lang": "tr-TR",
-  "start_url": "/bs-ofis-yonetim-sistemi/operasyon-test.html?v=258",
+  "start_url": "/bs-ofis-yonetim-sistemi/operasyon-test.html?v=259",
   "scope": "/bs-ofis-yonetim-sistemi/",
   "display": "standalone",
   "orientation": "any",

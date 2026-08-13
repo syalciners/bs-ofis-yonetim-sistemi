@@ -11,11 +11,11 @@ Son güncelleme: 13.08.2026
 
 ## Güncel çalışır aday
 
-**Sürüm: V258**
+**Sürüm: V263**
 
 Test adresi:
 
-`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=258`
+`https://syalciners.github.io/bs-ofis-yonetim-sistemi/operasyon-test.html?v=263`
 
 Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıcı tarafında yalnız publishable key + authenticated kullanıcı ile kullanılır; service-role anahtarı tarayıcıya verilmez.
 
@@ -26,9 +26,11 @@ Uygulama `servisler/` ve `moduller/` katmanlarından oluşur. Supabase tarayıc�
 - Teknik ID ve entegrasyon alanları günlük kullanıcı arayüzünde gösterilmez.
 - Tablet öncelikli, telefon ve web uyumlu yapı korunur.
 - Mobil alt formlar yatay kaymaz; yalnız dikey kaydırma kullanılır.
+- Form sheet başlığı ve ana kaydet alanı uzun formlarda erişilebilir kalacak biçimde sabitlenir.
 - Saat alanları mobil saat çarkı yerine klavyeden `SS:DD` biçiminde girilir; `0930` gibi girişler `09:30` biçimine dönüştürülür.
 - 1–5 seçenekli tekli seçimler açılır menü yerine yan yana küçük seçim butonlarıyla gösterilir; 6 ve üzeri seçenek açılır liste olarak kalır.
 - Kritik işlemlerde istemci ön kontrol yapar; sunucu kayıt sırasında aynı kuralları yeniden doğrular.
+- Dersler, Öğrenciler, Tahsilat, Sabit Program, Öğretmenler, Giderler ve Raporlar ortak bir görsel tasarım sistemini kullanır: açık arka plan, yumuşak kartlar, mavi ana vurgu, durum bazlı yeşil/kırmızı vurgu ve mobilde kompakt bilgi hiyerarşisi.
 
 ## Ders ve program mimarisi
 
@@ -124,7 +126,7 @@ Yönetici kontrollü güvenli RPC katmanına bağlı işlemler:
 - Tekrar hesaplayıcısı `Her Hafta`, `2 Haftada Bir` ve `Ayda Bir` örnekleriyle doğrulanmıştır.
 - Haftalık üretim RPC'si transaction + rollback testiyle mevcut hafta üzerinde sınanmıştır: 18 bu haftaya düşen program, 16 mevcut ders, 2 oluşturulacak, 0 çakışma, 0 hatalı program sonucu alınmış; rollback sonrasında veri ve hafta kilidi bırakılmamıştır.
 - Kritik finansal yazmalar idempotent/transaction kurallarıyla korunmaya devam eder.
-- `ders-modulu-v1.js` artık dış modüllerin veri değişikliklerinden sonra çağırabildiği `yukle()` arayüzünü sağlar; ders oluşturma/durum güncelleme sonrası takvim yeniden yüklenebilir.
+- `ders-modulu-v1.js` dış modüllerin veri değişikliklerinden sonra çağırabildiği `yukle()` arayüzünü sağlar; ders oluşturma/durum güncelleme sonrası takvim yeniden yüklenebilir.
 
 ## Görselleştirmeler
 
@@ -140,9 +142,21 @@ Ders ekranları:
 - Ders durumuna göre görsel durum işaretleri
 - Ders detayında tahakkuk / hakediş finansal sonuç kartları
 
+V263 ortak operasyon görsel standardı:
+
+- Öğrenci listesinde avatar baş harfleri, daha temiz arama alanı ve kompakt durum kartları
+- Tahsilatta filtre/kpi/geçmiş kartlarının tek tasarım dili
+- Sabit Programda gün bazlı kartlar, daha görünür tekrar rozetleri ve arama alanı
+- Öğretmenlerde profil kartları, avatar baş harfleri ve hakediş/ders birimi özetleri
+- Giderlerde kırmızı finans vurgusu ve daha okunabilir kasa çıkışı kartları
+- Raporlarda KPI kartları, durum rozetleri ve bölüm bazlı modern kart yerleşimi
+- Alt navigasyon ve bottom-sheet/modal arayüzlerinde ortak mobil davranış
+
 ## Teknik doğrulama
 
-`.github/workflows/pwa-dogrulama.yml` her servis/modül JavaScript dosyasını ve test kabuğunun inline JavaScript'ini `node --check` ile doğrular. Her aday sürüm commit zincirinde bu doğrulama çalıştırılır.
+`.github/workflows/pwa-dogrulama.yml` her servis/modül JavaScript dosyasını ve test kabuğunun inline JavaScript'ini `node --check` ile doğrular. V263 JavaScript doğrulaması başarıyla geçmiştir.
+
+V263 ile test Service Worker sürümü de aday sürümle eşitlendi; `operasyon-test.html`, manifest ve SW aynı `v=263` zincirini kullanır.
 
 ## Geçiş notu
 
@@ -154,9 +168,10 @@ AppSheet Supabase'e bağlı değildir; AppSheet yalnız Google Sheets'e kayıt y
 2. Sabit Program / Haftalık Dersleri Oluştur gerçek kullanım testi
 3. Yapıldı / İptal sonrası borç, hakediş ve raporların uçtan uca doğrulanması
 4. Tahsilat, gider ve öğretmen ödeme gerçek işlem kabul testi
-5. Telefon / tablet / masaüstü UX düzeltmeleri
-6. Google Sheets ↔ Supabase son veri mutabakatı
-7. Çalışan sürümün sabitlenmesi ve canlı PWA geçişi
+5. Kasa, Öğretmen Ödemeleri ve Ödevler ekranlarının aynı görsel standarda alınması
+6. Telefon / tablet / masaüstü UX düzeltmeleri
+7. Google Sheets ↔ Supabase son veri mutabakatı
+8. Çalışan sürümün sabitlenmesi ve canlı PWA geçişi
 
 ## Kabul sonrası
 

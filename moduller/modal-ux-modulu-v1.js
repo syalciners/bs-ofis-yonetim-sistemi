@@ -7,6 +7,11 @@
     const s=document.createElement('style');
     s.id='bsModalUXStil';
     s.textContent=`
+      /* V267 — Modal katmanı uygulama kabuğunun daima üzerinde kalır. */
+      body > [class*="-modal"]{
+        z-index:2000!important;
+      }
+
       /* Tüm bottom-sheet/modal içerikleri yalnız dikey kayar. */
       [class*="-sheet"]{
         overflow-x:hidden!important;
@@ -39,6 +44,16 @@
         background:linear-gradient(to top,#f8fafc 82%,rgba(248,250,252,0))!important;
       }
 
+      /* Öğrenci gibi form-buton kullanan düzenleme ekranlarının alt işlemleri de görünür kalır. */
+      [class*="-sheet"] form > [class*="-form-buton"]{
+        position:sticky!important;
+        bottom:-1px!important;
+        z-index:75!important;
+        padding-top:12px!important;
+        padding-bottom:max(4px,env(safe-area-inset-bottom))!important;
+        background:linear-gradient(to top,#f8fafc 82%,rgba(248,250,252,0))!important;
+      }
+
       /* Altbar kullanmayan tek ana submit düğmeleri de altta erişilebilir kalır. */
       [class*="-sheet"] form > button[type="submit"][class*="-kaydet"],
       [class*="-sheet"] form > button[type="submit"][class*="-devam"]{
@@ -50,6 +65,9 @@
       }
 
       @media(max-width:700px){
+        body > [class*="-modal"]{
+          inset:0!important;
+        }
         [class*="-sheet"]{
           width:100%!important;
           max-width:100vw!important;

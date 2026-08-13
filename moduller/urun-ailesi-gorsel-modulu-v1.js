@@ -22,16 +22,19 @@
     const s=document.createElement('style');
     s.id='bsUrunAilesiGorselStil';
     s.textContent=`
-      /* V269 — Finans Asistanı ile aynı BS ürün ailesi görsel sistemi. */
-      :root{--bsu-mavi:#2563eb;--bsu-mavi-acik:#eff6ff;--bsu-yazi:#0f172a;--bsu-ikincil:#64748b;--bsu-kenar:#e2e8f0;--bsu-zemin:#f5f7fb;--bsu-yesil:#16a34a;--bsu-kirmizi:#dc2626;--bsu-golge:0 7px 24px rgba(15,23,42,.05)}
-
+      /* V269 — tek aktif BS ürün ailesi görsel sistemi. */
+      :root{--bsu-mavi:#2563eb;--bsu-mavi-acik:#eff6ff;--bsu-yazi:#0f172a;--bsu-ikincil:#64748b;--bsu-kenar:#e2e8f0;--bsu-zemin:#f5f7fb;--bsu-yesil:#16a34a;--bsu-kirmizi:#dc2626;--bsu-turuncu:#d97706;--bsu-golge:0 7px 24px rgba(15,23,42,.05)}
+      html,body,#uygulama{background:var(--bsu-zemin)!important}
+      .icerik,.gorunum{min-width:0;max-width:100%}
       .alt-nav .nav-buton.aktif{background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important}
       #gorunum-anasayfa .sayfa-aciklama{color:var(--bsu-ikincil)}
-      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-baslik{color:var(--bsu-yazi)!important;font-size:27px!important;font-weight:850!important;line-height:1.08!important;letter-spacing:-.025em!important}
-      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-aciklama{color:var(--bsu-ikincil)!important}
-      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat) .ana-islem-buton{min-height:44px!important;height:auto!important;padding:0 15px!important;border:1px solid var(--bsu-mavi)!important;border-radius:13px!important;background:var(--bsu-mavi)!important;color:#fff!important;box-shadow:0 7px 18px rgba(37,99,235,.16)!important;font-weight:800!important}
 
-      /* Dersler: eski özel mavi tonlarını ürün ailesi mavisine eşitle. */
+      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-baslik-alani{align-items:center!important;margin-bottom:16px!important}
+      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-baslik{color:var(--bsu-yazi)!important;font-size:27px!important;font-weight:850!important;line-height:1.08!important;letter-spacing:-.025em!important}
+      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-aciklama{margin-top:6px!important;color:var(--bsu-ikincil)!important;line-height:1.4!important}
+      :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat) .ana-islem-buton,.bsogy-ac,.bsge-buton{min-height:44px!important;height:auto!important;padding:0 15px!important;border:1px solid var(--bsu-mavi)!important;border-radius:13px!important;background:var(--bsu-mavi)!important;background-image:none!important;color:#fff!important;box-shadow:0 7px 18px rgba(37,99,235,.16)!important;font-weight:800!important}
+
+      /* Dersler */
       #gorunum-dersler{--bsd-mavi:var(--bsu-mavi)!important;--bsd-mavi-acik:var(--bsu-mavi-acik)!important;--bsd-lacivert:var(--bsu-yazi)!important;--bsd-gri:var(--bsu-ikincil)!important;--bsd-kenar:var(--bsu-kenar)!important}
       #gorunum-dersler .ana-islem-buton,#gorunum-dersler .sekme.aktif,#gorunum-dersler .bsd-gun-ikon{background:var(--bsu-mavi)!important;background-image:none!important;color:#fff!important}
       #gorunum-dersler .sekme.aktif{box-shadow:0 6px 16px rgba(37,99,235,.16)!important}
@@ -56,15 +59,68 @@
       #gorunum-tahsilat .bsfin-kpi-kart.vurgu{border-color:#bbf7d0!important;background:#f7fef9!important}
       #gorunum-tahsilat .bsfin-kpi-kart.vurgu strong,#gorunum-tahsilat .bsfin-tutar{color:var(--bsu-yesil)!important}
 
-      /* İkincil yönetim ekranlarında aynı kart yoğunluğu. */
-      :is(#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) :is(.bsp-kart,.bsog-kart,.bsgd-bolum,.bsgd-kart,.bsrp-bolum,.bsrp-kart,.bska-liste,.bska-hesap,.bsod-liste,.bsod-kpi,.bsodev-kart,.bsay-kart){border-color:var(--bsu-kenar)!important;box-shadow:0 5px 18px rgba(15,23,42,.035)!important}
+      /* Sabit Program */
+      #gorunum-sabitprogram .bssp-arama{height:44px!important;border-color:var(--bsu-kenar)!important;border-radius:13px!important;background:#fff!important;box-shadow:0 5px 18px rgba(15,23,42,.035)!important}
+      #gorunum-sabitprogram .bssp-gun{overflow:hidden!important;border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fbfcfe!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-sabitprogram .bssp-gun-baslik{min-height:46px!important;padding:9px 13px!important;border-bottom:1px solid #e8edf4!important;background:#fbfcfe!important;color:var(--bsu-yazi)!important}
+      #gorunum-sabitprogram .bssp-gun-baslik span:last-child{padding:5px 9px;border-radius:999px;background:var(--bsu-mavi-acik);color:var(--bsu-mavi);font-size:8.5px}
+      #gorunum-sabitprogram .bssp-satir{margin:8px 9px 0!important;padding:10px 11px!important;border:1px solid #e7ecf3!important;border-radius:13px!important;background:#fff!important}
+      #gorunum-sabitprogram .bssp-satir:last-child{margin-bottom:9px!important}
+      #gorunum-sabitprogram .bssp-saat{background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important;border-radius:10px!important}
+      #gorunum-sabitprogram .bssp-ad{color:var(--bsu-yazi)!important}.bssp-detay{color:var(--bsu-ikincil)!important}
+      #gorunum-sabitprogram .bssp-rozet.tekrar{background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important}
+
+      /* Öğretmenler */
+      #gorunum-ogretmenler .bsog-grid{gap:10px!important}
+      #gorunum-ogretmenler .bsog-kart{position:relative;border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important;overflow:hidden}
+      #gorunum-ogretmenler .bsog-ad{color:var(--bsu-yazi)!important}.bsog-rol{color:var(--bsu-ikincil)!important}
+      #gorunum-ogretmenler .bsog-kpi{border:1px solid #edf1f6!important;border-radius:11px!important;background:#fbfcfe!important}
+      #gorunum-ogretmenler .bsog-kpi:first-child strong{color:var(--bsu-mavi)!important}
+      #gorunum-ogretmenler .bsog-sheet,#gorunum-ogretmenler .bsog-bolum{border-color:var(--bsu-kenar)!important}
+
+      /* Giderler */
+      #gorunum-giderler .bsgd-kpi{gap:9px!important}.bsgd-kart{border:1px solid var(--bsu-kenar)!important;border-radius:15px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-giderler .bsgd-kart:first-child{border-color:#fee2e2!important;background:linear-gradient(145deg,#fff,#fff7f7)!important}.bsgd-kart:first-child strong{color:#c24141!important}
+      #gorunum-giderler .bsgd-chip{border-color:#e2e8f0!important;background:#fff!important;color:#64748b!important}.bsgd-chip.aktif{border-color:#fecaca!important;background:#fff1f1!important;color:#c24141!important}
+      #gorunum-giderler .bsgd-bolum{border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+
+      /* Raporlar */
+      #gorunum-raporlar .bsrp-kpi{gap:9px!important}
+      #gorunum-raporlar .bsrp-kart,#gorunum-raporlar .bsrp-bolum{border:1px solid var(--bsu-kenar)!important;border-radius:16px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-raporlar .bsrp-kart strong{color:var(--bsu-yazi)!important}
+      #gorunum-raporlar .bsrp-rozet{background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important}
+
+      /* Kasa */
+      #gorunum-kasa .bska-toplam{position:relative;overflow:hidden;border:1px solid #cfe0ff!important;border-radius:18px!important;background:linear-gradient(135deg,#f7fbff,#edf4ff)!important;box-shadow:0 8px 25px rgba(37,99,235,.07)!important}
+      #gorunum-kasa .bska-toplam strong{color:#102044!important}.bska-hesaplar{gap:9px!important}
+      #gorunum-kasa .bska-hesap{border:1px solid var(--bsu-kenar)!important;border-radius:15px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-kasa .bska-chip{border-color:#e2e8f0!important;background:#fff!important;color:#64748b!important}.bska-chip.aktif{border-color:#bfdbfe!important;background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important}
+      #gorunum-kasa .bska-liste{border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-kasa .bska-tutar.gelir{color:var(--bsu-yesil)!important}.bska-tutar.gider{color:#c24141!important}
+
+      /* Öğretmen ödemeleri */
+      #gorunum-ogretmen-odemeleri .bsod-kpiler{gap:9px!important}.bsod-kpi{border:1px solid var(--bsu-kenar)!important;border-radius:15px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-ogretmen-odemeleri .bsod-kpi:nth-child(1){border-color:#dce9ff!important;background:linear-gradient(145deg,#fff,#f6f9ff)!important}.bsod-kpi:nth-child(1) strong{color:var(--bsu-mavi)!important}
+      #gorunum-ogretmen-odemeleri .bsod-kpi:nth-child(2){border-color:#d9f4e4!important;background:linear-gradient(145deg,#fff,#f4fff8)!important}.bsod-kpi:nth-child(2) strong{color:var(--bsu-yesil)!important}
+      #gorunum-ogretmen-odemeleri .bsod-kpi.kalan{border-color:#fde7c6!important;background:linear-gradient(145deg,#fff,#fff9f0)!important}.bsod-kpi.kalan strong{color:var(--bsu-turuncu)!important}
+      #gorunum-ogretmen-odemeleri .bsod-liste{border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+
+      /* Ödevler */
+      #gorunum-odevler .bsodev-arama{border-color:var(--bsu-kenar)!important;border-radius:13px!important;background:#fff!important;box-shadow:0 5px 18px rgba(15,23,42,.035)!important}
+      #gorunum-odevler .bsodev-chip{border-color:#e2e8f0!important;background:#fff!important;color:#64748b!important}.bsodev-chip.aktif{border-color:#bfdbfe!important;background:var(--bsu-mavi-acik)!important;color:var(--bsu-mavi)!important}
+      #gorunum-odevler .bsodev-kart{position:relative;border:1px solid var(--bsu-kenar)!important;border-radius:15px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important;overflow:hidden}
+      #gorunum-odevler .bsodev-kart:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#72a7ff}
+      #gorunum-odevler .bsodev-rozet.tamam{background:#eafaf1!important;color:#0c9144!important}.bsodev-rozet.gecikti{background:#fff0f0!important;color:#c24141!important}
+
+      /* Ayarlar */
+      #gorunum-ayarlar .bsay-kart{border:1px solid var(--bsu-kenar)!important;border-radius:16px!important;background:#fff!important;box-shadow:var(--bsu-golge)!important}
+      #gorunum-ayarlar .bsay-baslik{color:var(--bsu-yazi)!important}.bsay-satir{border-bottom-color:#f0f3f7!important}
 
       /* Dashboard bugünkü ders satırları ortak Ders Detayı açabildiğini hissettirir. */
       #bugunkuDersListesi [data-bs-ders-id]{cursor:pointer;transition:background .12s ease,transform .12s ease}
       #bugunkuDersListesi [data-bs-ders-id]:active{background:var(--bsu-mavi-acik)!important;transform:scale(.997)}
 
       /* Menü */
-      #gorunum-menu .sayfa-aciklama{color:var(--bsu-ikincil)!important}
       #gorunum-menu .modul-grid{gap:10px!important}
       #gorunum-menu .modul-kart{min-height:126px!important;padding:15px!important;border:1px solid var(--bsu-kenar)!important;border-radius:17px!important;background:#fff!important;box-shadow:0 5px 18px rgba(15,23,42,.035)!important}
       #gorunum-menu .bsu-menu-ikon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--bsu-mavi-acik);color:var(--bsu-mavi)}
@@ -74,28 +130,17 @@
 
       @media(max-width:700px){
         :is(#gorunum-dersler,#gorunum-ogrenciler,#gorunum-tahsilat,#gorunum-menu,#gorunum-sabitprogram,#gorunum-ogretmenler,#gorunum-giderler,#gorunum-raporlar,#gorunum-kasa,#gorunum-ogretmen-odemeleri,#gorunum-odevler,#gorunum-ayarlar) .sayfa-baslik{font-size:24px!important}
+        .icerik{width:calc(100% - 22px)!important}
         #gorunum-dersler .sayfa-baslik-alani{margin-bottom:14px!important}
+        #gorunum-ogretmenler .bsog-grid{grid-template-columns:1fr!important}
         #gorunum-menu .modul-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
         #gorunum-menu .modul-kart{min-height:116px!important;padding:13px!important;border-radius:15px!important}
-        #gorunum-menu .bsu-menu-ikon{width:34px;height:34px;border-radius:10px}
-        #gorunum-menu .bsu-menu-ikon svg{width:17px;height:17px}
-        #gorunum-menu .modul-baslik{margin-top:10px!important;font-size:11.5px!important}
-        #gorunum-menu .modul-aciklama{font-size:9.5px!important}
-
-        /* Öğretmen ödemelerinde mobilde Ödenen ve Kalan bilgisi kaybolmaz. */
-        #gorunum-ogretmen-odemeleri .bsod-satir{
-          grid-template-columns:minmax(0,1fr) auto auto!important;
-          grid-template-areas:"ad hak hak" "ad odeme kalan"!important;
-          row-gap:6px!important;
-          column-gap:10px!important;
-          align-items:center!important;
-        }
+        #gorunum-menu .bsu-menu-ikon{width:34px;height:34px;border-radius:10px}.bsu-menu-ikon svg{width:17px;height:17px}
+        #gorunum-menu .modul-baslik{margin-top:10px!important;font-size:11.5px!important}.modul-aciklama{font-size:9.5px!important}
+        #gorunum-ogretmen-odemeleri .bsod-satir{grid-template-columns:minmax(0,1fr) auto auto!important;grid-template-areas:"ad hak hak" "ad odeme kalan"!important;row-gap:6px!important;column-gap:10px!important;align-items:center!important}
         #gorunum-ogretmen-odemeleri .bsod-satir>div:first-child{grid-area:ad!important}
-        #gorunum-ogretmen-odemeleri .bsod-satir .bsod-rakam:nth-child(2){grid-area:hak!important;display:block!important}
-        #gorunum-ogretmen-odemeleri .bsod-satir .bsod-rakam:nth-child(3){grid-area:odeme!important;display:block!important}
-        #gorunum-ogretmen-odemeleri .bsod-satir .bsod-rakam:nth-child(4){grid-area:kalan!important;display:block!important}
-        #gorunum-ogretmen-odemeleri .bsod-rakam span{font-size:7.5px!important}
-        #gorunum-ogretmen-odemeleri .bsod-rakam strong{font-size:10px!important}
+        #gorunum-ogretmen-odemeleri .bsod-satir .bsod-rakam:nth-child(2){grid-area:hak!important;display:block!important}.bsod-satir .bsod-rakam:nth-child(3){grid-area:odeme!important;display:block!important}.bsod-satir .bsod-rakam:nth-child(4){grid-area:kalan!important;display:block!important}
+        #gorunum-ogretmen-odemeleri .bsod-rakam span{font-size:7.5px!important}.bsod-rakam strong{font-size:10px!important}
       }
     `;
     document.head.appendChild(s);

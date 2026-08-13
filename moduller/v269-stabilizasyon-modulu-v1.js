@@ -2,7 +2,7 @@
   if(window.BSV269StabilizasyonModuluV1) return;
   window.BSV269StabilizasyonModuluV1=true;
 
-  const SURUM='V270';
+  const SURUM='V272';
 
   function ayarlarSurumunuDuzelt(){
     const hedef=document.getElementById('bsayIcerik');
@@ -91,7 +91,7 @@
         iletisim();
       };
       uygula();
-    }catch(e){console.warn('V270 öğrenci detay doğrulama:',e);}
+    }catch(e){console.warn('V272 öğrenci detay doğrulama:',e);}
   }
 
   function profilMenuKullaniciButonunuDuzelt(){

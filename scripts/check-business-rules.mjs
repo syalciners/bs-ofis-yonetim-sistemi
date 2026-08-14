@@ -20,8 +20,10 @@ const teacherPaymentQuick = read('src/components/TeacherPaymentQuickForm.tsx')
 const calendar = read('src/pages/CalendarPage.tsx')
 const students = read('src/pages/StudentsPage.tsx')
 const teachers = read('src/pages/TeachersPage.tsx')
+const systemPage = read('src/pages/SystemPage.tsx')
 const bottomNav = read('src/components/BottomNav.tsx')
 const format = read('src/lib/format.ts')
+const uxOverrides = read('src/ux-overrides.css')
 const allSource = collectSource('src')
 
 const checks = []
@@ -41,6 +43,9 @@ expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<Te
 expectText('Öğrenci hızlı tahsilat formu öğrenciyi tekrar seçtirmez', studentCollectionQuick, 'ogrenci_id:studentId')
 expectText('Öğrenci hızlı tahsilat formu güncel bakiyeyi gösterir', studentCollectionQuick, 'studentDebt(data,studentId)')
 expectText('Öğrenci ekranı hızlı tahsilat formunu kullanır', students, '<StudentCollectionForm studentId={collectionId}')
+expectText('Statik KPI kartları tıklanabilir imleç göstermez', uxOverrides, '.kpi-card:not(button){cursor:default}')
+expectText('Gerçek KPI butonları tıklanabilir kalır', uxOverrides, 'button.kpi-card{cursor:pointer}')
+expectText('Sistem ekranı kayıt güvenliğini kullanıcı dilinde açıklar', systemPage, 'Tahsilat, gider, ödeme ve ders işlemleri kontrollü olarak birlikte kaydedilir.')
 expectText('Tahsilat güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('tahsilat_kaydet_guvenli_v1'")
 expectText('Gider güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('gider_kaydet_guvenli_v1'")
 expectText('Öğretmen ödemesi güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('ogretmen_odeme_kaydet_guvenli_v2'")
@@ -68,6 +73,7 @@ rejectRegex('Frontend doğrudan update yapmaz', allSource, /\.update\s*\(/, 'Fro
 rejectRegex('Frontend doğrudan delete yapmaz', allSource, /\.delete\s*\(/, 'Frontend kaynaklarında doğrudan .delete() kullanımı bulundu.')
 rejectRegex('Frontend dolar para birimi kullanmaz', allSource, /currency\s*:\s*['"]USD['"]/i, 'Frontend kaynaklarında USD para birimi bulundu.')
 rejectRegex('Frontend dolar simgeli ikon kullanmaz', allSource, /\b(?:CircleDollarSign|BadgeDollarSign|DollarSign)\b/, 'Frontend kaynaklarında dolar işaretli ikon bulundu.')
+rejectRegex('Sistem ekranı teknik altyapı jargonunu kullanıcıya göstermez', systemPage, /\b(?:Supabase|PostgreSQL|RLS|RPC|transaction|secret)\b/i, 'Sistem ekranında kullanıcıya gösterilmemesi gereken teknik altyapı terimi bulundu.')
 
 const collectionStart = forms.indexOf('export function CollectionForm')
 const collectionEnd = forms.indexOf('export function ExpenseForm')

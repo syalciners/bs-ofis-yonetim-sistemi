@@ -6,10 +6,12 @@ import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
 import { Sheet } from '../components/Sheet'
 import { LessonForm } from '../components/forms'
+import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import type { Ders } from '../lib/types'
 import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
 import { isManagerTeacher, teacherTone } from '../lib/teacherTone'
 import { createWeek } from '../services/officeService'
+import { reviewWeekPlanning, type WeekPlanningReview } from '../services/programSuggestionService'
 import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
@@ -22,7 +24,7 @@ const weekChoices=[
 export function CalendarPage(){
   const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams()
   const initialTeacher=params.get('ogretmen')||sessionStorage.getItem('bs-takvim-ogretmen')||'tum'
-  const[weekOffset,setWeekOffset]=useState(0);const[teacher,setTeacher]=useState(initialTeacher);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[weekBusy,setWeekBusy]=useState(false)
+  const[weekOffset,setWeekOffset]=useState(0);const[teacher,setTeacher]=useState(initialTeacher);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[weekBusy,setWeekBusy]=useState(false);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
   const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
   const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(teacher==='tum'||x.ogretmen_id===teacher)&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,teacher,monday,end])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-ogretmen',teacher)},[teacher])
@@ -32,11 +34,14 @@ export function CalendarPage(){
   const otherTeachers=activeTeachers.filter(x=>!isManagerTeacher(x.ad_soyad))
   const weekProgramCount=lessons.filter(x=>x.program_id).length
 
+  const createWeekNow=async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
+  const prepareWeek=async()=>{setWeekBusy(true);try{const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
+
   return <div className="page-stack calendar-v2">
     <section className="page-title-row"><div><span className="eyebrow">DERS PROGRAMI</span><h1>Takvim</h1><p>Haftayı seç, öğretmeni filtrele, dersi yönet.</p></div><button className="primary-btn desktop-only" onClick={()=>setNewLesson(true)}><CalendarPlus size={17}/>Ders Ekle</button></section>
 
     <section className="week-switcher" aria-label="Hafta seçimi">
-      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>setWeekOffset(x.offset)}>{x.label}</button>)}
+      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null)}}>{x.label}</button>)}
     </section>
     <div className="week-range"><CalendarDays size={16}/><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
 
@@ -52,7 +57,7 @@ export function CalendarPage(){
 
     <section className="calendar-command-bar">
       <div><b>{teacher==='tum'?'Tüm Öğretmenler':activeTeachers.find(x=>x.ogretmen_id===teacher)?.ad_soyad||'Öğretmen'}</b><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
-      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="primary-btn" disabled={weekBusy} onClick={async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}}><CalendarCheck2 size={17}/>{weekBusy?'Hazırlanıyor…':'Haftayı Oluştur'}</button></div>
+      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="primary-btn" disabled={weekBusy} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekBusy?'Kontrol ediliyor…':'Haftayı Oluştur'}</button></div>
     </section>
 
     <section className="week-agenda">
@@ -65,5 +70,6 @@ export function CalendarPage(){
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
     <Sheet open={newLesson} title="Tek Seferlik Ders" subtitle="Sabit programı değiştirmez." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
+    <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

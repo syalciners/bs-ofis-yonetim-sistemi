@@ -44,6 +44,8 @@ expectText('Genel hızlı tahsilat borcu tutara aktarabilir', collectionQuick, '
 expectText('Ana Sayfa bakiye destekli hızlı tahsilat formunu kullanır', overview, '<CollectionQuickForm onDone={()=>setModal(null)}')
 expectText('Ana Sayfa açık bakiyeli öğrencileri dikkat alanına taşır', overview, 'öğrencide açık bakiye')
 expectText('Açık bakiye dikkat kartı borçlu öğrencilere gider', overview, "go:()=>nav('/ogrenciler?filtre=borclu')")
+expectText('Öğretmen ödeme formu gelecek dönemleri gizler', teacherPaymentQuick, 'x.aktif !== false && x.baslangic_tarihi <= today')
+expectText('Öğretmen ödeme dönemleri en güncelden eskiye sıralanır', teacherPaymentQuick, 'b.baslangic_tarihi.localeCompare(a.baslangic_tarihi)')
 expectText('Öğretmen ödeme formu bugünün hakediş dönemini otomatik bulur', teacherPaymentQuick, "today >= x.baslangic_tarihi && today <= x.bitis_tarihi")
 expectText('Öğretmen ödeme formu iptal ödemeleri kalan hakedişten düşmez', teacherPaymentQuick, "x.hakedis_donemi_id === period && !x.iptal_mi")
 expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<TeacherPaymentQuickForm teacherId={payment}')

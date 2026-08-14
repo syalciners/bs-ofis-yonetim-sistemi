@@ -1,0 +1,178 @@
+/* Detay ekranı son katman düzeltmeleri: yatay stabilite, silme alanı ve üç durumlu ders akışı. */
+.teachers-v2 .sheet-panel,
+.teachers-v2 .sheet-body,
+.teachers-v2 .profile-detail-stack,
+.students-v2 .sheet-panel,
+.students-v2 .sheet-body,
+.lesson-detail-v2{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+
+/* Öğretmen detayında uzun branşlar ve kartlar Sheet genişliğini büyütemez. */
+.teachers-v2 .profile-detail-hero{
+  width:100%;
+  min-width:0;
+  grid-template-columns:auto minmax(0,1fr) auto !important;
+  align-items:start;
+}
+.teachers-v2 .profile-detail-copy,
+.teachers-v2 .profile-chip-row,
+.teachers-v2 .profile-focus-grid,
+.teachers-v2 .detail-action-cards,
+.teachers-v2 .detail-history-list{
+  min-width:0;
+  max-width:100%;
+}
+.teachers-v2 .profile-detail-copy>strong{
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+}
+.teachers-v2 .profile-chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  overflow:hidden;
+}
+.teachers-v2 .profile-chip-row small{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.teachers-v2 .profile-focus-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+/* Öğretmen düzenleme ekranında branş seçimi okunaklı ve sabit genişlikte. */
+.teachers-v2 .check-grid{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+.teachers-v2 .check-card{
+  width:100%;
+  min-width:0;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  text-align:left !important;
+  padding:10px 12px !important;
+}
+.teachers-v2 .check-card input{flex:0 0 auto}
+.teachers-v2 .check-card span{
+  min-width:0;
+  max-width:100%;
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+  text-align:left !important;
+}
+
+/* Öğrenci düzenleme ekranındaki kontrollü silme alanı. */
+.student-edit-panel{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:grid;
+  gap:14px;
+  overflow-x:hidden;
+}
+.record-danger-zone{
+  width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  border:1px solid #fecaca;
+  border-radius:14px;
+  background:#fffafa;
+}
+.record-danger-zone>div{display:grid;gap:3px;min-width:0}
+.record-danger-zone b{font-size:10px;color:#991b1b}
+.record-danger-zone span{font-size:8.5px;line-height:1.4;color:#7f1d1d;overflow-wrap:anywhere}
+.record-danger-zone .danger-btn{flex:0 0 auto;white-space:nowrap}
+
+/* Ders detayı: yalnız üç temel durum, her zaman görünür. */
+.lesson-status-three{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.lesson-status-button{
+  min-width:0;
+  min-height:68px;
+  border-radius:14px;
+  padding:9px 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-align:left;
+  cursor:pointer;
+  transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease;
+}
+.lesson-status-button>span:last-child{display:grid;gap:2px;min-width:0}
+.lesson-status-button b{font-size:10.5px;line-height:1.15}
+.lesson-status-button small{font-size:8px;line-height:1.3;color:#64748b;white-space:normal}
+.lesson-status-button-icon{width:31px;height:31px;flex:0 0 31px;border-radius:10px;display:grid;place-items:center}
+.lesson-status-button-icon svg{width:16px;height:16px}
+.lesson-status-button.blue{border:1.5px solid #93c5fd;background:#eff6ff;color:#1d4ed8}
+.lesson-status-button.blue .lesson-status-button-icon{background:#dbeafe;color:#1d4ed8}
+.lesson-status-button.green{border:1.5px solid #86efac;background:#f0fdf4;color:#15803d}
+.lesson-status-button.green .lesson-status-button-icon{background:#dcfce7;color:#15803d}
+.lesson-status-button.red{border:1.5px solid #fca5a5;background:#fef2f2;color:#b91c1c}
+.lesson-status-button.red .lesson-status-button-icon{background:#fee2e2;color:#b91c1c}
+.lesson-status-button:not(.current):hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(15,23,42,.08)}
+.lesson-status-button.current{border-width:2px;box-shadow:0 0 0 2px rgba(15,23,42,.04) inset}
+.lesson-status-button:disabled{opacity:1;cursor:default}
+.lesson-status-badge.cancelled{background:#fee2e2;color:#b91c1c}
+
+@media(max-width:700px){
+  .teachers-v2 .profile-detail-hero{
+    grid-template-columns:auto minmax(0,1fr) !important;
+  }
+  .teachers-v2 .profile-status{
+    grid-column:1/-1;
+    justify-self:start;
+  }
+  .teachers-v2 .profile-focus-grid{
+    grid-template-columns:1fr !important;
+  }
+  .teachers-v2 .check-grid{
+    grid-template-columns:1fr !important;
+  }
+  .record-danger-zone{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .record-danger-zone .danger-btn{width:100%}
+}
+
+@media(max-width:520px){
+  .teachers-v2 .detail-action-cards{
+    grid-template-columns:1fr !important;
+  }
+  .lesson-status-three{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+  }
+  .lesson-status-button{
+    min-height:62px;
+    padding:7px 5px;
+    display:grid;
+    justify-items:center;
+    text-align:center;
+    gap:4px;
+  }
+  .lesson-status-button-icon{width:28px;height:28px;flex-basis:28px}
+  .lesson-status-button small{display:none}
+  .lesson-status-button b{font-size:9.5px}
+}

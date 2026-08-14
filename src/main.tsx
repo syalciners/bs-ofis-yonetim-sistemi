@@ -7,6 +7,7 @@ import './styles.css'
 import './ux-overrides.css'
 import './detail-polish.css'
 import './navigation-stability.css'
+import './detail-layout-fixes.css'
 
 registerSW({ immediate: true })
 

@@ -18,6 +18,8 @@ jobs:
           node-version: 22
       - name: Kritik iş kuralları
         run: npm run check:rules
+      - name: Takvim UX kuralları
+        run: node scripts/check-calendar-ux.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.html && test -f dist/manifest.webmanifest

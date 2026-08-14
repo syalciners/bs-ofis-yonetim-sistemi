@@ -2,9 +2,7 @@ name: Build doğrulama
 
 on:
   push:
-    branches: [main, v1-temiz-gelistirme]
-  pull_request:
-    branches: [main]
+    branches: [v1-gelistirme, clean-v1-golden]
   workflow_dispatch:
 
 permissions:

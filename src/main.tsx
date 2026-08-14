@@ -14,6 +14,7 @@ import './lesson-form-fix.css'
 import './sheet-standard.css'
 import './sheet-footer-fixed.css'
 import './report-corporate.css'
+import './assignment-whatsapp.css'
 
 registerSW({ immediate: true })
 

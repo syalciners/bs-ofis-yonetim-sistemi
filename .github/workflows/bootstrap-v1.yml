@@ -22,8 +22,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .bootstrap/source.part.00 .bootstrap/source.part.01 .bootstrap/rest.part.* > /tmp/source.b64
+          cat \
+            .bootstrap/source.fix.00a \
+            .bootstrap/source.fix.00b \
+            .bootstrap/source.part.01 \
+            .bootstrap/rest.part.00 \
+            .bootstrap/rest.part.01 \
+            .bootstrap/rest.part.02 \
+            .bootstrap/rest.part.03 \
+            .bootstrap/rest.part.04 \
+            .bootstrap/rest.part.05 \
+            .bootstrap/rest.fix.06 \
+            .bootstrap/rest.part.07 \
+            .bootstrap/rest.part.08 \
+            .bootstrap/rest.part.09 \
+            .bootstrap/rest.part.10 \
+            .bootstrap/rest.part.11 \
+            .bootstrap/rest.part.12 \
+            .bootstrap/rest.part.13 \
+            .bootstrap/rest.part.14 \
+            > /tmp/source.b64
           base64 -d /tmp/source.b64 > /tmp/source.zip
+          unzip -tq /tmp/source.zip
           mkdir -p /tmp/v1
           unzip -q /tmp/source.zip -d /tmp/v1
 

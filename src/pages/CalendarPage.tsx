@@ -1,51 +1,64 @@
-import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Clock3, Eye, MoveRight, PauseCircle, Plus, Repeat2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { CalendarCheck2, CalendarDays, CalendarPlus, Plus } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
 import { Sheet } from '../components/Sheet'
-import { LessonForm, ProgramForm, ProgramMoveForm } from '../components/forms'
-import type { Ders, SabitProgram } from '../lib/types'
-import { addDays, fullDate, money, mondayOf, shortDate, time, todayISO } from '../lib/format'
-import { branchName, roomName, studentName, teacherName } from '../services/metrics'
-import { createWeek, previewProgram, saveProgram, skipProgramDate } from '../services/officeService'
+import { LessonForm } from '../components/forms'
+import type { Ders } from '../lib/types'
+import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
+import { isManagerTeacher, teacherTone } from '../lib/teacherTone'
+import { createWeek } from '../services/officeService'
 import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
+const weekChoices=[
+  {offset:-1,label:'Önceki Hafta'},
+  {offset:0,label:'Bu Hafta'},
+  {offset:1,label:'Gelecek Hafta'},
+]
 
 export function CalendarPage(){
-  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams();const initialTeacher=params.get('ogretmen')||'tum';const[mode,setMode]=useState<'gun'|'hafta'|'program'>(()=>initialTeacher!=='tum'?'hafta':window.innerWidth<650?'gun':'hafta');const[date,setDate]=useState(todayISO());const[teacher,setTeacher]=useState(initialTeacher);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[programForm,setProgramForm]=useState<SabitProgram|null|undefined>(undefined);const[selectedProgram,setSelectedProgram]=useState<SabitProgram|null>(null);const[moveProgram,setMoveProgram]=useState<SabitProgram|null>(null);const[weekBusy,setWeekBusy]=useState(false);const[preview,setPreview]=useState<any[]|null>(null)
-  const monday=mondayOf(date),end=addDays(monday,7)
-  const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>{if(teacher!=='tum'&&x.ogretmen_id!==teacher)return false;if(mode==='gun')return x.tarih===date;if(mode==='hafta')return (x.tarih||'')>=monday&&(x.tarih||'')<end;return false}).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,teacher,mode,date,monday,end])
+  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams()
+  const initialTeacher=params.get('ogretmen')||sessionStorage.getItem('bs-takvim-ogretmen')||'tum'
+  const[weekOffset,setWeekOffset]=useState(0);const[teacher,setTeacher]=useState(initialTeacher);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[weekBusy,setWeekBusy]=useState(false)
+  const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
+  const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(teacher==='tum'||x.ogretmen_id===teacher)&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,teacher,monday,end])
+  useEffect(()=>{sessionStorage.setItem('bs-takvim-ogretmen',teacher)},[teacher])
   if(!data)return null
-  const programs=data.sabitProgramlar.filter(x=>teacher==='tum'||x.ogretmen_id===teacher).sort((a,b)=>dayNames.indexOf(a.haftanin_gunu||'')-dayNames.indexOf(b.haftanin_gunu||'')||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
-  const changeDate=(n:number)=>setDate(addDays(date,mode==='hafta'?n*7:n))
-  const toggleProgram=async(p:SabitProgram)=>{try{await saveProgram({...p,program_durumu:p.program_durumu==='Pasif'?'Aktif':'Pasif'});await refresh();toast(`Program ${p.program_durumu==='Pasif'?'aktif':'pasif'} yapıldı.`);setSelectedProgram(null)}catch(e:any){toast(e.message||String(e),'error')}}
-  const skipNext=async(p:SabitProgram)=>{try{const r:any=await previewProgram(p.program_id,todayISO(),1);const dates=r?.tarihler||[];if(!dates.length)throw new Error('Atlanabilecek gelecek ders bulunamadı.');await skipProgramDate(p.program_id,dates[0].tarih,'Kullanıcı tarafından atlandı');await refresh();toast(`${fullDate(dates[0].tarih)} tarihli ders atlandı.`);setSelectedProgram(null)}catch(e:any){toast(e.message||String(e),'error')}}
-  const showPreview=async(p:SabitProgram)=>{try{const r:any=await previewProgram(p.program_id,todayISO(),10);setPreview(r?.tarihler||[])}catch(e:any){toast(e.message||String(e),'error')}}
-  return <div className="page-stack">
-    <section className="page-title-row"><div><span className="eyebrow">DERS YÖNETİMİ</span><h1>Takvim</h1><p>Planla, sonucu kaydet, gerektiğinde taşı.</p></div><button className="primary-btn desktop-only" onClick={()=>setNewLesson(true)}><CalendarPlus size={17}/>Ders Ekle</button></section>
-    <div className="segmented"><button className={mode==='gun'?'active':''} onClick={()=>setMode('gun')}>Gün</button><button className={mode==='hafta'?'active':''} onClick={()=>setMode('hafta')}>Hafta</button><button className={mode==='program'?'active':''} onClick={()=>setMode('program')}>Sabit Program</button></div>
-    <section className="toolbar-card">
-      {mode!=='program'?<><button className="icon-btn" onClick={()=>changeDate(-1)}><ChevronLeft size={18}/></button><button className="date-jump" onClick={()=>setDate(todayISO())}><b>{mode==='gun'?fullDate(date):`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`}</b><span>{date===todayISO()?'Bugün':'Bugüne dön'}</span></button><button className="icon-btn" onClick={()=>changeDate(1)}><ChevronRight size={18}/></button></>:<div className="toolbar-title"><Repeat2 size={18}/><span><b>Sabit Ders Programı</b><small>Tekrar eden ders şablonları</small></span></div>}
-      <select value={teacher} onChange={e=>setTeacher(e.target.value)}><option value="tum">Tüm öğretmenler</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select>
+  const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif')
+  const weekProgramCount=lessons.filter(x=>x.program_id).length
+
+  return <div className="page-stack calendar-v2">
+    <section className="page-title-row"><div><span className="eyebrow">DERS PROGRAMI</span><h1>Takvim</h1><p>Haftayı seç, öğretmeni filtrele, dersi yönet.</p></div><button className="primary-btn desktop-only" onClick={()=>setNewLesson(true)}><CalendarPlus size={17}/>Ders Ekle</button></section>
+
+    <section className="week-switcher" aria-label="Hafta seçimi">
+      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>setWeekOffset(x.offset)}>{x.label}</button>)}
+    </section>
+    <div className="week-range"><CalendarDays size={16}/><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
+
+    <section className="teacher-filter-wrap">
+      <div className="teacher-filter" aria-label="Öğretmen filtresi">
+        <button className={`teacher-chip teacher-all ${teacher==='tum'?'active':''}`} onClick={()=>setTeacher('tum')}>Tümü</button>
+        {activeTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''} ${isManagerTeacher(x.ad_soyad)?'manager':''}`} onClick={()=>setTeacher(x.ogretmen_id)}><span>{x.ad_soyad}</span>{isManagerTeacher(x.ad_soyad)&&<small>Yönetici</small>}</button>)}
+      </div>
     </section>
 
-    {mode==='gun'&&<div className="calendar-actions"><button className="primary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button></div>}
-    {mode==='hafta'&&<div className="calendar-actions"><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Tek Seferlik Ders</button><button className="primary-btn" disabled={weekBusy} onClick={async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}}>{weekBusy?'Hazırlanıyor…':'Haftayı Oluştur'}</button></div>}
+    <section className="calendar-command-bar">
+      <div><b>{teacher==='tum'?'Tüm Öğretmenler':activeTeachers.find(x=>x.ogretmen_id===teacher)?.ad_soyad||'Öğretmen'}</b><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
+      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="primary-btn" disabled={weekBusy} onClick={async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}}><CalendarCheck2 size={17}/>{weekBusy?'Hazırlanıyor…':'Haftayı Oluştur'}</button></div>
+    </section>
 
-    {mode==='gun'&&<section className="list-card">{lessons.length?lessons.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="calm-empty"><CalendarDays/><b>Bu gün için ders yok.</b><span>Ders ekleyebilir veya Hafta görünümünden sabit programı oluşturabilirsin.</span></div>}</section>}
-    {mode==='hafta'&&<section className="week-board">{Array.from({length:7},(_,i)=>addDays(monday,i)).map((d,i)=>{const items=lessons.filter(x=>x.tarih===d);return <div className="day-column" key={d}><header><b>{dayNames[i]}</b><span>{shortDate(d)} · {items.length}</span></header><div>{items.length?items.map(x=><LessonCard compact key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<span className="day-empty">Ders yok</span>}</div></div>})}</section>}
-    {mode==='program'&&<><div className="calendar-actions"><button className="primary-btn" onClick={()=>setProgramForm(null)}><Plus size={17}/>Sabit Ders Ekle</button></div><section className="program-list">{programs.map(p=><button className={`program-card ${p.program_durumu==='Pasif'||p.aktif===false?'muted-card':''}`} key={p.program_id} onClick={()=>setSelectedProgram(p)}><div className="program-time"><b>{p.haftanin_gunu}</b><span>{time(p.baslangic_saati)}</span></div><div className="program-main"><strong>{studentName(data,p.ogrenci_id)}</strong><small>{teacherName(data,p.ogretmen_id)} · {branchName(data,p.brans_id)} · {roomName(data,p.derslik_id)}</small><span>{p.tekrar_sikligi} · {p.program_durumu||'Aktif'}</span></div><div className="program-price"><b>{money(p.ogrenci_birim_ucreti)}</b><small>öğrenci / ders</small></div></button>)}</section></>}
+    <section className="week-agenda">
+      {Array.from({length:7},(_,i)=>addDays(monday,i)).map((date,i)=>{const items=lessons.filter(x=>x.tarih===date);const isToday=date===todayISO();return <div className={`agenda-day ${isToday?'today':''}`} key={date}>
+        <header><div><b>{dayNames[i]}</b>{isToday&&<span className="today-pill">Bugün</span>}</div><span>{shortDate(date)} · {items.length} ders</span></header>
+        <div className="agenda-lessons">{items.length?items.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="agenda-empty">Ders yok</div>}</div>
+      </div>})}
+    </section>
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
     <Sheet open={newLesson} title="Tek Seferlik Ders" subtitle="Sabit programı değiştirmez." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
-    <Sheet open={programForm!==undefined} title={programForm?'Sabit Programı Düzenle':'Yeni Sabit Ders'} subtitle="Tekrar eden ders şablonu" onClose={()=>setProgramForm(undefined)}>{programForm!==undefined&&<ProgramForm program={programForm||undefined} onDone={()=>setProgramForm(undefined)} onCancel={()=>setProgramForm(undefined)}/>}</Sheet>
-    <Sheet open={!!selectedProgram&&!preview} title={selectedProgram?studentName(data,selectedProgram.ogrenci_id):'Program'} subtitle={selectedProgram?`${selectedProgram.haftanin_gunu} · ${time(selectedProgram.baslangic_saati)} · ${selectedProgram.tekrar_sikligi}`:''} onClose={()=>setSelectedProgram(null)}>{selectedProgram&&<div className="action-list"><button onClick={()=>{setProgramForm(selectedProgram);setSelectedProgram(null)}}><span className="action-round blue"><Clock3/></span><span><b>Düzenle</b><small>Gün, saat, öğretmen, ücret veya tekrar</small></span></button><button onClick={()=>{setMoveProgram(selectedProgram);setSelectedProgram(null)}}><span className="action-round blue"><MoveRight/></span><span><b>Bu Haftaya Özel Değiştir</b><small>Sabit programı bozmadan tek tarihi taşı</small></span></button><button onClick={()=>void showPreview(selectedProgram)}><span className="action-round teal"><Eye/></span><span><b>Gelecek Tarihler</b><small>Önümüzdeki dersleri önizle</small></span></button><button onClick={()=>void skipNext(selectedProgram)}><span className="action-round orange"><PauseCircle/></span><span><b>Sonraki Dersi Atla</b><small>Sabit program kalır, tek tarih atlanır</small></span></button><button onClick={()=>void toggleProgram(selectedProgram)}><span className="action-round red"><Repeat2/></span><span><b>{selectedProgram.program_durumu==='Pasif'?'Aktif Yap':'Pasif Yap'}</b><small>{selectedProgram.program_durumu==='Pasif'?'Programı tekrar kullan':'Yeni ders üretimini durdur'}</small></span></button></div>}</Sheet>
-
-    <Sheet open={!!moveProgram} title="Bu Haftaya Özel Değiştir" subtitle={moveProgram?`${studentName(data,moveProgram.ogrenci_id)} · sabit program değişmez`:''} onClose={()=>setMoveProgram(null)}>{moveProgram&&<ProgramMoveForm program={moveProgram} onDone={()=>setMoveProgram(null)} onCancel={()=>setMoveProgram(null)}/>}</Sheet>
-    <Sheet open={!!preview} title="Gelecek Tarihler" subtitle={selectedProgram?`${studentName(data,selectedProgram.ogrenci_id)} · ${selectedProgram.tekrar_sikligi}`:''} onClose={()=>setPreview(null)}>{preview&&<div className="preview-list">{preview.map((x:any,i:number)=><div className="detail-row" key={i}><span>{fullDate(x.tarih)}</span><b>{String(x.saat||selectedProgram?.baslangic_saati||'').slice(0,5)}</b></div>)}</div>}</Sheet>
   </div>
 }

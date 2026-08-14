@@ -1,8 +1,9 @@
-import { BookOpenCheck, FileBarChart, GraduationCap, HeartPulse, Settings } from 'lucide-react'
+import { BookOpenCheck, FileBarChart, GraduationCap, HeartPulse, Repeat2, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function MorePage(){const nav=useNavigate();const items=[
   {to:'/ogretmenler',Icon:GraduationCap,title:'Öğretmenler',text:'Hakediş, program ve iletişim'},
+  {to:'/sabit-program',Icon:Repeat2,title:'Sabit Ders Programı',text:'Tekrar eden ders şablonları'},
   {to:'/odevler',Icon:BookOpenCheck,title:'Ödevler',text:'Bekleyen ve tamamlanan ödevler'},
   {to:'/raporlar',Icon:FileBarChart,title:'Raporlar',text:'Öğrenci, öğretmen ve kurum özetleri'},
   {to:'/ayarlar',Icon:Settings,title:'Ayarlar',text:'Kullanıcı ve uygulama tercihleri'},

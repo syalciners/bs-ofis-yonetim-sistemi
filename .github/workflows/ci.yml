@@ -2,7 +2,7 @@ name: Build doğrulama
 
 on:
   push:
-    branches: [v1-gelistirme, clean-v1-golden]
+    branches: [v1-gelistirme, v1-takvim-yenileme, clean-v1-golden]
   workflow_dispatch:
 
 permissions:
@@ -18,6 +18,8 @@ jobs:
           node-version: 22
       - name: Kritik iş kuralları
         run: npm run check:rules
+      - name: Takvim UX kuralları
+        run: node scripts/check-calendar-ux.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.html && test -f dist/manifest.webmanifest

@@ -1,4 +1,4 @@
-import { AlertCircle, CalendarCheck2, CalendarPlus, CircleDollarSign, GraduationCap, PlusCircle, ReceiptText, UserPlus, WalletCards } from 'lucide-react'
+import { AlertCircle, Banknote, CalendarCheck2, CalendarPlus, GraduationCap, PlusCircle, ReceiptText, UserPlus, WalletCards } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -26,13 +26,13 @@ export function OverviewPage() {
 
     <section className="kpi-grid four">
       <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Dersler</span><strong>{metrics.today.length}</strong><small>{metrics.today.filter(x=>x.ders_durumu==='Planlandı').length} planlandı</small></button>
-      <button className="kpi-card blue" onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="kpi-icon"><CircleDollarSign/></div><span>Bu Ay Tahsilat</span><strong>{money(metrics.collections)}</strong><small>gerçek nakit girişi</small></button>
+      <button className="kpi-card blue" onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="kpi-icon"><Banknote/></div><span>Bu Ay Tahsilat</span><strong>{money(metrics.collections)}</strong><small>gerçek nakit girişi</small></button>
       <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>öğrenci bakiyeleri</small></button>
       <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>Öğretmen Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
     </section>
 
     <section><div className="section-heading"><div><h2>Hızlı İşlemler</h2><span>tek dokunuş</span></div></div><div className="quick-actions">
-      <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><CircleDollarSign/></span><b>Tahsilat Al</b><small>öğrenci ödemesi</small></button>
+      <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>öğrenci ödemesi</small></button>
       <button onClick={()=>setModal('lesson')}><span className="quick-icon blue"><CalendarPlus/></span><b>Ders Ekle</b><small>tek seferlik ders</small></button>
       <button onClick={()=>setModal('student')}><span className="quick-icon orange"><UserPlus/></span><b>Öğrenci Ekle</b><small>yeni kayıt</small></button>
       <button disabled={weekBusy} onClick={async()=>{setWeekBusy(true);try{const r:any=await createWeek(mondayOf());await refresh();toast(`Hafta hazırlandı${r?.olusturulan!==undefined?`: ${r.olusturulan} ders oluşturuldu`:'.'}`)}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}}><span className="quick-icon green"><PlusCircle/></span><b>{weekBusy?'Hazırlanıyor…':'Haftayı Oluştur'}</b><small>sabit programdan</small></button>

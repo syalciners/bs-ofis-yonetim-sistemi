@@ -2,6 +2,7 @@ import { FileText, GraduationCap, Printer, School, UserRound } from 'lucide-reac
 import { useEffect, useState } from 'react'
 import { useAppData } from '../components/AppDataProvider'
 import { fullDate, money, todayISO } from '../lib/format'
+import { reportFilename } from '../lib/reportFilename'
 import { monthCollections, monthExpenses, monthRevenue, monthTeacherPayments, studentDebt } from '../services/metrics'
 
 type ReportType='kurum'|'ogrenci'|'ogretmen'
@@ -22,9 +23,18 @@ export function ReportsPage(){
   const selectedPeriod=periods.find(x=>x.hakedis_donemi_id===teacherPeriod)
   const periodText=type==='kurum'?monthLabel(today):type==='ogrenci'?'Tüm kayıt dönemi':selectedPeriod?.donem_adi||'Dönem seçilmedi'
   const subjectText=type==='kurum'?'BS Ofis':type==='ogrenci'?selectedStudent?.ad_soyad||'Öğrenci seçilmedi':selectedTeacher?.ad_soyad||'Öğretmen seçilmedi'
+  const pdfFilename=reportFilename({type,today,studentName:selectedStudent?.ad_soyad,teacherName:selectedTeacher?.ad_soyad,periodStart:selectedPeriod?.baslangic_tarihi})
+  const handlePrint=()=>{
+    const previousTitle=document.title
+    const restore=()=>{if(document.title===pdfFilename)document.title=previousTitle}
+    document.title=pdfFilename
+    window.addEventListener('afterprint',restore,{once:true})
+    window.print()
+    window.setTimeout(restore,30000)
+  }
 
   return <div className="page-stack report-page">
-    <section className="page-title-row no-print"><div><span className="eyebrow">RAPORLAR</span><h1>Raporlar</h1><p>Yönetim, öğrenci ve öğretmen raporlarını kurumsal belge düzeninde görüntüle.</p></div><button className="secondary-btn" onClick={()=>window.print()}><Printer size={17}/>Yazdır / PDF</button></section>
+    <section className="page-title-row no-print"><div><span className="eyebrow">RAPORLAR</span><h1>Raporlar</h1><p>Yönetim, öğrenci ve öğretmen raporlarını kurumsal belge düzeninde görüntüle.</p></div><button className="secondary-btn" onClick={handlePrint}><Printer size={17}/>Yazdır / PDF</button></section>
     <section className="report-choice no-print"><button className={type==='kurum'?'active':''} onClick={()=>setType('kurum')}><School/><span><b>Kurum Yönetim Raporu</b><small>Aylık operasyon ve finans özeti</small></span></button><button className={type==='ogrenci'?'active':''} onClick={()=>setType('ogrenci')}><UserRound/><span><b>Öğrenci Hesap Ekstresi</b><small>Ders borcu, tahsilat ve bakiye</small></span></button><button className={type==='ogretmen'?'active':''} onClick={()=>setType('ogretmen')}><GraduationCap/><span><b>Öğretmen Hakedişi</b><small>Dönem ders, hakediş ve ödeme</small></span></button></section>
     {type==='ogrenci'&&<select className="report-select no-print" value={student} onChange={e=>setStudent(e.target.value)}><option value="">Öğrenci seçin</option>{data.ogrenciler.map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select>}
     {type==='ogretmen'&&<div className="report-filter-row no-print"><select className="report-select" value={teacher} onChange={e=>setTeacher(e.target.value)}><option value="">Öğretmen seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select><select className="report-select" value={teacherPeriod} onChange={e=>setTeacherPeriod(e.target.value)}><option value="">Hakediş dönemi seçin</option>{periods.map(x=><option key={x.hakedis_donemi_id} value={x.hakedis_donemi_id}>{x.donem_adi}</option>)}</select></div>}

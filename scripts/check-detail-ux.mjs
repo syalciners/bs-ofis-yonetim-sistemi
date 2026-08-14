@@ -8,6 +8,7 @@ const lesson = readFileSync('src/components/LessonDetail.tsx','utf8')
 const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
 const css = readFileSync('src/navigation-stability.css','utf8')
 const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
+const teacherFormFix = readFileSync('src/teacher-form-fix.css','utf8')
 
 const checks = [
   ['Öğrenci iletişimi detayın üst bölümündedir', student.includes('profile-contact-strip') && student.includes('mailto:') && student.includes('wa.me/') && student.includes('tel:+')],
@@ -16,7 +17,9 @@ const checks = [
   ['Öğretmen hızlı işlemleri kart görünümündedir', teachers.includes('detail-action-cards') && teachers.includes('<b>Düzenle</b>')],
   ['Detay Sheet yatay taşmayı engeller', css.includes('.sheet-panel') && css.includes('overflow-x:hidden !important')],
   ['Öğretmen detayında ek yatay stabilite katmanı vardır', detailFixes.includes('.teachers-v2 .sheet-panel') && detailFixes.includes('overflow-x:hidden !important')],
-  ['Öğretmen branş seçimi mobilde tek sütuna iner', detailFixes.includes('.teachers-v2 .check-grid') && detailFixes.includes('grid-template-columns:1fr !important')],
+  ['Öğretmen branş seçimi mobilde tek sütuna iner', teacherFormFix.includes('@media(max-width:650px)') && teacherFormFix.includes('grid-template-columns:1fr !important')],
+  ['Öğretmen branş checkboxı genel input genişlik kuralından korunur', teacherFormFix.includes('.form-grid .check-card input[type="checkbox"]') && teacherFormFix.includes('width:20px !important') && teacherFormFix.includes('max-width:20px !important')],
+  ['Öğretmen branş adı checkbox yanında normal satır akışındadır', teacherFormFix.includes('grid-template-columns:22px minmax(0,1fr) !important') && teacherFormFix.includes('word-break:normal !important')],
   ['Form alanları mobil genişliği aşamaz', css.includes('.form-grid input,.form-grid select,.form-grid textarea') && css.includes('max-width:100% !important')],
   ['Uzun profil metinleri satıra kırılır', css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word')],
   ['Öğrenci silme güvenli RPC üzerinden yapılır', studentAdmin.includes("supabase.rpc('ogrenci_sil_guvenli_v1'") && !studentAdmin.includes('.delete(')],

@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - name: Kritik iş kuralları
+        run: npm run check:rules
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
@@ -42,18 +44,23 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Gerçek uygulama adresini doğrula
+      - name: Gerçek derlenmiş uygulama adresini doğrula
         shell: bash
         run: |
           set -euo pipefail
           URL="https://syalciners.github.io/bs-ofis-yonetim-sistemi/?smoke=${GITHUB_SHA}"
           for i in 1 2 3 4 5 6; do
             HTML="$(curl -fsSL --max-time 20 "$URL" || true)"
-            if printf '%s' "$HTML" | grep -q 'BS Ofis Yönetim Sistemi'; then
-              echo "Yayın doğrulandı: $URL"
-              exit 0
+            if printf '%s' "$HTML" | grep -q 'BS Ofis Yönetim Sistemi' \
+              && printf '%s' "$HTML" | grep -Eq 'assets/index-[A-Za-z0-9_-]+\.js' \
+              && ! printf '%s' "$HTML" | grep -q 'src/main.tsx'; then
+              MANIFEST="$(curl -fsSL --max-time 20 "https://syalciners.github.io/bs-ofis-yonetim-sistemi/manifest.webmanifest?smoke=${GITHUB_SHA}" || true)"
+              if printf '%s' "$MANIFEST" | grep -q 'BS Ofis Yönetim Sistemi'; then
+                echo "Derlenmiş React/PWA yayını doğrulandı: $URL"
+                exit 0
+              fi
             fi
             sleep 5
           done
-          echo "Yayın adresi beklenen uygulama HTML'ini döndürmedi."
+          echo "Yayın adresi derlenmiş React/PWA paketini döndürmedi."
           exit 1

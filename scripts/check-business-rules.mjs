@@ -17,6 +17,7 @@ const lessonDetail = read('src/components/LessonDetail.tsx')
 const forms = read('src/components/forms.tsx')
 const calendar = read('src/pages/CalendarPage.tsx')
 const bottomNav = read('src/components/BottomNav.tsx')
+const format = read('src/lib/format.ts')
 const allSource = collectSource('src')
 
 const checks = []
@@ -28,6 +29,8 @@ expectText('İptal tahsilat öğrenci bakiyesini etkilemez', metrics, "x.ogrenci
 expectText('İptal tahsilat aylık tahsilat KPI değerini etkilemez', metrics, "!x.iptal_mi && x.tarih?.startsWith(prefix)")
 expectText('Öğretmen hakedişi yalnız Yapıldı derslerinden oluşur', metrics, "x.ogretmen_id === id && x.ders_durumu === 'Yapıldı'")
 expectText('Aylık gerçekleşen ciro yalnız Yapıldı derslerinden oluşur', metrics, "x.ders_durumu === 'Yapıldı' && x.tarih?.startsWith(prefix)")
+expectText('Para gösterimi Türk Lirası kullanır', format, "currency: 'TRY'")
+expectText('Para gösterimi Türkiye yerel ayarını kullanır', format, "Intl.NumberFormat('tr-TR'")
 expectText('Tahsilat güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('tahsilat_kaydet_guvenli_v1'")
 expectText('Gider güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('gider_kaydet_guvenli_v1'")
 expectText('Öğretmen ödemesi güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('ogretmen_odeme_kaydet_guvenli_v2'")
@@ -52,6 +55,8 @@ rejectRegex('Frontend service_role anahtarı içermez', allSource, /service[_-]?
 rejectRegex('Frontend doğrudan insert yapmaz', allSource, /\.insert\s*\(/, 'Frontend kaynaklarında doğrudan .insert() kullanımı bulundu.')
 rejectRegex('Frontend doğrudan update yapmaz', allSource, /\.update\s*\(/, 'Frontend kaynaklarında doğrudan .update() kullanımı bulundu.')
 rejectRegex('Frontend doğrudan delete yapmaz', allSource, /\.delete\s*\(/, 'Frontend kaynaklarında doğrudan .delete() kullanımı bulundu.')
+rejectRegex('Frontend dolar para birimi kullanmaz', allSource, /currency\s*:\s*['"]USD['"]/i, 'Frontend kaynaklarında USD para birimi bulundu.')
+rejectRegex('Frontend dolar simgeli ikon kullanmaz', allSource, /\b(?:CircleDollarSign|BadgeDollarSign|DollarSign)\b/, 'Frontend kaynaklarında dolar işaretli ikon bulundu.')
 
 const collectionStart = forms.indexOf('export function CollectionForm')
 const collectionEnd = forms.indexOf('export function ExpenseForm')

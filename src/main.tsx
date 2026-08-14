@@ -12,6 +12,7 @@ import './teacher-form-fix.css'
 import './lesson-status-colors.css'
 import './lesson-form-fix.css'
 import './sheet-standard.css'
+import './sheet-footer-fixed.css'
 
 registerSW({ immediate: true })
 

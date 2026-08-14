@@ -1,0 +1,219 @@
+/* Tüm Sheet/detail ekranları için tek mobil yerleşim standardı.
+   Başlık ve işlem alanları sabit kalır; yalnız gövde dikey kayar. */
+
+body:has(.sheet-overlay){
+  overflow:hidden !important;
+}
+
+.sheet-overlay{
+  width:100dvw !important;
+  max-width:100dvw !important;
+  overflow:hidden !important;
+  overscroll-behavior:none;
+}
+
+.sheet-panel{
+  width:min(720px,100dvw) !important;
+  max-width:100dvw !important;
+  min-width:0 !important;
+  max-height:94dvh !important;
+  display:grid !important;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden !important;
+  overscroll-behavior:none;
+}
+
+/* Panelin kendisi kaymaz. */
+.sheet-header{
+  position:relative !important;
+  top:auto !important;
+  left:auto !important;
+  right:auto !important;
+  z-index:30 !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  flex:0 0 auto;
+  overflow:hidden;
+}
+
+.sheet-header>div{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+.sheet-header h2,
+.sheet-header p{
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+.sheet-header .icon-btn{
+  flex:0 0 40px !important;
+  width:40px !important;
+  min-width:40px !important;
+  max-width:40px !important;
+}
+
+/* Yalnız orta gövde kayar. */
+.sheet-body{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  min-height:0 !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y pinch-zoom;
+}
+
+.sheet-footer{
+  position:relative !important;
+  bottom:auto !important;
+  left:auto !important;
+  right:auto !important;
+  z-index:30 !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  flex:0 0 auto;
+  background:#fff;
+}
+
+/* Detay/form ağacındaki hiçbir eleman Sheet genişliğini büyütemez. */
+.sheet-body > *,
+.sheet-body form,
+.sheet-body form > *,
+.sheet-body label,
+.sheet-body section,
+.sheet-body .detail-stack,
+.sheet-body .profile-detail-stack,
+.sheet-body .detail-action-cards,
+.sheet-body .detail-history-list,
+.sheet-body .detail-history-card{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+.sheet-body input:not([type="checkbox"]),
+.sheet-body select,
+.sheet-body textarea,
+.sheet-body .report-select{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* iOS/Safari date-time alanlarının intrinsic genişliği normal width:100%'ü aşabilir. */
+.sheet-body input[type="date"],
+.sheet-body input[type="time"],
+.sheet-body input[type="datetime-local"]{
+  display:block !important;
+  width:100% !important;
+  inline-size:100% !important;
+  min-width:0 !important;
+  min-inline-size:0 !important;
+  max-width:100% !important;
+  max-inline-size:100% !important;
+  -webkit-min-logical-width:0 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+
+.sheet-body input[type="date"]::-webkit-date-and-time-value,
+.sheet-body input[type="time"]::-webkit-date-and-time-value,
+.sheet-body input[type="datetime-local"]::-webkit-date-and-time-value{
+  min-width:0 !important;
+  max-width:100% !important;
+  text-align:left;
+}
+
+/* Formun alt işlem alanı Sheet gövdesi kayarken ekranda kalır.
+   Bazı formlarda form-actions doğrudan, bazılarında .wide sarmalayıcı içindedir. */
+.sheet-body .form-grid > .form-actions,
+.sheet-body .form-grid > .wide:has(> .form-actions){
+  position:sticky !important;
+  bottom:-14px !important;
+  z-index:25 !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-top:6px !important;
+  padding:10px 0 calc(12px + env(safe-area-inset-bottom)) !important;
+  background:rgba(255,255,255,.98) !important;
+  border-top:1px solid #e6ebf2;
+  box-shadow:0 -10px 20px rgba(31,48,79,.055);
+  backdrop-filter:blur(12px);
+}
+
+.sheet-body .form-grid > .wide:has(> .form-actions) .form-actions{
+  margin:0 !important;
+}
+
+.sheet-body .form-actions button{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+@media(max-width:700px){
+  .sheet-panel{
+    width:100dvw !important;
+    max-width:100dvw !important;
+    max-height:calc(100dvh - env(safe-area-inset-top)) !important;
+    border-radius:20px 20px 0 0 !important;
+  }
+
+  .sheet-header{
+    padding:12px 14px !important;
+  }
+
+  .sheet-body{
+    padding:12px 14px !important;
+  }
+
+  /* Tüm düzenleme/kayıt Sheet'leri telefonda tek sütundur. */
+  .sheet-body .form-grid{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:10px !important;
+    overflow-x:hidden !important;
+  }
+
+  .sheet-body .form-grid > *,
+  .sheet-body .form-grid .wide{
+    grid-column:1 !important;
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+
+  .sheet-body input:not([type="checkbox"]),
+  .sheet-body select,
+  .sheet-body textarea,
+  .sheet-body .report-select{
+    font-size:16px !important;
+  }
+
+  .sheet-body .form-actions{
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) !important;
+    gap:8px !important;
+  }
+
+  .sheet-body .detail-action-cards,
+  .sheet-body .profile-contact-strip,
+  .sheet-body .profile-focus-grid,
+  .sheet-body .mini-grid{
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+}
+
+@media(max-width:380px){
+  .sheet-body .form-actions{
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr) !important;
+  }
+}

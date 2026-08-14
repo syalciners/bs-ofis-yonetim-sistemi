@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import './styles.css'
 import './ux-overrides.css'
+import './detail-polish.css'
 
 registerSW({ immediate: true })
 

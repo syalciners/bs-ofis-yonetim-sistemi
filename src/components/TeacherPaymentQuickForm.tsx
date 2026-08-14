@@ -10,8 +10,9 @@ export function TeacherPaymentQuickForm({ teacherId, onDone, onCancel }: { teach
   const [busy, setBusy] = useState(false)
   const [teacher, setTeacher] = useState(teacherId || '')
   const today = todayISO()
-  const currentPeriod = data?.hakedisDonemleri.find(x => x.aktif !== false && today >= x.baslangic_tarihi && today <= x.bitis_tarihi)
-  const fallbackPeriod = data?.hakedisDonemleri.find(x => x.aktif !== false)
+  const availablePeriods = (data?.hakedisDonemleri || []).filter(x => x.aktif !== false && x.baslangic_tarihi <= today).sort((a,b) => b.baslangic_tarihi.localeCompare(a.baslangic_tarihi))
+  const currentPeriod = availablePeriods.find(x => today >= x.baslangic_tarihi && today <= x.bitis_tarihi)
+  const fallbackPeriod = availablePeriods[0]
   const [period, setPeriod] = useState(currentPeriod?.hakedis_donemi_id || fallbackPeriod?.hakedis_donemi_id || '')
 
   if (!data) return null
@@ -49,7 +50,7 @@ export function TeacherPaymentQuickForm({ teacherId, onDone, onCancel }: { teach
     }
   }}>
     <label>Öğretmen<select name="ogretmen_id" value={teacher} onChange={e => setTeacher(e.target.value)} required><option value="">Seçin</option>{data.ogretmenler.filter(x => x.durum !== 'Pasif').map(x => <option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
-    <label>Hakediş Dönemi<select name="hakedis_donemi_id" value={period} onChange={e => setPeriod(e.target.value)} required><option value="">Seçin</option>{data.hakedisDonemleri.filter(x => x.aktif !== false).map(x => <option key={x.hakedis_donemi_id} value={x.hakedis_donemi_id}>{x.donem_adi}</option>)}</select></label>
+    <label>Hakediş Dönemi<select name="hakedis_donemi_id" value={period} onChange={e => setPeriod(e.target.value)} required><option value="">Seçin</option>{availablePeriods.map(x => <option key={x.hakedis_donemi_id} value={x.hakedis_donemi_id}>{x.donem_adi}</option>)}</select></label>
     {teacher && period && <div className="wide form-summary">Dönem hakedişi <b>{money(earned)}</b> · Ödenen <b>{money(paid)}</b> · Kalan <b>{money(remaining)}</b>{period === currentPeriod?.hakedis_donemi_id ? ' · Güncel dönem otomatik seçildi' : ''}</div>}
     <label>Tutar<input name="tutar" type="number" min="0.01" step="0.01" inputMode="decimal" defaultValue={remaining || ''} key={`${teacher}-${period}-${remaining}`} required /></label>
     <label>Tarih<input name="tarih" type="date" defaultValue={today} required /></label>

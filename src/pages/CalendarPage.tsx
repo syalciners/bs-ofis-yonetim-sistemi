@@ -31,7 +31,8 @@ export function CalendarPage(){
   if(!data)return null
   const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif')
   const managerTeachers=activeTeachers.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>teacherTone(a.ad_soyad)==='teacher-pink'?-1:teacherTone(b.ad_soyad)==='teacher-pink'?1:0)
-  const otherTeachers=activeTeachers.filter(x=>!isManagerTeacher(x.ad_soyad))
+  const otherTeachers=activeTeachers.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
+  const selectedOtherTeacher=otherTeachers.some(x=>x.ogretmen_id===teacher)?teacher:''
   const weekProgramCount=lessons.filter(x=>x.program_id).length
 
   const createWeekNow=async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
@@ -49,9 +50,15 @@ export function CalendarPage(){
       <div className="teacher-manager-grid" aria-label="Yönetici öğretmenler">
         {managerTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip teacher-manager-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''}`} onClick={()=>setTeacher(x.ogretmen_id)}><span>{x.ad_soyad}</span><small>Yönetici</small></button>)}
       </div>
-      <div className="teacher-secondary-row" aria-label="Diğer öğretmenler">
+      <div className="teacher-secondary-compact" aria-label="Diğer öğretmenler">
         <button className={`teacher-chip teacher-small-chip teacher-all ${teacher==='tum'?'active':''}`} onClick={()=>setTeacher('tum')}>Tümü</button>
-        {otherTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip teacher-small-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''}`} onClick={()=>setTeacher(x.ogretmen_id)}>{x.ad_soyad}</button>)}
+        <label className={`teacher-other-picker ${selectedOtherTeacher?'active':''}`}>
+          <span>Diğer Öğretmenler</span>
+          <select aria-label="Diğer öğretmen seç" value={selectedOtherTeacher} onChange={e=>setTeacher(e.target.value||'tum')}>
+            <option value="">Öğretmen seç</option>
+            {otherTeachers.map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}
+          </select>
+        </label>
       </div>
     </section>
 

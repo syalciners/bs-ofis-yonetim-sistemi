@@ -7,6 +7,8 @@ const more = read('src/pages/MorePage.tsx')
 const app = read('src/App.tsx')
 const tone = read('src/lib/teacherTone.ts')
 const css = read('src/ux-overrides.css')
+const stability = read('src/navigation-stability.css')
+const main = read('src/main.tsx')
 
 const checks = [
   ['Takvim Önceki Hafta butonunu içerir', calendar.includes("label:'Önceki Hafta'")],
@@ -26,10 +28,17 @@ const checks = [
   ['Diğer öğretmenler sarı renktir', tone.includes("return 'teacher-yellow'")],
   ['Yönetici öğretmenler Yönetici etiketi taşır', calendar.includes('<small>Yönetici</small>')],
   ['Seçili hafta belirgin mavi zemindir', css.includes('.week-switcher button.active{background:#2563eb;color:#fff')],
-  ['Pembe öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-pink{background:#fce7f3')],
-  ['Mavi öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-blue{background:#dbeafe')],
-  ['Sarı öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-yellow{background:#fef3c7')],
+  ['Başak Takvim butonu beyaz zemin ve pembe çerçeve kullanır', stability.includes('.calendar-v2 .teacher-chip.teacher-pink') && stability.includes('border-color:#ec4899')],
+  ['Süleyman Takvim butonu beyaz zemin ve mavi çerçeve kullanır', stability.includes('.calendar-v2 .teacher-chip.teacher-blue') && stability.includes('border-color:#3b82f6')],
+  ['Diğer öğretmenler beyaz zemin ve sarı çerçeve kullanır', stability.includes('.calendar-v2 .teacher-chip.teacher-yellow') && stability.includes('border-color:#eab308')],
+  ['Takvim ders kartlarında öğretmen rengi yalnız çerçeve vurgusudur', stability.includes('.calendar-v2 .lesson-card.teacher-pink') && stability.includes('border-left:4px solid #ec4899') && stability.includes('background:#fff !important')],
   ['Yönetici öğretmen butonları iki sütundur', css.includes('.teacher-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))')],
+  ['Küçük öğretmenler yatay kaydırma yerine satıra kırılır', stability.includes('.teacher-secondary-row') && stability.includes('flex-wrap:wrap') && stability.includes('overflow:visible !important')],
+  ['Uygulama yatay sayfa taşmasını engeller', stability.includes('overflow-x:hidden') && stability.includes('overscroll-behavior-x:none')],
+  ['Üst bar gerçek sabit konumdadır', stability.includes('.app-header-wrap') && stability.includes('position:fixed !important')],
+  ['Alt bar gerçek sabit konumdadır', stability.includes('.bottom-nav') && stability.includes('bottom:0 !important')],
+  ['Alt bar sekme isimlerini sürekli görünür tutar', stability.includes('.bottom-nav a span') && stability.includes('visibility:visible !important') && stability.includes('opacity:1 !important')],
+  ['Navigasyon stabilite CSS katmanı en son yüklenir', main.includes("import './navigation-stability.css'" )],
 ]
 
 const failed = checks.filter(([,ok])=>!ok)

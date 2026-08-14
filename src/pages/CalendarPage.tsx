@@ -1,5 +1,6 @@
 import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Clock3, Eye, MoveRight, PauseCircle, Plus, Repeat2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
@@ -14,7 +15,7 @@ import { useToast } from '../components/Toast'
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 
 export function CalendarPage(){
-  const {data,refresh}=useAppData();const{toast}=useToast();const[mode,setMode]=useState<'gun'|'hafta'|'program'>(()=>window.innerWidth<650?'gun':'hafta');const[date,setDate]=useState(todayISO());const[teacher,setTeacher]=useState('tum');const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[programForm,setProgramForm]=useState<SabitProgram|null|undefined>(undefined);const[selectedProgram,setSelectedProgram]=useState<SabitProgram|null>(null);const[moveProgram,setMoveProgram]=useState<SabitProgram|null>(null);const[weekBusy,setWeekBusy]=useState(false);const[preview,setPreview]=useState<any[]|null>(null)
+  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams();const initialTeacher=params.get('ogretmen')||'tum';const[mode,setMode]=useState<'gun'|'hafta'|'program'>(()=>initialTeacher!=='tum'?'hafta':window.innerWidth<650?'gun':'hafta');const[date,setDate]=useState(todayISO());const[teacher,setTeacher]=useState(initialTeacher);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[programForm,setProgramForm]=useState<SabitProgram|null|undefined>(undefined);const[selectedProgram,setSelectedProgram]=useState<SabitProgram|null>(null);const[moveProgram,setMoveProgram]=useState<SabitProgram|null>(null);const[weekBusy,setWeekBusy]=useState(false);const[preview,setPreview]=useState<any[]|null>(null)
   if(!data)return null
   const monday=mondayOf(date),end=addDays(monday,7)
   const lessons=useMemo(()=>data.dersler.filter(x=>{if(teacher!=='tum'&&x.ogretmen_id!==teacher)return false;if(mode==='gun')return x.tarih===date;if(mode==='hafta')return (x.tarih||'')>=monday&&(x.tarih||'')<end;return false}).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||''))),[data.dersler,teacher,mode,date,monday,end])

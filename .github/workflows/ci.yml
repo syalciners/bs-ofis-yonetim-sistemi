@@ -2,7 +2,7 @@ name: Build doğrulama
 
 on:
   push:
-    branches: [v1-gelistirme, v1-takvim-yenileme, clean-v1-golden]
+    branches: [v1-gelistirme, 'v1-takvim-*', clean-v1-golden]
   workflow_dispatch:
 
 permissions:

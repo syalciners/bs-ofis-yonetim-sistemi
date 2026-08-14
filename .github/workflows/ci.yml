@@ -24,6 +24,8 @@ jobs:
         run: node scripts/check-teachers-ux.mjs
       - name: Öğrenciler UX kuralları
         run: node scripts/check-students-ux.mjs
+      - name: Detay ekranı UX kuralları
+        run: node scripts/check-detail-ux.mjs
       - name: Akıllı Programlama kuralları
         run: node scripts/check-smart-scheduling.mjs
       - name: Ayarlar profil güvenliği

@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { Sheet } from '../components/Sheet'
-import { TeacherForm, TeacherPaymentForm } from '../components/forms'
+import { TeacherForm } from '../components/forms'
+import { TeacherPaymentQuickForm } from '../components/TeacherPaymentQuickForm'
 import type { Ogretmen } from '../lib/types'
 import { money, normalizePhone, shortDate, time } from '../lib/format'
 import { nextLessonForTeacher, studentName, teacherBalance } from '../services/metrics'
@@ -22,7 +23,7 @@ export function TeachersPage(){
       {more&&<div className="action-list">{phone&&<a href={`tel:+${normalizePhone(phone)}`}><span className="action-round teal"><Phone/></span><span><b>Ara</b><small>Öğretmeni telefonla ara</small></span></a>}{phone&&<a href={`https://wa.me/${normalizePhone(phone)}`} target="_blank" rel="noreferrer"><span className="action-round green"><MessageCircle/></span><span><b>WhatsApp</b><small>Doğrudan konuşmayı aç</small></span></a>}<button onClick={()=>{setEdit(selected);setSelected(null)}}><span className="action-round orange"><Edit3/></span><span><b>Öğretmeni Düzenle</b><small>İletişim, branş ve durum bilgileri</small></span></button></div>}
       <section className="detail-section"><h3>Son Dersler</h3>{data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8).map(x=><div className="detail-row" key={x.ders_id}><span>{shortDate(x.tarih)} · {time(x.baslangic_saati)}</span><b>{studentName(data,x.ogrenci_id)} · {x.ders_durumu}</b></div>)}</section>
     </div>})()}</Sheet>
-    <Sheet open={!!payment} title="Öğretmen Ödemesi" subtitle={payment?data.ogretmenler.find(x=>x.ogretmen_id===payment)?.ad_soyad:''} onClose={()=>setPayment(null)}>{payment&&<TeacherPaymentForm teacherId={payment} onDone={()=>setPayment(null)} onCancel={()=>setPayment(null)}/>}</Sheet>
+    <Sheet open={!!payment} title="Öğretmen Ödemesi" subtitle={payment?data.ogretmenler.find(x=>x.ogretmen_id===payment)?.ad_soyad:''} onClose={()=>setPayment(null)}>{payment&&<TeacherPaymentQuickForm teacherId={payment} onDone={()=>setPayment(null)} onCancel={()=>setPayment(null)}/>}</Sheet>
     <Sheet open={!!edit} title="Öğretmeni Düzenle" subtitle="İletişim, branş ve durum" onClose={()=>setEdit(null)}>{edit&&<TeacherForm teacher={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
     <Sheet open={newTeacher} title="Yeni Öğretmen" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setNewTeacher(false)}><TeacherForm onDone={()=>setNewTeacher(false)} onCancel={()=>setNewTeacher(false)}/></Sheet>
   </div>

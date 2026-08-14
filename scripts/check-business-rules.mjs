@@ -15,8 +15,11 @@ const service = read('src/services/officeService.ts')
 const cancelService = read('src/services/financeCancelService.ts')
 const lessonDetail = read('src/components/LessonDetail.tsx')
 const forms = read('src/components/forms.tsx')
+const studentCollectionQuick = read('src/components/StudentCollectionForm.tsx')
 const teacherPaymentQuick = read('src/components/TeacherPaymentQuickForm.tsx')
 const calendar = read('src/pages/CalendarPage.tsx')
+const students = read('src/pages/StudentsPage.tsx')
+const teachers = read('src/pages/TeachersPage.tsx')
 const bottomNav = read('src/components/BottomNav.tsx')
 const format = read('src/lib/format.ts')
 const allSource = collectSource('src')
@@ -34,6 +37,10 @@ expectText('Para gösterimi Türk Lirası kullanır', format, "currency: 'TRY'")
 expectText('Para gösterimi Türkiye yerel ayarını kullanır', format, "Intl.NumberFormat('tr-TR'")
 expectText('Öğretmen ödeme formu bugünün hakediş dönemini otomatik bulur', teacherPaymentQuick, "today >= x.baslangic_tarihi && today <= x.bitis_tarihi")
 expectText('Öğretmen ödeme formu iptal ödemeleri kalan hakedişten düşmez', teacherPaymentQuick, "x.hakedis_donemi_id === period && !x.iptal_mi")
+expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<TeacherPaymentQuickForm teacherId={payment}')
+expectText('Öğrenci hızlı tahsilat formu öğrenciyi tekrar seçtirmez', studentCollectionQuick, 'ogrenci_id:studentId')
+expectText('Öğrenci hızlı tahsilat formu güncel bakiyeyi gösterir', studentCollectionQuick, 'studentDebt(data,studentId)')
+expectText('Öğrenci ekranı hızlı tahsilat formunu kullanır', students, '<StudentCollectionForm studentId={collectionId}')
 expectText('Tahsilat güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('tahsilat_kaydet_guvenli_v1'")
 expectText('Gider güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('gider_kaydet_guvenli_v1'")
 expectText('Öğretmen ödemesi güvenli RPC üzerinden kaydedilir', service, "supabase.rpc('ogretmen_odeme_kaydet_guvenli_v2'")
@@ -66,9 +73,14 @@ const collectionStart = forms.indexOf('export function CollectionForm')
 const collectionEnd = forms.indexOf('export function ExpenseForm')
 const collectionBlock = collectionStart >= 0 && collectionEnd > collectionStart ? forms.slice(collectionStart, collectionEnd) : ''
 checks.push({
-  name: 'Tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür',
+  name: 'Genel tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür',
   ok: collectionBlock.length > 0 && !/\bmax\s*=/.test(collectionBlock),
   detail: 'CollectionForm içinde max sınırı bulundu veya form bloğu okunamadı.',
+})
+checks.push({
+  name: 'Öğrenci hızlı tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür',
+  ok: !/\bmax\s*=/.test(studentCollectionQuick),
+  detail: 'StudentCollectionForm içinde max sınırı bulundu.',
 })
 
 const failed = checks.filter((x) => !x.ok)

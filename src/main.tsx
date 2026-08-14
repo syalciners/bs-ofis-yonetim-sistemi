@@ -8,6 +8,7 @@ import './ux-overrides.css'
 import './detail-polish.css'
 import './navigation-stability.css'
 import './detail-layout-fixes.css'
+import './teacher-form-fix.css'
 
 registerSW({ immediate: true })
 

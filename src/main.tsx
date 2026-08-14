@@ -9,6 +9,7 @@ import './detail-polish.css'
 import './navigation-stability.css'
 import './detail-layout-fixes.css'
 import './teacher-form-fix.css'
+import './lesson-status-colors.css'
 
 registerSW({ immediate: true })
 

@@ -11,6 +11,8 @@ const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
 const css = readFileSync('src/navigation-stability.css','utf8')
 const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
 const teacherFormFix = readFileSync('src/teacher-form-fix.css','utf8')
+const sheet = readFileSync('src/components/Sheet.tsx','utf8')
+const sheetStandard = readFileSync('src/sheet-standard.css','utf8')
 
 const checks = [
   ['Öğrenci iletişimi detayın üst bölümündedir', student.includes('profile-contact-strip') && student.includes('mailto:') && student.includes('wa.me/') && student.includes('tel:+')],
@@ -22,10 +24,15 @@ const checks = [
   ['Öğretmen branş seçimi mobilde tek sütuna iner', teacherFormFix.includes('@media(max-width:650px)') && teacherFormFix.includes('grid-template-columns:1fr !important')],
   ['Öğretmen branş checkboxı genel input genişlik kuralından korunur', teacherFormFix.includes('.form-grid .check-card input[type="checkbox"]') && teacherFormFix.includes('width:20px !important') && teacherFormFix.includes('max-width:20px !important')],
   ['Öğretmen branş adı checkbox yanında normal satır akışındadır', teacherFormFix.includes('grid-template-columns:22px minmax(0,1fr) !important') && teacherFormFix.includes('word-break:normal !important')],
-  ['iOS Sheet visual viewport dışına taşamaz', teacherFormFix.includes('width:100dvw !important') && teacherFormFix.includes('max-width:100dvw !important')],
-  ['iOS form alanları otomatik zoomu tetiklemez', teacherFormFix.includes('.sheet-panel .form-grid input:not([type="checkbox"])') && teacherFormFix.includes('font-size:16px !important')],
+  ['iOS Sheet visual viewport dışına taşamaz', sheetStandard.includes('width:100dvw !important') && sheetStandard.includes('max-width:100dvw !important')],
+  ['iOS form alanları otomatik zoomu tetiklemez', sheetStandard.includes('font-size:16px !important')],
   ['Form alanları mobil genişliği aşamaz', css.includes('.form-grid input,.form-grid select,.form-grid textarea') && css.includes('max-width:100% !important')],
   ['Uzun profil metinleri satıra kırılır', css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word')],
+  ['Sheet paneli kaymaz, yalnız gövde kayar', sheetStandard.includes('.sheet-panel') && sheetStandard.includes('overflow:hidden !important') && sheetStandard.includes('.sheet-body') && sheetStandard.includes('overflow-y:auto !important')],
+  ['Sheet açıldığında gövde en üste sıfırlanır', sheet.includes('bodyRef.current?.scrollTo') && sheet.includes('ref={bodyRef} className="sheet-body"')],
+  ['Form işlem alanı gövde kayarken sabit kalır', sheetStandard.includes('.wide:has(> .form-actions)') && sheetStandard.includes('position:sticky !important') && sheetStandard.includes('bottom:-14px !important')],
+  ['Tarih ve saat alanları iOS intrinsic genişliğini aşamaz', sheetStandard.includes('input[type="date"]') && sheetStandard.includes('input[type="time"]') && sheetStandard.includes('-webkit-min-logical-width:0 !important') && sheetStandard.includes('inline-size:100% !important')],
+  ['Tüm Sheet formları telefonda tek sütundur', sheetStandard.includes('.sheet-body .form-grid') && sheetStandard.includes('grid-template-columns:minmax(0,1fr) !important')],
   ['Öğrenci silme güvenli RPC üzerinden yapılır', studentAdmin.includes("supabase.rpc('ogrenci_sil_guvenli_v1'") && !studentAdmin.includes('.delete(')],
   ['Öğrenci düzenleme ekranında silme butonu vardır', studentEdit.includes('Öğrenciyi Sil') && studentEdit.includes('hasHistory')],
   ['Ders durumları üç doğrudan butondur', lesson.includes('lesson-status-three') && lesson.includes("value:'Planlandı'") && lesson.includes("value:'Yapıldı'") && lesson.includes("value:'İptal'")],

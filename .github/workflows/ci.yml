@@ -24,6 +24,8 @@ jobs:
         run: node scripts/check-teachers-ux.mjs
       - name: Akıllı Programlama kuralları
         run: node scripts/check-smart-scheduling.mjs
+      - name: Ayarlar profil güvenliği
+        run: node scripts/check-settings-ux.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.html && test -f dist/manifest.webmanifest

@@ -28,9 +28,9 @@ export function ReportsPage(){
     const previousTitle=document.title
     const restore=()=>{if(document.title===pdfFilename)document.title=previousTitle}
     document.title=pdfFilename
-    window.addEventListener('afterprint',restore,{once:true})
-    window.print()
-    window.setTimeout(restore,30000)
+    window.addEventListener('focus',()=>window.setTimeout(restore,1200),{once:true})
+    requestAnimationFrame(()=>requestAnimationFrame(()=>window.print()))
+    window.setTimeout(restore,120000)
   }
 
   return <div className="page-stack report-page">

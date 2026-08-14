@@ -53,7 +53,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/v1/public
           for f in apple-touch-icon.png bs-app-icon-192.png bs-app-icon-512.png favicon-16x16.png favicon-32x32.png favicon-48x48.png; do
-            git show v0-9-eski-prototip-arsiv:$f > "/tmp/v1/public/$f"
+            git show origin/v0-9-eski-prototip-arsiv:$f > "/tmp/v1/public/$f"
           done
 
       - name: Replace development branch with clean V1 source
@@ -68,4 +68,4 @@ jobs:
           git commit -m "V1: temiz React PWA kaynak yapısını kur"
           git push origin HEAD:v1-temiz-gelistirme
 
-# verified chunks 2026-08-14
+# verified chunks and archive ref 2026-08-14

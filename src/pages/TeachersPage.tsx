@@ -18,11 +18,16 @@ export function TeachersPage(){
     .filter(x=>x.ogretmen_id===teacherId&&x.aktif!==false)
     .map(x=>data.branslar.find(b=>b.brans_id===x.brans_id&&b.aktif!==false)?.brans_adi)
     .filter((x):x is string=>Boolean(x))
+  const teachingTitle=(branches:string[])=>{
+    const normalized=branches.map(x=>x.toLocaleUpperCase('tr-TR'))
+    if(normalized.some(x=>x.includes('MATEMATİK')||x.includes('MATH')))return 'Matematik Öğretmeni'
+    return branches[0]?`${branches[0]} Öğretmeni`:'Öğretmen'
+  }
   const managerRank=(name:string)=>name.trim().toLocaleUpperCase('tr-TR')==='BAŞAK ATİLLA'?0:1
   const managers=rows.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>managerRank(a.ad_soyad)-managerRank(b.ad_soyad))
   const teachers=rows.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
 
-  const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),primary=branches[0],title=manager?`Yönetici${primary?` - ${primary} Öğretmeni`:' - Öğretmen'}`:primary?`${primary} Öğretmeni`:'Öğretmen';return <button className={`teacher-profile-card ${teacherTone(x.ad_soyad)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>{setSelected(x);setMore(false)}}>
+  const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle;return <button className={`teacher-profile-card ${teacherTone(x.ad_soyad)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>{setSelected(x);setMore(false)}}>
     <div className="teacher-profile-head"><div className="avatar purple">{x.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
     <div className="teacher-branches"><span>Verdiği Dersler</span><b>{branches.length?branches.join(' · '):'Branş tanımlanmamış'}</b></div>
     <div className="teacher-card-footer"><span>{next?<><b>{shortDate(next.tarih)} {time(next.baslangic_saati)}</b> sıradaki ders</>:<>Sıradaki ders yok</>}</span><span>Güncel kalan <b className={balance>0?'danger-text':''}>{money(Math.max(balance,0))}</b></span></div>

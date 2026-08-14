@@ -42,6 +42,8 @@ expectText('Para gösterimi Türkiye yerel ayarını kullanır', format, "Intl.N
 expectText('Genel hızlı tahsilat seçilen öğrencinin bakiyesini gösterir', collectionQuick, 'studentDebt(data,studentId)')
 expectText('Genel hızlı tahsilat borcu tutara aktarabilir', collectionQuick, 'Borcu tutara aktar')
 expectText('Ana Sayfa bakiye destekli hızlı tahsilat formunu kullanır', overview, '<CollectionQuickForm onDone={()=>setModal(null)}')
+expectText('Ana Sayfa açık bakiyeli öğrencileri dikkat alanına taşır', overview, 'öğrencide açık bakiye')
+expectText('Açık bakiye dikkat kartı borçlu öğrencilere gider', overview, "go:()=>nav('/ogrenciler?filtre=borclu')")
 expectText('Öğretmen ödeme formu bugünün hakediş dönemini otomatik bulur', teacherPaymentQuick, "today >= x.baslangic_tarihi && today <= x.bitis_tarihi")
 expectText('Öğretmen ödeme formu iptal ödemeleri kalan hakedişten düşmez', teacherPaymentQuick, "x.hakedis_donemi_id === period && !x.iptal_mi")
 expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<TeacherPaymentQuickForm teacherId={payment}')
@@ -79,6 +81,7 @@ rejectRegex('Frontend doğrudan delete yapmaz', allSource, /\.delete\s*\(/, 'Fro
 rejectRegex('Frontend dolar para birimi kullanmaz', allSource, /currency\s*:\s*['"]USD['"]/i, 'Frontend kaynaklarında USD para birimi bulundu.')
 rejectRegex('Frontend dolar simgeli ikon kullanmaz', allSource, /\b(?:CircleDollarSign|BadgeDollarSign|DollarSign)\b/, 'Frontend kaynaklarında dolar işaretli ikon bulundu.')
 rejectRegex('Sistem ekranı teknik altyapı jargonunu kullanıcıya göstermez', systemPage, /\b(?:Supabase|PostgreSQL|RLS|RPC|transaction|secret)\b/i, 'Sistem ekranında kullanıcıya gösterilmemesi gereken teknik altyapı terimi bulundu.')
+rejectRegex('Vadesiz öğrenci bakiyesi gecikmiş borç diye etiketlenmez', overview, /gecik\w*[^\n]{0,30}(?:borç|tahsilat)|(?:borç|tahsilat)[^\n]{0,30}gecik\w*/i, 'Ana Sayfa vade bilgisi olmadan açık bakiyeyi gecikmiş borç/tahsilat olarak etiketliyor.')
 
 const collectionStart = forms.indexOf('export function CollectionForm')
 const collectionEnd = forms.indexOf('export function ExpenseForm')

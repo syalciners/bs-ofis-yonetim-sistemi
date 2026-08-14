@@ -28,9 +28,26 @@
   gap:8px !important;
 }
 
-/* Alt bar içerik üzerine binmesin. */
+/* Safari/iOS'ta overflow container padding-bottom her zaman yeterli scroll mesafesi
+   oluşturmuyor. Bu nedenle gövdenin sonunda gerçek bir içerik spacer'ı oluşturulur.
+   Böylece Notlar/Açıklama/uyarı/silme alanları sabit footer'ın tamamen üstüne çıkabilir. */
 .sheet-body:has(.form-actions){
-  padding-bottom:calc(104px + env(safe-area-inset-bottom)) !important;
+  padding-bottom:14px !important;
+}
+
+.sheet-body:has(.form-actions)::after{
+  content:"";
+  display:block;
+  width:100%;
+  height:calc(126px + env(safe-area-inset-bottom));
+  min-height:calc(126px + env(safe-area-inset-bottom));
+  pointer-events:none;
+}
+
+/* Form grid içinde de gerçek akış mesafesi bırakılır. Bu, özellikle uzun mobil
+   formlarda son textarea/hint alanının footer'ın arkasında kalmasını engeller. */
+.sheet-body .form-grid:has(.form-actions){
+  padding-bottom:8px !important;
 }
 
 /* Önceki sticky wrapper davranışını etkisizleştir. */
@@ -79,6 +96,11 @@
   .sheet-body .form-actions{
     bottom:3dvh !important;
     border-radius:0 0 24px 24px;
+  }
+
+  .sheet-body:has(.form-actions)::after{
+    height:118px;
+    min-height:118px;
   }
 }
 

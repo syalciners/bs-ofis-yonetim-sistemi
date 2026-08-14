@@ -32,7 +32,7 @@ const checks = [
   ['Sheet paneli kaymaz, yalnız gövde kayar', sheetStandard.includes('.sheet-panel') && sheetStandard.includes('overflow:hidden !important') && sheetStandard.includes('.sheet-body') && sheetStandard.includes('overflow-y:auto !important')],
   ['Sheet açıldığında gövde en üste sıfırlanır', sheet.includes('bodyRef.current?.scrollTo') && sheet.includes('ref={bodyRef} className="sheet-body"')],
   ['Form işlem alanı ilk andan itibaren gerçek sabit alt bardır', sheetFooterFixed.includes('.sheet-body .form-actions') && sheetFooterFixed.includes('position:fixed !important') && sheetFooterFixed.includes('bottom:0 !important')],
-  ['Sabit alt bar içeriğin üstünü kapatmaz', sheetFooterFixed.includes('.sheet-body:has(.form-actions)') && sheetFooterFixed.includes('padding-bottom:calc(104px + env(safe-area-inset-bottom))')],
+  ['Sabit alt bar için gerçek Safari scroll spacer vardır', sheetFooterFixed.includes('.sheet-body:has(.form-actions)::after') && sheetFooterFixed.includes('height:calc(126px + env(safe-area-inset-bottom))') && sheetFooterFixed.includes('pointer-events:none')],
   ['Tarih ve saat alanları iOS intrinsic genişliğini aşamaz', sheetFooterFixed.includes('input[type="date"]') && sheetFooterFixed.includes('input[type="time"]') && sheetFooterFixed.includes('-webkit-appearance:none !important') && sheetFooterFixed.includes('inline-size:100% !important')],
   ['Tüm Sheet formları telefonda tek sütundur', sheetStandard.includes('.sheet-body .form-grid') && sheetStandard.includes('grid-template-columns:minmax(0,1fr) !important')],
   ['Öğrenci silme güvenli RPC üzerinden yapılır', studentAdmin.includes("supabase.rpc('ogrenci_sil_guvenli_v1'") && !studentAdmin.includes('.delete(')],

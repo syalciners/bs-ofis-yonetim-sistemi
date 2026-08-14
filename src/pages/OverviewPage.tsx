@@ -10,15 +10,16 @@ import { LessonDetail } from '../components/LessonDetail'
 import type { Ders } from '../lib/types'
 import { money, mondayOf } from '../lib/format'
 import { createWeek } from '../services/officeService'
-import { monthCollections, overdueAssignments, todayLessons, totalOpenDebt, totalTeacherBalance, zoomProblems } from '../services/metrics'
+import { monthCollections, overdueAssignments, studentDebt, todayLessons, totalOpenDebt, totalTeacherBalance, zoomProblems } from '../services/metrics'
 import { useToast } from '../components/Toast'
 
 export function OverviewPage() {
   const {data,refresh}=useAppData();const nav=useNavigate();const{toast}=useToast();const[modal,setModal]=useState<'collection'|'student'|'lesson'|null>(null);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[weekBusy,setWeekBusy]=useState(false)
-  const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),debt:totalOpenDebt(data),teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
+  const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),debt:totalOpenDebt(data),debtors:data.ogrenciler.filter(x=>x.durum!=='Pasif'&&studentDebt(data,x.ogrenci_id)>0).length,teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
   if(!data||!metrics)return null
   const attention=[
     {show:metrics.today.filter(x=>x.ders_durumu==='Planlandı').length>0,icon:CalendarCheck2,title:`${metrics.today.filter(x=>x.ders_durumu==='Planlandı').length} planlı ders`,text:'Bugün sonuç bekleyen dersler',go:()=>nav('/takvim')},
+    {show:metrics.debtors>0,icon:WalletCards,title:`${metrics.debtors} öğrencide açık bakiye`,text:`${money(metrics.debt)} tahsilat bekliyor`,go:()=>nav('/ogrenciler?filtre=borclu')},
     {show:metrics.assign.length>0,icon:ReceiptText,title:`${metrics.assign.length} geciken ödev`,text:'Son teslim tarihi geçmiş kayıtlar',go:()=>nav('/odevler')},
     {show:metrics.zoom.length>0,icon:AlertCircle,title:`${metrics.zoom.length} Zoom uyarısı`,text:'Kontrol edilmesi gereken online ders',go:()=>nav('/sistem')},
   ].filter(x=>x.show)

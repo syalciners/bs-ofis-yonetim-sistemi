@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { Sheet } from '../components/Sheet'
-import { AssignmentForm, CollectionForm, LessonForm, StudentForm } from '../components/forms'
+import { AssignmentForm, LessonForm, StudentForm } from '../components/forms'
+import { StudentCollectionForm } from '../components/StudentCollectionForm'
 import { StudentDetail } from '../components/StudentDetail'
 import type { Ogrenci } from '../lib/types'
 import { money, shortDate, time } from '../lib/format'
@@ -23,7 +24,7 @@ export function StudentsPage(){
     <Sheet open={!!selected&&!edit&&!collectionId&&!lessonStudentId&&!assignmentStudentId} title={selected?.ad_soyad||'Öğrenci'} subtitle="Öğrenci profili" onClose={()=>setSelected(null)}>{selected&&<StudentDetail student={selected} onCollection={()=>setCollectionId(selected.ogrenci_id)} onLesson={()=>setLessonStudentId(selected.ogrenci_id)} onAssignment={()=>setAssignmentStudentId(selected.ogrenci_id)} onEdit={()=>{setEdit(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!edit} title="Öğrenciyi Düzenle" subtitle="İletişim ve kayıt bilgileri" onClose={()=>setEdit(null)}>{edit&&<StudentForm student={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
     <Sheet open={newStudent} title="Yeni Öğrenci" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setNewStudent(false)}><StudentForm onDone={()=>setNewStudent(false)} onCancel={()=>setNewStudent(false)}/></Sheet>
-    <Sheet open={!!collectionId} title="Tahsilat Al" subtitle={collectionId?data.ogrenciler.find(x=>x.ogrenci_id===collectionId)?.ad_soyad:''} onClose={()=>setCollectionId(null)}>{collectionId&&<CollectionForm studentId={collectionId} onDone={()=>setCollectionId(null)} onCancel={()=>setCollectionId(null)}/>}</Sheet>
+    <Sheet open={!!collectionId} title="Tahsilat Al" subtitle={collectionId?data.ogrenciler.find(x=>x.ogrenci_id===collectionId)?.ad_soyad:''} onClose={()=>setCollectionId(null)}>{collectionId&&<StudentCollectionForm studentId={collectionId} onDone={()=>setCollectionId(null)} onCancel={()=>setCollectionId(null)}/>}</Sheet>
     <Sheet open={!!lessonStudentId} title="Ders Ekle" subtitle={lessonStudentId?data.ogrenciler.find(x=>x.ogrenci_id===lessonStudentId)?.ad_soyad:''} onClose={()=>setLessonStudentId(null)}>{lessonStudentId&&<LessonForm studentId={lessonStudentId} onDone={()=>setLessonStudentId(null)} onCancel={()=>setLessonStudentId(null)}/>}</Sheet>
     <Sheet open={!!assignmentStudentId} title="Ödev Ekle" subtitle={assignmentStudentId?data.ogrenciler.find(x=>x.ogrenci_id===assignmentStudentId)?.ad_soyad:''} onClose={()=>setAssignmentStudentId(null)}>{assignmentStudentId&&<AssignmentForm studentId={assignmentStudentId} onDone={()=>setAssignmentStudentId(null)} onCancel={()=>setAssignmentStudentId(null)}/>}</Sheet>
   </div>

@@ -1,5 +1,5 @@
 import { CalendarClock, CheckCircle2, Edit3, ExternalLink, XCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Ders } from '../lib/types'
 import { fullDate, money, time } from '../lib/format'
 import { useAppData } from './AppDataProvider'
@@ -17,7 +17,11 @@ const statuses = [
 ] as const
 
 export function LessonDetail({ lesson, onEdit, onDone }: {lesson:Ders;onEdit:()=>void;onDone:()=>void}) {
-  const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false);const[showStatuses,setShowStatuses]=useState(false);if(!data)return null
+  const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
+  const isPlanned=(lesson.ders_durumu||'Planlandı')==='Planlandı'
+  const[showStatuses,setShowStatuses]=useState(isPlanned)
+  useEffect(()=>setShowStatuses(isPlanned),[lesson.ders_id,lesson.ders_durumu])
+  if(!data)return null
   const setStatus=async(status:string)=>{setBusy(true);try{await setLessonStatus(lesson.ders_id,status);await refresh();toast(`Ders durumu “${status}” olarak kaydedildi.`);onDone()}catch(e:any){toast(e.message||String(e),'error')}finally{setBusy(false)}}
   return <div className="detail-stack">
     <div className="detail-hero"><div><span>Öğrenci</span><strong>{studentName(data,lesson.ogrenci_id)}</strong><small>{branchName(data,lesson.brans_id)} · {teacherName(data,lesson.ogretmen_id)}</small></div><span className="status-pill">{lesson.ders_durumu||'Planlandı'}</span></div>
@@ -26,10 +30,14 @@ export function LessonDetail({ lesson, onEdit, onDone }: {lesson:Ders;onEdit:()=
     {lesson.aciklama&&<div className="note-box">{lesson.aciklama}</div>}
     {lesson.zoom_katilim_baglantisi&&<a className="primary-btn full" href={lesson.zoom_katilim_baglantisi} target="_blank" rel="noreferrer"><ExternalLink size={17}/>Zoom Dersine Katıl</a>}
 
-    <button className="primary-btn full" disabled={busy} onClick={()=>setShowStatuses(v=>!v)}><CheckCircle2 size={17}/>{showStatuses?'Durum Seçimini Kapat':'Durumu Değiştir'}</button>
-    {showStatuses&&<div className="action-list">
-      {statuses.filter(x=>x.value!==lesson.ders_durumu).map(x=>{const Icon=x.icon;return <button key={x.value} disabled={busy} onClick={()=>void setStatus(x.value)}><span className={`action-round ${x.tone}`}><Icon/></span><span><b>{x.text}</b><small>{x.help}</small></span></button>})}
-    </div>}
+    {isPlanned&&showStatuses&&<div className="form-summary"><b>Ders sonucunu seçin.</b> “Yapıldı” seçildiğinde öğrenci ücreti ve öğretmen hakedişi oluşur.</div>}
+    {!showStatuses&&<button className="primary-btn full" disabled={busy} onClick={()=>setShowStatuses(true)}><CheckCircle2 size={17}/>Durumu Değiştir</button>}
+    {showStatuses&&<>
+      <div className="action-list">
+        {statuses.filter(x=>x.value!==lesson.ders_durumu).map(x=>{const Icon=x.icon;return <button key={x.value} disabled={busy} onClick={()=>void setStatus(x.value)}><span className={`action-round ${x.tone}`}><Icon/></span><span><b>{x.text}</b><small>{x.help}</small></span></button>})}
+      </div>
+      {!isPlanned&&<button className="secondary-btn full" disabled={busy} onClick={()=>setShowStatuses(false)}>Durum Seçimini Kapat</button>}
+    </>}
 
     <button className="secondary-btn full" onClick={onEdit}><Edit3 size={17}/>Dersi Düzenle</button>
   </div>

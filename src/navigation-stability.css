@@ -9,7 +9,7 @@ html,body,#root{
 
 body{
   position:relative;
-  touch-action:pan-y;
+  touch-action:pan-y pinch-zoom;
 }
 
 .app-shell{
@@ -83,7 +83,7 @@ body{
 /* Takvim içinde yatay sayfa hareketi yok; küçük öğretmenler gerektiğinde alt satıra iner. */
 .calendar-v2{
   overflow-x:hidden;
-  touch-action:pan-y;
+  touch-action:pan-y pinch-zoom;
 }
 
 .teacher-filter-wrap{

@@ -2,3 +2,7 @@
 .kpi-card:not(button){cursor:default}
 button.kpi-card{cursor:pointer}
 .settings-list>div{cursor:default}
+
+.report-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.report-filter-row .report-select{width:100%;max-width:none}
+@media(max-width:650px){.report-filter-row{grid-template-columns:1fr}}

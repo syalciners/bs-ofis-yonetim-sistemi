@@ -80,6 +80,9 @@ export interface Tahsilat {
   odeme_yontemi?: string | null
   aciklama?: string | null
   hesap_id?: Id | null
+  iptal_mi?: boolean | null
+  guncelleyen?: string | null
+  guncellenme_zamani?: string | null
 }
 
 export interface Gider {

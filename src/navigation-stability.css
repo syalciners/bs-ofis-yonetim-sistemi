@@ -80,7 +80,7 @@ body{
   font-size:9px;
 }
 
-/* Takvim içinde yatay sayfa hareketi yok; küçük öğretmenler gerektiğinde alt satıra iner. */
+/* Takvim içinde yatay sayfa hareketi yok. */
 .calendar-v2{
   overflow-x:hidden;
   touch-action:pan-y pinch-zoom;
@@ -95,15 +95,6 @@ body{
 .teacher-manager-grid{
   width:100%;
   min-width:0;
-}
-
-.teacher-secondary-row{
-  width:100%;
-  max-width:100%;
-  display:flex;
-  flex-wrap:wrap;
-  overflow:visible !important;
-  padding:2px 2px 0 !important;
 }
 
 /* Öğretmen kimliği: renk zeminde değil çerçevede. */
@@ -145,7 +136,58 @@ body{
   transform:none !important;
 }
 
-/* Ders kartları da ana temada beyaz kalır; öğretmen yalnız sol çerçeveyle ayırt edilir. */
+/* İki yönetici sabit; diğer öğretmenler tek kompakt seçicide. */
+.teacher-secondary-compact{
+  width:100%;
+  max-width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:7px;
+  align-items:stretch;
+}
+
+.teacher-secondary-compact .teacher-all{
+  min-width:82px;
+}
+
+.teacher-other-picker{
+  min-width:0;
+  min-height:42px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  padding:6px 10px;
+  border:1.5px solid #dbe3ec;
+  border-radius:12px;
+  background:#fff;
+  color:#475569;
+}
+
+.teacher-other-picker>span{
+  font-size:9px;
+  font-weight:900;
+  color:#7a8799;
+  white-space:nowrap;
+}
+
+.teacher-other-picker select{
+  width:100%;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#334155;
+  font-size:11px;
+  font-weight:850;
+}
+
+.teacher-other-picker.active{
+  border-color:#eab308;
+  box-shadow:0 4px 12px rgba(234,179,8,.10);
+}
+
+/* Ders kartları ana temada beyaz kalır; öğretmen yalnız sol çerçeveyle ayırt edilir. */
 .calendar-v2 .lesson-card.teacher-pink{
   background:#fff !important;
   border-left:4px solid #ec4899 !important;
@@ -172,6 +214,50 @@ body{
   min-width:0;
 }
 
+/* Öğretmenler ve ödemeler: beyaz zemin + kimlik rengi çerçevede. */
+.teachers-v2 .teacher-profile-card{
+  background:#fff !important;
+}
+
+.teachers-v2 .teacher-profile-card.teacher-pink{
+  border-color:#ec4899 !important;
+}
+
+.teachers-v2 .teacher-profile-card.teacher-blue{
+  border-color:#3b82f6 !important;
+}
+
+.teachers-v2 .teacher-profile-card.teacher-yellow{
+  border-color:#eab308 !important;
+}
+
+.teachers-v2 .teacher-profile-card.manager-card{
+  border-width:2px !important;
+}
+
+.teachers-v2 .teacher-profile-card.standard-card{
+  border-width:1.5px !important;
+}
+
+.profile-detail-hero.teacher-pink,
+.profile-detail-hero.teacher-blue,
+.profile-detail-hero.teacher-yellow{
+  background:#fff !important;
+}
+
+.profile-detail-hero.teacher-pink{border-color:#ec4899 !important}
+.profile-detail-hero.teacher-blue{border-color:#3b82f6 !important}
+.profile-detail-hero.teacher-yellow{border-color:#eab308 !important}
+
+.teacher-payment-card.teacher-pink,
+.teacher-payment-card.teacher-blue,
+.teacher-payment-card.teacher-yellow{
+  background:#fff !important;
+}
+.teacher-payment-card.teacher-pink{border-color:#ec4899 !important}
+.teacher-payment-card.teacher-blue{border-color:#3b82f6 !important}
+.teacher-payment-card.teacher-yellow{border-color:#eab308 !important}
+
 @media(max-width:700px){
   .app-shell{
     padding-top:calc(78px + env(safe-area-inset-top));
@@ -187,7 +273,8 @@ body{
   .bottom-nav a{
     min-height:56px;
   }
-  .teacher-secondary-row{
-    gap:6px;
+  .teacher-other-picker{
+    grid-template-columns:1fr;
+    gap:2px;
   }
 }

@@ -38,4 +38,4 @@ function ProtectedApp() {
   </Routes></main><BottomNav/></div>
 }
 
-export default function App() { return <ToastProvider><AppDataProvider><ProtectedApp/></ToastProvider> }
+export default function App() { return <ToastProvider><AppDataProvider><ProtectedApp/></AppDataProvider></ToastProvider> }

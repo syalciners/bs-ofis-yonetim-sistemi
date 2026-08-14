@@ -1,0 +1,4 @@
+/* V1 UX düzeltmeleri: yalnız gerçek aksiyonlar tıklanabilir hissi verir. */
+.kpi-card:not(button){cursor:default}
+button.kpi-card{cursor:pointer}
+.settings-list>div{cursor:default}

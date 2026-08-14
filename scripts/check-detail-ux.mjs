@@ -20,6 +20,8 @@ const checks = [
   ['Öğretmen branş seçimi mobilde tek sütuna iner', teacherFormFix.includes('@media(max-width:650px)') && teacherFormFix.includes('grid-template-columns:1fr !important')],
   ['Öğretmen branş checkboxı genel input genişlik kuralından korunur', teacherFormFix.includes('.form-grid .check-card input[type="checkbox"]') && teacherFormFix.includes('width:20px !important') && teacherFormFix.includes('max-width:20px !important')],
   ['Öğretmen branş adı checkbox yanında normal satır akışındadır', teacherFormFix.includes('grid-template-columns:22px minmax(0,1fr) !important') && teacherFormFix.includes('word-break:normal !important')],
+  ['iOS Sheet visual viewport dışına taşamaz', teacherFormFix.includes('width:100dvw !important') && teacherFormFix.includes('max-width:100dvw !important')],
+  ['iOS form alanları otomatik zoomu tetiklemez', teacherFormFix.includes('.sheet-panel .form-grid input:not([type="checkbox"])') && teacherFormFix.includes('font-size:16px !important')],
   ['Form alanları mobil genişliği aşamaz', css.includes('.form-grid input,.form-grid select,.form-grid textarea') && css.includes('max-width:100% !important')],
   ['Uzun profil metinleri satıra kırılır', css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word')],
   ['Öğrenci silme güvenli RPC üzerinden yapılır', studentAdmin.includes("supabase.rpc('ogrenci_sil_guvenli_v1'") && !studentAdmin.includes('.delete(')],

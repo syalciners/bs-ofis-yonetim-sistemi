@@ -5,6 +5,8 @@ const studentEdit = readFileSync('src/components/StudentEditPanel.tsx','utf8')
 const studentAdmin = readFileSync('src/services/studentAdminService.ts','utf8')
 const teachers = readFileSync('src/pages/TeachersPage.tsx','utf8')
 const lesson = readFileSync('src/components/LessonDetail.tsx','utf8')
+const lessonCard = readFileSync('src/components/LessonCard.tsx','utf8')
+const lessonStatusCss = readFileSync('src/lesson-status-colors.css','utf8')
 const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
 const css = readFileSync('src/navigation-stability.css','utf8')
 const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
@@ -28,6 +30,8 @@ const checks = [
   ['Öğrenci düzenleme ekranında silme butonu vardır', studentEdit.includes('Öğrenciyi Sil') && studentEdit.includes('hasHistory')],
   ['Ders durumları üç doğrudan butondur', lesson.includes('lesson-status-three') && lesson.includes("value:'Planlandı'") && lesson.includes("value:'Yapıldı'") && lesson.includes("value:'İptal'")],
   ['Ders durum renkleri mavi yeşil kırmızıdır', detailFixes.includes('.lesson-status-button.blue') && detailFixes.includes('.lesson-status-button.green') && detailFixes.includes('.lesson-status-button.red')],
+  ['Ders kartı durum sınıfı Türkçe locale ile üretilir', lessonCard.includes("toLocaleLowerCase('tr-TR')")],
+  ['Ana sayfa İptal etiketi kırmızı stile bağlıdır', lessonStatusCss.includes('.lesson-card.status-iptal .lesson-status span') && lessonStatusCss.includes('color:#b91c1c !important')],
   ['Tahsilat fiziksel silinmez, güvenli iptal kullanır', finance.includes('cancelCollection') && finance.includes('Kaydı İptal Et') && finance.includes('Kayıt silinmeyecek')],
 ]
 

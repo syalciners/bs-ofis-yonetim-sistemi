@@ -1,0 +1,26 @@
+name: V1 build doğrulama
+
+on:
+  push:
+    branches: [v1-temiz-gelistirme]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package.json
+      - name: Bağımlılıkları kur
+        run: npm install --no-audit --no-fund
+      - name: TypeScript ve PWA build
+        run: npm run build
+      - name: Çıktıyı doğrula
+        run: test -f dist/index.html && test -f dist/manifest.webmanifest

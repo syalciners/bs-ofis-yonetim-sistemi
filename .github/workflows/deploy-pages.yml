@@ -38,3 +38,22 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gerçek uygulama adresini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://syalciners.github.io/bs-ofis-yonetim-sistemi/?smoke=${GITHUB_SHA}"
+          for i in 1 2 3 4 5 6; do
+            HTML="$(curl -fsSL --max-time 20 "$URL" || true)"
+            if printf '%s' "$HTML" | grep -q 'BS Ofis Yönetim Sistemi'; then
+              echo "Yayın doğrulandı: $URL"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Yayın adresi beklenen uygulama HTML'ini döndürmedi."
+          exit 1

@@ -30,6 +30,8 @@ jobs:
         run: node scripts/check-smart-scheduling.mjs
       - name: Ayarlar profil güvenliği
         run: node scripts/check-settings-ux.mjs
+      - name: Ödev ve WhatsApp kuralları
+        run: node scripts/check-assignments-ux.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.html && test -f dist/manifest.webmanifest

@@ -127,8 +127,14 @@ export interface Odev {
   son_teslim_tarihi?: string | null
   durum: string
   oncelik?: string | null
+  odev_fotografi?: string | null
+  odev_dosyasi?: string | null
+  teslim_dosyasi?: string | null
+  odev_dosya_linki?: string | null
+  odev_fotograf_linki?: string | null
   ogretmen_notu?: string | null
   puan?: string | null
+  tamamlanma_tarihi?: string | null
 }
 
 export interface KullaniciProfili {

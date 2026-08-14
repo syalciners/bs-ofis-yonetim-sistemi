@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { Sheet } from '../components/Sheet'
-import { CollectionForm, LessonForm, StudentForm } from '../components/forms'
+import { LessonForm, StudentForm } from '../components/forms'
+import { CollectionQuickForm } from '../components/CollectionQuickForm'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
 import type { Ders } from '../lib/types'
@@ -42,7 +43,7 @@ export function OverviewPage() {
 
     <section><div className="section-heading"><div><h2>Dikkat Gerektirenler</h2><span>yalnız gerekenler</span></div></div>{attention.length?<div className="attention-grid">{attention.map((x,i)=><button key={i} onClick={x.go}><span className="attention-icon"><x.icon/></span><span><b>{x.title}</b><small>{x.text}</small></span></button>)}</div>:<div className="all-good"><CalendarCheck2/><span><b>Kontrol bekleyen kritik iş yok.</b><small>Günlük akış normal görünüyor.</small></span></div>}</section>
 
-    <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle="Ödeme kaydedildiğinde kasa hareketi otomatik oluşur." onClose={()=>setModal(null)}><CollectionForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
+    <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle="Öğrenciyi seç; güncel bakiye otomatik gösterilir." onClose={()=>setModal(null)}><CollectionQuickForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='student'} title="Yeni Öğrenci" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setModal(null)}><StudentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='lesson'} title="Yeni Ders" subtitle="Çakışma kaydetmeden önce otomatik kontrol edilir." onClose={()=>setModal(null)}><LessonForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Ders sonucu ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>

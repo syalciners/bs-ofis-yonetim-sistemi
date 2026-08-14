@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 
 const page = readFileSync('src/pages/TeachersPage.tsx','utf8')
 const css = readFileSync('src/ux-overrides.css','utf8')
+const stability = readFileSync('src/navigation-stability.css','utf8')
 
 const checks = [
   ['Yöneticiler ayrı üst gruptadır', page.includes('manager-teacher-grid') && page.includes('Yöneticiler')],
@@ -13,9 +14,12 @@ const checks = [
   ['Yönetici unvanı öğretmen unvanıyla birleşir', page.includes('Yönetici - ${baseTitle}')],
   ['Yönetici kartları iki sütundur', css.includes('.manager-teacher-grid{display:grid;grid-template-columns:repeat(2')],
   ['Diğer öğretmen kartları daha kompakt gruptadır', css.includes('.standard-teacher-grid{display:grid') && css.includes('.teacher-profile-card.standard-card')],
-  ['Başak pembe kart kimliğini korur', css.includes('.teacher-profile-card.teacher-pink')],
-  ['Süleyman mavi kart kimliğini korur', css.includes('.teacher-profile-card.teacher-blue')],
-  ['Diğer öğretmenler sarı kart kimliğini korur', css.includes('.teacher-profile-card.teacher-yellow')],
+  ['Öğretmen kartları beyaz zeminde kalır', stability.includes('.teachers-v2 .teacher-profile-card') && stability.includes('background:#fff !important')],
+  ['Başak pembe çerçeve kullanır', stability.includes('.teachers-v2 .teacher-profile-card.teacher-pink') && stability.includes('border-color:#ec4899')],
+  ['Süleyman mavi çerçeve kullanır', stability.includes('.teachers-v2 .teacher-profile-card.teacher-blue') && stability.includes('border-color:#3b82f6')],
+  ['Diğer öğretmenler sarı çerçeve kullanır', stability.includes('.teachers-v2 .teacher-profile-card.teacher-yellow') && stability.includes('border-color:#eab308')],
+  ['Öğretmen detay başlığı da beyaz zemin standardındadır', stability.includes('.profile-detail-hero.teacher-pink') && stability.includes('.profile-detail-hero.teacher-blue') && stability.includes('background:#fff !important')],
+  ['Öğretmen ödeme kartları da beyaz zemin standardındadır', stability.includes('.teacher-payment-card.teacher-pink') && stability.includes('.teacher-payment-card.teacher-blue') && stability.includes('.teacher-payment-card.teacher-yellow')],
 ]
 
 const failed = checks.filter(([,ok])=>!ok)

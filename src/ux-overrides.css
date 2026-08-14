@@ -13,17 +13,20 @@ button.kpi-card{cursor:pointer}
 .week-switcher button{min-height:44px;border:0;border-radius:11px;background:transparent;color:#475569;font-weight:800;cursor:pointer;transition:.18s ease}
 .week-switcher button.active{background:#2563eb;color:#fff;box-shadow:0 5px 14px rgba(37,99,235,.22)}
 .week-range{display:flex;align-items:center;justify-content:center;gap:7px;color:#475569;font-size:14px}
-.teacher-filter-wrap{overflow:hidden}
-.teacher-filter{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 7px;scrollbar-width:none}
-.teacher-filter::-webkit-scrollbar{display:none}
-.teacher-chip{flex:0 0 auto;min-height:44px;border:1px solid transparent;border-radius:14px;padding:7px 13px;display:flex;align-items:center;gap:7px;font-weight:800;cursor:pointer;transition:.16s ease;white-space:nowrap}
+.teacher-filter-wrap{display:grid;gap:8px;overflow:hidden}
+.teacher-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.teacher-secondary-row{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 7px;scrollbar-width:none}
+.teacher-secondary-row::-webkit-scrollbar{display:none}
+.teacher-chip{border:1px solid transparent;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:800;cursor:pointer;transition:.16s ease;white-space:nowrap}
 .teacher-chip small{font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;opacity:.72}
+.teacher-manager-chip{width:100%;min-height:52px;padding:9px 14px;flex-direction:column;gap:2px;font-size:14px}
+.teacher-manager-chip span{line-height:1.15}
+.teacher-small-chip{flex:0 0 auto;min-height:34px;padding:5px 10px;border-radius:11px;font-size:11px}
 .teacher-chip.teacher-all{background:#f8fafc;border-color:#dbe3ec;color:#334155}
 .teacher-chip.teacher-pink{background:#fce7f3;border-color:#f9a8d4;color:#9d174d}
 .teacher-chip.teacher-blue{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
 .teacher-chip.teacher-yellow{background:#fef3c7;border-color:#fcd34d;color:#92400e}
 .teacher-chip.active{transform:translateY(-1px);box-shadow:0 5px 14px rgba(15,23,42,.13);outline:2px solid currentColor;outline-offset:1px}
-.teacher-chip.manager{border-width:2px}
 .calendar-command-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 15px;background:#fff;border:1px solid #e5eaf0;border-radius:16px}
 .calendar-command-bar>div:first-child{display:flex;flex-direction:column;gap:2px}
 .calendar-command-bar>div:first-child span{font-size:12px;color:#64748b}
@@ -58,7 +61,9 @@ button.kpi-card{cursor:pointer}
 @media(max-width:700px){
   .week-switcher{gap:5px;padding:5px}
   .week-switcher button{font-size:12px;padding:7px 5px}
-  .teacher-chip{min-height:40px;padding:6px 10px;font-size:12px}
+  .teacher-manager-grid{gap:7px}
+  .teacher-manager-chip{min-height:48px;padding:8px 7px;font-size:12px}
+  .teacher-small-chip{min-height:32px;padding:5px 9px;font-size:10.5px}
   .calendar-command-bar{align-items:stretch;flex-direction:column}
   .calendar-command-bar>div:last-child{display:grid;grid-template-columns:1fr 1fr}
   .calendar-command-bar>div:last-child button{justify-content:center}

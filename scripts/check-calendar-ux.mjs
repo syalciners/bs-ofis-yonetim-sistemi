@@ -13,6 +13,8 @@ const checks = [
   ['Takvim Bu Hafta butonunu içerir', calendar.includes("label:'Bu Hafta'")],
   ['Takvim Gelecek Hafta butonunu içerir', calendar.includes("label:'Gelecek Hafta'")],
   ['Takvim öğretmen buton filtresini kullanır', calendar.includes('teacher-chip')],
+  ['Yönetici öğretmenler üstte ayrı gruptadır', calendar.includes('teacher-manager-grid') && calendar.includes('teacher-manager-chip')],
+  ['Diğer öğretmenler altta küçük butonlardır', calendar.includes('teacher-secondary-row') && calendar.includes('teacher-small-chip')],
   ['Takvim günlere göre haftalık ajanda kullanır', calendar.includes('week-agenda') && calendar.includes('agenda-day')],
   ['Takvim Sabit Program formunu doğrudan içermez', !calendar.includes('ProgramForm') && !calendar.includes("mode==='program'")],
   ['Sabit Program ayrı sayfadır', fixed.includes('Sabit Ders Programı') && fixed.includes('fixed-program-groups')],
@@ -22,11 +24,12 @@ const checks = [
   ['Başak Atilla pembe öğretmen rengidir', tone.includes("'BAŞAK ATİLLA'") && tone.includes("return 'teacher-pink'")],
   ['Süleyman Yalçıner mavi öğretmen rengidir', tone.includes("'SÜLEYMAN YALÇINER'") && tone.includes("return 'teacher-blue'")],
   ['Diğer öğretmenler sarı renktir', tone.includes("return 'teacher-yellow'")],
-  ['Yönetici öğretmenler özel işaretlenir', calendar.includes("?'manager':''") && calendar.includes('Yönetici')],
+  ['Yönetici öğretmenler Yönetici etiketi taşır', calendar.includes('<small>Yönetici</small>')],
   ['Seçili hafta belirgin mavi zemindir', css.includes('.week-switcher button.active{background:#2563eb;color:#fff')],
   ['Pembe öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-pink{background:#fce7f3')],
   ['Mavi öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-blue{background:#dbeafe')],
   ['Sarı öğretmen zemini tanımlıdır', css.includes('.teacher-chip.teacher-yellow{background:#fef3c7')],
+  ['Yönetici öğretmen butonları iki sütundur', css.includes('.teacher-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))')],
 ]
 
 const failed = checks.filter(([,ok])=>!ok)

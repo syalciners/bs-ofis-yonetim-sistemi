@@ -28,6 +28,8 @@ export function CalendarPage(){
   useEffect(()=>{sessionStorage.setItem('bs-takvim-ogretmen',teacher)},[teacher])
   if(!data)return null
   const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif')
+  const managerTeachers=activeTeachers.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>teacherTone(a.ad_soyad)==='teacher-pink'?-1:teacherTone(b.ad_soyad)==='teacher-pink'?1:0)
+  const otherTeachers=activeTeachers.filter(x=>!isManagerTeacher(x.ad_soyad))
   const weekProgramCount=lessons.filter(x=>x.program_id).length
 
   return <div className="page-stack calendar-v2">
@@ -39,9 +41,12 @@ export function CalendarPage(){
     <div className="week-range"><CalendarDays size={16}/><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
 
     <section className="teacher-filter-wrap">
-      <div className="teacher-filter" aria-label="Öğretmen filtresi">
-        <button className={`teacher-chip teacher-all ${teacher==='tum'?'active':''}`} onClick={()=>setTeacher('tum')}>Tümü</button>
-        {activeTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''} ${isManagerTeacher(x.ad_soyad)?'manager':''}`} onClick={()=>setTeacher(x.ogretmen_id)}><span>{x.ad_soyad}</span>{isManagerTeacher(x.ad_soyad)&&<small>Yönetici</small>}</button>)}
+      <div className="teacher-manager-grid" aria-label="Yönetici öğretmenler">
+        {managerTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip teacher-manager-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''}`} onClick={()=>setTeacher(x.ogretmen_id)}><span>{x.ad_soyad}</span><small>Yönetici</small></button>)}
+      </div>
+      <div className="teacher-secondary-row" aria-label="Diğer öğretmenler">
+        <button className={`teacher-chip teacher-small-chip teacher-all ${teacher==='tum'?'active':''}`} onClick={()=>setTeacher('tum')}>Tümü</button>
+        {otherTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip teacher-small-chip ${teacherTone(x.ad_soyad)} ${teacher===x.ogretmen_id?'active':''}`} onClick={()=>setTeacher(x.ogretmen_id)}>{x.ad_soyad}</button>)}
       </div>
     </section>
 

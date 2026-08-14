@@ -12,7 +12,7 @@ export const expenseName = (d: AppData, id?: string | null) => d.giderKategorile
 
 export const studentDebt = (d: AppData, id: string) => {
   const debt = d.dersler.filter(x => x.ogrenci_id === id && x.ders_durumu === 'Yapıldı').reduce((s, x) => s + Number(x.ogrenci_toplam_tutar || 0), 0)
-  const paid = d.tahsilatlar.filter(x => x.ogrenci_id === id).reduce((s, x) => s + Number(x.tutar || 0), 0)
+  const paid = d.tahsilatlar.filter(x => x.ogrenci_id === id && !x.iptal_mi).reduce((s, x) => s + Number(x.tutar || 0), 0)
   return debt - paid
 }
 
@@ -26,7 +26,7 @@ export const teacherBalance = (d: AppData, id: string) => {
 
 export const totalTeacherBalance = (d: AppData) => activeTeachers(d).reduce((s, x) => s + Math.max(teacherBalance(d, x.ogretmen_id), 0), 0)
 
-export const monthCollections = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.tahsilatlar.filter(x => x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
+export const monthCollections = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.tahsilatlar.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
 export const monthExpenses = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.giderler.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
 export const monthTeacherPayments = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.ogretmenOdemeleri.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
 export const monthRevenue = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.dersler.filter(x => x.ders_durumu === 'Yapıldı' && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.ogrenci_toplam_tutar || 0), 0)

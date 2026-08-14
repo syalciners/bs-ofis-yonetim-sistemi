@@ -5,4 +5,9 @@ button.kpi-card{cursor:pointer}
 
 .report-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .report-filter-row .report-select{width:100%;max-width:none}
-@media(max-width:650px){.report-filter-row{grid-template-columns:1fr}}
+.settings-card{flex-wrap:wrap}
+.settings-card>.secondary-btn{margin-left:auto}
+@media(max-width:650px){
+  .report-filter-row{grid-template-columns:1fr}
+  .settings-card>.secondary-btn{width:100%;margin-left:0;justify-content:center}
+}

@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Kritik iş kuralları
+        run: npm run check:rules
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.html && test -f dist/manifest.webmanifest

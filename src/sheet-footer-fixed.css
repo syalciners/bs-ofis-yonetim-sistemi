@@ -1,60 +1,101 @@
-/* Sheet form işlem alanları gerçek sabit footer gibi davranır.
-   İçerik kayar; işlem butonları panel altında sürekli görünür kalır. */
+/* Sheet işlem alanı artık viewport'a fixed değildir.
+   Header + kaydırılan body + gerçek footer aynı panel gridinin parçalarıdır. */
 
 .sheet-panel{
   position:relative !important;
+  grid-template-rows:auto minmax(0,1fr) auto !important;
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
 }
 
-/* Sticky yaklaşımının aksine bar formun en altına gelmeyi beklemez.
-   Form açılır açılmaz görünür ve submit butonu form DOM'u içinde kalır. */
+.sheet-body{
+  min-height:0 !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior-y:none !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* React Sheet bileşeni gövdedeki gerçek aksiyonları bu footer'a yansıtır.
+   Orijinal butonlar form içinde kalır; böylece doğrulama ve submit mantığı korunur. */
 .sheet-body .form-actions{
-  position:fixed !important;
-  left:50% !important;
-  right:auto !important;
-  bottom:0 !important;
-  transform:translateX(-50%) !important;
-  z-index:140 !important;
-  width:min(720px,100dvw) !important;
-  max-width:100dvw !important;
+  display:none !important;
+}
+
+.sheet-footer{
+  display:none !important;
+  position:relative !important;
+  inset:auto !important;
+  z-index:40 !important;
+  width:100% !important;
   min-width:0 !important;
+  max-width:100% !important;
   margin:0 !important;
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom)) !important;
   background:rgba(255,255,255,.985) !important;
   border-top:1px solid #dfe6f1 !important;
-  box-shadow:0 -12px 28px rgba(31,48,79,.10) !important;
+  box-shadow:0 -10px 24px rgba(31,48,79,.08) !important;
   backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
+}
+
+.sheet-footer.has-content{
+  display:block !important;
+}
+
+.sheet-action-host,
+.sheet-explicit-footer{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+.sheet-footer .form-actions{
+  display:grid !important;
+  position:static !important;
+  inset:auto !important;
+  transform:none !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
   grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) !important;
   gap:8px !important;
 }
 
-/* Safari/iOS'ta overflow container padding-bottom her zaman yeterli scroll mesafesi
-   oluşturmuyor. Bu nedenle gövdenin sonunda gerçek bir içerik spacer'ı oluşturulur.
-   Böylece Notlar/Açıklama/uyarı/silme alanları sabit footer'ın tamamen üstüne çıkabilir. */
+/* Tek işlemli ekranlarda buton artık yarım sütunda kalmaz. */
+.sheet-footer .form-actions:has(> :only-child){
+  grid-template-columns:minmax(0,1fr) !important;
+}
+
+.sheet-footer .form-actions button{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  min-height:48px !important;
+}
+
+/* Footer gerçek grid satırı olduğu için gövdede yapay spacer/overlay gerekmez. */
 .sheet-body:has(.form-actions){
   padding-bottom:14px !important;
 }
 
 .sheet-body:has(.form-actions)::after{
-  content:"";
-  display:block;
-  width:100%;
-  height:calc(126px + env(safe-area-inset-bottom));
-  min-height:calc(126px + env(safe-area-inset-bottom));
-  pointer-events:none;
+  content:none !important;
+  display:none !important;
 }
 
-/* Form grid içinde de gerçek akış mesafesi bırakılır. Bu, özellikle uzun mobil
-   formlarda son textarea/hint alanının footer'ın arkasında kalmasını engeller. */
 .sheet-body .form-grid:has(.form-actions){
-  padding-bottom:8px !important;
+  padding-bottom:0 !important;
 }
 
-/* Önceki sticky wrapper davranışını etkisizleştir. */
 .sheet-body .form-grid > .wide:has(> .form-actions){
   position:static !important;
-  bottom:auto !important;
-  z-index:auto !important;
+  inset:auto !important;
   padding:0 !important;
   margin:0 !important;
   border:0 !important;
@@ -62,7 +103,7 @@
   background:transparent !important;
 }
 
-/* iOS Safari date/time kendi doğal genişliğini dayatabildiği için appearance da sıfırlanır. */
+/* iOS Safari date/time kendi doğal genişliğini dayatabildiği için appearance sıfırlanır. */
 .sheet-body input[type="date"],
 .sheet-body input[type="time"],
 .sheet-body input[type="datetime-local"]{
@@ -91,30 +132,40 @@
   text-align:left !important;
 }
 
-@media(min-width:701px){
-  /* Masaüstünde Sheet alt kenarı viewport dibinden yaklaşık %3 yukarıdadır. */
-  .sheet-body .form-actions{
-    bottom:3dvh !important;
-    border-radius:0 0 24px 24px;
-  }
-
-  .sheet-body:has(.form-actions)::after{
-    height:118px;
-    min-height:118px;
-  }
-}
-
 @media(max-width:700px){
-  .sheet-body .form-actions{
-    width:100dvw !important;
-    max-width:100dvw !important;
+  /* Mobilde panel gerçek visual viewport yüksekliğine oturur.
+     Böylece çekme/rubber-band sırasında panelin tamamı yukarı sürüklenmez. */
+  .sheet-panel{
+    height:calc(100dvh - max(12px, env(safe-area-inset-top))) !important;
+    max-height:calc(100dvh - max(12px, env(safe-area-inset-top))) !important;
+  }
+
+  .sheet-footer{
     padding-left:14px !important;
     padding-right:14px !important;
+  }
+
+  .sheet-footer .form-actions{
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) !important;
+  }
+
+  .sheet-footer .form-actions:has(> :only-child){
+    grid-template-columns:minmax(0,1fr) !important;
   }
 
   .sheet-body input[type="date"],
   .sheet-body input[type="time"],
   .sheet-body input[type="datetime-local"]{
     font-size:16px !important;
+  }
+}
+
+@media(max-width:380px){
+  .sheet-footer .form-actions{
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr) !important;
+  }
+
+  .sheet-footer .form-actions:has(> :only-child){
+    grid-template-columns:minmax(0,1fr) !important;
   }
 }

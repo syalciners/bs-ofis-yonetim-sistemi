@@ -12,6 +12,7 @@ import { MorePage } from './pages/MorePage'
 import { TeachersPage } from './pages/TeachersPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
 import { ReportsPage } from './pages/ReportsPage'
+import { FixedProgramPage } from './pages/FixedProgramPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SystemPage } from './pages/SystemPage'
 import { LoaderCircle } from 'lucide-react'
@@ -30,10 +31,11 @@ function ProtectedApp() {
     <Route path="/ogretmenler" element={<TeachersPage/>}/>
     <Route path="/odevler" element={<AssignmentsPage/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
+    <Route path="/sabit-program" element={<FixedProgramPage/>}/>
     <Route path="/ayarlar" element={<SettingsPage/>}/>
     <Route path="/sistem" element={<SystemPage/>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes></main><BottomNav/></div>
 }
 
-export default function App() { return <ToastProvider><AppDataProvider><ProtectedApp/></AppDataProvider></ToastProvider> }
+export default function App() { return <ToastProvider><AppDataProvider><ProtectedApp/></ToastProvider> }

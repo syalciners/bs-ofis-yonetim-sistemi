@@ -1,4 +1,4 @@
-import { Banknote, CircleDollarSign, GraduationCap, Landmark, Plus, Receipt, ReceiptText, Users, WalletCards, XCircle } from 'lucide-react'
+import { Banknote, GraduationCap, Landmark, Plus, Receipt, ReceiptText, Users, WalletCards, XCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -45,7 +45,7 @@ export function FinancePage(){
 
     {tab==='tahsilatlar'&&<>
       <div className="section-heading"><div><h2>Son Tahsilatlar</h2><span>{activeCollectionCount} aktif kayıt</span></div><button className="text-btn" onClick={()=>nav('/ogrenciler?filtre=borclu')}>Borçlu Öğrenciler</button></div>
-      <section className="finance-list">{data.tahsilatlar.length?data.tahsilatlar.map(x=><button className="finance-card income" style={x.iptal_mi?{opacity:.5}:undefined} key={x.tahsilat_id} onClick={()=>setSelected({type:'tahsilat',row:x})}><div className="finance-icon"><CircleDollarSign/></div><div><strong>{studentName(data,x.ogrenci_id)}</strong><small>{fullDate(x.tarih)} · {x.odeme_yontemi||'—'}{x.iptal_mi?' · İptal':''}{x.aciklama?` · ${x.aciklama}`:''}</small></div><b>{x.iptal_mi?'İptal · ':''}{money(x.tutar)}</b></button>):<div className="calm-empty"><Users/><b>Henüz tahsilat yok.</b><span>İlk tahsilatı “Tahsilat Al” ile kaydedebilirsin.</span></div>}</section>
+      <section className="finance-list">{data.tahsilatlar.length?data.tahsilatlar.map(x=><button className="finance-card income" style={x.iptal_mi?{opacity:.5}:undefined} key={x.tahsilat_id} onClick={()=>setSelected({type:'tahsilat',row:x})}><div className="finance-icon"><Banknote/></div><div><strong>{studentName(data,x.ogrenci_id)}</strong><small>{fullDate(x.tarih)} · {x.odeme_yontemi||'—'}{x.iptal_mi?' · İptal':''}{x.aciklama?` · ${x.aciklama}`:''}</small></div><b>{x.iptal_mi?'İptal · ':''}{money(x.tutar)}</b></button>):<div className="calm-empty"><Users/><b>Henüz tahsilat yok.</b><span>İlk tahsilatı “Tahsilat Al” ile kaydedebilirsin.</span></div>}</section>
     </>}
 
     {tab==='ogretmen'&&<>

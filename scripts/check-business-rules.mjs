@@ -1,13 +1,26 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const read = (path) => readFileSync(join(root, path), 'utf8')
+const collectSource = (dir) => readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
+  const relative = join(dir, entry.name)
+  if (entry.isDirectory()) return collectSource(relative)
+  return /\.(ts|tsx)$/.test(entry.name) ? [read(relative)] : []
+}).join('\n')
+
 const metrics = read('src/services/metrics.ts')
 const service = read('src/services/officeService.ts')
 const lessonDetail = read('src/components/LessonDetail.tsx')
 const forms = read('src/components/forms.tsx')
+const calendar = read('src/pages/CalendarPage.tsx')
+const bottomNav = read('src/components/BottomNav.tsx')
+const allSource = collectSource('src')
 
 const checks = []
 const expectText = (name, source, text) => checks.push({ name, ok: source.includes(text), detail: `Beklenen ifade bulunamadı: ${text}` })
+const rejectRegex = (name, source, regex, detail) => checks.push({ name, ok: !regex.test(source), detail })
 
 expectText('Öğrenci borcu yalnız Yapıldı derslerinden oluşur', metrics, "x.ogrenci_id === id && x.ders_durumu === 'Yapıldı'")
 expectText('Öğretmen hakedişi yalnız Yapıldı derslerinden oluşur', metrics, "x.ogretmen_id === id && x.ders_durumu === 'Yapıldı'")
@@ -22,6 +35,17 @@ expectText('Ders durumunda Öğrenci Gelmedi korunur', lessonDetail, "value:'Ö�
 expectText('Ders durumunda Ertelendi korunur', lessonDetail, "value:'Ertelendi'")
 expectText('Ders durumunda Öğretmen İptali korunur', lessonDetail, "value:'Öğretmen İptali'")
 expectText('Ders durumunda Planlandı korunur', lessonDetail, "value:'Planlandı'")
+expectText('Takvim veri yüklenirken Hook sırasını değiştirmez', calendar, "const lessons=useMemo(()=>{if(!data)return[];")
+expectText('Alt menü Özet girişini korur', bottomNav, "label: 'Özet'")
+expectText('Alt menü Takvim girişini korur', bottomNav, "label: 'Takvim'")
+expectText('Alt menü Öğrenciler girişini korur', bottomNav, "label: 'Öğrenciler'")
+expectText('Alt menü Finans girişini korur', bottomNav, "label: 'Finans'")
+expectText('Alt menü Menü girişini korur', bottomNav, "label: 'Menü'")
+
+rejectRegex('Frontend service_role anahtarı içermez', allSource, /service[_-]?role/i, 'Frontend kaynaklarında service_role ifadesi bulundu.')
+rejectRegex('Frontend doğrudan insert yapmaz', allSource, /\.insert\s*\(/, 'Frontend kaynaklarında doğrudan .insert() kullanımı bulundu.')
+rejectRegex('Frontend doğrudan update yapmaz', allSource, /\.update\s*\(/, 'Frontend kaynaklarında doğrudan .update() kullanımı bulundu.')
+rejectRegex('Frontend doğrudan delete yapmaz', allSource, /\.delete\s*\(/, 'Frontend kaynaklarında doğrudan .delete() kullanımı bulundu.')
 
 const collectionStart = forms.indexOf('export function CollectionForm')
 const collectionEnd = forms.indexOf('export function ExpenseForm')
@@ -35,8 +59,8 @@ checks.push({
 const failed = checks.filter((x) => !x.ok)
 for (const check of checks) console.log(`${check.ok ? '✓' : '✗'} ${check.name}`)
 if (failed.length) {
-  console.error(`\n${failed.length} kritik iş kuralı kontrolü başarısız:`)
+  console.error(`\n${failed.length} kritik iş kuralı / mimari kontrol başarısız:`)
   failed.forEach((x) => console.error(`- ${x.name}: ${x.detail}`))
   process.exit(1)
 }
-console.log(`\n${checks.length} kritik iş kuralı doğrulandı.`)
+console.log(`\n${checks.length} kritik iş kuralı ve mimari sınır doğrulandı.`)

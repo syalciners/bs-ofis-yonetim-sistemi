@@ -1,1 +1,98 @@
-placeholder
+/* Sheet form işlem alanları gerçek sabit footer gibi davranır.
+   İçerik kayar; işlem butonları panel altında sürekli görünür kalır. */
+
+.sheet-panel{
+  position:relative !important;
+}
+
+/* Sticky yaklaşımının aksine bar formun en altına gelmeyi beklemez.
+   Form açılır açılmaz görünür ve submit butonu form DOM'u içinde kalır. */
+.sheet-body .form-actions{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:0 !important;
+  transform:translateX(-50%) !important;
+  z-index:140 !important;
+  width:min(720px,100dvw) !important;
+  max-width:100dvw !important;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+  background:rgba(255,255,255,.985) !important;
+  border-top:1px solid #dfe6f1 !important;
+  box-shadow:0 -12px 28px rgba(31,48,79,.10) !important;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) !important;
+  gap:8px !important;
+}
+
+/* Alt bar içerik üzerine binmesin. */
+.sheet-body:has(.form-actions){
+  padding-bottom:calc(104px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Önceki sticky wrapper davranışını etkisizleştir. */
+.sheet-body .form-grid > .wide:has(> .form-actions){
+  position:static !important;
+  bottom:auto !important;
+  z-index:auto !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+}
+
+/* iOS Safari date/time kendi doğal genişliğini dayatabildiği için appearance da sıfırlanır. */
+.sheet-body input[type="date"],
+.sheet-body input[type="time"],
+.sheet-body input[type="datetime-local"]{
+  display:block !important;
+  width:100% !important;
+  inline-size:100% !important;
+  max-width:100% !important;
+  max-inline-size:100% !important;
+  min-width:0 !important;
+  min-inline-size:0 !important;
+  -webkit-min-logical-width:0 !important;
+  box-sizing:border-box !important;
+  margin:0 !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
+
+.sheet-body input[type="date"]::-webkit-date-and-time-value,
+.sheet-body input[type="time"]::-webkit-date-and-time-value,
+.sheet-body input[type="datetime-local"]::-webkit-date-and-time-value{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  text-align:left !important;
+}
+
+@media(min-width:701px){
+  /* Masaüstünde Sheet alt kenarı viewport dibinden yaklaşık %3 yukarıdadır. */
+  .sheet-body .form-actions{
+    bottom:3dvh !important;
+    border-radius:0 0 24px 24px;
+  }
+}
+
+@media(max-width:700px){
+  .sheet-body .form-actions{
+    width:100dvw !important;
+    max-width:100dvw !important;
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  .sheet-body input[type="date"],
+  .sheet-body input[type="time"],
+  .sheet-body input[type="datetime-local"]{
+    font-size:16px !important;
+  }
+}

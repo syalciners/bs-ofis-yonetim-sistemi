@@ -13,6 +13,7 @@ const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
 const teacherFormFix = readFileSync('src/teacher-form-fix.css','utf8')
 const sheet = readFileSync('src/components/Sheet.tsx','utf8')
 const sheetStandard = readFileSync('src/sheet-standard.css','utf8')
+const sheetFooterFixed = readFileSync('src/sheet-footer-fixed.css','utf8')
 
 const checks = [
   ['Öğrenci iletişimi detayın üst bölümündedir', student.includes('profile-contact-strip') && student.includes('mailto:') && student.includes('wa.me/') && student.includes('tel:+')],
@@ -30,8 +31,9 @@ const checks = [
   ['Uzun profil metinleri satıra kırılır', css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word')],
   ['Sheet paneli kaymaz, yalnız gövde kayar', sheetStandard.includes('.sheet-panel') && sheetStandard.includes('overflow:hidden !important') && sheetStandard.includes('.sheet-body') && sheetStandard.includes('overflow-y:auto !important')],
   ['Sheet açıldığında gövde en üste sıfırlanır', sheet.includes('bodyRef.current?.scrollTo') && sheet.includes('ref={bodyRef} className="sheet-body"')],
-  ['Form işlem alanı gövde kayarken sabit kalır', sheetStandard.includes('.wide:has(> .form-actions)') && sheetStandard.includes('position:sticky !important') && sheetStandard.includes('bottom:-14px !important')],
-  ['Tarih ve saat alanları iOS intrinsic genişliğini aşamaz', sheetStandard.includes('input[type="date"]') && sheetStandard.includes('input[type="time"]') && sheetStandard.includes('-webkit-min-logical-width:0 !important') && sheetStandard.includes('inline-size:100% !important')],
+  ['Form işlem alanı ilk andan itibaren gerçek sabit alt bardır', sheetFooterFixed.includes('.sheet-body .form-actions') && sheetFooterFixed.includes('position:fixed !important') && sheetFooterFixed.includes('bottom:0 !important')],
+  ['Sabit alt bar içeriğin üstünü kapatmaz', sheetFooterFixed.includes('.sheet-body:has(.form-actions)') && sheetFooterFixed.includes('padding-bottom:calc(104px + env(safe-area-inset-bottom))')],
+  ['Tarih ve saat alanları iOS intrinsic genişliğini aşamaz', sheetFooterFixed.includes('input[type="date"]') && sheetFooterFixed.includes('input[type="time"]') && sheetFooterFixed.includes('-webkit-appearance:none !important') && sheetFooterFixed.includes('inline-size:100% !important')],
   ['Tüm Sheet formları telefonda tek sütundur', sheetStandard.includes('.sheet-body .form-grid') && sheetStandard.includes('grid-template-columns:minmax(0,1fr) !important')],
   ['Öğrenci silme güvenli RPC üzerinden yapılır', studentAdmin.includes("supabase.rpc('ogrenci_sil_guvenli_v1'") && !studentAdmin.includes('.delete(')],
   ['Öğrenci düzenleme ekranında silme butonu vardır', studentEdit.includes('Öğrenciyi Sil') && studentEdit.includes('hasHistory')],

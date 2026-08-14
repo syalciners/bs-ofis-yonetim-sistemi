@@ -34,13 +34,22 @@
   }
 
   async function ogrenciGuncelle(ogrenciId,payload){
-    const {data,error}=await bsSupabase
-      .from('ogrenciler')
-      .update(payload)
-      .eq('ogrenci_id',ogrenciId)
-      .select('ogrenci_id,ad_soyad,veli_adi,veli_telefon,ogrenci_telefon,email,kayit_tarihi,durum,notlar')
-      .single();
-    if(error) throw error;
+    const mevcut=await ogrenciGetir(ogrenciId);
+    const g={...mevcut,...(payload||{})};
+    const {error}=await bsSupabase.rpc('ogrenci_kaydet_guvenli_v2',{
+      p_ogrenci_id:ogrenciId,
+      p_ad_soyad:g.ad_soyad,
+      p_veli_adi:g.veli_adi||null,
+      p_veli_telefon:g.veli_telefon||null,
+      p_ogrenci_telefon:g.ogrenci_telefon||null,
+      p_email:g.email||null,
+      p_kayit_tarihi:g.kayit_tarihi||null,
+      p_notlar:g.notlar||null,
+      p_durum:g.durum||'Aktif'
+    });
+    if(error) throw new Error(error.message||'Öğrenci kaydedilemedi.');
+
+    const data=await ogrenciGetir(ogrenciId);
     if(!data||data.ogrenci_id!==ogrenciId) throw new Error('Öğrenci kaydı doğrulanamadı.');
     if(window.BSReferansServisi) BSReferansServisi.ogrenciGuncelle(data);
     document.dispatchEvent(new CustomEvent('bs:veri-degisti',{detail:{konu:'ogrenci',kayit:data}}));

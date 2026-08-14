@@ -10,6 +10,7 @@ import { StudentsPage } from './pages/StudentsPage'
 import { FinancePage } from './pages/FinancePage'
 import { MorePage } from './pages/MorePage'
 import { TeachersPage } from './pages/TeachersPage'
+import { TeacherPaymentsPage } from './pages/TeacherPaymentsPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { FixedProgramPage } from './pages/FixedProgramPage'
@@ -29,6 +30,7 @@ function ProtectedApp() {
     <Route path="/finans" element={<FinancePage/>}/>
     <Route path="/menu" element={<MorePage/>}/>
     <Route path="/ogretmenler" element={<TeachersPage/>}/>
+    <Route path="/ogretmen-odemeleri" element={<TeacherPaymentsPage/>}/>
     <Route path="/odevler" element={<AssignmentsPage/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>

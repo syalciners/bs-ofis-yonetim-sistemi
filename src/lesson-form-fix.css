@@ -1,0 +1,83 @@
+/* Yeni Ders formu: iPhone/tablet yatay stabilite ve kompakt form düzeni. */
+.sheet-panel{
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]){
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:10px;
+}
+
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) > *{
+  min-width:0;
+  max-width:100%;
+}
+
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) input,
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) select,
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) textarea{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) select{
+  padding-right:36px;
+}
+
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) input[type="date"],
+.sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) input[type="time"]{
+  min-inline-size:0;
+}
+
+@media(max-width:650px){
+  .sheet-panel{
+    width:100dvw !important;
+    max-width:100dvw !important;
+    max-height:94dvh;
+  }
+
+  .sheet-header{
+    flex:0 0 auto;
+    padding:12px 14px !important;
+  }
+
+  .sheet-body{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    padding:12px !important;
+  }
+
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]){
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:9px !important;
+  }
+
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) .wide{
+    grid-column:1 !important;
+  }
+
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) input,
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) select,
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) textarea{
+    font-size:16px !important;
+    min-height:46px;
+  }
+
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) textarea{
+    min-height:82px;
+  }
+
+  .sheet-body .form-grid:has(input[name="tarih"]):has(select[name="ogrenci_id"]):has(select[name="ogretmen_id"]):has(select[name="brans_id"]):has(select[name="derslik_id"]) .form-actions{
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+    width:100%;
+    gap:8px;
+  }
+}

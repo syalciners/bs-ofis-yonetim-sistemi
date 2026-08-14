@@ -6,3 +6,61 @@ button.kpi-card{cursor:pointer}
 .report-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .report-filter-row .report-select{width:100%;max-width:none}
 @media(max-width:650px){.report-filter-row{grid-template-columns:1fr}}
+
+/* Haftalık Takvim */
+.calendar-v2{gap:14px}
+.week-switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px;background:#eef2f7;border:1px solid #e2e8f0;border-radius:16px}
+.week-switcher button{min-height:44px;border:0;border-radius:11px;background:transparent;color:#475569;font-weight:800;cursor:pointer;transition:.18s ease}
+.week-switcher button.active{background:#2563eb;color:#fff;box-shadow:0 5px 14px rgba(37,99,235,.22)}
+.week-range{display:flex;align-items:center;justify-content:center;gap:7px;color:#475569;font-size:14px}
+.teacher-filter-wrap{overflow:hidden}
+.teacher-filter{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 7px;scrollbar-width:none}
+.teacher-filter::-webkit-scrollbar{display:none}
+.teacher-chip{flex:0 0 auto;min-height:44px;border:1px solid transparent;border-radius:14px;padding:7px 13px;display:flex;align-items:center;gap:7px;font-weight:800;cursor:pointer;transition:.16s ease;white-space:nowrap}
+.teacher-chip small{font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;opacity:.72}
+.teacher-chip.teacher-all{background:#f8fafc;border-color:#dbe3ec;color:#334155}
+.teacher-chip.teacher-pink{background:#fce7f3;border-color:#f9a8d4;color:#9d174d}
+.teacher-chip.teacher-blue{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
+.teacher-chip.teacher-yellow{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.teacher-chip.active{transform:translateY(-1px);box-shadow:0 5px 14px rgba(15,23,42,.13);outline:2px solid currentColor;outline-offset:1px}
+.teacher-chip.manager{border-width:2px}
+.calendar-command-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 15px;background:#fff;border:1px solid #e5eaf0;border-radius:16px}
+.calendar-command-bar>div:first-child{display:flex;flex-direction:column;gap:2px}
+.calendar-command-bar>div:first-child span{font-size:12px;color:#64748b}
+.calendar-command-bar>div:last-child{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.week-agenda{display:grid;gap:10px}
+.agenda-day{background:#fff;border:1px solid #e5eaf0;border-radius:17px;overflow:hidden}
+.agenda-day.today{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(37,99,235,.07)}
+.agenda-day>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;background:#f8fafc;border-bottom:1px solid #edf1f5}
+.agenda-day>header>div{display:flex;align-items:center;gap:8px}
+.agenda-day>header>b,.agenda-day>header div b{font-size:14px;color:#0f172a}
+.agenda-day>header>span{font-size:12px;color:#64748b}
+.today-pill{padding:3px 7px;border-radius:999px;background:#2563eb;color:#fff;font-size:10px;font-weight:900}
+.agenda-lessons{display:grid;gap:7px;padding:9px}
+.agenda-empty{padding:9px 12px;color:#94a3b8;font-size:12px;text-align:center}
+
+/* Öğretmen renk kimliği: durum şeridi ayrı kalır, zemin öğretmeni ayırt eder. */
+.lesson-card.teacher-pink,.program-card.teacher-pink{background:linear-gradient(90deg,#fff 0%,#fdf2f8 100%)}
+.lesson-card.teacher-blue,.program-card.teacher-blue{background:linear-gradient(90deg,#fff 0%,#eff6ff 100%)}
+.lesson-card.teacher-yellow,.program-card.teacher-yellow{background:linear-gradient(90deg,#fff 0%,#fffbeb 100%)}
+
+/* Menü > Sabit Ders Programı */
+.fixed-program-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#fff;border:1px solid #e5eaf0;border-radius:16px}
+.fixed-program-toolbar>div{display:flex;flex-direction:column;gap:2px}
+.fixed-program-toolbar span{font-size:12px;color:#64748b}
+.fixed-program-groups{display:grid;gap:12px}
+.fixed-day-group{background:#fff;border:1px solid #e5eaf0;border-radius:17px;overflow:hidden}
+.fixed-day-group>header{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;background:#f8fafc;border-bottom:1px solid #edf1f5}
+.fixed-day-group>header b{font-size:14px}
+.fixed-day-group>header span{font-size:12px;color:#64748b}
+.fixed-day-group>div{display:grid;gap:7px;padding:9px}
+
+@media(max-width:700px){
+  .week-switcher{gap:5px;padding:5px}
+  .week-switcher button{font-size:12px;padding:7px 5px}
+  .teacher-chip{min-height:40px;padding:6px 10px;font-size:12px}
+  .calendar-command-bar{align-items:stretch;flex-direction:column}
+  .calendar-command-bar>div:last-child{display:grid;grid-template-columns:1fr 1fr}
+  .calendar-command-bar>div:last-child button{justify-content:center}
+  .fixed-program-toolbar{align-items:stretch;flex-direction:column}
+}

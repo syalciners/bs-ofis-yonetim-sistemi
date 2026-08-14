@@ -15,8 +15,10 @@ const service = read('src/services/officeService.ts')
 const cancelService = read('src/services/financeCancelService.ts')
 const lessonDetail = read('src/components/LessonDetail.tsx')
 const forms = read('src/components/forms.tsx')
+const collectionQuick = read('src/components/CollectionQuickForm.tsx')
 const studentCollectionQuick = read('src/components/StudentCollectionForm.tsx')
 const teacherPaymentQuick = read('src/components/TeacherPaymentQuickForm.tsx')
+const overview = read('src/pages/OverviewPage.tsx')
 const calendar = read('src/pages/CalendarPage.tsx')
 const students = read('src/pages/StudentsPage.tsx')
 const teachers = read('src/pages/TeachersPage.tsx')
@@ -37,6 +39,9 @@ expectText('Öğretmen hakedişi yalnız Yapıldı derslerinden oluşur', metric
 expectText('Aylık gerçekleşen ciro yalnız Yapıldı derslerinden oluşur', metrics, "x.ders_durumu === 'Yapıldı' && x.tarih?.startsWith(prefix)")
 expectText('Para gösterimi Türk Lirası kullanır', format, "currency: 'TRY'")
 expectText('Para gösterimi Türkiye yerel ayarını kullanır', format, "Intl.NumberFormat('tr-TR'")
+expectText('Genel hızlı tahsilat seçilen öğrencinin bakiyesini gösterir', collectionQuick, 'studentDebt(data,studentId)')
+expectText('Genel hızlı tahsilat borcu tutara aktarabilir', collectionQuick, 'Borcu tutara aktar')
+expectText('Ana Sayfa bakiye destekli hızlı tahsilat formunu kullanır', overview, '<CollectionQuickForm onDone={()=>setModal(null)}')
 expectText('Öğretmen ödeme formu bugünün hakediş dönemini otomatik bulur', teacherPaymentQuick, "today >= x.baslangic_tarihi && today <= x.bitis_tarihi")
 expectText('Öğretmen ödeme formu iptal ödemeleri kalan hakedişten düşmez', teacherPaymentQuick, "x.hakedis_donemi_id === period && !x.iptal_mi")
 expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<TeacherPaymentQuickForm teacherId={payment}')
@@ -80,8 +85,8 @@ const collectionEnd = forms.indexOf('export function ExpenseForm')
 const collectionBlock = collectionStart >= 0 && collectionEnd > collectionStart ? forms.slice(collectionStart, collectionEnd) : ''
 checks.push({
   name: 'Genel tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür',
-  ok: collectionBlock.length > 0 && !/\bmax\s*=/.test(collectionBlock),
-  detail: 'CollectionForm içinde max sınırı bulundu veya form bloğu okunamadı.',
+  ok: collectionBlock.length > 0 && !/\bmax\s*=/.test(collectionBlock) && !/\bmax\s*=/.test(collectionQuick),
+  detail: 'Tahsilat formunda borç üst sınırı bulundu veya form bloğu okunamadı.',
 })
 checks.push({
   name: 'Öğrenci hızlı tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür',

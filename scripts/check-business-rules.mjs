@@ -47,6 +47,7 @@ expectText('Ders durumunda Öğrenci Gelmedi korunur', lessonDetail, "value:'Ö�
 expectText('Ders durumunda Ertelendi korunur', lessonDetail, "value:'Ertelendi'")
 expectText('Ders durumunda Öğretmen İptali korunur', lessonDetail, "value:'Öğretmen İptali'")
 expectText('Ders durumunda Planlandı korunur', lessonDetail, "value:'Planlandı'")
+expectText('Planlanan derste sonuç seçenekleri doğrudan açılır', lessonDetail, 'const[showStatuses,setShowStatuses]=useState(isPlanned)')
 expectText('Takvim veri yüklenirken Hook sırasını değiştirmez', calendar, "const lessons=useMemo(()=>{if(!data)return[];")
 expectText('Alt menü Özet girişini korur', bottomNav, "label: 'Özet'")
 expectText('Alt menü Takvim girişini korur', bottomNav, "label: 'Takvim'")

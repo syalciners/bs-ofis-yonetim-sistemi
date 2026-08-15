@@ -26,6 +26,15 @@ export const teacherBalance = (d: AppData, id: string) => {
 
 export const totalTeacherBalance = (d: AppData) => activeTeachers(d).reduce((s, x) => s + Math.max(teacherBalance(d, x.ogretmen_id), 0), 0)
 
+export const matchingActiveCollection = (d: AppData, input: { ogrenci_id: string; tarih: string; tutar: number; odeme_yontemi: string }) =>
+  d.tahsilatlar.find(x =>
+    !x.iptal_mi &&
+    x.ogrenci_id === input.ogrenci_id &&
+    x.tarih === input.tarih &&
+    Math.abs(Number(x.tutar || 0) - Number(input.tutar || 0)) < 0.005 &&
+    String(x.odeme_yontemi || '') === input.odeme_yontemi
+  )
+
 export const monthCollections = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.tahsilatlar.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
 export const monthExpenses = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.giderler.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)
 export const monthTeacherPayments = (d: AppData, prefix = firstOfMonth().slice(0,7)) => d.ogretmenOdemeleri.filter(x => !x.iptal_mi && x.tarih?.startsWith(prefix)).reduce((s, x) => s + Number(x.tutar || 0), 0)

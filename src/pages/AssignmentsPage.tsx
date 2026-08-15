@@ -1,5 +1,5 @@
 import { BookOpenCheck, CheckCircle2, Edit3, FileText, Image, MessageCircle, Paperclip, Plus } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AssignmentEditorForm } from '../components/AssignmentEditorForm'
 import { AssignmentStatusSafeForm } from '../components/AssignmentStatusSafeForm'
@@ -34,7 +34,8 @@ const maskPhone=(value?:string|null)=>{const d=String(value||'').replace(/\D/g,'
 const recipientInfo=(student?:Ogrenci)=>student?.veli_telefon?`Veli · ${maskPhone(student.veli_telefon)}`:student?.ogrenci_telefon?`Öğrenci · ${maskPhone(student.ogrenci_telefon)}`:'Telefon bilgisi yok'
 
 export function AssignmentsPage(){
-  const{data}=useAppData();const{toast}=useToast();const[searchParams]=useSearchParams();const driveArchiveEnabled=searchParams.get('drive_test')==='1';const[selected,setSelected]=useState<Odev|null>(null);const[edit,setEdit]=useState<Odev|null>(null);const[status,setStatus]=useState<Odev|null>(null);const[add,setAdd]=useState(false);const[filter,setFilter]=useState<Filter>('bekleyen');const[sharing,setSharing]=useState<string|null>(null)
+  const{data}=useAppData();const{toast}=useToast();const[searchParams,setSearchParams]=useSearchParams();const driveArchiveEnabled=searchParams.get('drive_test')==='1';const[selected,setSelected]=useState<Odev|null>(null);const[edit,setEdit]=useState<Odev|null>(null);const[status,setStatus]=useState<Odev|null>(null);const[add,setAdd]=useState(false);const[filter,setFilter]=useState<Filter>('bekleyen');const[sharing,setSharing]=useState<string|null>(null)
+  useEffect(()=>{if(searchParams.get('yeni')!=='1')return;setAdd(true);const next=new URLSearchParams([...searchParams.entries()].filter(([key])=>key!=='yeni'));setSearchParams(next,{replace:true})},[searchParams,setSearchParams])
   const rows=useMemo(()=>{if(!data)return[];return [...data.odevler].filter(x=>filter==='tumu'||filter==='tamamlanan'?filter==='tumu'||completed(x):filter==='geciken'?overdue(x):pending(x)).sort((a,b)=>String(a.son_teslim_tarihi||'9999').localeCompare(String(b.son_teslim_tarihi||'9999')))},[data,filter]);if(!data)return null
   const pendingCount=data.odevler.filter(pending).length,late=data.odevler.filter(overdue).length,done=data.odevler.filter(completed).length
 

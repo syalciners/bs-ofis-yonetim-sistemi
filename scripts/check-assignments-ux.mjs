@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 
 const page=readFileSync('src/pages/AssignmentsPage.tsx','utf8')
+const overview=readFileSync('src/pages/OverviewPage.tsx','utf8')
 const editor=readFileSync('src/components/AssignmentEditorForm.tsx','utf8')
 const status=readFileSync('src/components/AssignmentStatusSafeForm.tsx','utf8')
 const attachment=readFileSync('src/services/assignmentAttachmentService.ts','utf8')
@@ -35,7 +36,10 @@ const checks=[
   ['Drive servisi öğrenci klasörünü ID ve adla bulur veya oluşturur',appsScript.includes("ogrenciId + '_' + ogrenciAdi")&&appsScript.includes('klasorBulVeyaOlustur_')],
   ['Drive dosya adı öğretmen tarih öğrenci standardındadır',appsScript.includes("asciiUpper_(ogretmenAdi) + '_' + datePart + '_' + asciiUpper_(ogrenciAdi)")&&appsScript.includes("'_ODEV_FOTOGRAF'")],
   ['Drive dosyası WhatsApp için bağlantıyla görüntülenebilir olur',appsScript.includes('DriveApp.Access.ANYONE_WITH_LINK')&&appsScript.includes("'/view'")],
-  ['Ödev formunda görsel ve dosya ekleme alanı vardır',editor.includes('Görsel Ekle')&&editor.includes('Dosya Ekle')&&editor.includes('saveAssignmentAttachments')],
+  ['Hızlı Ödev Ekle menüdeki ortak forma yönlenir',overview.includes("nav('/odevler?yeni=1')")&&!overview.includes('<AssignmentForm')&&page.includes("searchParams.get('yeni')!=='1'")],
+  ['Ödev formunda kamera galeri ve Drive kaynakları görünürdür',editor.includes('Fotoğraf / Kamera')&&editor.includes('Kamera, galeri veya Drive')&&editor.includes('accept="image/*"')],
+  ['Ödev formunda telefon bilgisayar ve Drive dosya seçimi görünürdür',editor.includes('Dosya / Drive')&&editor.includes('Telefon, bilgisayar veya Drive')],
+  ['Ödev formunda görsel ve dosya ekleme akışı ortaktır',editor.includes('saveAssignmentAttachments')&&overview.includes("nav('/odevler?yeni=1')")],
   ['Ödev tipi ek dosya ve Drive link alanlarını taşır',types.includes('odev_dosyasi?: string | null')&&types.includes('odev_fotografi?: string | null')&&types.includes('odev_dosya_linki?: string | null')&&types.includes('odev_fotograf_linki?: string | null')],
   ['Ödev durumları veritabanı RPC değerleriyle aynıdır',status.includes('<option>Verildi</option>')&&status.includes('<option>Eksik</option>')&&status.includes('<option>Tamamlandı</option>')&&status.includes('<option>İptal</option>')&&!/Bekliyor|Devam Ediyor|Teslim Edildi/.test(status)],
   ['İptal ödev gecikmiş sayılmaz',page.includes("const canceled=(x:Odev)=>x.durum==='İptal'")&&page.includes('const pending=(x:Odev)=>!completed(x)&&!canceled(x)')],

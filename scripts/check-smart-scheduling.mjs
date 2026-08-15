@@ -6,6 +6,7 @@ const form=read('src/components/SmartProgramForm.tsx')
 const panel=read('src/components/WeekPlanningReviewPanel.tsx')
 const calendar=read('src/pages/CalendarPage.tsx')
 const fixed=read('src/pages/FixedProgramPage.tsx')
+const office=read('src/services/officeService.ts')
 const css=read('src/ux-overrides.css')
 const prepareStart=calendar.indexOf('const prepareWeek=async()=>')
 const prepareEnd=calendar.indexOf('\n\n  return <div',prepareStart)
@@ -16,7 +17,11 @@ const checks=[
   ['Haftalık program ön kontrolü sunucu RPC üzerinden alınır',service.includes("haftalik_program_kontrol_oneri_v1")],
   ['Haftalık ön kontrol seçilen ve sonraki haftayı birlikte kapsar',service.includes('nextMonday')&&service.includes('Promise.all([checkSingleWeek(monday), checkSingleWeek(nextMonday)])')],
   ['Sabit Program akıllı formu kullanır',fixed.includes('<SmartProgramForm')],
+  ['Sabit program kaydetme gelecekteki dersleri senkronlayan v3 RPC kullanır',office.includes("sabit_program_kaydet_guvenli_v3")],
   ['Sabit program kaydetmeden önce öneri kontrolü çalışır',form.includes('await suggestProgram(p)')],
+  ['Program düzenleme yalnız gelecek Planlandı dersler için onay ister',form.includes('Sabit program güncellensin mi?')&&form.includes('şu andan sonraki “Planlandı” dersler')],
+  ['Program düzenleme geçmiş ve tek seferlik dersleri koruduğunu açıklar',form.includes('Geçmiş, sonuçlanmış ve tek seferlik değiştirilmiş dersler korunur')],
+  ['Pasife alma mevcut planlı dersleri koruduğunu açıklar',fixed.includes('Mevcut planlı dersler korunur; yalnız yeni ders üretimi durdurulur.')],
   ['Sabit program aynı saatte uygun derslik önerir',form.includes('Aynı saatte uygun derslik')&&form.includes('onerilen_derslikler')],
   ['Sabit program yakın uygun saat önerir',form.includes('Yakın uygun saatler')&&form.includes('onerilen_saatler')],
   ['Öneri seçildiğinde saat ve derslik forma uygulanır',form.includes('setRoom(s.derslik_id)')&&form.includes('setStartTime(s.saat)')],

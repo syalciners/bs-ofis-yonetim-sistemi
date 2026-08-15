@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon-16x16.png','favicon-32x32.png','favicon-48x48.png','apple-touch-icon.png'],
+      includeAssets: ['bs-egitim-favicon-16-v2.png','bs-egitim-favicon-32-v2.png','bs-egitim-favicon-48-v2.png','bs-egitim-apple-touch-v2.png'],
       manifest: {
         name: 'BS Eğitim Yönetimi',
         short_name: 'BS Eğitim',
@@ -18,9 +18,9 @@ export default defineConfig({
         display: 'standalone',
         lang: 'tr-TR',
         icons: [
-          { src: 'bs-app-icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'bs-app-icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'bs-app-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'bs-egitim-icon-192-v2.png', sizes: '192x192', type: 'image/png' },
+          { src: 'bs-egitim-icon-512-v2.png', sizes: '512x512', type: 'image/png' },
+          { src: 'bs-egitim-icon-512-v2.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       }
     })

@@ -9,6 +9,9 @@ const lessonCard = readFileSync('src/components/LessonCard.tsx','utf8')
 const lessonStatusCss = readFileSync('src/lesson-status-colors.css','utf8')
 const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
 const financeCancelService = readFileSync('src/services/financeCancelService.ts','utf8')
+const financeEditService = readFileSync('src/services/financeEditService.ts','utf8')
+const financeEditForm = readFileSync('src/components/FinanceRecordEditForm.tsx','utf8')
+const financeEditMigration = readFileSync('supabase/migrations/20260815220833_finans_kayit_guvenli_duzenleme_v1.sql','utf8')
 const css = readFileSync('src/navigation-stability.css','utf8')
 const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
 const teacherFormFix = readFileSync('src/teacher-form-fix.css','utf8')
@@ -47,6 +50,15 @@ const checks = [
   ['Ana sayfa İptal etiketi kırmızı stile bağlıdır', lessonStatusCss.includes('.lesson-card.status-iptal .lesson-status span') && lessonStatusCss.includes('color:#b91c1c !important')],
   ['Aktif tahsilat yalnız güvenli iptal akışını kullanır', finance.includes('cancelCollection') && finance.includes('Kaydı İptal Et') && finance.includes('Kayıt silinmeyecek')],
   ['Kalıcı silme yalnız iptal tahsilatta ve güvenli RPC ile sunulur', finance.includes("selected.type==='tahsilat'&&selected.row.iptal_mi") && financeCancelService.includes("run('tahsilat_sil_guvenli_v1'") && !finance.includes('.delete(')],
+  ['Aktif finans kayıtlarında Kaydı Düzenle butonu vardır', finance.includes('Kaydı Düzenle') && finance.includes("['tahsilat','ogretmen','gider'].includes(selected.type)&&!selected.row.iptal_mi") && finance.includes('setEdit(selected)')],
+  ['Finans düzenleme ekranı üç kaynak kaydı destekler', financeEditForm.includes("type:'tahsilat'") && financeEditForm.includes("type:'gider'") && financeEditForm.includes("type:'ogretmen'")],
+  ['Finans düzenleme istemcisi yalnız güvenli RPC kullanır', financeEditService.includes("run('tahsilat_guncelle_guvenli_v1'") && financeEditService.includes("run('gider_guncelle_guvenli_v1'") && financeEditService.includes("run('ogretmen_odeme_guncelle_guvenli_v1'") && !financeEditService.includes('.update(')],
+  ['Tahsilat düzenleme tekrar kontrolünde mevcut kayıt hariç tutulur', financeEditForm.includes('x.tahsilat_id!==record.tahsilat_id')],
+  ['Öğretmen ödeme düzenlemesinde mevcut ödeme kalan hesaptan hariç tutulur', financeEditForm.includes('x.ogretmen_odeme_id!==record.ogretmen_odeme_id')],
+  ['Finans düzenleme RPC erişimi anon role kapalıdır', (financeEditMigration.match(/revoke all on function/g)||[]).length===3 && (financeEditMigration.match(/from public, anon/g)||[]).length===3],
+  ['Finans düzenleme RPC erişimi authenticated role açıktır', (financeEditMigration.match(/to authenticated/g)||[]).length===3],
+  ['Finans düzenleme RPC fonksiyonlarında yönetici koruması vardır', (financeEditMigration.match(/private\.bs_ofis_yonetici_mi\(\)/g)||[]).length===3],
+  ['Tahsilat düzenlemesi Finans senkronizasyonunu tetikler', financeEditMigration.includes('private.finans_v18_sync_tetikle()') && financeEditMigration.includes('Finans senkronizasyonu başlatılamadı. Düzenleme işlemi geri alındı.')],
 ]
 
 const failed = checks.filter(([,ok])=>!ok)

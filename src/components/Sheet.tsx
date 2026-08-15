@@ -1,11 +1,20 @@
 import { X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 export function Sheet({ open, title, subtitle, onClose, children, footer }: { open: boolean; title: string; subtitle?: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+  const panelRef = useRef<HTMLElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const actionHostRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const onCloseRef = useRef(onClose)
+  const titleId = useId()
+  const subtitleId = useId()
   const [hasGeneratedFooter, setHasGeneratedFooter] = useState(false)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!open) return
@@ -14,6 +23,53 @@ export function Sheet({ open, title, subtitle, onClose, children, footer }: { op
     })
     return () => cancelAnimationFrame(frame)
   }, [open, title])
+
+  useEffect(() => {
+    if (!open) return
+
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const focusFrame = requestAnimationFrame(() => {
+      closeButtonRef.current?.focus({ preventScroll: true })
+    })
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCloseRef.current()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const panel = panelRef.current
+      if (!panel) return
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(element => element.getClientRects().length > 0)
+
+      if (!focusable.length) {
+        event.preventDefault()
+        panel.focus({ preventScroll: true })
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      cancelAnimationFrame(focusFrame)
+      document.removeEventListener('keydown', handleKeyDown)
+      previousFocus?.focus({ preventScroll: true })
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -105,10 +161,10 @@ export function Sheet({ open, title, subtitle, onClose, children, footer }: { op
   const footerVisible = Boolean(footer || hasGeneratedFooter)
 
   return <div className="sheet-overlay" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-    <section className="sheet-panel" role="dialog" aria-modal="true" aria-label={title}>
+    <section ref={panelRef} className="sheet-panel" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={subtitle ? subtitleId : undefined} tabIndex={-1}>
       <header className="sheet-header">
-        <div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>
-        <button className="icon-btn" type="button" onClick={onClose} aria-label="Kapat"><X size={18}/></button>
+        <div><h2 id={titleId}>{title}</h2>{subtitle && <p id={subtitleId}>{subtitle}</p>}</div>
+        <button ref={closeButtonRef} className="icon-btn" type="button" onClick={onClose} aria-label="Kapat"><X size={18}/></button>
       </header>
       <div ref={bodyRef} className="sheet-body">{children}</div>
       <footer className={`sheet-footer${footerVisible ? ' has-content' : ''}`} aria-hidden={!footerVisible}>

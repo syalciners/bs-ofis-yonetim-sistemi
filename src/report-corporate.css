@@ -17,12 +17,24 @@
   html,body{background:#fff!important;margin:0!important;padding:0!important;width:210mm!important}
   .report-page{padding:0!important;margin:0!important;width:210mm!important}
   .report-sheet{width:210mm!important;min-height:0!important;height:auto!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
-  .report-doc-header{padding:6mm 9mm 3mm!important;gap:3.5mm!important}
+
+  /* Baskı her cihazda aynı A4 düzenini kullanır. Mobil ekran kuralları print sırasında sıfırlanır. */
+  .report-doc-header{grid-template-columns:auto minmax(0,1fr) auto!important;padding:6mm 9mm 3mm!important;gap:3.5mm!important;align-items:center!important}
+  .report-doc-code{grid-column:auto!important;text-align:right!important;display:grid!important;gap:.8mm!important;align-items:initial!important}
+  .report-meta{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .report-meta>div{border-right:1px solid var(--report-line)!important;border-bottom:0!important;padding:2.5mm 5.5mm!important;gap:.7mm!important}
+  .report-meta>div:last-child{border-right:0!important}
+  .report-content{padding:3.2mm 9mm 3mm!important}
+  .report-table.corporate,.report-table.teacher-ledger,.report-table.payment-ledger,.report-table.lesson-summary{overflow:visible!important}
+  .report-table.corporate .report-tr{min-width:0!important;grid-template-columns:1.05fr 1.45fr .8fr .8fr .8fr!important}
+  .report-table.teacher-ledger .report-tr{min-width:0!important;grid-template-columns:1fr 1.5fr .9fr .9fr!important}
+  .report-table.payment-ledger .report-tr{min-width:0!important;grid-template-columns:1fr 1fr 1.4fr .9fr!important}
+  .report-table.lesson-summary .report-tr{min-width:0!important;grid-template-columns:1.3fr .6fr 1fr 1fr!important}
+
   .report-doc-header img{width:9mm!important;height:9mm!important;border-radius:2.3mm!important;box-shadow:none!important}
   .report-doc-brand h2{font-size:11.5px!important}.report-doc-brand p{font-size:7.5px!important}
   .report-doc-code b{font-size:7.5px!important}.report-doc-code span{font-size:6.5px!important}
-  .report-meta>div{padding:2.5mm 5.5mm!important;gap:.7mm!important}.report-meta span{font-size:6px!important}.report-meta b{font-size:8px!important}
-  .report-content{padding:3.2mm 9mm 3mm!important}
+  .report-meta span{font-size:6px!important}.report-meta b{font-size:8px!important}
   .report-content h3{font-size:9px!important;margin:2.6mm 0 1.5mm!important;gap:1.5mm!important}
   .report-section-note{font-size:6.7px!important}
   .report-kpis{gap:2mm!important}.report-kpis>div{padding:2.5mm!important;min-height:0!important}.report-kpis span{font-size:6.5px!important}.report-kpis b{font-size:10.5px!important}

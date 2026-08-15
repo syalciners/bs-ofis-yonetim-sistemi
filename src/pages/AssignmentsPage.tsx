@@ -1,5 +1,6 @@
 import { BookOpenCheck, CheckCircle2, Edit3, FileText, Image, MessageCircle, Paperclip, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AssignmentEditorForm } from '../components/AssignmentEditorForm'
 import { AssignmentStatusSafeForm } from '../components/AssignmentStatusSafeForm'
 import { useAppData } from '../components/AppDataProvider'
@@ -33,7 +34,7 @@ const maskPhone=(value?:string|null)=>{const d=String(value||'').replace(/\D/g,'
 const recipientInfo=(student?:Ogrenci)=>student?.veli_telefon?`Veli · ${maskPhone(student.veli_telefon)}`:student?.ogrenci_telefon?`Öğrenci · ${maskPhone(student.ogrenci_telefon)}`:'Telefon bilgisi yok'
 
 export function AssignmentsPage(){
-  const{data}=useAppData();const{toast}=useToast();const[selected,setSelected]=useState<Odev|null>(null);const[edit,setEdit]=useState<Odev|null>(null);const[status,setStatus]=useState<Odev|null>(null);const[add,setAdd]=useState(false);const[filter,setFilter]=useState<Filter>('bekleyen');const[sharing,setSharing]=useState<string|null>(null)
+  const{data}=useAppData();const{toast}=useToast();const[searchParams]=useSearchParams();const driveArchiveEnabled=searchParams.get('drive_test')==='1';const[selected,setSelected]=useState<Odev|null>(null);const[edit,setEdit]=useState<Odev|null>(null);const[status,setStatus]=useState<Odev|null>(null);const[add,setAdd]=useState(false);const[filter,setFilter]=useState<Filter>('bekleyen');const[sharing,setSharing]=useState<string|null>(null)
   const rows=useMemo(()=>{if(!data)return[];return [...data.odevler].filter(x=>filter==='tumu'||filter==='tamamlanan'?filter==='tumu'||completed(x):filter==='geciken'?overdue(x):pending(x)).sort((a,b)=>String(a.son_teslim_tarihi||'9999').localeCompare(String(b.son_teslim_tarihi||'9999')))},[data,filter]);if(!data)return null
   const pendingCount=data.odevler.filter(pending).length,late=data.odevler.filter(overdue).length,done=data.odevler.filter(completed).length
 
@@ -41,7 +42,7 @@ export function AssignmentsPage(){
   const openAttachment=async(x:Odev,kind:'file'|'image')=>{try{await openAssignmentAttachment(x,kind)}catch(err:any){toast(err.message||String(err),'error')}}
 
   return <div className="page-stack assignments-v2">
-    <section className="page-title-row"><div><span className="eyebrow">ÖDEV TAKİBİ</span><h1>Ödevler</h1><p>Ödevi yaz, eklerini ekle, WhatsApp ile veli veya öğrenciye gönder.</p></div><button className="primary-btn" onClick={()=>setAdd(true)}><Plus size={17}/>Ödev Ekle</button></section>
+    <section className="page-title-row"><div><span className="eyebrow">ÖDEV TAKİBİ</span><h1>Ödevler</h1><p>Ödevi yaz, eklerini ekle, WhatsApp ile veli veya öğrenciye gönder.</p>{driveArchiveEnabled&&<div className="form-hint">Drive test modu açık · yalnız bu bağlantıda etkindir.</div>}</div><button className="primary-btn" onClick={()=>setAdd(true)}><Plus size={17}/>Ödev Ekle</button></section>
     <div className="segmented four-seg"><button className={filter==='bekleyen'?'active':''} onClick={()=>setFilter('bekleyen')}>Bekleyen · {pendingCount}</button><button className={filter==='geciken'?'active':''} onClick={()=>setFilter('geciken')}>Geciken · {late}</button><button className={filter==='tamamlanan'?'active':''} onClick={()=>setFilter('tamamlanan')}>Tamamlanan · {done}</button><button className={filter==='tumu'?'active':''} onClick={()=>setFilter('tumu')}>Tümü</button></div>
     <section className="finance-list assignment-list">{rows.length?rows.map(x=>{const isLate=overdue(x),deadline=deadlineInfo(x),attachmentCount=Number(Boolean(x.odev_fotografi||x.odev_fotograf_linki))+Number(Boolean(x.odev_dosyasi||x.odev_dosya_linki));return <button className={`finance-card assignment-card ${isLate?'expense':''}`} key={x.odev_id} onClick={()=>setSelected(x)}><div className="finance-icon"><BookOpenCheck/></div><div className="assignment-card-copy"><strong>{x.odev_basligi||x.konu||'Ödev'}</strong><small>{studentName(data,x.ogrenci_id)} · {teacherName(data,x.ogretmen_id)}</small><span className={`assignment-deadline assignment-deadline-${deadline.tone}`}>{deadline.label}{attachmentCount?` · ${attachmentCount} ek`:''}</span></div><span className={`assignment-status assignment-status-${x.durum.toLocaleLowerCase('tr-TR').replaceAll(' ','-')}`}>{isLate?'Gecikti':x.durum}</span></button>}):<div className="calm-empty"><BookOpenCheck/><b>{filter==='bekleyen'?'Bekleyen ödev yok.':filter==='geciken'?'Geciken ödev yok.':'Bu filtrede ödev yok.'}</b><span>{filter==='bekleyen'?'Yeni ödev ekleyebilir veya tamamlananları görüntüleyebilirsin.':'Başka bir filtre seçebilirsin.'}</span></div>}</section>
 
@@ -55,8 +56,8 @@ export function AssignmentsPage(){
       <div className="assignment-secondary-actions"><button className="secondary-btn" onClick={()=>setStatus(selected)}><CheckCircle2 size={17}/>Durumu Güncelle</button><button className="secondary-btn" onClick={()=>setEdit(selected)}><Edit3 size={17}/>Düzenle</button></div>
       {!student?.veli_telefon&&!student?.ogrenci_telefon&&<div className="form-hint">WhatsApp gönderimi için öğrenci veya veli telefon bilgisi eklenmelidir.</div>}
     </div>})()}</Sheet>
-    <Sheet open={add} title="Yeni Ödev" subtitle="Metni yazın, gerekiyorsa görsel veya dosya ekleyin." onClose={()=>setAdd(false)}><AssignmentEditorForm onDone={()=>setAdd(false)} onCancel={()=>setAdd(false)}/></Sheet>
-    <Sheet open={!!edit} title="Ödevi Düzenle" subtitle={edit?studentName(data,edit.ogrenci_id):''} onClose={()=>setEdit(null)}>{edit&&<AssignmentEditorForm assignment={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
+    <Sheet open={add} title="Yeni Ödev" subtitle="Metni yazın, gerekiyorsa görsel veya dosya ekleyin." onClose={()=>setAdd(false)}><AssignmentEditorForm driveArchiveEnabled={driveArchiveEnabled} onDone={()=>setAdd(false)} onCancel={()=>setAdd(false)}/></Sheet>
+    <Sheet open={!!edit} title="Ödevi Düzenle" subtitle={edit?studentName(data,edit.ogrenci_id):''} onClose={()=>setEdit(null)}>{edit&&<AssignmentEditorForm assignment={edit} driveArchiveEnabled={driveArchiveEnabled} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
     <Sheet open={!!status} title="Ödev Durumu" subtitle={status?studentName(data,status.ogrenci_id):''} onClose={()=>setStatus(null)}>{status&&<AssignmentStatusSafeForm assignment={status} onDone={()=>setStatus(null)} onCancel={()=>setStatus(null)}/>}</Sheet>
   </div>
 }

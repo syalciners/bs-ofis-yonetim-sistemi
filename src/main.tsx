@@ -21,7 +21,9 @@ import './program-share.css'
 registerSW({
   immediate: true,
   onRegisteredSW: (_swUrl, registration) => {
-    if (registration) void registration.update().catch(() => undefined)
+    if (!registration) return
+    const checkForUpdate = registration.update.bind(registration)
+    void checkForUpdate().catch(() => undefined)
   },
 })
 

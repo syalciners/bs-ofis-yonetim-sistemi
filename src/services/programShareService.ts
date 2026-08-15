@@ -34,8 +34,9 @@ export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,
   const student=target.type==='student'?data.ogrenciler.find(x=>x.ogrenci_id===target.id):undefined
   const teacher=target.type==='teacher'?data.ogretmenler.find(x=>x.ogretmen_id===target.id):undefined
   const personName=student?.ad_soyad||teacher?.ad_soyad||'Seçili kişi'
-  const recipientName=student?.veli_adi?`${student.veli_adi} (Veli)`:personName
-  const recipientPhone=target.type==='student'?(student?.veli_telefon||student?.ogrenci_telefon||''):(teacher?.telefon||'')
+  const guardianPhone=student?.veli_telefon||''
+  const recipientPhone=target.type==='student'?(guardianPhone||student?.ogrenci_telefon||''):(teacher?.telefon||'')
+  const recipientName=target.type==='student'&&guardianPhone?(student?.veli_adi?`${student.veli_adi} (Veli)`:'Veli'):personName
   const weekLabel=`${shortDate(monday)} – ${shortDate(sunday)}`
   const lines=['Merhaba 👋','','📅 *HAFTALIK DERS PROGRAMI*']
   lines.push(target.type==='student'?`👤 *Öğrenci:* ${personName}`:`👨‍🏫 *Öğretmen:* ${personName}`)

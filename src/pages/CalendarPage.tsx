@@ -36,8 +36,10 @@ export function CalendarPage(){
   const weekProgramCount=lessons.filter(x=>x.program_id).length
   const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:lessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
 
-  const createWeekNow=async()=>{setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
-  const prepareWeek=async()=>{setWeekBusy(true);try{const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
+  const confirmWeekCreation=()=>window.confirm(`${shortDate(monday)} – ${shortDate(addDays(monday,6))} haftasının eksik dersleri oluşturulsun mu?\n\nÖğretmen filtresinden bağımsız olarak tüm aktif sabit programlar işlenir. Mevcut dersler korunur; yalnız eksik dersler eklenir.`)
+
+  const createWeekNow=async()=>{if(!confirmWeekCreation())return;setWeekBusy(true);try{const r:any=await createWeek(monday);await refresh();setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
+  const prepareWeek=async()=>{setWeekBusy(true);try{const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation())return;const r:any=await createWeek(monday);await refresh();toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Hafta hazır.`:'Hafta hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
 
   return <div className="page-stack calendar-v2">
     <section className="page-title-row"><div><span className="eyebrow">DERS PROGRAMI</span><h1>Takvim</h1><p>Haftayı seç, öğretmeni filtrele, dersi yönet.</p></div><button className="primary-btn desktop-only" onClick={()=>setNewLesson(true)}><CalendarPlus size={17}/>Ders Ekle</button></section>

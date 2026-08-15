@@ -37,14 +37,17 @@ function doPost(e) {
     const tur = body.tur === 'fotograf' ? 'fotograf' : 'dosya';
     const mimeType = temizMetin_(body.mime_type, 160) || 'application/octet-stream';
     const originalName = temizMetin_(body.dosya_adi, 220) || (tur === 'fotograf' ? 'odev-fotograf.jpg' : 'odev-dosya.pdf');
-    const base64 = String(body.base64 || '');
+    const sourceUrl = String(body.dosya_url || '');
 
-    if (!odevId || !ogrenciId || !ogrenciAdi || !ogretmenAdi || !verilisTarihi || !base64) {
+    if (!odevId || !ogrenciId || !ogrenciAdi || !ogretmenAdi || !verilisTarihi || !sourceUrl) {
       throw new Error('Eksik ödev veya dosya bilgisi.');
     }
+    if (!/^https:\/\//i.test(sourceUrl)) throw new Error('Geçersiz dosya bağlantısı.');
     if (ALLOWED_MIME_TYPES.indexOf(mimeType) === -1) throw new Error('Bu dosya türüne izin verilmiyor.');
 
-    const bytes = Utilities.base64Decode(base64);
+    const source = UrlFetchApp.fetch(sourceUrl, { followRedirects: true, muteHttpExceptions: true });
+    if (source.getResponseCode() < 200 || source.getResponseCode() >= 300) throw new Error('Geçici ödev eki alınamadı.');
+    const bytes = source.getBlob().getBytes();
     if (bytes.length > MAX_FILE_SIZE) throw new Error('Ödev eki en fazla 15 MB olabilir.');
 
     const root = DriveApp.getFolderById(ODEV_ROOT_FOLDER_ID);

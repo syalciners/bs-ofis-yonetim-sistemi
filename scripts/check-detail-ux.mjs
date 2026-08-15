@@ -8,6 +8,7 @@ const lesson = readFileSync('src/components/LessonDetail.tsx','utf8')
 const lessonCard = readFileSync('src/components/LessonCard.tsx','utf8')
 const lessonStatusCss = readFileSync('src/lesson-status-colors.css','utf8')
 const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
+const financeCancelService = readFileSync('src/services/financeCancelService.ts','utf8')
 const css = readFileSync('src/navigation-stability.css','utf8')
 const detailFixes = readFileSync('src/detail-layout-fixes.css','utf8')
 const teacherFormFix = readFileSync('src/teacher-form-fix.css','utf8')
@@ -44,7 +45,8 @@ const checks = [
   ['Ders durum renkleri mavi yeşil kırmızıdır', detailFixes.includes('.lesson-status-button.blue') && detailFixes.includes('.lesson-status-button.green') && detailFixes.includes('.lesson-status-button.red')],
   ['Ders kartı durum sınıfı Türkçe locale ile üretilir', lessonCard.includes("toLocaleLowerCase('tr-TR')")],
   ['Ana sayfa İptal etiketi kırmızı stile bağlıdır', lessonStatusCss.includes('.lesson-card.status-iptal .lesson-status span') && lessonStatusCss.includes('color:#b91c1c !important')],
-  ['Tahsilat fiziksel silinmez, güvenli iptal kullanır', finance.includes('cancelCollection') && finance.includes('Kaydı İptal Et') && finance.includes('Kayıt silinmeyecek')],
+  ['Aktif tahsilat yalnız güvenli iptal akışını kullanır', finance.includes('cancelCollection') && finance.includes('Kaydı İptal Et') && finance.includes('Kayıt silinmeyecek')],
+  ['Kalıcı silme yalnız iptal tahsilatta ve güvenli RPC ile sunulur', finance.includes("selected.type==='tahsilat'&&selected.row.iptal_mi") && financeCancelService.includes("run('tahsilat_sil_guvenli_v1'") && !finance.includes('.delete(')],
 ]
 
 const failed = checks.filter(([,ok])=>!ok)

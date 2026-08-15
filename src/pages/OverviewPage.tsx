@@ -1,20 +1,18 @@
-import { AlertCircle, Banknote, CalendarCheck2, CalendarPlus, GraduationCap, PlusCircle, ReceiptText, UserPlus, WalletCards } from 'lucide-react'
+import { AlertCircle, Banknote, CalendarCheck2, CalendarPlus, GraduationCap, ReceiptText, UserPlus, WalletCards } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { Sheet } from '../components/Sheet'
-import { LessonForm, StudentForm } from '../components/forms'
+import { AssignmentForm, LessonForm, StudentForm } from '../components/forms'
 import { CollectionQuickForm } from '../components/CollectionQuickForm'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
 import type { Ders } from '../lib/types'
-import { money, mondayOf } from '../lib/format'
-import { createWeek } from '../services/officeService'
+import { money } from '../lib/format'
 import { monthCollections, overdueAssignments, studentDebt, todayLessons, totalOpenDebt, totalTeacherBalance, zoomProblems } from '../services/metrics'
-import { useToast } from '../components/Toast'
 
 export function OverviewPage() {
-  const {data,refresh}=useAppData();const nav=useNavigate();const{toast}=useToast();const[modal,setModal]=useState<'collection'|'student'|'lesson'|null>(null);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[weekBusy,setWeekBusy]=useState(false)
+  const {data}=useAppData();const nav=useNavigate();const[modal,setModal]=useState<'collection'|'student'|'lesson'|'assignment'|null>(null);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null)
   const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),debt:totalOpenDebt(data),debtors:data.ogrenciler.filter(x=>x.durum!=='Pasif'&&studentDebt(data,x.ogrenci_id)>0).length,teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
   if(!data||!metrics)return null
   const attention=[
@@ -37,16 +35,17 @@ export function OverviewPage() {
       <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>öğrenci ödemesi</small></button>
       <button onClick={()=>setModal('lesson')}><span className="quick-icon blue"><CalendarPlus/></span><b>Ders Ekle</b><small>tek seferlik ders</small></button>
       <button onClick={()=>setModal('student')}><span className="quick-icon orange"><UserPlus/></span><b>Öğrenci Ekle</b><small>yeni kayıt</small></button>
-      <button disabled={weekBusy} onClick={async()=>{setWeekBusy(true);try{const r:any=await createWeek(mondayOf());await refresh();toast(`Hafta hazırlandı${r?.olusturulan!==undefined?`: ${r.olusturulan} ders oluşturuldu`:'.'}`)}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}}><span className="quick-icon green"><PlusCircle/></span><b>{weekBusy?'Hazırlanıyor…':'Haftayı Oluştur'}</b><small>sabit programdan</small></button>
+      <button onClick={()=>setModal('assignment')}><span className="quick-icon green"><ReceiptText/></span><b>Ödev Ekle</b><small>öğrenci ödevi</small></button>
     </div></section>
 
-    <section><div className="section-heading"><div><h2>Bugünün Programı</h2><span>{metrics.today.length} ders</span></div><button className="text-btn" onClick={()=>nav('/takvim')}>Tümünü Gör</button></div><div className="list-card">{metrics.today.length?metrics.today.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="calm-empty"><CalendarCheck2/><b>Bugün ders yok.</b><span>Yeni ders ekleyebilir veya sabit programdan haftayı oluşturabilirsin.</span></div>}</div></section>
+    <section><div className="section-heading"><div><h2>Bugünün Programı</h2><span>{metrics.today.length} ders</span></div><button className="text-btn" onClick={()=>nav('/takvim')}>Tümünü Gör</button></div><div className="list-card">{metrics.today.length?metrics.today.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="calm-empty"><CalendarCheck2/><b>Bugün ders yok.</b><span>Yeni ders ekleyebilir veya Takvim ekranından haftayı oluşturabilirsin.</span></div>}</div></section>
 
     <section><div className="section-heading"><div><h2>Dikkat Gerektirenler</h2><span>yalnız gerekenler</span></div></div>{attention.length?<div className="attention-grid">{attention.map((x,i)=><button key={i} onClick={x.go}><span className="attention-icon"><x.icon/></span><span><b>{x.title}</b><small>{x.text}</small></span></button>)}</div>:<div className="all-good"><CalendarCheck2/><span><b>Kontrol bekleyen kritik iş yok.</b><small>Günlük akış normal görünüyor.</small></span></div>}</section>
 
     <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle="Öğrenciyi seç; güncel bakiye otomatik gösterilir." onClose={()=>setModal(null)}><CollectionQuickForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='student'} title="Yeni Öğrenci" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setModal(null)}><StudentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='lesson'} title="Yeni Ders" subtitle="Çakışma kaydetmeden önce otomatik kontrol edilir." onClose={()=>setModal(null)}><LessonForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
+    <Sheet open={modal==='assignment'} title="Yeni Ödev" subtitle="Öğrenci, teslim tarihi ve ödev bilgisini girin." onClose={()=>setModal(null)}><AssignmentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Ders sonucu ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Tarih, saat ve ders bilgileri" onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
   </div>

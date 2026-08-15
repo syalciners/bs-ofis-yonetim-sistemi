@@ -55,6 +55,7 @@ expectText('Ana Sayfa hızlı ödev formunu kullanır', overview, '<AssignmentFo
 expectText('Ana Sayfa ödev hızlı işlem düğmesini gösterir', overview, '<b>Ödev Ekle</b><small>öğrenci ödevi</small>')
 expectText('Ana Sayfa son tahsilatlarda iptal kayıtları dışarıda bırakır', overview, 'recentCollections:data.tahsilatlar.filter(x=>!x.iptal_mi).slice(0,3)')
 expectText('Ana Sayfa yalnız son üç aktif tahsilatı gösterir', overview, '<h2>Son Tahsilatlar</h2>')
+expectText('Son tahsilat sayacı teknik simge olmadan Türkçe görünür', overview, '<span>son {metrics.recentCollections.length} kayıt</span>')
 expectText('Son tahsilat kartı öğrenci adını gösterir', overview, 'studentName(data,x.ogrenci_id)')
 expectText('Son tahsilat kartı tarih ve ödeme yöntemini gösterir', overview, "fullDate(x.tarih)} · {x.odeme_yontemi||'—'")
 expectText('Son tahsilatlar mevcut Finans ekranına gider', overview, "nav('/finans?tab=tahsilatlar')")

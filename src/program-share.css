@@ -26,6 +26,13 @@
 .teacher-person-picker.active{border-color:#3b82f6;background:#f8fbff}
 .student-person-picker.active{border-color:#2f9c95;background:#f8fffd}
 
+/* Eski Takvim görünümünde Tümü + Öğretmen seç + Öğrenci seç aynı satırda kalır. */
+.teacher-secondary-compact:has(.student-picker){grid-template-columns:auto repeat(2,minmax(0,1fr))}
+.teacher-secondary-compact:has(.student-picker) .simple-picker{grid-template-columns:1fr;gap:0;padding:6px 9px}
+.teacher-secondary-compact:has(.student-picker) .simple-picker select{font-size:11px}
+.teacher-secondary-compact:has(.student-picker) .student-picker{border-color:#99ddd6}
+.teacher-secondary-compact:has(.student-picker) .student-picker.active{border-color:#2f9c95;box-shadow:0 4px 12px rgba(47,156,149,.10)}
+
 .calendar-title-copy{width:100%;min-width:0}
 .calendar-title-line{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .calendar-title-line h1{min-width:0}
@@ -85,6 +92,10 @@
   .calendar-quick-teacher{min-height:36px;padding:5px 7px;font-size:9.5px}
   .calendar-person-picker{min-height:46px;padding:6px 8px}
   .calendar-person-picker select{font-size:10.5px}
+  .teacher-secondary-compact:has(.student-picker){gap:6px}
+  .teacher-secondary-compact:has(.student-picker) .teacher-all{min-width:68px;padding-left:7px;padding-right:7px}
+  .teacher-secondary-compact:has(.student-picker) .simple-picker{padding:5px 7px}
+  .teacher-secondary-compact:has(.student-picker) .simple-picker select{font-size:10px}
   .calendar-title-line{gap:8px}
   .calendar-title-week-action{min-height:36px;max-width:60%;padding:5px 9px;font-size:9px;gap:5px}
   .calendar-title-week-action svg{width:15px;height:15px}

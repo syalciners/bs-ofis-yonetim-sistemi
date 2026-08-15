@@ -13,6 +13,7 @@ type DriveArchiveInput={
   studentName:string
   teacherName:string
   assignedDate:string
+  assignmentTitle:string
   file?:ArchiveItem|null
   image?:ArchiveItem|null
 }
@@ -25,6 +26,7 @@ async function archiveOne(input:{
   studentName:string
   teacherName:string
   assignedDate:string
+  assignmentTitle:string
   kind:'dosya'|'fotograf'
   attachment:ArchiveItem
 }){
@@ -44,6 +46,7 @@ async function archiveOne(input:{
       ogrenci_adi:input.studentName,
       ogretmen_adi:input.teacherName,
       verilis_tarihi:input.assignedDate,
+      odev_basligi:input.assignmentTitle,
       tur:input.kind,
       storage_path:input.attachment.path,
       dosya_adi:input.attachment.name,
@@ -60,7 +63,7 @@ async function archiveOne(input:{
 
 export async function archiveAssignmentAttachmentsToDrive(input:DriveArchiveInput){
   const results:DriveResponse[]=[]
-  const common={assignmentId:input.assignmentId,studentId:input.studentId,studentName:input.studentName,teacherName:input.teacherName,assignedDate:input.assignedDate}
+  const common={assignmentId:input.assignmentId,studentId:input.studentId,studentName:input.studentName,teacherName:input.teacherName,assignedDate:input.assignedDate,assignmentTitle:input.assignmentTitle}
   if(input.file){
     const response=await archiveOne({...common,kind:'dosya',attachment:input.file})
     if(!response.configured)return{configured:false,results}

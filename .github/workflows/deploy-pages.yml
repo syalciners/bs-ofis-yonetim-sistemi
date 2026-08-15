@@ -51,11 +51,11 @@ jobs:
           URL="https://syalciners.github.io/bs-ofis-yonetim-sistemi/?smoke=${GITHUB_SHA}"
           for i in 1 2 3 4 5 6; do
             HTML="$(curl -fsSL --max-time 20 "$URL" || true)"
-            if printf '%s' "$HTML" | grep -q 'BS Ofis Yönetim Sistemi' \
+            if printf '%s' "$HTML" | grep -q 'BS Eğitim Yönetimi' \
               && printf '%s' "$HTML" | grep -Eq 'assets/index-[A-Za-z0-9_-]+\.js' \
               && ! printf '%s' "$HTML" | grep -q 'src/main.tsx'; then
               MANIFEST="$(curl -fsSL --max-time 20 "https://syalciners.github.io/bs-ofis-yonetim-sistemi/manifest.webmanifest?smoke=${GITHUB_SHA}" || true)"
-              if printf '%s' "$MANIFEST" | grep -q 'BS Ofis Yönetim Sistemi'; then
+              if printf '%s' "$MANIFEST" | grep -q 'BS Eğitim Yönetimi'; then
                 echo "Derlenmiş React/PWA yayını doğrulandı: $URL"
                 exit 0
               fi

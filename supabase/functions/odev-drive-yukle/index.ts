@@ -22,6 +22,7 @@ type UploadBody={
   ogrenci_adi:string
   ogretmen_adi:string
   verilis_tarihi:string
+  odev_basligi?:string
   tur:'dosya'|'fotograf'
   storage_path:string
   dosya_adi:string
@@ -67,6 +68,7 @@ Deno.serve(async(req:Request)=>{
         ogrenci_adi:body.ogrenci_adi,
         ogretmen_adi:body.ogretmen_adi,
         verilis_tarihi:body.verilis_tarihi,
+        odev_basligi:String(body.odev_basligi||'').trim().slice(0,160),
         tur:body.tur,
         mime_type:body.mime_type,
         dosya_adi:body.dosya_adi,

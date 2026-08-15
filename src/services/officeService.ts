@@ -177,8 +177,18 @@ export async function saveTeacherPayment(input: { ogretmen_id: string; hakedis_d
   if (error) throw error
 }
 
-export async function saveProgram(input: SabitProgram) {
-  const { error } = await supabase.rpc('sabit_program_kaydet_guvenli_v2', {
+export type ProgramSaveResult = {
+  basarili: boolean
+  program_id: string
+  yeni_program: boolean
+  guncellenen_gelecek_ders: number
+  korunan_gelecek_ders: number
+  korunan_istisna: number
+  gecmis_dersler_korundu: boolean
+}
+
+export async function saveProgram(input: SabitProgram): Promise<ProgramSaveResult> {
+  const { data, error } = await supabase.rpc('sabit_program_kaydet_guvenli_v3', {
     p_program_id: input.program_id || uid('SP'), p_ogrenci_id: input.ogrenci_id, p_ogretmen_id: input.ogretmen_id,
     p_brans_id: input.brans_id, p_derslik_id: input.derslik_id, p_haftanin_gunu: input.haftanin_gunu,
     p_baslangic_saati: input.baslangic_saati, p_ders_sayisi: Number(input.ders_sayisi || 1),
@@ -187,6 +197,7 @@ export async function saveProgram(input: SabitProgram) {
     p_bitis_tarihi: input.bitis_tarihi || null, p_aciklama: input.aciklama || null, p_program_durumu: input.program_durumu || 'Aktif',
   })
   if (error) throw error
+  return data as ProgramSaveResult
 }
 
 export async function programConflict(input: SabitProgram) {

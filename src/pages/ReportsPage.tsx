@@ -22,7 +22,7 @@ export function ReportsPage(){
   const selectedTeacher=data.ogretmenler.find(x=>x.ogretmen_id===teacher)
   const selectedPeriod=periods.find(x=>x.hakedis_donemi_id===teacherPeriod)
   const periodText=type==='kurum'?monthLabel(today):type==='ogrenci'?'Tüm kayıt dönemi':selectedPeriod?.donem_adi||'Dönem seçilmedi'
-  const subjectText=type==='kurum'?'BS Ofis':type==='ogrenci'?selectedStudent?.ad_soyad||'Öğrenci seçilmedi':selectedTeacher?.ad_soyad||'Öğretmen seçilmedi'
+  const subjectText=type==='kurum'?'BS Eğitim':type==='ogrenci'?selectedStudent?.ad_soyad||'Öğrenci seçilmedi':selectedTeacher?.ad_soyad||'Öğretmen seçilmedi'
   const pdfFilename=reportFilename({type,today,studentName:selectedStudent?.ad_soyad,teacherName:selectedTeacher?.ad_soyad,periodStart:selectedPeriod?.baslangic_tarihi})
   const handlePrint=()=>{
     const previousTitle=document.title
@@ -40,7 +40,7 @@ export function ReportsPage(){
     {type==='ogretmen'&&<div className="report-filter-row no-print"><select className="report-select" value={teacher} onChange={e=>setTeacher(e.target.value)}><option value="">Öğretmen seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select><select className="report-select" value={teacherPeriod} onChange={e=>setTeacherPeriod(e.target.value)}><option value="">Hakediş dönemi seçin</option>{periods.map(x=><option key={x.hakedis_donemi_id} value={x.hakedis_donemi_id}>{x.donem_adi}</option>)}</select></div>}
 
     <section className="report-sheet">
-      <header className="report-doc-header"><img src="./bs-app-icon-192.png"/><div className="report-doc-brand"><h2>BS Ofis Yönetim Sistemi</h2><p>{reportTitle}</p></div><div className="report-doc-code"><b>{reportCode}</b><span>{fullDate(today)}</span></div></header>
+      <header className="report-doc-header"><img src="./bs-app-icon-192.png" alt="BS Eğitim"/><div className="report-doc-brand"><h2>BS Eğitim Yönetimi</h2><p>{reportTitle}</p></div><div className="report-doc-code"><b>{reportCode}</b><span>{fullDate(today)}</span></div></header>
       <div className="report-meta"><div><span>Rapor Dönemi</span><b>{periodText}</b></div><div><span>Rapor Konusu</span><b>{subjectText}</b></div><div><span>Belge Türü</span><b>{reportTitle}</b></div></div>
       <div className="report-content">
         {type==='kurum'&&<>
@@ -61,7 +61,7 @@ export function ReportsPage(){
         </>})()}
         {type==='ogretmen'&&(!teacher||!teacherPeriod)&&<div className="report-placeholder">Raporu görmek için öğretmen ve hakediş dönemi seçin.</div>}
 
-        <footer className="report-doc-footer"><span><b>BS Ofis Yönetim Sistemi</b> tarafından oluşturulmuştur.</span><span>Belge tarihi: {fullDate(today)} · Rapor kodu: {reportCode}</span></footer>
+        <footer className="report-doc-footer"><span><b>BS Eğitim Yönetimi</b> tarafından oluşturulmuştur.</span><span>Belge tarihi: {fullDate(today)} · Rapor kodu: {reportCode}</span></footer>
       </div>
     </section>
   </div>

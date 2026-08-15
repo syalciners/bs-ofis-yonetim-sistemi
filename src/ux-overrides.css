@@ -118,3 +118,36 @@ button.kpi-card{cursor:pointer}
   .teacher-profile-card.manager-card,.teacher-profile-card.standard-card{min-height:auto}
   .smart-options>div{display:grid;grid-template-columns:1fr 1fr}.suggestion-btn{width:100%}
 }
+
+/* Mobil okunabilirlik tabanı: mevcut yerleşimi ve iş akışlarını değiştirmez. */
+.brand small{font-size:10px}
+.bottom-nav a{font-size:10px}
+.page-title-row p{font-size:12px;line-height:1.45}
+.eyebrow{font-size:10px}
+.page-title-row>.primary-btn{font-size:10px}
+.kpi-card span{font-size:11px}
+.kpi-card small{font-size:10px;line-height:1.4}
+.section-heading span{font-size:10.5px}
+.quick-actions b{font-size:11.5px}
+.quick-actions small{font-size:10px;line-height:1.35}
+.lesson-time span,.lesson-status span{font-size:9.5px}
+.lesson-main small{font-size:10px}
+.attention-grid b,.all-good b{font-size:11px}
+.attention-grid small,.all-good small{font-size:10px;line-height:1.4}
+.student-name span,.student-meta span,.finance-card small,.menu-grid small,.settings-list small{font-size:10px;line-height:1.4}
+.student-balance span{font-size:10.5px}
+.segmented button{font-size:10px}
+.form-grid label{font-size:10.5px}
+.form-hint,.form-summary,.sheet-header p{font-size:10.5px;line-height:1.45}
+
+@media(max-width:650px){
+  .brand small{font-size:9.5px;letter-spacing:.13em}
+  .page-title-row p{font-size:11px}
+  .eyebrow{font-size:9.5px}
+  .kpi-card span{font-size:10.5px}
+  .kpi-card small{font-size:9.5px}
+  .section-heading h2{font-size:14px}
+  .quick-actions small{font-size:9.5px}
+  .lesson-main small{font-size:9.5px}
+  .form-grid input,.form-grid select,.form-grid textarea,.report-select{font-size:16px}
+}

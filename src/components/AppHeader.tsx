@@ -8,8 +8,8 @@ export function AppHeader() {
   return <header className="app-header-wrap">
     <div className="app-header">
       <button className="brand" type="button" onClick={() => nav('/')}>
-        <img src="./bs-app-icon-192.png" alt="BS" />
-        <span><strong>BS Ofis</strong><small>Yönetim Sistemi</small></span>
+        <img src="./bs-app-icon-192.png" alt="BS Eğitim" />
+        <span><strong>BS Eğitim</strong><small>Yönetim Sistemi</small></span>
       </button>
       <div className="header-actions">
         <span className="cloud-chip"><Cloud size={13}/> Bulut</span>

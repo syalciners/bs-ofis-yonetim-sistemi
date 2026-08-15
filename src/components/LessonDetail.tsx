@@ -40,6 +40,6 @@ export function LessonDetail({ lesson, onEdit, onDone }: {lesson:Ders;onEdit:()=
       <div className="lesson-status-three">{statuses.map(x=>{const Icon=x.icon;const current=x.value===(lesson.ders_durumu||'Planlandı');return <button key={x.value} aria-pressed={current} className={`lesson-status-button ${x.tone} ${current?'current':''}`} disabled={busy||current} onClick={()=>void setStatus(x.value)}><span className="lesson-status-button-icon"><Icon/></span><span><b>{x.text}</b><small>{current?'Mevcut durum':x.help}</small></span></button>})}</div>
     </section>
 
-    <button className="secondary-btn full lesson-edit-btn" onClick={onEdit}><Edit3 size={17}/>Ders Bilgilerini Düzenle</button>
+    <button className="secondary-btn full lesson-edit-btn" onClick={onEdit}><Edit3 size={17}/>Kaydı Düzenle</button>
   </div>
 }

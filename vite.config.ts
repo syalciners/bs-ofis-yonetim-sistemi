@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon-16x16.png','favicon-32x32.png','favicon-48x48.png','apple-touch-icon.png'],
       manifest: {
-        name: 'BS Ofis Yönetim Sistemi',
-        short_name: 'BS Ofis',
-        description: 'Yalçıner Ofis için ders, öğrenci, öğretmen ve finans yönetimi',
+        name: 'BS Eğitim Yönetimi',
+        short_name: 'BS Eğitim',
+        description: 'BS Eğitim için ders, öğrenci, öğretmen ve finans yönetimi',
         theme_color: '#f7f9fc',
         background_color: '#f7f9fc',
         display: 'standalone',

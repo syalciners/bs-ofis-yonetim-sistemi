@@ -55,17 +55,18 @@ export function CalendarPage(){
   useEffect(()=>{sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter));sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')},[filter])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
   if(!data)return null
-  const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif').sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
+  const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif')
   const activeStudents=data.ogrenciler.filter(x=>x.durum!=='Pasif').sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
   const managerTeachers=activeTeachers.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>teacherTone(a.ad_soyad)==='teacher-pink'?-1:teacherTone(b.ad_soyad)==='teacher-pink'?1:0)
-  const selectedTeacher=filter.type==='teacher'&&activeTeachers.some(x=>x.ogretmen_id===filter.id)?filter.id:''
+  const otherTeachers=activeTeachers.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
+  const selectedOtherTeacher=filter.type==='teacher'&&otherTeachers.some(x=>x.ogretmen_id===filter.id)?filter.id:''
   const selectedStudent=filter.type==='student'&&activeStudents.some(x=>x.ogrenci_id===filter.id)?filter.id:''
   const weekProgramCount=lessons.filter(x=>x.program_id).length
   const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:lessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
   const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
   const weekActionText=weekBusy||weekStatusBusy?'Kontrol ediliyor…':allWeeksReady?'Haftalar Hazır':activeWeekStatus?.selected.calisti&&!activeWeekStatus.next.calisti?'Sonraki Haftayı Hazırla':activeWeekStatus&&!activeWeekStatus.selected.calisti&&activeWeekStatus.next.calisti?'Bu Haftayı Hazırla':activeWeekStatus?'İki Haftayı Hazırla':'Haftayı Oluştur'
-  const filterLabel=filter.type==='all'?'Tüm Program':filter.type==='teacher'?(activeTeachers.find(x=>x.ogretmen_id===filter.id)?.ad_soyad||'Öğretmen'):(activeStudents.find(x=>x.ogrenci_id===filter.id)?.ad_soyad||'Öğrenci')
+  const filterLabel=filter.type==='all'?'Tüm Program':filter.type==='teacher'?activeTeachers.find(x=>x.ogretmen_id===filter.id)?.ad_soyad||'Öğretmen':activeStudents.find(x=>x.ogrenci_id===filter.id)?.ad_soyad||'Öğrenci'
   const shareTarget:ProgramShareTarget|null=filter.type==='all'?null:{type:filter.type,id:filter.id}
   const chooseFilter=(next:CalendarFilter)=>{setFilter(next);setShareOpen(false)}
   const emptyHint='Başka bir hafta, öğretmen veya öğrenci seçebilirsin.'
@@ -82,20 +83,21 @@ export function CalendarPage(){
       {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null);setShareOpen(false)}}>{x.label}</button>)}
     </section>
 
-    <section className="calendar-person-filter" aria-label="Takvim kişi filtresi">
-      <div className="calendar-manager-quick" aria-label="Hızlı öğretmen seçimi">
-        {managerTeachers.map(x=>{const active=filter.type==='teacher'&&filter.id===x.ogretmen_id;return <button key={x.ogretmen_id} className={`calendar-quick-teacher ${teacherTone(x.ad_soyad)} ${active?'active':''}`} onClick={()=>chooseFilter(active?{type:'all'}:{type:'teacher',id:x.ogretmen_id})}>{x.ad_soyad}</button>})}
+    <section className="teacher-filter-wrap">
+      <div className="teacher-manager-grid" aria-label="Yönetici öğretmenler">
+        {managerTeachers.map(x=><button key={x.ogretmen_id} className={`teacher-chip teacher-manager-chip ${teacherTone(x.ad_soyad)} ${filter.type==='teacher'&&filter.id===x.ogretmen_id?'active':''}`} onClick={()=>chooseFilter({type:'teacher',id:x.ogretmen_id})}><span>{x.ad_soyad}</span><small>Yönetici</small></button>)}
       </div>
-      <div className="calendar-person-selectors">
-        <label className={`calendar-person-picker teacher-person-picker ${selectedTeacher?'active':''}`}>
-          <span>Öğretmen</span>
-          <select aria-label="Öğretmen seç" value={selectedTeacher} onChange={e=>chooseFilter(e.target.value?{type:'teacher',id:e.target.value}:{type:'all'})}>
+      <div className="teacher-secondary-compact" aria-label="Takvim kişi filtreleri">
+        <button className={`teacher-chip teacher-small-chip teacher-all ${filter.type==='all'?'active':''}`} onClick={()=>chooseFilter({type:'all'})}>Tümü</button>
+        <label className={`teacher-other-picker ${selectedOtherTeacher?'active':''}`}>
+          <span>Diğer Öğretmenler</span>
+          <select aria-label="Diğer öğretmen seç" value={selectedOtherTeacher} onChange={e=>chooseFilter(e.target.value?{type:'teacher',id:e.target.value}:{type:'all'})}>
             <option value="">Öğretmen seç</option>
-            {activeTeachers.map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}
+            {otherTeachers.map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}
           </select>
         </label>
-        <label className={`calendar-person-picker student-person-picker ${selectedStudent?'active':''}`}>
-          <span>Öğrenci</span>
+        <label className={`teacher-other-picker student-picker ${selectedStudent?'active':''}`}>
+          <span>Öğrenciler</span>
           <select aria-label="Öğrenci seç" value={selectedStudent} onChange={e=>chooseFilter(e.target.value?{type:'student',id:e.target.value}:{type:'all'})}>
             <option value="">Öğrenci seç</option>
             {activeStudents.map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}

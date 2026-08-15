@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 
 const read = (path) => readFileSync(path, 'utf8')
 const calendar = read('src/pages/CalendarPage.tsx')
+const lessonDetail = read('src/components/LessonDetail.tsx')
 const fixed = read('src/pages/FixedProgramPage.tsx')
 const more = read('src/pages/MorePage.tsx')
 const app = read('src/App.tsx')
@@ -21,6 +22,11 @@ const checks = [
   ['Takvim yalnız ders bulunan günleri gösterir', calendar.includes('const visibleDays=') && calendar.includes('.filter(x=>x.items.length>0)')],
   ['Takvim boş gün kartı üretmez', !calendar.includes('agenda-empty')],
   ['Derssiz hafta sakin boş durum mesajı gösterir', calendar.includes('Bu haftada ders yok.') && calendar.includes('calendar-empty-week')],
+  ['Ders durumu değişikliği açık kullanıcı onayı ister', lessonDetail.includes('if(!window.confirm(statusChangeMessage(current,status)))return')],
+  ['Yapıldı onayı öğrenci ücreti ve öğretmen hakedişini açıklar', lessonDetail.includes('öğrenci ücretini ve öğretmen hakedişini finansal sonuçlara dahil eder')],
+  ['Yapıldı durumundan dönüşün finansal etkisi açıklanır', lessonDetail.includes('artık finansal sonuçlara dahil edilmez')],
+  ['Durum onayından sonra güvenli RPC çağrısı korunur', lessonDetail.includes('await setLessonStatus(lesson.ders_id,status)')],
+  ['Ders durumu alanı onay davranışını kullanıcıya bildirir', lessonDetail.includes('Finansal etkisi onaylandıktan sonra kaydedilir.')],
   ['Takvim Sabit Program formunu doğrudan içermez', !calendar.includes('ProgramForm') && !calendar.includes("mode==='program'")],
   ['Sabit Program ayrı sayfadır', fixed.includes('Sabit Ders Programı') && fixed.includes('fixed-program-groups')],
   ['Sabit Program günlere göre gruplanır', fixed.includes('dayNames.map(day=>')],

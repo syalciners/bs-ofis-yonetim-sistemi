@@ -17,6 +17,7 @@ import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
 
+// Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({
   immediate: true,
   onRegisteredSW: (_swUrl, registration) => {

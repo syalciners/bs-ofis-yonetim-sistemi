@@ -21,6 +21,7 @@ const checks=[
   ['Sabit program yakın uygun saat önerir',form.includes('Yakın uygun saatler')&&form.includes('onerilen_saatler')],
   ['Öneri seçildiğinde saat ve derslik forma uygulanır',form.includes('setRoom(s.derslik_id)')&&form.includes('setStartTime(s.saat)')],
   ['Haftayı Oluştur üretimden önce ön kontrol yapar',prepareBlock.indexOf('await reviewWeekPlanning(monday)')>=0&&prepareBlock.indexOf('await reviewWeekPlanning(monday)')<prepareBlock.indexOf('await createWeek(monday)')],
+  ['Hazır hafta kontrolü çakışma taramasından önce yapılır',prepareBlock.indexOf('await readWeekStatus()')>=0&&prepareBlock.indexOf('await readWeekStatus()')<prepareBlock.indexOf('await reviewWeekPlanning(monday)')],
   ['Çakışmada haftalık ders üretimi yerine çözüm paneli açılır',calendar.includes('setWeekReview(review)')&&calendar.includes('<WeekPlanningReviewPanel')],
   ['Haftalık öneri tek seferlik güvenli taşıma mekanizmasını kullanır',panel.includes('await moveProgramDate(')],
   ['Öneri uygulandıktan sonra çakışmalar yeniden kontrol edilir',panel.includes('await reviewWeekPlanning(review.haftalar[0])')],

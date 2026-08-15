@@ -1,12 +1,38 @@
-/* Takvim kişi filtresi ve program paylaşımı */
-.calendar-v2 .teacher-secondary-compact{
-  grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);
+/* Takvim kompakt kişi filtresi ve program paylaşımı */
+.calendar-person-filter{display:grid;gap:8px;min-width:0}
+.calendar-filter-segment{
+  width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+  padding:5px;border:1px solid #e2e8f0;border-radius:14px;background:#eef2f7;
 }
-.calendar-v2 .student-picker.active{
-  border-color:#2f9c95 !important;
-  box-shadow:0 4px 12px rgba(47,156,149,.12) !important;
+.calendar-filter-segment button{
+  min-width:0;min-height:40px;border:0;border-radius:10px;background:transparent;
+  color:#526177;font-size:11px;font-weight:900;cursor:pointer;transition:.16s ease;
 }
-.calendar-v2 .student-picker>span{color:#257f79}
+.calendar-filter-segment button.active{
+  background:#fff;color:#1d4ed8;box-shadow:0 4px 12px rgba(31,48,79,.08);
+}
+.calendar-person-picker{
+  width:100%;min-width:0;min-height:44px;display:grid;grid-template-columns:auto minmax(0,1fr);
+  align-items:center;gap:10px;padding:6px 11px;border:1.5px solid #dbe3ec;border-radius:12px;background:#fff;
+}
+.calendar-person-picker>span{font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.calendar-person-picker select{
+  width:100%;min-width:0;border:0;outline:0;background:transparent;color:#24344d;font-size:12px;font-weight:850;
+}
+.teacher-person-picker{border-color:#bfdbfe}
+.teacher-person-picker>span{color:#1d4ed8}
+.student-person-picker{border-color:#99ddd6}
+.student-person-picker>span{color:#257f79}
+
+.calendar-command-summary{display:grid!important;gap:3px!important;min-width:0}
+.calendar-command-title{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+.calendar-command-title>b{font-size:13px;line-height:1.2;overflow-wrap:anywhere}
+.calendar-command-date{
+  display:inline-flex!important;align-items:center;gap:5px!important;width:max-content;
+  padding:4px 7px;border-radius:999px;background:#f1f5f9;color:#526177!important;
+  font-size:9.5px!important;font-weight:850;white-space:nowrap;
+}
+.calendar-command-date svg{flex:0 0 auto}
 .calendar-share-btn{border-color:#b8e6c9;color:#15803d;background:#fcfffd}
 .calendar-share-btn:disabled{color:#7b8799;background:#f8fafc;border-color:#dbe3ec}
 
@@ -43,10 +69,11 @@
 @media(max-width:700px){
   .calendar-command-bar>div:last-child{grid-template-columns:1fr 1fr !important}
   .calendar-command-bar .calendar-week-action{grid-column:1/-1}
-  .calendar-v2 .teacher-secondary-compact{grid-template-columns:76px minmax(0,1fr) minmax(0,1fr)}
+  .calendar-command-title{justify-content:space-between}
 }
 @media(max-width:520px){
-  .calendar-v2 .teacher-secondary-compact{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .calendar-v2 .teacher-secondary-compact .teacher-all{grid-column:1/-1;width:100%}
+  .calendar-filter-segment button{min-height:38px;font-size:10.5px}
+  .calendar-person-picker{grid-template-columns:1fr;gap:2px;padding:7px 10px}
+  .calendar-command-title{align-items:flex-start;flex-direction:column;gap:5px}
   .program-share-lesson{grid-template-columns:78px minmax(0,1fr)}
 }

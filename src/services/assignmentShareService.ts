@@ -1,19 +1,11 @@
 import type { Odev, Ogrenci, Ogretmen } from '../lib/types'
 import { fullDate } from '../lib/format'
+import { buildWhatsappUrl, normalizeTrWhatsappPhone } from '../lib/whatsapp'
 import { assignmentAttachmentName, assignmentLinkExpirySeconds, signedAssignmentAttachmentUrl } from './assignmentAttachmentService'
 
-const phoneDigits=(value?:string|null)=>String(value||'').replace(/\D/g,'')
-const normalizeTrPhone=(value?:string|null)=>{
-  const d=phoneDigits(value)
-  if(!d)return''
-  if(d.startsWith('90')&&d.length>=12)return d
-  if(d.startsWith('0')&&d.length===11)return `90${d.slice(1)}`
-  if(d.length===10)return `90${d}`
-  return d
-}
-
 export async function buildAssignmentWhatsAppUrl(assignment:Odev,student:Ogrenci,teacher?:Ogretmen){
-  const phone=normalizeTrPhone(student.veli_telefon||student.ogrenci_telefon)
+  const rawPhone=student.veli_telefon||student.ogrenci_telefon
+  const phone=normalizeTrWhatsappPhone(rawPhone)
   if(!phone)throw new Error('Öğrenci veya veli için WhatsApp telefon numarası bulunamadı.')
   const expires=assignmentLinkExpirySeconds(assignment.son_teslim_tarihi)
   const [fileUrl,imageUrl]=await Promise.all([
@@ -40,7 +32,7 @@ export async function buildAssignmentWhatsAppUrl(assignment:Odev,student:Ogrenci
     if(fileUrl)lines.push(`📄 *${fileName}:* ${fileUrl}`)
   }
   lines.push('','🌟 Başarılar dileriz.','*BS Ofis Yönetim Sistemi*')
-  return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
+  return buildWhatsappUrl(rawPhone||phone,lines.join('\n'))
 }
 
 export async function openAssignmentAttachment(assignment:Odev,kind:'file'|'image'){

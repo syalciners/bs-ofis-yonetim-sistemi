@@ -15,6 +15,7 @@ import './sheet-standard.css'
 import './sheet-footer-fixed.css'
 import './report-corporate.css'
 import './assignment-whatsapp.css'
+import './program-share.css'
 
 registerSW({ immediate: true })
 

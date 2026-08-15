@@ -20,15 +20,16 @@ export async function buildAssignmentWhatsAppUrl(assignment:Odev,student:Ogrenci
     signedAssignmentAttachmentUrl(assignment,'file',expires),
     signedAssignmentAttachmentUrl(assignment,'image',expires),
   ])
+  const title=assignment.odev_basligi||assignment.konu||'Ödev'
   const lines=[
     'Merhaba,',
     '',
     `*${student.ad_soyad} için ödev*`,
-    `*${assignment.odev_basligi||assignment.konu||'Ödev'}*`,
+    `Ödev: *${title}*`,
   ]
   if(assignment.odev_aciklamasi)lines.push('',assignment.odev_aciklamasi)
-  lines.push('',`Veriliş: ${fullDate(assignment.verilis_tarihi)}`)
-  if(assignment.son_teslim_tarihi)lines.push(`Son teslim: ${fullDate(assignment.son_teslim_tarihi)}`)
+  lines.push('',`Veriliş tarihi: ${fullDate(assignment.verilis_tarihi)}`)
+  if(assignment.son_teslim_tarihi)lines.push(`Son teslim tarihi: ${fullDate(assignment.son_teslim_tarihi)}`)
   if(teacher?.ad_soyad)lines.push(`Öğretmen: ${teacher.ad_soyad}`)
   if(imageUrl||fileUrl){lines.push('','*Ekler*');if(imageUrl)lines.push(`Görsel: ${imageUrl}`);if(fileUrl)lines.push(`Dosya: ${fileUrl}`)}
   lines.push('','BS Ofis Yönetim Sistemi')

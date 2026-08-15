@@ -5,6 +5,8 @@ const studentEdit = readFileSync('src/components/StudentEditPanel.tsx','utf8')
 const studentAdmin = readFileSync('src/services/studentAdminService.ts','utf8')
 const teachers = readFileSync('src/pages/TeachersPage.tsx','utf8')
 const lesson = readFileSync('src/components/LessonDetail.tsx','utf8')
+const assignments = readFileSync('src/pages/AssignmentsPage.tsx','utf8')
+const fixedProgram = readFileSync('src/pages/FixedProgramPage.tsx','utf8')
 const lessonCard = readFileSync('src/components/LessonCard.tsx','utf8')
 const lessonStatusCss = readFileSync('src/lesson-status-colors.css','utf8')
 const finance = readFileSync('src/pages/FinancePage.tsx','utf8')
@@ -22,8 +24,11 @@ const sheetFooterFixed = readFileSync('src/sheet-footer-fixed.css','utf8')
 const checks = [
   ['Öğrenci iletişimi detayın üst bölümündedir', student.includes('profile-contact-strip') && student.includes('mailto:') && student.includes('wa.me/') && student.includes('tel:+')],
   ['Öğretmen iletişimi detayın üst bölümündedir', teachers.includes('profile-contact-strip') && teachers.includes('mailto:') && teachers.includes('wa.me/') && teachers.includes('tel:+')],
-  ['Öğrenci hızlı işlemleri kart görünümündedir', student.includes('detail-action-cards') && student.includes('<b>Düzenle</b>')],
-  ['Öğretmen hızlı işlemleri kart görünümündedir', teachers.includes('detail-action-cards') && teachers.includes('<b>Düzenle</b>')],
+  ['Öğrenci hızlı işlemleri kart görünümündedir', student.includes('detail-action-cards') && student.includes('<b>Kaydı Düzenle</b>')],
+  ['Öğretmen hızlı işlemleri kart görünümündedir', teachers.includes('detail-action-cards') && teachers.includes('<b>Kaydı Düzenle</b>')],
+  ['Ders detayında Kaydı Düzenle standardı kullanılır', lesson.includes('Kaydı Düzenle</button>')],
+  ['Ödev detayında Kaydı Düzenle standardı kullanılır', assignments.includes('Kaydı Düzenle</button>')],
+  ['Sabit program detayında Kaydı Düzenle standardı kullanılır', fixedProgram.includes('<b>Kaydı Düzenle</b>')],
   ['Detay Sheet yatay taşmayı engeller', css.includes('.sheet-panel') && css.includes('overflow-x:hidden !important')],
   ['Öğretmen detayında ek yatay stabilite katmanı vardır', detailFixes.includes('.teachers-v2 .sheet-panel') && detailFixes.includes('overflow-x:hidden !important')],
   ['Öğretmen branş seçimi mobilde tek sütuna iner', teacherFormFix.includes('@media(max-width:650px)') && teacherFormFix.includes('grid-template-columns:1fr !important')],

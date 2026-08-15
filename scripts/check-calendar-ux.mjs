@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 const read = (path) => readFileSync(path, 'utf8')
 const calendar = read('src/pages/CalendarPage.tsx')
 const lessonDetail = read('src/components/LessonDetail.tsx')
+const office = read('src/services/officeService.ts')
 const fixed = read('src/pages/FixedProgramPage.tsx')
 const more = read('src/pages/MorePage.tsx')
 const app = read('src/App.tsx')
@@ -27,10 +28,14 @@ const checks = [
   ['Yapıldı durumundan dönüşün finansal etkisi açıklanır', lessonDetail.includes('artık finansal sonuçlara dahil edilmez')],
   ['Durum onayından sonra güvenli RPC çağrısı korunur', lessonDetail.includes('await setLessonStatus(lesson.ders_id,status)')],
   ['Ders durumu alanı onay davranışını kullanıcıya bildirir', lessonDetail.includes('Finansal etkisi onaylandıktan sonra kaydedilir.')],
-  ['Haftalık ders üretimi kullanıcı onayı ister', (calendar.match(/if\(!confirmWeekCreation\(\)\)return/g)||[]).length===2],
+  ['Haftalık ders üretimi kullanıcı onayı ister', (calendar.match(/if\(!confirmWeekCreation\(status\)\)return/g)||[]).length===2],
   ['Haftalık üretim onayı öğretmen filtresinden bağımsız kapsamı açıklar', calendar.includes('Öğretmen filtresinden bağımsız olarak tüm aktif sabit programlar işlenir.')],
-  ['Haftalık üretim onayı yalnız eksik derslerin ekleneceğini açıklar', calendar.includes('Mevcut dersler korunur; yalnız eksik dersler eklenir.')],
+  ['Haftalık üretim onayı hazır haftaların yeniden işlenmeyeceğini açıklar', calendar.includes('Hazır haftalar yeniden işlenmez; mevcut dersler korunur.')],
   ['Haftalık üretim güvenli V4 RPC çağrısını korur', calendar.includes('await createWeek(monday)')],
+  ['Hafta hazırlık durumu güvenli RPC üzerinden okunur', office.includes("haftalik_ders_uretim_durumu_v1")],
+  ['Seçilen ve sonraki haftanın hazırlık durumu birlikte kontrol edilir', calendar.includes('getWeekCreationStatus(monday)') && calendar.includes('getWeekCreationStatus(addDays(monday,7))')],
+  ['Hazır haftalarda oluşturma düğmesi pasifleşir', calendar.includes('disabled={weekBusy||weekStatusBusy||allWeeksReady}') && calendar.includes("allWeeksReady?'Haftalar Hazır'" )],
+  ['Yalnız eksik haftanın adı kullanıcıya gösterilir', calendar.includes("'Sonraki Haftayı Hazırla'") && calendar.includes("'Bu Haftayı Hazırla'" )],
   ['Takvim Sabit Program formunu doğrudan içermez', !calendar.includes('ProgramForm') && !calendar.includes("mode==='program'")],
   ['Sabit Program ayrı sayfadır', fixed.includes('Sabit Ders Programı') && fixed.includes('fixed-program-groups')],
   ['Sabit Program günlere göre gruplanır', fixed.includes('dayNames.map(day=>')],

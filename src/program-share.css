@@ -24,6 +24,15 @@
 .student-person-picker{border-color:#99ddd6}
 .student-person-picker>span{color:#257f79}
 
+.calendar-title-copy{width:100%;min-width:0}
+.calendar-title-line{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.calendar-title-line h1{min-width:0}
+.calendar-title-week-action{
+  flex:0 0 auto;min-height:38px;max-width:58%;padding:6px 11px;
+  font-size:9.5px;line-height:1.15;text-align:center;box-shadow:0 5px 12px rgba(37,99,235,.14);
+}
+.calendar-title-week-action svg{flex:0 0 auto}
+
 .calendar-command-summary{display:grid!important;gap:3px!important;min-width:0}
 .calendar-command-title{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
 .calendar-command-title>b{font-size:13px;line-height:1.2;overflow-wrap:anywhere}
@@ -69,11 +78,13 @@
 @media(max-width:700px){
   .calendar-command-bar>div:last-child{grid-template-columns:1fr 1fr !important}
   .calendar-command-bar .calendar-week-action{grid-column:1/-1}
-  .calendar-command-title{justify-content:space-between}
 }
 @media(max-width:520px){
   .calendar-filter-segment button{min-height:38px;font-size:10.5px}
   .calendar-person-picker{grid-template-columns:1fr;gap:2px;padding:7px 10px}
+  .calendar-title-line{gap:8px}
+  .calendar-title-week-action{min-height:36px;max-width:60%;padding:5px 9px;font-size:9px;gap:5px}
+  .calendar-title-week-action svg{width:15px;height:15px}
   .calendar-command-title{align-items:flex-start;flex-direction:column;gap:5px}
   .program-share-lesson{grid-template-columns:78px minmax(0,1fr)}
 }

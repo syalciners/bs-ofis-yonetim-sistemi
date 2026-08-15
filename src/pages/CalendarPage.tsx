@@ -1,4 +1,4 @@
-import { CalendarCheck2, CalendarDays, CalendarPlus, Plus, Send } from 'lucide-react'
+import { CalendarCheck2, CalendarDays, Plus, Send } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -76,7 +76,7 @@ export function CalendarPage(){
   const prepareWeek=async()=>{setWeekBusy(true);try{const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());toast(r?.olusturulan!==undefined?`${r.olusturulan} ders oluşturuldu. Haftalar hazır.`:'Haftalar hazırlandı.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
 
   return <div className="page-stack calendar-v2">
-    <section className="page-title-row"><div><span className="eyebrow">DERS PROGRAMI</span><h1>Takvim</h1><p>Haftayı ve kişi türünü seç, programı görüntüle ve yönet.</p></div><button className="primary-btn desktop-only" onClick={()=>setNewLesson(true)}><CalendarPlus size={17}/>Ders Ekle</button></section>
+    <section className="page-title-row calendar-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><button className="primary-btn calendar-week-action calendar-title-week-action" disabled={weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div><p>Haftayı ve kişi türünü seç, programı görüntüle ve yönet.</p></div></section>
 
     <section className="week-switcher" aria-label="Hafta seçimi">
       {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null);setShareOpen(false)}}>{x.label}</button>)}
@@ -106,7 +106,7 @@ export function CalendarPage(){
 
     <section className="calendar-command-bar">
       <div className="calendar-command-summary"><div className="calendar-command-title"><b>{filterLabel}</b><span className="calendar-command-date"><CalendarDays size={14}/>{shortDate(monday)} – {shortDate(sunday)}</span></div><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
-      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!lessons.length} onClick={()=>setShareOpen(true)}><Send size={17}/>Program Gönder</button><button className="primary-btn calendar-week-action" disabled={weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div>
+      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!lessons.length} onClick={()=>setShareOpen(true)}><Send size={17}/>Program Gönder</button></div>
     </section>
 
     <section className="week-agenda">

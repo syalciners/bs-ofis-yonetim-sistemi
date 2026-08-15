@@ -81,7 +81,7 @@ expectText('Rapor dönem filtreleri tablette yan yana düzenlenir', uxOverrides,
 expectText('Rapor dönem filtreleri telefonda alt alta iner', uxOverrides, '@media(max-width:650px){.report-filter-row{grid-template-columns:1fr}}')
 expectText('Statik KPI kartları tıklanabilir imleç göstermez', uxOverrides, '.kpi-card:not(button){cursor:default}')
 expectText('Gerçek KPI butonları tıklanabilir kalır', uxOverrides, 'button.kpi-card{cursor:pointer}')
-expectText('Üst başlık kurum içi BS Eğitim markasını kullanır', appHeader, '<strong>BS Eğitim</strong><small>Yönetim Sistemi</small>')
+expectText('Üst başlık BS Eğitim Yönetimi adını eksiksiz kullanır', appHeader, '<strong>BS Eğitim</strong><small>Yönetimi</small>')
 expectText('Giriş ekranı BS Eğitim Yönetimi adını kullanır', login, '<h1>BS Eğitim Yönetimi</h1>')
 expectText('PWA manifesti BS Eğitim Yönetimi adını kullanır', viteConfig, "name: 'BS Eğitim Yönetimi'")
 expectText('Tarayıcı başlığı BS Eğitim Yönetimi adını kullanır', indexHtml, '<title>BS Eğitim Yönetimi</title>')

@@ -11,8 +11,8 @@ import { useToast } from './Toast'
 export function AssignmentEditorForm({ assignment, studentId, driveArchiveEnabled=false, onDone, onCancel }: { assignment?:Odev; studentId?:string; driveArchiveEnabled?:boolean; onDone:()=>void; onCancel:()=>void }) {
   const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false);const[file,setFile]=useState<File|null>(null);const[image,setImage]=useState<File|null>(null)
   if(!data)return null
-  const submit=async(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const id=assignment?.odev_id||uid('ODV');const selectedStudentId=String(f.get('ogrenci_id'));const selectedTeacherId=String(f.get('ogretmen_id'));const assignedDate=String(f.get('verilis_tarihi'));try{
-    await saveAssignment({odev_id:id,ogrenci_id:selectedStudentId,ogretmen_id:selectedTeacherId,konu:String(f.get('konu')),aciklama:String(f.get('aciklama')||'')||null,verilis_tarihi:assignedDate,son_teslim_tarihi:String(f.get('son_teslim_tarihi')||'')||null,oncelik:String(f.get('oncelik')||'Normal')})
+  const submit=async(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const id=assignment?.odev_id||uid('ODV');const selectedStudentId=String(f.get('ogrenci_id'));const selectedTeacherId=String(f.get('ogretmen_id'));const assignedDate=String(f.get('verilis_tarihi'));const assignmentTitle=String(f.get('konu')).trim();try{
+    await saveAssignment({odev_id:id,ogrenci_id:selectedStudentId,ogretmen_id:selectedTeacherId,konu:assignmentTitle,aciklama:String(f.get('aciklama')||'')||null,verilis_tarihi:assignedDate,son_teslim_tarihi:String(f.get('son_teslim_tarihi')||'')||null,oncelik:String(f.get('oncelik')||'Normal')})
     let driveWarning=''
     if(file||image){
       const saved=await saveAssignmentAttachments({assignmentId:id,file,image,existingFile:assignment?.odev_dosyasi||null,existingImage:assignment?.odev_fotografi||null})
@@ -27,6 +27,7 @@ export function AssignmentEditorForm({ assignment, studentId, driveArchiveEnable
             studentName:student.ad_soyad,
             teacherName:teacher.ad_soyad,
             assignedDate,
+            assignmentTitle,
             file:file&&saved.filePath?{path:saved.filePath,name:file.name,mimeType:file.type,existingDriveLink:assignment?.odev_dosya_linki||null}:null,
             image:image&&saved.imagePath?{path:saved.imagePath,name:image.name,mimeType:image.type,existingDriveLink:assignment?.odev_fotograf_linki||null}:null,
           })

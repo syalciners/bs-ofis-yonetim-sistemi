@@ -34,6 +34,7 @@ function doPost(e) {
     const ogrenciAdi = temizMetin_(body.ogrenci_adi, 160);
     const ogretmenAdi = temizMetin_(body.ogretmen_adi, 160);
     const verilisTarihi = temizMetin_(body.verilis_tarihi, 20);
+    const odevBasligi = temizMetin_(body.odev_basligi, 160) || 'Ödev';
     const tur = body.tur === 'fotograf' ? 'fotograf' : 'dosya';
     const mimeType = temizMetin_(body.mime_type, 160) || 'application/octet-stream';
     const originalName = temizMetin_(body.dosya_adi, 220) || (tur === 'fotograf' ? 'odev-fotograf.jpg' : 'odev-dosya.pdf');
@@ -56,7 +57,8 @@ function doPost(e) {
     const studentFolder = klasorBulVeyaOlustur_(root, studentFolderName);
     const extension = uzanti_(originalName, mimeType);
     const datePart = tarihDosyaAdi_(verilisTarihi);
-    const baseName = asciiUpper_(ogretmenAdi) + '_' + datePart + '_' + asciiUpper_(ogrenciAdi) + (tur === 'fotograf' ? '_ODEV_FOTOGRAF' : '_ODEV');
+    const titlePart = asciiUpper_(odevBasligi).slice(0, 80) || 'ODEV';
+    const baseName = asciiUpper_(ogretmenAdi) + '_' + datePart + '_' + asciiUpper_(ogrenciAdi) + '_' + titlePart;
     const fileName = baseName + extension;
 
     const blob = Utilities.newBlob(bytes, mimeType, fileName);

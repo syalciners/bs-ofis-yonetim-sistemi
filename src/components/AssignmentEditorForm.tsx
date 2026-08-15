@@ -8,7 +8,7 @@ import { archiveAssignmentAttachmentsToDrive } from '../services/assignmentDrive
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
 
-export function AssignmentEditorForm({ assignment, studentId, onDone, onCancel }: { assignment?:Odev; studentId?:string; onDone:()=>void; onCancel:()=>void }) {
+export function AssignmentEditorForm({ assignment, studentId, driveArchiveEnabled=false, onDone, onCancel }: { assignment?:Odev; studentId?:string; driveArchiveEnabled?:boolean; onDone:()=>void; onCancel:()=>void }) {
   const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false);const[file,setFile]=useState<File|null>(null);const[image,setImage]=useState<File|null>(null)
   if(!data)return null
   const submit=async(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const id=assignment?.odev_id||uid('ODV');const selectedStudentId=String(f.get('ogrenci_id'));const selectedTeacherId=String(f.get('ogretmen_id'));const assignedDate=String(f.get('verilis_tarihi'));try{
@@ -16,21 +16,23 @@ export function AssignmentEditorForm({ assignment, studentId, onDone, onCancel }
     let driveWarning=''
     if(file||image){
       const saved=await saveAssignmentAttachments({assignmentId:id,file,image,existingFile:assignment?.odev_dosyasi||null,existingImage:assignment?.odev_fotografi||null})
-      const student=data.ogrenciler.find(x=>x.ogrenci_id===selectedStudentId)
-      const teacher=data.ogretmenler.find(x=>x.ogretmen_id===selectedTeacherId)
-      if(!student||!teacher)driveWarning='Öğrenci veya öğretmen bilgisi bulunamadığı için Drive arşivi tamamlanamadı.'
-      else try{
-        const archived=await archiveAssignmentAttachmentsToDrive({
-          assignmentId:id,
-          studentId:selectedStudentId,
-          studentName:student.ad_soyad,
-          teacherName:teacher.ad_soyad,
-          assignedDate,
-          file:file&&saved.filePath?{path:saved.filePath,name:file.name,mimeType:file.type,existingDriveLink:assignment?.odev_dosya_linki||null}:null,
-          image:image&&saved.imagePath?{path:saved.imagePath,name:image.name,mimeType:image.type,existingDriveLink:assignment?.odev_fotograf_linki||null}:null,
-        })
-        if(!archived.configured)driveWarning='Google Drive arşiv servisi henüz etkin değil.'
-      }catch(err:any){driveWarning=err?.message||String(err)}
+      if(driveArchiveEnabled){
+        const student=data.ogrenciler.find(x=>x.ogrenci_id===selectedStudentId)
+        const teacher=data.ogretmenler.find(x=>x.ogretmen_id===selectedTeacherId)
+        if(!student||!teacher)driveWarning='Öğrenci veya öğretmen bilgisi bulunamadığı için Drive arşivi tamamlanamadı.'
+        else try{
+          const archived=await archiveAssignmentAttachmentsToDrive({
+            assignmentId:id,
+            studentId:selectedStudentId,
+            studentName:student.ad_soyad,
+            teacherName:teacher.ad_soyad,
+            assignedDate,
+            file:file&&saved.filePath?{path:saved.filePath,name:file.name,mimeType:file.type,existingDriveLink:assignment?.odev_dosya_linki||null}:null,
+            image:image&&saved.imagePath?{path:saved.imagePath,name:image.name,mimeType:image.type,existingDriveLink:assignment?.odev_fotograf_linki||null}:null,
+          })
+          if(!archived.configured)driveWarning='Google Drive arşiv servisi henüz etkin değil.'
+        }catch(err:any){driveWarning=err?.message||String(err)}
+      }
     }
     await refresh()
     if(driveWarning)toast('Ödev kaydedildi. Drive arşivi tamamlanamadı; ek güvenli depoda korunuyor.','error')
@@ -51,7 +53,7 @@ export function AssignmentEditorForm({ assignment, studentId, onDone, onCancel }
         <label className="assignment-file-picker"><ImagePlus size={18}/><span><b>Görsel Ekle</b><small>{image?.name||assignmentAttachmentName(assignment?.odev_fotografi)||(assignment?.odev_fotograf_linki?'Mevcut bağlantılı görsel':'JPG, PNG veya WEBP · en fazla 15 MB')}</small></span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setImage(e.target.files?.[0]||null)}/></label>
         <label className="assignment-file-picker"><Paperclip size={18}/><span><b>Dosya Ekle</b><small>{file?.name||assignmentAttachmentName(assignment?.odev_dosyasi)||(assignment?.odev_dosya_linki?'Mevcut bağlantılı dosya':'PDF, Word veya Excel · en fazla 15 MB')}</small></span><input type="file" accept="application/pdf,.doc,.docx,.xls,.xlsx" onChange={e=>setFile(e.target.files?.[0]||null)}/></label>
       </div>
-      <div className="form-hint"><FileText size={14}/>Ekler önce güvenli depoya alınır, ardından Google Drive’da öğrencinin klasörüne arşivlenir. WhatsApp gönderiminde tıklanabilir bağlantı paylaşılır.</div>
+      <div className="form-hint"><FileText size={14}/>{driveArchiveEnabled?'Drive test modu açık: Ekler önce güvenli depoya alınır, ardından öğrencinin Drive klasörüne arşivlenir.':'Ekler özel depoda tutulur. WhatsApp gönderiminde süreli güvenli bağlantı paylaşılır.'}</div>
     </div>
     <div className="wide form-actions"><button type="button" className="secondary-btn" onClick={onCancel}>Vazgeç</button><button type="submit" className="primary-btn" disabled={busy}>{busy?'Kaydediliyor…':assignment?'Ödevi Güncelle':'Ödevi Kaydet'}</button></div>
   </form>

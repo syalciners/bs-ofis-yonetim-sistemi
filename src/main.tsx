@@ -17,7 +17,12 @@ import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
 
-registerSW({ immediate: true })
+registerSW({
+  immediate: true,
+  onRegisteredSW: (_swUrl, registration) => {
+    if (registration) void registration.update().catch(() => undefined)
+  },
+})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -95,7 +95,7 @@ expectText('Öğretmen ödeme dönemleri en güncelden eskiye sıralanır', teac
 expectText('Öğretmen ödeme formu bugünün hakediş dönemini otomatik bulur', teacherPaymentQuick, "today >= x.baslangic_tarihi && today <= x.bitis_tarihi")
 expectText('Öğretmen ödeme formu iptal ödemeleri kalan hakedişten düşmez', teacherPaymentQuick, "x.hakedis_donemi_id === period && !x.iptal_mi")
 expectText('Öğretmen ödemeleri iptal kayıtlarını varsayılan listeden ayırır', finance, 'const visibleTeacherPayments=showCanceledTeacherPayments?data.ogretmenOdemeleri:data.ogretmenOdemeleri.filter(x=>!x.iptal_mi)')
-expectText('Öğretmen ödemeleri iptal kayıtlarını isteğe bağlı gösterir', finance, 'İptalleri Göster')
+expectText('Öğretmen ödemeleri iptal kayıtlarını isteğe bağlı gösterir', finance, 'onClick={()=>setShowCanceledTeacherPayments(x=>!x)}')
 expectText('Öğretmen ödemesi iptal görünürlük düğmesi erişilebilir durum taşır', finance, 'aria-pressed={showCanceledTeacherPayments}')
 expectText('İptal öğretmen ödemeleri gizliyken açıklayıcı boş durum gösterilir', finance, 'İptal edilen ödemeler varsayılan listede gizleniyor.')
 expectText('Öğretmen profili hızlı ödeme formunu kullanır', teachers, '<TeacherPaymentQuickForm teacherId={payment}')

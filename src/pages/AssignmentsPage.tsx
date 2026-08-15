@@ -35,7 +35,7 @@ const recipientInfo=(student?:Ogrenci)=>student?.veli_telefon?`Veli · ${maskPho
 
 export function AssignmentsPage(){
   const{data}=useAppData();const{toast}=useToast();const[searchParams,setSearchParams]=useSearchParams();const driveArchiveEnabled=searchParams.get('drive_test')==='1';const[selected,setSelected]=useState<Odev|null>(null);const[edit,setEdit]=useState<Odev|null>(null);const[status,setStatus]=useState<Odev|null>(null);const[add,setAdd]=useState(false);const[filter,setFilter]=useState<Filter>('bekleyen');const[sharing,setSharing]=useState<string|null>(null)
-  useEffect(()=>{if(searchParams.get('yeni')!=='1')return;setAdd(true);const next=new URLSearchParams(searchParams);next.delete('yeni');setSearchParams(next,{replace:true})},[searchParams,setSearchParams])
+  useEffect(()=>{if(searchParams.get('yeni')!=='1')return;setAdd(true);const next=new URLSearchParams([...searchParams.entries()].filter(([key])=>key!=='yeni'));setSearchParams(next,{replace:true})},[searchParams,setSearchParams])
   const rows=useMemo(()=>{if(!data)return[];return [...data.odevler].filter(x=>filter==='tumu'||filter==='tamamlanan'?filter==='tumu'||completed(x):filter==='geciken'?overdue(x):pending(x)).sort((a,b)=>String(a.son_teslim_tarihi||'9999').localeCompare(String(b.son_teslim_tarihi||'9999')))},[data,filter]);if(!data)return null
   const pendingCount=data.odevler.filter(pending).length,late=data.odevler.filter(overdue).length,done=data.odevler.filter(completed).length
 

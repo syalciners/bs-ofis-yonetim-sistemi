@@ -52,7 +52,7 @@ expectText('Para gösterimi Türkiye yerel ayarını kullanır', format, "Intl.N
 expectText('Genel hızlı tahsilat seçilen öğrencinin bakiyesini gösterir', collectionQuick, 'studentDebt(data,studentId)')
 expectText('Genel hızlı tahsilat borcu tutara aktarabilir', collectionQuick, 'Borcu tutara aktar')
 expectText('Ana Sayfa bakiye destekli hızlı tahsilat formunu kullanır', overview, '<CollectionQuickForm onDone={()=>setModal(null)}')
-expectText('Ana Sayfa hızlı ödev formunu kullanır', overview, '<AssignmentForm onDone={()=>setModal(null)}')
+expectText('Ana Sayfa hızlı ödev formunu kullanır', overview, "nav('/odevler?yeni=1')")
 expectText('Ana Sayfa ödev hızlı işlem düğmesini gösterir', overview, '<b>Ödev Ekle</b><small>öğrenci ödevi</small>')
 expectText('Ana Sayfa son tahsilatlarda iptal kayıtları dışarıda bırakır', overview, 'recentCollections:data.tahsilatlar.filter(x=>!x.iptal_mi).slice(0,3)')
 expectText('Ana Sayfa yalnız son üç aktif tahsilatı gösterir', overview, '<h2>Son Tahsilatlar</h2>')

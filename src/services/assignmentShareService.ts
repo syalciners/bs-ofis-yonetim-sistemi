@@ -1,6 +1,6 @@
 import type { Odev, Ogrenci, Ogretmen } from '../lib/types'
 import { fullDate } from '../lib/format'
-import { assignmentLinkExpirySeconds, signedAssignmentAttachmentUrl } from './assignmentAttachmentService'
+import { assignmentAttachmentName, assignmentLinkExpirySeconds, signedAssignmentAttachmentUrl } from './assignmentAttachmentService'
 
 const phoneDigits=(value?:string|null)=>String(value||'').replace(/\D/g,'')
 const normalizeTrPhone=(value?:string|null)=>{
@@ -21,18 +21,25 @@ export async function buildAssignmentWhatsAppUrl(assignment:Odev,student:Ogrenci
     signedAssignmentAttachmentUrl(assignment,'image',expires),
   ])
   const title=assignment.odev_basligi||assignment.konu||'Ödev'
+  const fileName=assignmentAttachmentName(assignment.odev_dosyasi)||'Dosya'
+  const imageName=assignmentAttachmentName(assignment.odev_fotografi)||'Görsel'
   const lines=[
-    'Merhaba,',
+    'Merhaba 👋',
     '',
-    `*${student.ad_soyad} için ödev*`,
-    `Ödev: *${title}*`,
+    '✨ *ÖDEV BİLGİLENDİRMESİ*',
+    `👤 *Öğrenci:* ${student.ad_soyad}`,
+    `📘 *Konu:* ${title}`,
   ]
-  if(assignment.odev_aciklamasi)lines.push('',assignment.odev_aciklamasi)
-  lines.push('',`Veriliş tarihi: ${fullDate(assignment.verilis_tarihi)}`)
-  if(assignment.son_teslim_tarihi)lines.push(`Son teslim tarihi: ${fullDate(assignment.son_teslim_tarihi)}`)
-  if(teacher?.ad_soyad)lines.push(`Öğretmen: ${teacher.ad_soyad}`)
-  if(imageUrl||fileUrl){lines.push('','*Ekler*');if(imageUrl)lines.push(`Görsel: ${imageUrl}`);if(fileUrl)lines.push(`Dosya: ${fileUrl}`)}
-  lines.push('','BS Ofis Yönetim Sistemi')
+  if(assignment.odev_aciklamasi)lines.push('','📝 *Yapılacaklar*',assignment.odev_aciklamasi)
+  lines.push('',`📅 *Veriliş:* ${fullDate(assignment.verilis_tarihi)}`)
+  if(assignment.son_teslim_tarihi)lines.push(`⏳ *Son Teslim:* ${fullDate(assignment.son_teslim_tarihi)}`)
+  if(teacher?.ad_soyad)lines.push(`👨‍🏫 *Öğretmen:* ${teacher.ad_soyad}`)
+  if(imageUrl||fileUrl){
+    lines.push('','📎 *Ekler*')
+    if(imageUrl)lines.push(`🖼️ *${imageName}:* ${imageUrl}`)
+    if(fileUrl)lines.push(`📄 *${fileName}:* ${fileUrl}`)
+  }
+  lines.push('','🌟 Başarılar dileriz.','*BS Ofis Yönetim Sistemi*')
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
 }
 

@@ -10,7 +10,9 @@ const types=readFileSync('src/lib/types.ts','utf8')
 const checks=[
   ['Ödev detayında WhatsApp gönder butonu vardır',page.includes('WhatsApp’tan Gönder')&&page.includes('buildAssignmentWhatsAppUrl')],
   ['WhatsApp telefonu önce veli sonra öğrenci telefonundan alır',share.includes('student.veli_telefon||student.ogrenci_telefon')],
-  ['WhatsApp mesajı ödev metnini içerir',share.includes('assignment.odev_aciklamasi')&&share.includes("'*Ekler*'")],
+  ['WhatsApp mesajı ödev metnini içerir',share.includes('assignment.odev_aciklamasi')&&share.includes('📝 *Yapılacaklar*')],
+  ['WhatsApp mesajı kurumsal görsel şablonu kullanır',share.includes('✨ *ÖDEV BİLGİLENDİRMESİ*')&&share.includes('👤 *Öğrenci:*')&&share.includes('📘 *Konu:*')&&share.includes('📅 *Veriliş:*')&&share.includes('⏳ *Son Teslim:*')],
+  ['WhatsApp mesajında ekler tıklanabilir bağlantı olarak yer alır',share.includes('📎 *Ekler*')&&share.includes('🖼️ *${imageName}:* ${imageUrl}')&&share.includes('📄 *${fileName}:* ${fileUrl}')],
   ['WhatsApp ekleri süreli imzalı bağlantı kullanır',share.includes('assignmentLinkExpirySeconds')&&attachment.includes('createSignedUrl')],
   ['Ödev ekleri özel storage bucket kullanır',attachment.includes("const BUCKET='odev-ekleri'")&&attachment.includes('.storage.from(BUCKET).upload')],
   ['Ödev eki en fazla 15 MB ile sınırlıdır',attachment.includes('const MAX_SIZE=15*1024*1024')],

@@ -22,7 +22,7 @@
 
 /* Takvim kartı: öğrenci; öğretmen • branş + durum; derslik. */
 .lesson-meta-calendar,.lesson-status-calendar{display:none}
-.calendar-v2 .lesson-card{grid-template-columns:80px minmax(0,1fr);align-items:start;padding-top:9px;padding-bottom:9px}
+.calendar-v2 .lesson-card{grid-template-columns:70px minmax(0,1fr);align-items:start;padding-top:9px;padding-bottom:9px}
 .calendar-v2 .lesson-time{align-self:center}
 .calendar-v2 .lesson-main{align-self:start;min-width:0;gap:2px}
 .calendar-v2 .lesson-main>strong{font-size:12.5px;line-height:1.2}

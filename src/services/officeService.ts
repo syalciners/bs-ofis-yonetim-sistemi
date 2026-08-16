@@ -94,29 +94,6 @@ export async function lessonConflict(input: { tarih: string; ogrenci_id: string;
   return data as { uygun: boolean; mesaj?: string; [key: string]: unknown }
 }
 
-export async function createWeek(monday: string) {
-  const { data, error } = await supabase.rpc('haftalik_dersleri_olustur_guvenli_v4', { p_hafta_baslangici: monday })
-  if (error) throw error
-  return data
-}
-
-export type WeekCreationStatus = {
-  calisti: boolean
-  hafta_baslangici?: string
-  gecis_kilidi?: boolean
-  beklenen?: number
-  mevcut?: number
-  eksik?: number
-  olusturulan?: number
-  zaten_mevcut?: number
-}
-
-export async function getWeekCreationStatus(monday: string): Promise<WeekCreationStatus> {
-  const { data, error } = await supabase.rpc('haftalik_ders_uretim_durumu_v1', { p_hafta_baslangici: monday })
-  if (error) throw error
-  return data as WeekCreationStatus
-}
-
 export async function saveStudent(input: Partial<Ogrenci> & { ad_soyad: string; ogrenci_id?: string }) {
   const id = input.ogrenci_id || uid('OGR')
   if (input.ogrenci_id) {

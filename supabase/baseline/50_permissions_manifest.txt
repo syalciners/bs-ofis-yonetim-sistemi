@@ -1,0 +1,17 @@
+BS Eğitim Yönetimi — 2026-08-16 API rol yetki manifesti
+
+Bu dosya public/private tablo ve fonksiyonların PUBLIC, anon, authenticated ve service_role rollerine ait canlı ACL durumunun doğrulama özetidir. Tam ACL satırlarını çoğaltmak yerine katalog verisinin deterministik SHA-256 parmak izi tutulur.
+
+Toplam ACL satırı: 461
+SHA-256: b6a8db268edef3ac86a1edac2e5c434af22801323b91dadfa36b47b47656b5ee
+
+Dağılım:
+- TABLE / anon: 48
+- TABLE / authenticated: 112
+- TABLE / service_role: 176
+- FUNCTION / PUBLIC: 6
+- FUNCTION / anon: 8
+- FUNCTION / authenticated: 54
+- FUNCTION / service_role: 57
+
+Not: Bu manifest mevcut durumu kaydeder; bu bakım adımında herhangi bir GRANT/REVOKE uygulanmamıştır.

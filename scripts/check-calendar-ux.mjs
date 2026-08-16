@@ -4,6 +4,7 @@ const read = (path) => readFileSync(path, 'utf8')
 const calendar = read('src/pages/CalendarPage.tsx')
 const lessonDetail = read('src/components/LessonDetail.tsx')
 const weekService = read('src/services/weekPlanningService.ts')
+const pdfService = read('src/services/weeklyProgramPdfService.ts')
 const weekMigration = read('supabase/migrations/20260816001408_hafta_eksik_ders_guvenli_v5.sql')
 const conflictMigration = read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
 const fixed = read('src/pages/FixedProgramPage.tsx')
@@ -23,6 +24,11 @@ const checks = [
   ['Program Gönder Ders Ekle ile aynı komut satırındadır', calendar.includes('calendar-command-bar') && calendar.includes('calendar-share-btn') && calendar.includes('Program Gönder')],
   ['Program Gönder yalnız tek kişi ve ders varken aktiftir', calendar.includes('disabled={!shareTarget||!lessons.length}')],
   ['Program paylaşımı mevcut önizleme bileşenini kullanır', calendar.includes("import { ProgramSharePreview }") && calendar.includes('<ProgramSharePreview target={shareTarget}')],
+  ['PDF Al Takvim komut satırındadır', calendar.includes('calendar-pdf-btn') && calendar.includes('PDF Al') && calendar.includes('openWeeklyProgramPdf')],
+  ['Haftalık PDF kişi filtresinden bağımsız tüm dersleri kullanır', calendar.includes('const allWeekLessons=useMemo') && calendar.includes("data.dersler.filter(x=>(x.tarih||'')>=monday&&(x.tarih||'')<end)") && calendar.includes('openWeeklyProgramPdf(data,allWeekLessons,monday,addDays(monday,6))')],
+  ['Haftalık PDF A4 yatay ve tam program sütunlarını içerir', pdfService.includes('@page{size:A4 landscape') && ['Saat','Öğrenci','Branş','Öğretmen','Derslik','Durum'].every(x=>pdfService.includes(`<th>${x}</th>`))],
+  ['Haftalık PDF yazdırma penceresini ve PDF kaydet aksiyonunu açar', pdfService.includes("window.open('','_blank')") && pdfService.includes('Yazdır / PDF Kaydet') && pdfService.includes('window.print()')],
+  ['PDF butonu mobilde iki ana aksiyonun altında tam genişliktedir', programCss.includes('.calendar-command-bar .calendar-pdf-btn{grid-column:1/-1}')],
   ['Yönetici öğretmenler üstte ayrı gruptadır', calendar.includes('teacher-manager-grid') && calendar.includes('teacher-manager-chip')],
   ['Yönetici öğretmenler Yönetici etiketi taşır', calendar.includes('<small>Yönetici</small>')],
   ['Alt filtre satırı Tümü Öğretmen seç Öğrenci seç düzenindedir', calendar.includes('teacher-secondary-compact') && calendar.includes('aria-label="Öğretmen seç"') && calendar.includes('aria-label="Öğrenci seç"') && !calendar.includes('Diğer Öğretmenler')],

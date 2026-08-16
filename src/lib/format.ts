@@ -3,6 +3,12 @@ export const money2 = (value?: number | null) => new Intl.NumberFormat('tr-TR', 
 export const shortDate = (iso?: string | null) => iso ? new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'short' }).format(new Date(`${iso}T12:00:00+03:00`)) : '—'
 export const fullDate = (iso?: string | null) => iso ? new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(`${iso}T12:00:00+03:00`)) : '—'
 export const time = (value?: string | null) => value ? value.slice(0, 5) : '—'
+export const formatClockInput = (value?: string | null) => {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 4)
+  if (digits.length <= 2) return digits
+  if (digits.length === 3 && Number(digits.slice(0, 2)) > 23) return `0${digits[0]}:${digits.slice(1)}`
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`
+}
 export const todayISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
 export const thisMonthKey = () => todayISO().slice(0, 7)
 export const firstOfMonth = () => `${thisMonthKey()}-01`

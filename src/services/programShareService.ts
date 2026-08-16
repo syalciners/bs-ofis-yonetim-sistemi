@@ -62,7 +62,12 @@ const lessonLine=(data:AppData,lesson:Ders,target:ProgramShareTarget)=>{
   const placeText=place==='Online'?'🌐 Online':`📍 ${titleCaseTr(place)}`
   const cancelPrefix=lesson.ders_durumu==='İptal'?'❌ ':'🕐 '
   const cancelSuffix=lesson.ders_durumu==='İptal'?' · *İptal*':''
-  if(target.type==='student')return`${cancelPrefix}${start}–${end} · 📘 ${branch} · 👨‍🏫 ${titleCaseTr(teacherName(data,lesson.ogretmen_id))} · ${placeText}${cancelSuffix}`
+  if(target.type==='student')return[
+    `${cancelPrefix}${start}–${end}${cancelSuffix}`,
+    `📘 ${branch}`,
+    `👨‍🏫 ${titleCaseTr(teacherName(data,lesson.ogretmen_id))}`,
+    placeText,
+  ].join('\n')
   return`${cancelPrefix}${start}–${end} · 👤 ${titleCaseTr(studentName(data,lesson.ogrenci_id))} · 📘 ${branch} · ${placeText}${cancelSuffix}`
 }
 
@@ -84,7 +89,10 @@ export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,
   const dates=[...new Set(sorted.map(x=>x.tarih).filter((x):x is string=>Boolean(x)))]
   for(const date of dates){
     lines.push('',dayHeading(date))
-    for(const lesson of sorted.filter(x=>x.tarih===date))lines.push(lessonLine(data,lesson,target))
+    for(const lesson of sorted.filter(x=>x.tarih===date)){
+      if(target.type==='student')lines.push('',lessonLine(data,lesson,target))
+      else lines.push(lessonLine(data,lesson,target))
+    }
   }
   lines.push('','İyi çalışmalar dileriz.','*BS Ofis Eğitim Yönetimi*')
   const message=lines.join('\n')

@@ -131,7 +131,7 @@ export function CalendarPage(){
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
-    <Sheet open={newLesson} title="Tek Seferlik Ders" subtitle="Sabit programı değiştirmez." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
+    <Sheet open={newLesson} title="Ders Ekle" subtitle="Öğrenci, öğretmen ve derslik uygunluğu otomatik kontrol edilir." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
     <Sheet open={shareOpen&&!!shareTarget} title="Program Gönder" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`} onClose={()=>setShareOpen(false)}>{shareTarget&&<ProgramSharePreview target={shareTarget} lessons={lessons} monday={monday} sunday={addDays(monday,6)} onClose={()=>setShareOpen(false)}/>}</Sheet>
     <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>

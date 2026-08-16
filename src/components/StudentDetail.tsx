@@ -24,7 +24,7 @@ export function StudentDetail({ student, onCollection, onLesson, onAssignment, o
 
     <section className="detail-action-cards" aria-label="Hızlı işlemler">
       <button className="detail-action-card primary" onClick={onCollection}><span className="detail-action-icon teal"><WalletCards/></span><span><b>Tahsilat Al</b><small>Ödemeyi kaydet</small></span></button>
-      <button className="detail-action-card" onClick={onLesson}><span className="detail-action-icon blue"><CalendarPlus/></span><span><b>Ders Ekle</b><small>Tek seferlik ders</small></span></button>
+      <button className="detail-action-card" onClick={onLesson}><span className="detail-action-icon blue"><CalendarPlus/></span><span><b>Ders Ekle</b><small>Yeni ders kaydı</small></span></button>
       <button className="detail-action-card" onClick={onAssignment}><span className="detail-action-icon purple"><BookOpenCheck/></span><span><b>Ödev Ekle</b><small>Yeni çalışma oluştur</small></span></button>
       <button className="detail-action-card" onClick={onEdit}><span className="detail-action-icon orange"><Pencil/></span><span><b>Kaydı Düzenle</b><small>Profil bilgilerini değiştir</small></span></button>
     </section>

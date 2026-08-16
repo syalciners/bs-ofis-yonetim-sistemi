@@ -68,7 +68,12 @@ const lessonLine=(data:AppData,lesson:Ders,target:ProgramShareTarget)=>{
     titleCaseTr(teacherName(data,lesson.ogretmen_id)),
     placeText,
   ].join('\n')
-  return`${cancelPrefix}${start}–${end} · 👤 ${titleCaseTr(studentName(data,lesson.ogrenci_id))} · 📘 ${branch} · ${placeText}${cancelSuffix}`
+  return[
+    `${cancelPrefix}${start}–${end}${cancelSuffix}`,
+    titleCaseTr(studentName(data,lesson.ogrenci_id)),
+    branch,
+    placeText,
+  ].join('\n')
 }
 
 export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,lessons:Ders[],monday:string,sunday:string):ProgramSharePreviewData{
@@ -89,10 +94,7 @@ export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,
   const dates=[...new Set(sorted.map(x=>x.tarih).filter((x):x is string=>Boolean(x)))]
   for(const date of dates){
     lines.push('',dayHeading(date))
-    for(const lesson of sorted.filter(x=>x.tarih===date)){
-      if(target.type==='student')lines.push('',lessonLine(data,lesson,target))
-      else lines.push(lessonLine(data,lesson,target))
-    }
+    for(const lesson of sorted.filter(x=>x.tarih===date))lines.push('',lessonLine(data,lesson,target))
   }
   lines.push('','İyi çalışmalar dileriz.','*BS Ofis Eğitim Yönetimi*')
   const message=lines.join('\n')

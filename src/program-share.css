@@ -53,6 +53,7 @@
 .calendar-command-date svg{flex:0 0 auto}
 .calendar-share-btn{border-color:#b8e6c9;color:#15803d;background:#fcfffd}
 .calendar-share-btn:disabled{color:#7b8799;background:#f8fafc;border-color:#dbe3ec}
+.calendar-pdf-btn{border-color:#bfdbfe;color:#1d4ed8;background:#f8fbff}
 
 .program-share-preview{min-width:0}
 .program-share-hero,.program-share-recipient{
@@ -86,6 +87,7 @@
 
 @media(max-width:700px){
   .calendar-command-bar>div:last-child{grid-template-columns:1fr 1fr !important}
+  .calendar-command-bar .calendar-pdf-btn{grid-column:1/-1}
 }
 @media(max-width:520px){
   .calendar-manager-quick,.calendar-person-selectors{gap:6px}

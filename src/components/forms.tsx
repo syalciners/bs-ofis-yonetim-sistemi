@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Ders, Odev, Ogrenci, Ogretmen, SabitProgram } from '../lib/types'
-import { todayISO, uid } from '../lib/format'
+import { formatClockInput, todayISO, uid } from '../lib/format'
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
 import { lessonConflict, moveProgramDate, previewProgram, saveAssignment, saveCollection, saveExpense, saveLesson, saveProgram, saveStudent, saveTeacher, saveTeacherPayment, updateAssignmentStatus, updateLesson, programConflict } from '../services/officeService'
@@ -78,7 +78,7 @@ export function LessonForm({ lesson, studentId, onDone, onCancel }: { lesson?:De
     <label>Branş<select name="brans_id" value={branch} onChange={e=>{setBranch(e.target.value);applyKnownPrice(student,teacher,e.target.value)}} required><option value="">Seçin</option>{branches.map(x=><option key={x.brans_id} value={x.brans_id}>{x.brans_adi}</option>)}</select></label>
     <label>Derslik<select name="derslik_id" defaultValue={lesson?.derslik_id||''} required><option value="">Seçin</option>{data.derslikler.filter(x=>x.aktif!==false).map(x=><option key={x.derslik_id} value={x.derslik_id}>{x.mekan_adi}</option>)}</select></label>
     <label>Tarih<input name="tarih" type="date" defaultValue={lesson?.tarih||todayISO()} required/></label>
-    <label>Saat<input name="baslangic_saati" type="time" defaultValue={(lesson?.baslangic_saati||'').slice(0,5)} required/></label>
+    <label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." defaultValue={(lesson?.baslangic_saati||'').slice(0,5)} onInput={e=>{e.currentTarget.value=formatClockInput(e.currentTarget.value)}} required/></label>
     <label>Ders Birimi<select name="ders_sayisi" defaultValue={String(lesson?.ders_sayisi||1)}>{[1,2,3,4].map(x=><option key={x} value={x}>{x} ders</option>)}</select></label>
     <label>Öğrenci Birim Ücreti<input name="ogrenci_birim_ucreti" type="number" min="0" step="0.01" value={studentPrice} onChange={e=>setStudentPrice(e.target.value)} required/></label>
     <label>Öğretmen Birim Hakedişi<input name="ogretmen_birim_hakedisi" type="number" min="0" step="0.01" value={teacherPrice} onChange={e=>setTeacherPrice(e.target.value)} required/></label>
@@ -98,7 +98,7 @@ export function ProgramForm({ program, onDone, onCancel }: { program?:SabitProgr
     <label>Branş<select name="brans_id" defaultValue={program?.brans_id||''} key={teacher} required><option value="">Seçin</option>{branches.map(x=><option key={x.brans_id} value={x.brans_id}>{x.brans_adi}</option>)}</select></label>
     <label>Derslik<select name="derslik_id" defaultValue={program?.derslik_id||''} required><option value="">Seçin</option>{data.derslikler.filter(x=>x.aktif!==false).map(x=><option key={x.derslik_id} value={x.derslik_id}>{x.mekan_adi}</option>)}</select></label>
     <label>Gün<select name="haftanin_gunu" defaultValue={program?.haftanin_gunu||'Pazartesi'}>{days.map(x=><option key={x}>{x}</option>)}</select></label>
-    <label>Saat<input name="baslangic_saati" type="time" defaultValue={(program?.baslangic_saati||'').slice(0,5)} required/></label>
+    <label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." defaultValue={(program?.baslangic_saati||'').slice(0,5)} onInput={e=>{e.currentTarget.value=formatClockInput(e.currentTarget.value)}} required/></label>
     <label>Ders Birimi<select name="ders_sayisi" defaultValue={String(program?.ders_sayisi||1)}>{[1,2,3,4].map(x=><option key={x} value={x}>{x} ders</option>)}</select></label>
     <label>Tekrar<select name="tekrar_sikligi" defaultValue={program?.tekrar_sikligi||'Her Hafta'}><option>Her Hafta</option><option>2 Haftada Bir</option><option>Ayda Bir</option></select></label>
     <label>Başlangıç<input name="baslangic_tarihi" type="date" defaultValue={program?.baslangic_tarihi||todayISO()}/></label>
@@ -161,7 +161,7 @@ export function ProgramMoveForm({ program, onDone, onCancel }: { program:SabitPr
   return <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const input={program_id:program.program_id,orijinal_tarih:String(f.get('orijinal_tarih')),yeni_tarih:String(f.get('yeni_tarih')),yeni_baslangic_saati:String(f.get('yeni_baslangic_saati')),yeni_derslik_id:String(f.get('yeni_derslik_id')),aciklama:String(f.get('aciklama')||'')||null};try{const c=await lessonConflict({tarih:input.yeni_tarih,ogrenci_id:String(program.ogrenci_id||''),ogretmen_id:String(program.ogretmen_id||''),derslik_id:input.yeni_derslik_id,baslangic_saati:input.yeni_baslangic_saati,ders_sayisi:Number(program.ders_sayisi||1),haric_ders_id:null});if(!c?.uygun)throw new Error(c?.mesaj||'Yeni tarih ve saatte çakışma var.');await moveProgramDate(input);await refresh();toast('Bu haftaya özel değişiklik uygulandı. Sabit program değişmedi.');onDone()}catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}}}>
     <label className="wide">Hangi Ders?<select name="orijinal_tarih" required disabled={loading}><option value="">{loading?'Tarihler yükleniyor…':'Seçin'}</option>{dates.map((x:any)=><option key={x.tarih} value={x.tarih}>{x.tarih} · {String(x.saat||program.baslangic_saati||'').slice(0,5)}</option>)}</select></label>
     <label>Yeni Tarih<input name="yeni_tarih" type="date" min={todayISO()} required/></label>
-    <label>Yeni Saat<input name="yeni_baslangic_saati" type="time" defaultValue={String(program.baslangic_saati||'').slice(0,5)} required/></label>
+    <label>Yeni Saat<input name="yeni_baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." defaultValue={String(program.baslangic_saati||'').slice(0,5)} onInput={e=>{e.currentTarget.value=formatClockInput(e.currentTarget.value)}} required/></label>
     <label>Derslik<select name="yeni_derslik_id" defaultValue={program.derslik_id||''} required>{data.derslikler.filter(x=>x.aktif!==false).map(x=><option key={x.derslik_id} value={x.derslik_id}>{x.mekan_adi}</option>)}</select></label>
     <label className="wide">Açıklama<textarea name="aciklama" rows={2} placeholder="Örn. Bu haftaya özel saat değişikliği"/></label>
     <div className="wide form-hint">Yalnız seçilen tarih taşınır. Haftalık sabit programın gün ve saati değişmez.</div>

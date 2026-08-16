@@ -16,8 +16,6 @@ const lessonPlace=(data:AppData,lesson:Ders)=>{
   return online?'Online':roomName(data,lesson.derslik_id)
 }
 
-const lessonSort=(a:Ders,b:Ders)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||''))||teacherName({} as AppData,a.ogretmen_id).localeCompare(teacherName({} as AppData,b.ogretmen_id),'tr-TR')
-
 const statusClass=(status?:string|null)=>status==='İptal'?'cancelled':status==='Yapıldı'?'done':'planned'
 
 export function buildWeeklyProgramPdfHtml(data:AppData,lessons:Ders[],monday:string,sunday:string){

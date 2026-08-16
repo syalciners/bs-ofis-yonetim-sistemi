@@ -64,8 +64,8 @@ const lessonLine=(data:AppData,lesson:Ders,target:ProgramShareTarget)=>{
   const cancelSuffix=lesson.ders_durumu==='İptal'?' · *İptal*':''
   if(target.type==='student')return[
     `${cancelPrefix}${start}–${end}${cancelSuffix}`,
-    `📘 ${branch}`,
-    `👨‍🏫 ${titleCaseTr(teacherName(data,lesson.ogretmen_id))}`,
+    branch,
+    titleCaseTr(teacherName(data,lesson.ogretmen_id)),
     placeText,
   ].join('\n')
   return`${cancelPrefix}${start}–${end} · 👤 ${titleCaseTr(studentName(data,lesson.ogrenci_id))} · 📘 ${branch} · ${placeText}${cancelSuffix}`

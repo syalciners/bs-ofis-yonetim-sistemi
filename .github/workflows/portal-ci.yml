@@ -1,0 +1,36 @@
+name: Portal CI
+
+on:
+  push:
+    branches: [portal-v1-gelistirme]
+    paths:
+      - 'portal/**'
+      - '.github/workflows/portal-ci.yml'
+  pull_request:
+    paths:
+      - 'portal/**'
+      - '.github/workflows/portal-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portal
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+      - name: Node kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bağımlılıkları kur
+        run: npm install --no-audit --no-fund
+      - name: Portalı derle
+        run: npm run build
+      - name: Lock dosyasını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-package-lock
+          path: portal/package-lock.json
+          if-no-files-found: error

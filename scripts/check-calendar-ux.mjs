@@ -5,6 +5,7 @@ const calendar = read('src/pages/CalendarPage.tsx')
 const lessonDetail = read('src/components/LessonDetail.tsx')
 const weekService = read('src/services/weekPlanningService.ts')
 const pdfService = read('src/services/weeklyProgramPdfService.ts')
+const packageJson = read('package.json')
 const weekMigration = read('supabase/migrations/20260816001408_hafta_eksik_ders_guvenli_v5.sql')
 const conflictMigration = read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
 const fixed = read('src/pages/FixedProgramPage.tsx')
@@ -26,9 +27,11 @@ const checks = [
   ['Program paylaşımı mevcut önizleme bileşenini kullanır', calendar.includes("import { ProgramSharePreview }") && calendar.includes('<ProgramSharePreview target={shareTarget}')],
   ['PDF Al Takvim komut satırındadır', calendar.includes('calendar-pdf-btn') && calendar.includes('PDF Al') && calendar.includes('openWeeklyProgramPdf')],
   ['Haftalık PDF seçili Takvim programındaki dersleri kullanır', !calendar.includes('const allWeekLessons=useMemo') && calendar.includes('openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)') && calendar.includes('disabled={!lessons.length}')],
-  ['Haftalık PDF seçili program adını belge başlığında taşır', pdfService.includes('programLabel') && pdfService.includes('escapeHtml(programLabel)')],
-  ['Haftalık PDF A4 yatay ve tam program sütunlarını içerir', pdfService.includes('@page{size:A4 landscape') && ['Saat','Öğrenci','Branş','Öğretmen','Derslik','Durum'].every(x=>pdfService.includes(`<th>${x}</th>`))],
-  ['Haftalık PDF yazdırma penceresini ve PDF kaydet aksiyonunu açar', pdfService.includes("window.open('','_blank')") && pdfService.includes('Yazdır / PDF Kaydet') && pdfService.includes('window.print()')],
+  ['Haftalık PDF seçili program adını belge başlığında taşır', pdfService.includes('programLabel') && pdfService.includes('{text:programLabel,fontSize:10.5,bold:true,color:BLUE}')],
+  ['Haftalık PDF gerçek PDF motoru kullanır', packageJson.includes('"pdfmake"') && pdfService.includes("import('pdfmake/build/pdfmake')") && pdfService.includes('addVirtualFileSystem')],
+  ['Haftalık PDF A4 yatay ve tam program sütunlarını içerir', pdfService.includes("pageSize:'A4'") && pdfService.includes("pageOrientation:'landscape'") && ['SAAT','ÖĞRENCİ','BRANŞ','ÖĞRETMEN','DERSLİK','DURUM'].every(x=>pdfService.includes(`text:'${x}'`))],
+  ['Haftalık PDF doğrudan dosya indirir ve tarayıcı yazdırmasını kullanmaz', pdfService.includes('.download(filename)') && !pdfService.includes('window.print()') && !pdfService.includes("window.open('','_blank')")],
+  ['Haftalık PDF beyaz kurumsal başlık ve kontrollü footer üretir', pdfService.includes("text:'BS EĞİTİM YÖNETİMİ'") && pdfService.includes("footer:(currentPage:number,pageCount:number)") && !pdfService.includes('https://syalciners.github.io')],
   ['PDF butonu mobilde iki ana aksiyonun altında tam genişliktedir', programCss.includes('.calendar-command-bar .calendar-pdf-btn{grid-column:1/-1}')],
   ['Yönetici öğretmenler üstte ayrı gruptadır', calendar.includes('teacher-manager-grid') && calendar.includes('teacher-manager-chip')],
   ['Yönetici öğretmenler Yönetici etiketi taşır', calendar.includes('<small>Yönetici</small>')],

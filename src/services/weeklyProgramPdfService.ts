@@ -181,8 +181,8 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
             columns:[
               {width:58,image:logoData,fit:[58,58],margin:[0,0,0,0]},
               {width:'*',stack:[
-                {text:'BS EĞİTİM',fontSize:15.5,bold:true,color:NAVY_DARK,characterSpacing:.35,margin:[0,8,0,0]},
-                {text:'YÖNETİMİ',fontSize:7.5,color:MUTED,characterSpacing:2.3,margin:[0,2,0,0]},
+                {text:'BS Eğitim',fontSize:15.5,bold:true,color:NAVY_DARK,characterSpacing:.35,margin:[0,8,0,0]},
+                {text:'Yönetimi',fontSize:7.5,color:MUTED,characterSpacing:2.3,margin:[0,2,0,0]},
               ],margin:[10,0,0,0]},
             ],
           },
@@ -205,7 +205,7 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
         margin:[0,9,0,11]
       },
       {text:'SEÇİLİ PROGRAM',fontSize:5.6,bold:true,color:BLUE,characterSpacing:1.15,margin:[0,0,0,4]},
-      {text:programLabel,fontSize:18.5,bold:true,color:NAVY_DARK,margin:[0,0,0,1]},
+      {text:programLabel,fontSize:16,bold:true,color:NAVY,margin:[0,0,0,1]},
       {text:'Haftalık Ders Programı',fontSize:8.2,color:BLUE,margin:[0,2,0,10]},
       {
         table:{

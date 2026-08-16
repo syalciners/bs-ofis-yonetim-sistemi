@@ -1,5 +1,5 @@
 import { CalendarCheck2, ChevronLeft, ChevronRight, List, Plus } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonDetail } from '../components/LessonDetail'
@@ -87,13 +87,11 @@ export function DailyCalendarPage(){
   const[monday,setMonday]=useState(()=>{const stored=sessionStorage.getItem('bs-takvim-hafta');return stored&&/^\d{4}-\d{2}-\d{2}$/.test(stored)?stored:baseMonday})
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
-  const quickFormHost=useRef<HTMLDivElement|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
-  useEffect(()=>{if(!quickSlot)return;const frame=requestAnimationFrame(()=>{const root=quickFormHost.current;const dateInput=root?.querySelector<HTMLInputElement>('input[name="tarih"]');const timeInput=root?.querySelector<HTMLInputElement>('input[name="baslangic_saati"]');if(dateInput)dateInput.value=quickSlot.date;if(timeInput)timeInput.value=quickSlot.time});return()=>cancelAnimationFrame(frame)},[quickSlot])
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
   const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
   const selectedWeekReady=Boolean(activeWeekStatus?.selected.calisti);const nextWeekReady=Boolean(activeWeekStatus?.next.calisti)
@@ -144,7 +142,7 @@ export function DailyCalendarPage(){
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
-    <Sheet open={!!quickSlot} title="Ders Ekle" subtitle={quickSlot?`${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<div ref={quickFormHost}><LessonForm key={`${quickSlot.date}-${quickSlot.time}`} onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/></div>}</Sheet>
+    <Sheet open={!!quickSlot} title="Ders Ekle" subtitle={quickSlot?`${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<LessonForm key={`${quickSlot.date}-${quickSlot.time}`} defaultDate={quickSlot.date} defaultStartTime={quickSlot.time} lockDateTime onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/>}</Sheet>
     <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

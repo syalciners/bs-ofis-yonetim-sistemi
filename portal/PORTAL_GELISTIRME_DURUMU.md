@@ -2,57 +2,67 @@
 
 Tarih: 16.08.2026
 
-## Tamamlanan
-- `portal-v1-gelistirme` branch'i `main` üzerinden oluşturuldu; mevcut yönetim uygulamasının root koduna dokunulmadı.
-- Portalın salt-okunur güvenlik modeli canlı Supabase'e uygulandı.
-- `portal_kullanicilari` eşleştirme tablosu oluşturuldu; RLS aktif edildi.
-- `anon` ve `authenticated` rollerinin `portal_kullanicilari` tablosuna doğrudan erişimleri tamamen kaldırıldı.
-- Dört salt-okunur RPC oluşturuldu: `portal_oturum_bilgisi_v1`, `portal_bugun_v1`, `portal_program_v1`, `portal_odevler_v1`.
-- Portal RPC'lerinde `public` ve `anon` EXECUTE yetkisi kaldırıldı; yalnız `authenticated` çağırabilir.
-- Her portal RPC'si `auth.uid()` ve aktif `portal_kullanicilari` kaydını doğrulayıp yalnız ilgili öğrenci/öğretmenin verisini döndürüyor.
-- Portal UI V1 tamamlandı: Bugün, Program, Ödevler, Profil.
-- GitHub Actions Portal CI kuruldu; `package-lock.json` sabitlendi ve build başarılı geçti.
-- Supabase Security Advisor çalıştırıldı; portal için anonim erişim açığı bulunmadı.
-- Yönetim ve portal kimlikleri çift taraflı trigger ile birbirinden ayrıldı. Aynı `auth_user_id` iki sistemde aynı anda kullanılamaz.
-- Kimlik izolasyonu kontrollü negatif testten geçti: mevcut yönetim hesabının portal kullanıcısı olarak eklenmesi veritabanı tarafından engellendi.
-- Gerçek portal kullanıcısı henüz oluşturulmadı; `portal_kullanicilari` tablosu boş tutuluyor.
-- BS ana marka standardı portal için kabul edildi. Portal marka adı `BS Eğitim Portalı`; finans ürününe ait `Bütçe Yönetimi` alt adı kullanılmıyor.
-- Portal renk standardı: Deep Navy `#0B1F3A`, Satin Silver `#B8C1CC`, Growth Blue `#168BFF`.
-- Gerçek BS app icon 192 px ve 512 px PWA ikonları olarak eklendi; PWA theme color `#0B1F3A`, açık yüzey `#F7F9FC`.
-- Supabase modern publishable key ve proje URL'si istemci fallback'i olarak tanımlandı; `service_role` veya başka gizli anahtar portal kodunda bulunmuyor.
-- Mevcut authenticated SECURITY DEFINER RPC'leri tarandı; yönetim yazma RPC'lerinin tamamında yönetici kontrolü bulundu.
-- Portal RPC fonksiyon tanımları tek tek incelendi; dört portal RPC'si yalnız veri okuyor ve DML yazma işlemi yapmıyor.
-- Negatif privilege testi tekrarlandı: `anon` dört portal RPC'sinin hiçbirini çalıştıramıyor; `anon` ve `authenticated` rolleri `portal_kullanicilari` tablosunda doğrudan SELECT/INSERT/UPDATE/DELETE yapamıyor.
-- Supabase portal değişikliklerinden sonra canlı `bs-egitim-yonetimi-v2` Vercel projesinin runtime hataları kontrol edildi; hata bulunmadı.
-- CI'den geçen commit `1fa460e08930721d1c224932564f0f8fee9908b5` güvenli referans olarak `portal-v1-golden-master` branch'ine donduruldu.
-- Golden master'dan yalnız deployment CI farkı taşıyan `portal-v1-deploy` branch'i oluşturuldu; GitHub Actions `portal-dist` artifact'ı başarıyla üretildi.
-
-## Marka ve tasarım kararı
-BS monogramı aynen korunacak; portal için yeni veya benzer bir logo türetilmeyecek. Eğitim ürünü aynı ana marka ailesinde kalacak. Arayüzde lacivert ana kurumsal renk, Growth Blue yalnız vurgu/aktif durumlarda, Satin Silver ikincil yüzey ve ayırıcı tonlarda kullanılacak. Neon, yoğun glow, aşırı gradient ve dekoratif 3D efekt kullanılmayacak.
-
-## Güvenlik kararı
-Portal kullanıcılarına ana tablolarda doğrudan SELECT policy açılmayacak. Ana tabloların mevcut yönetici RLS modeli korunacak. Portal yalnız sınırlı veri döndüren `portal_*` SECURITY DEFINER RPC'lerini çağıracak. Portal tarafında INSERT, UPDATE, DELETE RPC'si bulunmayacak.
-
-Yönetim hesabı ile portal hesabı kesin olarak ayrı kimliklerdir. Yönetim kullanıcısı portal kullanıcısı olamaz; portal kullanıcısı daha sonra yönetim profiline eklenemez. Rol değişimi gerekirse eski profil önce bilinçli olarak kaldırılmalıdır.
-
-## Vercel production durumu
-- Yeni ve bağımsız Vercel projesi: `bs-egitim-portali`
+## Güncel güvenli sürüm
+- Portal geliştirme branch'i: `portal-v1-gelistirme`
+- Portal golden master: `portal-v1-golden-master`
+- Çalışan runtime commit: `8af27eb3ff430bd32e9e64428febd66dfbf5b178`
+- Production: `https://bs-egitim-portali.vercel.app`
 - Vercel Project ID: `prj_WTCzIweta6c9XIpQT8pKGC9xBPrB`
-- Production URL: `https://bs-egitim-portali.vercel.app`
-- Production deployment ID: `dpl_EwDPgNGpL3LjSSTgX4zXx5m39Nf5`
-- Production deployment durumu: READY / HTTP 200.
-- Mevcut `bs-egitim-yonetimi-v1` ve `bs-egitim-yonetimi-v2` projelerine dokunulmadı.
-- Vercel deployment harness GitHub'daki sabit commit `1fa460e08930721d1c224932564f0f8fee9908b5` kaynağını indiriyor, `portal/` içinde `npm ci` + `npm run build` çalıştırıyor ve yalnız `dist` çıktısını yayınlıyor.
-- Build logunda kaynak commit doğrulandı; Vite production build ve PWA generateSW başarılı tamamlandı.
-- Supabase Google OAuth authorize negatif/uyumluluk kontrolü production portal adresiyle yapıldı. Auth servisi `redirect_to=https://bs-egitim-portali.vercel.app` değerini aynen Google authorize akışına taşıdı; mevcut redirect allowlist portal production adresini kabul ediyor.
+- Güncel production deployment: `dpl_4vKTDxUE6iisScEAnDwieJhmpmqF` — READY
+- Mevcut BS Eğitim Yönetimi uygulamasının root koduna ve Vercel V1/V2 projelerine dokunulmadı.
 
-## İlk öğretmen pilotu için mevcut durum
-Yönetim profiline bağlı hesaplar pilotta kullanılmayacak. Yönetim hesabı olmayan aktif öğretmen kayıtları arasında portal pilotuna uygun Google hesabı olan bir öğretmen seçilecek. Yetki, öğretmen Google ile portala ilk kez giriş yaptıktan ve `auth.users` kaydı oluştuktan sonra doğru `ogretmen_id` ile tek kayıt olarak verilecek. Toplu öğretmen yetkilendirmesi yapılmayacak.
+## Portal erişim modeli — V2
+Portal artık günlük erişim için `portal_kullanicilari` tablosunu kullanmaz. Bu tablo ve V1 RPC'leri yalnız rollback amacıyla korunur.
 
-## Sıradaki doğrulama
-1. `https://bs-egitim-portali.vercel.app` adresini yönetim profiline bağlı olmayan seçilmiş tek öğretmen Google hesabıyla aç ve Google ile giriş yap.
-2. İlk girişte portal hesabı henüz bağlı olmadığı için `Portal erişimi tanımlı değil` ekranının görülmesini doğrula.
-3. Oluşan yeni `auth.users` kaydını doğru `ogretmen_id` ile `portal_kullanicilari` tablosuna tek kayıt olarak bağla.
-4. Aynı öğretmen hesabıyla yeniden giriş yap; yalnız kendi dersleri ve ödevlerinin geldiğini doğrula.
-5. Yönetim/finans verilerinin görünmediğini ve hiçbir yazma işleminin mümkün olmadığını uçtan uca test et.
-6. Öğretmen pilotu başarılı olduktan sonra aynı protokolü tek öğrenci hesabıyla uygula.
+Yetki kaynağı doğrudan aktif öğrenci/öğretmen kaydındaki `email` alanıdır:
+1. Kullanıcı Google ile giriş yapar.
+2. Sunucu `auth.uid()` üzerinden Supabase Auth kaydını bulur.
+3. Yalnız `email_confirmed_at` dolu doğrulanmış Auth e-postası kullanılır; istemciden e-posta parametresi kabul edilmez.
+4. E-posta `lower(trim(email))` ile normalize edilerek aktif `ogrenciler.email` ve `ogretmenler.email` kayıtlarında aranır.
+5. Tam bir aktif eşleşme varsa kişi Öğrenci veya Öğretmen olarak otomatik tanınır; ayrıca manuel portal yetkisi verilmez.
+6. 0 eşleşmede erişim reddedilir.
+7. Aynı e-posta 2 veya daha fazla aktif kişi kaydıyla eşleşirse sistem tahmin yapmaz ve güvenlik nedeniyle erişimi reddeder.
+8. Aktif `kullanici_profilleri` kaydı bulunan yönetim/personel hesapları portal kimliği olarak kesin olarak reddedilir. Böylece yönetim JWT yetkileri salt-okunur portal oturumuna taşınmaz.
+
+## V2 salt-okunur RPC'ler
+- `private.portal_kimligi_epostadan_v2()` — yalnız iç kimlik çözümleyici; `public`, `anon` ve `authenticated` için doğrudan EXECUTE kapalı.
+- `public.portal_oturum_bilgisi_v2()`
+- `public.portal_bugun_v2()`
+- `public.portal_program_v2(integer)`
+- `public.portal_odevler_v2()`
+
+Public V2 RPC'lerinde `public` ve `anon` EXECUTE kapalı, yalnız `authenticated` çağırabilir. Portal istemcisi production'da yalnız bu V2 RPC'lerini çağırır.
+
+## Güvenlik doğrulamaları
+- Anonim kullanıcı V2 portal RPC'lerini çalıştıramıyor.
+- `portal_kullanicilari` tablosunda `anon` ve `authenticated` doğrudan SELECT/INSERT/UPDATE/DELETE yapamıyor.
+- V2 fonksiyonlarında INSERT/UPDATE/DELETE yok.
+- V2 fonksiyonlarında tahsilat, gider, kasa veya hakediş tablolarına referans yok.
+- Aktif öğrenci + öğretmen e-postaları arasında güncel veride normalize edilmiş mükerrer e-posta bulunmadı.
+- Aktif Yönetici hesabı kontrollü `auth.uid()` simülasyonunda V2 tarafından beklenen şekilde reddedildi.
+- Authenticated SECURITY DEFINER yazma RPC'leri tekrar tarandı. Yönetim yazma RPC'leri yönetici kontrolü içeriyor. Yönetici kontrolü olmayan `kullanici_kendi_profilini_guncelle_guvenli_v1` yalnız kullanıcının kendi aktif `kullanici_profilleri` satırını günceller; portal kullanıcılarının böyle bir satırı olmadığı için portal için yazma kapısı oluşturmaz.
+- Supabase Security Advisor çalıştırıldı. Portal V2 SECURITY DEFINER fonksiyonları authenticated çağrı nedeniyle genel uyarıda görünür; bu bilinçli salt-okunur RPC tasarımıdır ve fonksiyon içi kimlik sınırları ayrıca test edilmiştir.
+- GitHub Portal CI, runtime commit `8af27eb3ff430bd32e9e64428febd66dfbf5b178` için başarıyla tamamlandı.
+- Production JS paketi kontrol edildi; `portal_oturum_bilgisi_v2`, `portal_bugun_v2`, `portal_program_v2`, `portal_odevler_v2` çağrılarını içeriyor.
+
+## Marka standardı
+Portal yalnız root `public` klasöründeki mevcut BS Eğitim V2 marka ailesini kullanır. Yeni/benzer logo üretmek veya başka ikon seçmek yasaktır:
+- `bs-egitim-icon-192-v2.png`
+- `bs-egitim-icon-512-v2.png`
+- `bs-egitim-apple-touch-v2.png`
+- `bs-egitim-favicon-16-v2.png`
+- `bs-egitim-favicon-32-v2.png`
+- `bs-egitim-favicon-48-v2.png`
+
+Renk standardı: Deep Navy `#0B1F3A`, Satin Silver `#B8C1CC`, Growth Blue `#168BFF`.
+
+## Kullanıcı deneyimi
+Portal yalnız görüntüleme içindir. Öğrenci ve öğretmenler ders/program/ödev verilerini okuyabilir; portalda veri değiştiren buton veya RPC bulunmaz. Yönetim, finans, tahsilat, gider, kasa ve hakediş verileri portala verilmez.
+
+## Sıradaki tek doğrulama
+Production altyapısı V2'ye geçti. Pozitif uçtan uca test için henüz yönetim hesabı olmayan gerçek bir öğrenci veya öğretmen Google hesabıyla giriş yapılmadı. İlk testte:
+1. Aktif öğrenci veya öğretmen kaydındaki `email` alanına kişinin gerçek Google e-postasının yazılı olduğunu doğrula.
+2. Aynı kişi `https://bs-egitim-portali.vercel.app` adresinde aynı Google hesabıyla giriş yapsın.
+3. Manuel yetki/eşleştirme yapmadan otomatik içeri alınması beklenir.
+4. Yalnız kendi programı ve ödevleri görülmeli; başka kişi ve finans verileri görünmemeli.
+5. İlk gerçek kullanıcı testi geçmeden toplu kullanım başlatılmamalıdır.

@@ -111,8 +111,8 @@ export function CalendarPage(){
     </section>
 
     <section className="calendar-command-bar">
-      <div><b>{filterLabel}</b><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
-      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!lessons.length} onClick={()=>setShareOpen(true)}><MessageCircle size={17}/>Program Gönder</button><button className="secondary-btn calendar-pdf-btn" disabled={!allWeekLessons.length} onClick={openWeekPdf} title="Seçili haftanın tüm programını PDF olarak al"><FileDown size={17}/>PDF Al</button></div>
+      <div className="calendar-command-summary"><div className="calendar-command-heading"><b>{filterLabel}</b><button className="secondary-btn calendar-pdf-btn" disabled={!allWeekLessons.length} onClick={openWeekPdf} title="Seçili haftanın tüm programını PDF olarak al"><FileDown size={16}/>PDF Al</button></div><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
+      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!lessons.length} onClick={()=>setShareOpen(true)}><MessageCircle size={17}/>Program Gönder</button></div>
     </section>
 
     <section className="week-agenda">

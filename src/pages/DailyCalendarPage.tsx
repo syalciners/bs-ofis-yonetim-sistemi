@@ -1,5 +1,5 @@
 import { CalendarCheck2, ChevronLeft, ChevronRight, List, Plus } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonDetail } from '../components/LessonDetail'
@@ -8,9 +8,8 @@ import { LessonForm } from '../components/forms'
 import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
-import { addDays, formatClockInput, mondayOf, shortDate, todayISO } from '../lib/format'
+import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
 import { teacherTone } from '../lib/teacherTone'
-import { lessonConflict, saveLesson } from '../services/officeService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
 import { createWeek, getWeekCreationStatus, reviewWeekPlanning, type WeekCreationStatus } from '../services/weekPlanningService'
 
@@ -82,42 +81,19 @@ function placeLessons(lessons:Ders[]):PlacedLesson[]{
   return placed
 }
 
-function QuickLessonForm({date,time,onDone,onCancel}:{date:string;time:string;onDone:()=>void;onCancel:()=>void}){
-  const{data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
-  const[student,setStudent]=useState('');const[teacher,setTeacher]=useState('');const[branch,setBranch]=useState('')
-  const[studentPrice,setStudentPrice]=useState('');const[teacherPrice,setTeacherPrice]=useState('')
-  if(!data)return null
-  const branchIds=new Set(data.ogretmenBranslari.filter(x=>x.ogretmen_id===teacher&&x.aktif!==false).map(x=>x.brans_id))
-  const branches=data.branslar.filter(x=>x.aktif!==false&&(!teacher||branchIds.has(x.brans_id)))
-  const applyKnownPrice=(sid:string,tid:string,bid:string)=>{if(!sid||!tid||!bid)return;const p=data.sabitProgramlar.find(x=>x.ogrenci_id===sid&&x.ogretmen_id===tid&&x.brans_id===bid&&x.program_durumu!=='Pasif'&&x.aktif!==false);if(p){setStudentPrice(String(p.ogrenci_birim_ucreti??''));setTeacherPrice(String(p.ogretmen_birim_hakedisi??''))}}
-  return <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const input={tarih:String(f.get('tarih')),ogrenci_id:String(f.get('ogrenci_id')),ogretmen_id:String(f.get('ogretmen_id')),brans_id:String(f.get('brans_id')),derslik_id:String(f.get('derslik_id')),baslangic_saati:String(f.get('baslangic_saati')),ders_sayisi:Number(f.get('ders_sayisi')),ogrenci_birim_ucreti:Number(f.get('ogrenci_birim_ucreti')),ogretmen_birim_hakedisi:Number(f.get('ogretmen_birim_hakedisi')),aciklama:String(f.get('aciklama')||'')||null};try{const c=await lessonConflict({...input,haric_ders_id:null});if(!c?.uygun)throw new Error(c?.mesaj||'Bu tarih ve saatte çakışma var.');await saveLesson(input as any);await refresh();toast('Ders oluşturuldu.');onDone()}catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}}}>
-    <label>Öğrenci<select name="ogrenci_id" value={student} onChange={e=>{const v=e.target.value;setStudent(v);applyKnownPrice(v,teacher,branch)}} required autoFocus><option value="">Seçin</option>{data.ogrenciler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select></label>
-    <label>Öğretmen<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('');setStudentPrice('');setTeacherPrice('')}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
-    <label>Branş<select name="brans_id" value={branch} onChange={e=>{setBranch(e.target.value);applyKnownPrice(student,teacher,e.target.value)}} required><option value="">Seçin</option>{branches.map(x=><option key={x.brans_id} value={x.brans_id}>{x.brans_adi}</option>)}</select></label>
-    <label>Derslik<select name="derslik_id" required><option value="">Seçin</option>{data.derslikler.filter(x=>x.aktif!==false).map(x=><option key={x.derslik_id} value={x.derslik_id}>{x.mekan_adi}</option>)}</select></label>
-    <label>Tarih<input name="tarih" type="date" defaultValue={date} required/></label>
-    <label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" defaultValue={time} onInput={e=>{e.currentTarget.value=formatClockInput(e.currentTarget.value)}} required/></label>
-    <label>Ders Birimi<select name="ders_sayisi" defaultValue="1">{[1,2,3,4].map(x=><option key={x} value={x}>{x} ders</option>)}</select></label>
-    <label>Öğrenci Birim Ücreti<input name="ogrenci_birim_ucreti" type="number" min="0" step="0.01" value={studentPrice} onChange={e=>setStudentPrice(e.target.value)} required/></label>
-    <label>Öğretmen Birim Hakedişi<input name="ogretmen_birim_hakedisi" type="number" min="0" step="0.01" value={teacherPrice} onChange={e=>setTeacherPrice(e.target.value)} required/></label>
-    {student&&teacher&&branch&&studentPrice!==''&&<div className="wide form-summary">Varsayılan ücretler mevcut sabit programdan getirildi. Gerekirse yalnız bu ders için değiştirebilirsin.</div>}
-    <label className="wide">Açıklama<textarea name="aciklama" rows={2}/></label>
-    <div className="wide form-hint">Tarih ve saat seçtiğin takvim hücresinden getirildi. Kaydetmeden önce çakışma otomatik kontrol edilir.</div>
-    <div className="wide form-actions"><button className="secondary-btn" type="button" onClick={onCancel}>Vazgeç</button><button className="primary-btn" type="submit" disabled={busy}>{busy?'Kaydediliyor…':'Dersi Oluştur'}</button></div>
-  </form>
-}
-
 export function DailyCalendarPage(){
   const{data,refresh}=useAppData();const{toast}=useToast();const nav=useNavigate()
   const baseMonday=mondayOf(todayISO())
   const[monday,setMonday]=useState(()=>{const stored=sessionStorage.getItem('bs-takvim-hafta');return stored&&/^\d{4}-\d{2}-\d{2}$/.test(stored)?stored:baseMonday})
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
+  const quickFormHost=useRef<HTMLDivElement|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
+  useEffect(()=>{if(!quickSlot)return;const frame=requestAnimationFrame(()=>{const root=quickFormHost.current;const dateInput=root?.querySelector<HTMLInputElement>('input[name="tarih"]');const timeInput=root?.querySelector<HTMLInputElement>('input[name="baslangic_saati"]');if(dateInput)dateInput.value=quickSlot.date;if(timeInput)timeInput.value=quickSlot.time});return()=>cancelAnimationFrame(frame)},[quickSlot])
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
   const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
   const selectedWeekReady=Boolean(activeWeekStatus?.selected.calisti);const nextWeekReady=Boolean(activeWeekStatus?.next.calisti)
@@ -168,7 +144,7 @@ export function DailyCalendarPage(){
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
-    <Sheet open={!!quickSlot} title="Tek Seferlik Ders" subtitle={quickSlot?`${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden hızlı ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<QuickLessonForm date={quickSlot.date} time={quickSlot.time} onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/>}</Sheet>
+    <Sheet open={!!quickSlot} title="Ders Ekle" subtitle={quickSlot?`${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<div ref={quickFormHost}><LessonForm key={`${quickSlot.date}-${quickSlot.time}`} onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/></div>}</Sheet>
     <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

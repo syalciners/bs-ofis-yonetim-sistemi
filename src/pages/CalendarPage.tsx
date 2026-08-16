@@ -61,8 +61,8 @@ export function CalendarPage(){
   const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
   const isPastWeek=weekOffset<0;const isCurrentWeek=weekOffset===0
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
-  const pdfLessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
-  const lessons=useMemo(()=>pdfLessons.filter(x=>!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))),[pdfLessons])
+  const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
+  const visibleLessons=useMemo(()=>lessons.filter(x=>!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))),[lessons])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter));sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')},[filter])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
@@ -74,8 +74,8 @@ export function CalendarPage(){
   const selectedOtherTeacher=filter.type==='teacher'&&otherTeachers.some(x=>x.ogretmen_id===filter.id)?filter.id:''
   const selectedStudent=filter.type==='student'&&activeStudents.some(x=>x.ogrenci_id===filter.id)?filter.id:''
   const shareTarget:ProgramShareTarget|null=filter.type==='teacher'?{type:'teacher',id:filter.id}:filter.type==='student'?{type:'student',id:filter.id}:null
-  const weekProgramCount=lessons.filter(x=>x.program_id).length
-  const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:lessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
+  const weekProgramCount=visibleLessons.filter(x=>x.program_id).length
+  const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:visibleLessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
   const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
   const selectedWeekReady=Boolean(activeWeekStatus?.selected.calisti)
@@ -88,7 +88,7 @@ export function CalendarPage(){
 
   const createWeekNow=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){setWeekReview(null);toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
   const prepareWeek=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
-  const openWeekPdf=async()=>{if(!pdfLessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,pdfLessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
+  const openWeekPdf=async()=>{if(!lessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
 
   return <div className="page-stack calendar-v2">
     <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Haftayı seç, öğretmen veya öğrenciyi filtrele, dersi yönet.</p></div></section>
@@ -120,8 +120,8 @@ export function CalendarPage(){
     </section>
 
     <section className="calendar-command-bar">
-      <div className="calendar-command-summary"><div className="calendar-command-heading"><b>{filterLabel}</b><button className="secondary-btn calendar-pdf-btn" disabled={!pdfLessons.length} onClick={()=>void openWeekPdf()} title="Seçili programı PDF olarak al"><FileDown size={16}/>PDF Al</button></div><span>{lessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
-      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!lessons.length} onClick={()=>setShareOpen(true)}><MessageCircle size={17}/>Program Gönder</button></div>
+      <div className="calendar-command-summary"><div className="calendar-command-heading"><b>{filterLabel}</b><button className="secondary-btn calendar-pdf-btn" disabled={!lessons.length} onClick={()=>void openWeekPdf()} title="Seçili programı PDF olarak al"><FileDown size={16}/>PDF Al</button></div><span>{visibleLessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
+      <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!visibleLessons.length} onClick={()=>setShareOpen(true)}><MessageCircle size={17}/>Program Gönder</button></div>
     </section>
 
     <section className="week-agenda">
@@ -134,7 +134,7 @@ export function CalendarPage(){
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
     <Sheet open={newLesson} title="Ders Ekle" subtitle="Öğrenci, öğretmen ve derslik uygunluğu otomatik kontrol edilir." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
-    <Sheet open={shareOpen&&!!shareTarget} title="Program Gönder" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`} onClose={()=>setShareOpen(false)}>{shareTarget&&<ProgramSharePreview target={shareTarget} lessons={lessons} monday={monday} sunday={addDays(monday,6)} onClose={()=>setShareOpen(false)}/>}</Sheet>
+    <Sheet open={shareOpen&&!!shareTarget} title="Program Gönder" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`} onClose={()=>setShareOpen(false)}>{shareTarget&&<ProgramSharePreview target={shareTarget} lessons={visibleLessons} monday={monday} sunday={addDays(monday,6)} onClose={()=>setShareOpen(false)}/>}</Sheet>
     <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

@@ -205,8 +205,8 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
         margin:[0,9,0,11]
       },
       {text:'SEÇİLİ PROGRAM',fontSize:5.6,bold:true,color:BLUE,characterSpacing:1.15,margin:[0,0,0,4]},
-      {text:programLabel,fontSize:16,bold:true,color:NAVY,margin:[0,0,0,1]},
-      {text:'Haftalık Ders Programı',fontSize:8.2,color:BLUE,margin:[0,2,0,10]},
+      {text:programLabel,fontSize:16,bold:true,color:NAVY},
+      {text:'Haftalık Ders Programı',fontSize:8.2,color:BLUE,margin:[0,3,0,10]},
       {
         table:{
           widths:['*','*','*','*'],

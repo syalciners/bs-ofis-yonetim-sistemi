@@ -2,7 +2,7 @@ name: Portal CI
 
 on:
   push:
-    branches: [portal-v1-gelistirme]
+    branches: [portal-v1-gelistirme, portal-v1-deploy]
     paths:
       - 'portal/**'
       - '.github/workflows/portal-ci.yml'
@@ -37,7 +37,7 @@ jobs:
       - name: Portalı derle
         run: npm run build
       - name: Paket kilidini branch'e sabitle
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref_name == 'portal-v1-gelistirme'
         run: |
           if ! git diff --quiet -- package-lock.json || [ -n "$(git ls-files --others --exclude-standard package-lock.json)" ]; then
             git config user.name "github-actions[bot]"
@@ -51,4 +51,10 @@ jobs:
         with:
           name: portal-package-lock
           path: portal/package-lock.json
+          if-no-files-found: error
+      - name: Portal dağıtım çıktısını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-dist
+          path: portal/dist
           if-no-files-found: error

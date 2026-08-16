@@ -6,6 +6,7 @@ import { AppHeader } from './components/AppHeader'
 import { BottomNav } from './components/BottomNav'
 import { OverviewPage } from './pages/OverviewPage'
 import { CalendarPage } from './pages/CalendarPage'
+import { DailyCalendarPage } from './pages/DailyCalendarPage'
 import { StudentsPage } from './pages/StudentsPage'
 import { FinancePage } from './pages/FinancePage'
 import { MorePage } from './pages/MorePage'
@@ -26,6 +27,7 @@ function ProtectedApp() {
   return <div className="app-shell"><AppHeader/><main className="page-container"><Routes>
     <Route path="/" element={<OverviewPage/>}/>
     <Route path="/takvim" element={<CalendarPage/>}/>
+    <Route path="/takvim/gunluk" element={<DailyCalendarPage/>}/>
     <Route path="/ogrenciler" element={<StudentsPage/>}/>
     <Route path="/finans" element={<FinancePage/>}/>
     <Route path="/menu" element={<MorePage/>}/>

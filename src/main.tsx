@@ -16,6 +16,7 @@ import './sheet-footer-fixed.css'
 import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
+import './daily-calendar.css'
 import './premium-typography.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.

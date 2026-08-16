@@ -1,6 +1,6 @@
 import { CalendarCheck2, CalendarDays, FileDown, MessageCircle, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
@@ -35,9 +35,16 @@ const parseFilter=(value:string|null):CalendarFilter|null=>{
   if(value.startsWith('student:')&&value.slice(8))return{type:'student',id:value.slice(8)}
   return null
 }
+const storedWeekOffset=()=>{
+  const stored=sessionStorage.getItem('bs-takvim-hafta')
+  if(!stored||!/^\d{4}-\d{2}-\d{2}$/.test(stored))return 0
+  const base=new Date(`${mondayOf(todayISO())}T12:00:00`).getTime()
+  const target=new Date(`${stored}T12:00:00`).getTime()
+  return Math.round((target-base)/(7*86400000))
+}
 
 export function CalendarPage(){
-  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams()
+  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams();const nav=useNavigate()
   const[filter,setFilter]=useState<CalendarFilter>(()=>{
     const studentParam=params.get('ogrenci')
     if(studentParam)return{type:'student',id:studentParam}
@@ -49,12 +56,13 @@ export function CalendarPage(){
     const oldTeacher=sessionStorage.getItem('bs-takvim-ogretmen')
     return oldTeacher&&oldTeacher!=='tum'?{type:'teacher',id:oldTeacher}:{type:'all'}
   })
-  const[weekOffset,setWeekOffset]=useState(0);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[shareOpen,setShareOpen]=useState(false);const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
+  const[weekOffset,setWeekOffset]=useState(storedWeekOffset);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[shareOpen,setShareOpen]=useState(false);const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
   const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
   const isPastWeek=weekOffset<0;const isCurrentWeek=weekOffset===0
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
   const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter));sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')},[filter])
+  useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
   if(!data)return null
   const activeTeachers=data.ogretmenler.filter(x=>x.durum!=='Pasif')
@@ -81,7 +89,7 @@ export function CalendarPage(){
   const openWeekPdf=async()=>{if(!lessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
 
   return <div className="page-stack calendar-v2">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div><p>Haftayı seç, öğretmen veya öğrenciyi filtrele, dersi yönet.</p></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Haftayı seç, öğretmen veya öğrenciyi filtrele, dersi yönet.</p></div></section>
 
     <section className="week-switcher" aria-label="Hafta seçimi">
       {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null);setShareOpen(false)}}>{x.label}</button>)}

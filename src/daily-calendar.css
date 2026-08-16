@@ -1,0 +1,90 @@
+.calendar-title-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.calendar-mode-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:7px 11px;border:1px solid #ea8b15;border-radius:12px;background:linear-gradient(135deg,#f6a51c,#f47a16);color:#fff;font:800 10.5px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.01em;box-shadow:0 7px 16px rgba(244,122,22,.2);white-space:nowrap;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+.calendar-mode-btn:hover{transform:translateY(-1px);box-shadow:0 9px 20px rgba(244,122,22,.26);filter:saturate(1.05)}
+.calendar-mode-btn:active{transform:translateY(0)}
+
+.daily-calendar-page{gap:14px}
+.daily-week-nav{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:8px;padding:8px;border:1px solid #dbe4ef;border-radius:18px;background:linear-gradient(180deg,#fff,#fbfcfe);box-shadow:0 8px 24px rgba(30,52,82,.045)}
+.daily-week-nav>button{width:42px;height:42px;display:grid;place-items:center;border:1px solid #dce5ef;border-radius:13px;background:#fff;color:#17345b;cursor:pointer;box-shadow:0 3px 9px rgba(32,58,88,.05)}
+.daily-week-nav>button:active{transform:scale(.97)}
+.daily-week-nav>div{text-align:center;min-width:0}
+.daily-week-nav span{display:block;margin-bottom:2px;color:#8794a6;font-size:8.5px;font-weight:900;letter-spacing:.12em}
+.daily-week-nav b{display:block;color:#15355f;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.daily-day-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.daily-day-tabs button{position:relative;display:grid;place-items:center;gap:1px;min-width:0;min-height:54px;padding:6px 2px;border:1px solid #dfe7f1;border-radius:13px;background:#fff;color:#607084;cursor:pointer;box-shadow:0 3px 10px rgba(30,52,82,.035);transition:.16s ease}
+.daily-day-tabs button span{font-size:9px;font-weight:850}
+.daily-day-tabs button b{font-size:13px;font-weight:900;color:#2a4261}
+.daily-day-tabs button i{position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);padding:1px 5px;border-radius:999px;background:#d9f2ee;color:#207b73;font-size:6.5px;font-style:normal;font-weight:900;white-space:nowrap}
+.daily-day-tabs button.active{border-color:#2f69da;background:linear-gradient(180deg,#326fe8,#245ec9);box-shadow:0 8px 18px rgba(37,99,214,.2);color:#fff;transform:translateY(-1px)}
+.daily-day-tabs button.active b,.daily-day-tabs button.active span{color:#fff}
+.daily-day-tabs button.today:not(.active){border-color:#8bcfc8;background:#f5fffd}
+
+.daily-calendar-card{overflow:hidden;border:1px solid #dbe4ee;border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(30,52,82,.055)}
+.daily-calendar-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid #e8eef5;background:linear-gradient(180deg,#fff,#fbfcfe)}
+.daily-calendar-card-head>div:first-child{min-width:0}
+.daily-calendar-card-head span{display:block;color:#8a96a7;font-size:8px;font-weight:900;letter-spacing:.11em}
+.daily-calendar-card-head b{display:block;margin-top:2px;color:#17365e;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daily-lesson-count{display:flex;align-items:baseline;gap:4px;padding:6px 9px;border:1px solid #dce6f1;border-radius:11px;background:#fff}
+.daily-lesson-count strong{color:#2461ce;font-size:15px;font-weight:950}
+.daily-lesson-count span{color:#7b8898;font-size:8px;letter-spacing:0;text-transform:none}
+
+.daily-timeline{display:grid;grid-template-columns:62px minmax(0,1fr);min-width:0}
+.daily-time-axis{position:relative;border-right:1px solid #e1e8f0;background:#fbfcfe}
+.daily-time-axis span{position:absolute;right:9px;transform:translateY(-50%);color:#9aa5b3;font-size:8px;font-weight:750;line-height:1;white-space:nowrap}
+.daily-time-axis span.whole{color:#4f6178;font-size:9px;font-weight:900}
+.daily-time-axis .end-label{transform:translateY(-100%)}
+.daily-time-body{position:relative;min-width:0;background:#fff;border-bottom:1px solid #edf1f5}
+.daily-empty-slot{position:absolute;left:0;right:0;z-index:1;display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:0 10px;border:0;border-top:1px solid #f0f3f7;background:transparent;color:transparent;text-align:right;cursor:pointer}
+.daily-empty-slot.whole{border-top-color:#dde5ee}
+.daily-empty-slot svg{opacity:0}
+.daily-empty-slot:hover{background:#f8fbff;color:#6f87a5}
+.daily-empty-slot:hover svg{opacity:1}
+.daily-empty-slot span{font-size:8px;font-weight:800}
+
+.daily-lesson-block{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;min-width:0;padding:8px 9px;border:1px solid #d9e4f1;border-left-width:4px;border-radius:13px;background:#fff;text-align:left;overflow:hidden;cursor:pointer;box-shadow:0 7px 18px rgba(32,58,88,.085);transition:transform .15s ease,box-shadow .15s ease}
+.daily-lesson-block:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(32,58,88,.12)}
+.daily-lesson-block strong{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17365f;font-size:10.5px;font-weight:950;letter-spacing:.01em}
+.daily-lesson-block>span{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#314b6d;font-size:9px;font-weight:850}
+.daily-lesson-block small{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718095;font-size:8px;font-weight:700}
+.daily-lesson-block em{margin-top:auto;padding:2px 6px;border-radius:999px;background:#eaf2ff;color:#3767ad;font-size:6.5px;font-style:normal;font-weight:900;white-space:nowrap}
+.daily-lesson-block.teacher-pink{border-left-color:#ec4899;background:linear-gradient(135deg,#fff,#fff8fc)}
+.daily-lesson-block.teacher-blue{border-left-color:#3b82f6;background:linear-gradient(135deg,#fff,#f7fbff)}
+.daily-lesson-block.teacher-yellow{border-left-color:#eab308;background:linear-gradient(135deg,#fff,#fffdf5)}
+.daily-lesson-block.done em{background:#e6f6ee;color:#247750}
+.daily-lesson-block.cancelled{opacity:.68;background:#fbfbfc}
+.daily-lesson-block.cancelled em{background:#f0f1f3;color:#717780}
+.daily-lesson-block.compact{padding:7px 7px;gap:1px}
+.daily-lesson-block.compact strong{font-size:9px}
+.daily-lesson-block.compact>span{font-size:8px}
+.daily-lesson-block.compact small{font-size:7px}
+
+@media (max-width:640px){
+  .calendar-title-actions{gap:5px}
+  .calendar-mode-btn{min-height:32px;padding:6px 9px;font-size:9.5px;border-radius:10px}
+  .daily-calendar-page{gap:11px}
+  .daily-week-nav{grid-template-columns:38px minmax(0,1fr) 38px;padding:6px;border-radius:16px}
+  .daily-week-nav>button{width:38px;height:38px;border-radius:11px}
+  .daily-week-nav b{font-size:11.5px}
+  .daily-day-tabs{gap:3px}
+  .daily-day-tabs button{min-height:49px;border-radius:11px;padding:5px 1px}
+  .daily-day-tabs button span{font-size:8px}
+  .daily-day-tabs button b{font-size:11.5px}
+  .daily-calendar-card{border-radius:17px}
+  .daily-calendar-card-head{padding:11px 10px}
+  .daily-calendar-card-head b{font-size:11px}
+  .daily-timeline{grid-template-columns:54px minmax(0,1fr)}
+  .daily-time-axis span{right:7px;font-size:7.5px}
+  .daily-time-axis span.whole{font-size:8px}
+  .daily-lesson-block{padding:7px 7px;border-radius:11px}
+  .daily-lesson-block strong{font-size:9.5px}
+  .daily-lesson-block>span{font-size:8px}
+  .daily-lesson-block small{font-size:7.5px}
+  .daily-empty-slot span{display:none}
+}
+
+@media (hover:none){
+  .daily-empty-slot{color:#b3bdc9}
+  .daily-empty-slot svg{opacity:.22}
+  .daily-empty-slot:active{background:#f2f7fd;color:#6f87a5}
+}

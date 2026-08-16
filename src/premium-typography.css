@@ -1,0 +1,70 @@
+/* Premium tipografi: yalnız ekrandaki okunabilirlik ve finansal hiyerarşi.
+   Kart, buton, grid, padding, ikon ve yazdırma/PDF ölçülerine dokunmaz. */
+@media screen {
+  /* Sayfa açıklamaları */
+  .page-title-row p{font-size:12px;line-height:1.5}
+
+  /* KPI hiyerarşisi */
+  .kpi-card span{font-size:11.5px}
+  .kpi-card small{font-size:10.5px;line-height:1.4}
+
+  /* Özet: yalnız parasal KPI'lar; Bugünkü Dersler sayısı aynı kalır. */
+  .kpi-grid.four:not(.compact-kpis) .kpi-card.blue strong,
+  .kpi-grid.four:not(.compact-kpis) .kpi-card.orange strong,
+  .kpi-grid.four:not(.compact-kpis) .kpi-card.red strong{font-size:23px}
+
+  /* Finans: dört KPI da parasaldır. */
+  .kpi-grid.four.compact-kpis .kpi-card strong{font-size:20px}
+
+  /* Öğrenciler: yalnız Açık Alacak parasaldır; öğrenci/adet sayıları aynı kalır. */
+  .students-v2 .kpi-grid.three.compact-kpis .kpi-card.orange strong{font-size:20px}
+
+  /* Bölüm ve hızlı işlem yardımcı metinleri */
+  .section-heading span{font-size:11.5px}
+  .quick-actions small{font-size:10.5px;line-height:1.35}
+  .calm-empty span{font-size:10px;line-height:1.5}
+
+  /* Takvim / ders kartları: ana saat ve isimler değişmez. */
+  .lesson-main small{font-size:10.5px;line-height:1.25}
+
+  /* Öğrenci ve finans liste yardımcı metinleri */
+  .student-name span,
+  .student-meta span,
+  .finance-card small,
+  .menu-grid small,
+  .settings-list small{font-size:11px;line-height:1.4}
+  .student-balance span{font-size:11.5px}
+  .student-balance b{font-size:12px}
+  .finance-card>b{font-size:12px}
+
+  /* Sabit Ders Programı: ders bilgisi ve ücret hiyerarşisi */
+  .program-main small{font-size:9.5px;line-height:1.35}
+  .program-price b{font-size:11px}
+  .program-price small{font-size:8.5px}
+
+  /* Menü / Rapor seçim kartları */
+  .report-choice small{font-size:9px;line-height:1.4}
+
+  /* Ödev kartı ikincil bilgi; durum ve süre pill'leri bilerek değişmez. */
+  .assignment-card-copy small{font-size:11px;line-height:1.35}
+
+  /* Rapor ekran önizlemesi. @media screen sayesinde basılı PDF etkilenmez. */
+  .report-doc-brand p{font-size:10px!important}
+  .report-doc-code b{font-size:10px}
+  .report-doc-code span{font-size:9px}
+  .report-meta span{font-size:8.5px}
+  .report-meta b{font-size:10.5px}
+  .report-section-note{font-size:9px}
+  .report-kpis span{font-size:9px}
+  .report-kpis b{font-size:12px}
+  .report-tr span{font-size:9.5px}
+  .report-tr.head span{font-size:8.5px!important}
+  .report-empty-row{font-size:10px}
+
+  @media(max-width:650px){
+    /* Mobilde Özet parasal KPI'ları mevcut 17px tabandan yalnız +2px büyür. */
+    .kpi-grid.four:not(.compact-kpis) .kpi-card.blue strong,
+    .kpi-grid.four:not(.compact-kpis) .kpi-card.orange strong,
+    .kpi-grid.four:not(.compact-kpis) .kpi-card.red strong{font-size:19px}
+  }
+}

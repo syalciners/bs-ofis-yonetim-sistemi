@@ -19,3 +19,13 @@
   border:1px solid #fecaca !important;
   font-weight:900 !important;
 }
+
+/* Takvim kartı: ana bilgi üç satır, durum etiketi sağ alt köşede. */
+.lesson-meta-calendar{display:none}
+.calendar-v2 .lesson-card{align-items:stretch}
+.calendar-v2 .lesson-time{align-self:center}
+.calendar-v2 .lesson-main{align-self:center;min-width:0}
+.calendar-v2 .lesson-meta-default{display:none}
+.calendar-v2 .lesson-meta-calendar{display:grid;gap:2px;min-width:0}
+.calendar-v2 .lesson-meta-calendar small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-v2 .lesson-status{align-self:end;justify-self:end}

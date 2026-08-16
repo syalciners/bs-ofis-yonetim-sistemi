@@ -172,7 +172,7 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
       {
         table:{headerRows:1,widths:[82,162,132,162,132,108],body:tableBody,dontBreakRows:true},
         layout:{
-          hLineWidth:(i:number)=>(i===0||i===1)?.7:.35,
+          hLineWidth:(i:number)=>(i===0||i===1)?0.7:0.35,
           vLineWidth:()=>0,
           hLineColor:()=>LINE,
           paddingLeft:()=>3,

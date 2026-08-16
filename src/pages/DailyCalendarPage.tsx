@@ -1,4 +1,4 @@
-import { CalendarCheck2, ChevronLeft, ChevronRight, List, Plus } from 'lucide-react'
+import { CalendarCheck2, Check, ChevronLeft, ChevronRight, List, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -22,14 +22,24 @@ const days=[
   {short:'Cmt',long:'Cumartesi'},
   {short:'Paz',long:'Pazar'},
 ]
+
+const ROOM_COLUMNS=[
+  {id:'LOC-002',label:'Yalçıner'},
+  {id:'LOC-001',label:'Başak'},
+  {id:'LOC-003',label:'Salon'},
+  {id:'LOC-005',label:'OSM'},
+  {id:'LOC-004',label:'Online'},
+] as const
+
 const SLOT_MINUTES=30
 const SLOT_HEIGHT=48
 const DEFAULT_START=8*60
 const DEFAULT_END=21*60
+const DEFAULT_LESSON_MINUTES=60
 const CALENDAR_HIDDEN_STATUSES=new Set(['İptal','Ertelendi','Öğretmen İptali'])
 
 type TwoWeekCreationStatus={monday:string;selected:WeekCreationStatus;next:WeekCreationStatus}
-type QuickSlot={date:string;time:string}
+type QuickSlot={date:string;time:string;roomId:string}
 type PlacedLesson={lesson:Ders;start:number;end:number;lane:number;laneCount:number}
 
 const allWeeksAreReady=(status:TwoWeekCreationStatus)=>status.selected.calisti&&status.next.calisti
@@ -42,6 +52,12 @@ const timeToMinutes=(value?:string|null)=>{
 }
 const minutesToTime=(minutes:number)=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`
 const lessonEndMinutes=(lesson:Ders,start:number)=>timeToMinutes(lesson.bitis_saati)??start+Math.max(Number(lesson.ders_sayisi||1),1)*60
+const overlaps=(aStart:number,aEnd:number,bStart:number,bEnd:number)=>aStart<bEnd&&bStart<aEnd
+const abbreviateName=(value:string)=>{
+  const parts=value.trim().split(/\s+/).filter(Boolean)
+  if(parts.length<2)return value
+  return `${parts[0][0]?.toLocaleUpperCase('tr-TR')||''}. ${parts[parts.length-1]}`
+}
 const weekTitle=(monday:string)=>{
   const sunday=addDays(monday,6)
   const left=new Date(`${monday}T12:00:00`)
@@ -82,6 +98,12 @@ function placeLessons(lessons:Ders[]):PlacedLesson[]{
   return placed
 }
 
+function StatusIndicator({status}:{status?:string|null}){
+  if(status==='Yapıldı')return <span className="daily-status-indicator done" title="Yapıldı" aria-label="Yapıldı"><Check size={10} strokeWidth={3}/></span>
+  if(CALENDAR_HIDDEN_STATUSES.has(String(status||'')))return <span className="daily-status-indicator cancelled" title="İptal" aria-label="İptal"><X size={10} strokeWidth={3}/></span>
+  return <span className="daily-status-indicator planned" title="Planlandı" aria-label="Planlandı"/>
+}
+
 export function DailyCalendarPage(){
   const{data,refresh}=useAppData();const{toast}=useToast();const nav=useNavigate()
   const baseMonday=mondayOf(todayISO())
@@ -101,21 +123,23 @@ export function DailyCalendarPage(){
   const createWeekNow=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){setWeekReview(null);toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
   const prepareWeek=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
   if(!data)return null
+
   const selectedDayIndex=Math.max(0,Math.min(6,Math.round((new Date(`${selectedDate}T12:00:00`).getTime()-new Date(`${monday}T12:00:00`).getTime())/86400000)))
   const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
-  const placed=placeLessons(dayLessons)
-  const rangeStart=placed.length?Math.floor(Math.min(...placed.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
-  const rangeEnd=placed.length?Math.ceil(Math.max(...placed.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
+  const allPlaced=placeLessons(dayLessons)
+  const rangeStart=allPlaced.length?Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
+  const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
   const studentName=(id?:string|null)=>data.ogrenciler.find(x=>x.ogrenci_id===id)?.ad_soyad||'Öğrenci'
   const teacherName=(id?:string|null)=>data.ogretmenler.find(x=>x.ogretmen_id===id)?.ad_soyad||'Öğretmen'
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
-  const roomName=(id?:string|null)=>data.derslikler.find(x=>x.derslik_id===id)?.mekan_adi||''
-  const statusClass=(status?:string|null)=>status==='Yapıldı'?'done':['İptal','Ertelendi','Öğretmen İptali'].includes(String(status||''))?'cancelled':'planned'
+  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const changeWeek=(delta:number)=>{setMonday(addDays(monday,delta*7));setWeekReview(null)}
+
   return <div className="page-stack calendar-v2 daily-calendar-page">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Günü seç, boş saate dokunarak ders ekle.</p></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Günü seç, boş derslik ve saate dokunarak ders ekle.</p></div></section>
 
     <section className="daily-week-nav" aria-label="Hafta değiştir">
       <button type="button" aria-label="Önceki hafta" onClick={()=>changeWeek(-1)}><ChevronLeft size={20}/></button>
@@ -129,21 +153,45 @@ export function DailyCalendarPage(){
 
     <section className="daily-calendar-card">
       <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b></div><div className="daily-lesson-count"><strong>{dayLessons.length}</strong><span>ders</span></div></header>
-      <div className="daily-timeline" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
-        <div className="daily-time-axis" style={{height:slotCount*SLOT_HEIGHT}} aria-hidden="true">
-          {slots.map((minute,i)=><span key={minute} className={minute%60===0?'whole':''} style={{top:i*SLOT_HEIGHT}}>{minutesToTime(minute)}</span>)}
-          <span className="whole end-label" style={{top:slotCount*SLOT_HEIGHT}}>{minutesToTime(rangeEnd)}</span>
-        </div>
-        <div className="daily-time-body" style={{height:slotCount*SLOT_HEIGHT}}>
-          {slots.map((minute,i)=><button key={minute} type="button" className={`daily-empty-slot ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute)})} aria-label={`${minutesToTime(minute)} saatine ders ekle`}><Plus size={14}/><span>Ders ekle</span></button>)}
-          {placed.map(({lesson,start,end,lane,laneCount})=>{const teacher=teacherName(lesson.ogretmen_id);const top=((start-rangeStart)/SLOT_MINUTES)*SLOT_HEIGHT+4;const height=Math.max(((end-start)/SLOT_MINUTES)*SLOT_HEIGHT-8,42);const left=`calc(${(lane/laneCount)*100}% + 5px)`;const width=`calc(${100/laneCount}% - 10px)`;return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(teacher)} ${statusClass(lesson.ders_durumu)} ${laneCount>=3?'compact':''}`} style={{top,height,left,width}} onClick={()=>setSelected(lesson)} aria-label={`${studentName(lesson.ogrenci_id)}, ${minutesToTime(start)} ders detayını aç`}><strong>{studentName(lesson.ogrenci_id)}</strong><span>{branchName(lesson.brans_id)}</span><small>{teacher}</small><small>{roomName(lesson.derslik_id)}</small><em>{lesson.ders_durumu||'Planlandı'}</em></button>})}
+      <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
+        <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
+          <div className="daily-room-header-row">
+            <div className="daily-time-head">Saat</div>
+            {roomColumns.map(column=><div className={`daily-room-head room-${column.id.toLowerCase()}`} key={column.id} title={column.room?.mekan_adi||column.label}><strong>{column.label}</strong></div>)}
+          </div>
+          <div className="daily-room-body-row">
+            <div className="daily-time-axis" style={{height:slotCount*SLOT_HEIGHT}} aria-hidden="true">
+              {slots.map((minute,i)=><span key={minute} className={minute%60===0?'whole':''} style={{top:i*SLOT_HEIGHT}}>{minutesToTime(minute)}</span>)}
+              <span className="whole end-label" style={{top:slotCount*SLOT_HEIGHT}}>{minutesToTime(rangeEnd)}</span>
+            </div>
+            {roomColumns.map(column=>{
+              const roomLessons=dayLessons.filter(x=>x.derslik_id===column.id)
+              const placed=placeLessons(roomLessons)
+              return <div className="daily-room-column" key={column.id} style={{height:slotCount*SLOT_HEIGHT}}>
+                {slots.map((minute,i)=>{
+                  const occupied=placed.some(x=>overlaps(minute,minute+DEFAULT_LESSON_MINUTES,x.start,x.end))
+                  return occupied
+                    ?<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>
+                    :<button key={minute} type="button" className={`daily-room-slot addable ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute),roomId:column.id})} aria-label={`${column.label}, ${minutesToTime(minute)} saatine ders ekle`}><Plus size={13}/><span>Ders ekle</span></button>
+                })}
+                {placed.map(({lesson,start,end,lane,laneCount})=>{
+                  const fullStudent=studentName(lesson.ogrenci_id);const fullTeacher=teacherName(lesson.ogretmen_id)
+                  const top=((start-rangeStart)/SLOT_MINUTES)*SLOT_HEIGHT+4
+                  const height=Math.max(((end-start)/SLOT_MINUTES)*SLOT_HEIGHT-8,42)
+                  const left=`calc(${(lane/laneCount)*100}% + 4px)`
+                  const width=`calc(${100/laneCount}% - 8px)`
+                  return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(fullTeacher)} ${laneCount>=2?'compact':''}`} style={{top,height,left,width}} onClick={()=>setSelected(lesson)} title={`${fullStudent} · ${branchName(lesson.brans_id)} · ${fullTeacher}`} aria-label={`${fullStudent}, ${branchName(lesson.brans_id)}, ${fullTeacher}, ${minutesToTime(start)} ders detayını aç`}><StatusIndicator status={lesson.ders_durumu}/><strong>{abbreviateName(fullStudent)}</strong><span>{branchName(lesson.brans_id)}</span><small>{abbreviateName(fullTeacher)}</small></button>
+                })}
+              </div>
+            })}
+          </div>
         </div>
       </div>
     </section>
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
-    <Sheet open={!!quickSlot} title="Ders Ekle" subtitle={quickSlot?`${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<LessonForm key={`${quickSlot.date}-${quickSlot.time}`} defaultDate={quickSlot.date} defaultStartTime={quickSlot.time} lockDateTime onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/>}</Sheet>
+    <Sheet open={!!quickSlot} title="Ders Ekle" subtitle={quickSlot?`${quickRoom?.label||'Derslik'} · ${shortDate(quickSlot.date)} · ${quickSlot.time}`:'Takvimden ders ekleme'} onClose={()=>setQuickSlot(null)}>{quickSlot&&<LessonForm key={`${quickSlot.date}-${quickSlot.time}-${quickSlot.roomId}`} defaultDate={quickSlot.date} defaultStartTime={quickSlot.time} defaultRoomId={quickSlot.roomId} lockDateTime onDone={()=>setQuickSlot(null)} onCancel={()=>setQuickSlot(null)}/>}</Sheet>
     <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

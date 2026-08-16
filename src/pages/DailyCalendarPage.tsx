@@ -26,6 +26,7 @@ const SLOT_MINUTES=30
 const SLOT_HEIGHT=48
 const DEFAULT_START=8*60
 const DEFAULT_END=21*60
+const CALENDAR_HIDDEN_STATUSES=new Set(['İptal','Ertelendi','Öğretmen İptali'])
 
 type TwoWeekCreationStatus={monday:string;selected:WeekCreationStatus;next:WeekCreationStatus}
 type QuickSlot={date:string;time:string}
@@ -101,7 +102,7 @@ export function DailyCalendarPage(){
   const prepareWeek=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
   if(!data)return null
   const selectedDayIndex=Math.max(0,Math.min(6,Math.round((new Date(`${selectedDate}T12:00:00`).getTime()-new Date(`${monday}T12:00:00`).getTime())/86400000)))
-  const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
+  const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
   const placed=placeLessons(dayLessons)
   const rangeStart=placed.length?Math.floor(Math.min(...placed.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
   const rangeEnd=placed.length?Math.ceil(Math.max(...placed.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END

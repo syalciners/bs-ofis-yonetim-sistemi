@@ -18,6 +18,7 @@ import { openWeeklyProgramPdf } from '../services/weeklyProgramPdfService'
 import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
+const CALENDAR_HIDDEN_STATUSES=new Set(['İptal','Ertelendi','Öğretmen İptali'])
 const weekChoices=[
   {offset:-1,label:'Önceki Hafta'},
   {offset:0,label:'Bu Hafta'},
@@ -60,7 +61,7 @@ export function CalendarPage(){
   const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
   const isPastWeek=weekOffset<0;const isCurrentWeek=weekOffset===0
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
-  const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
+  const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))&&(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter));sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')},[filter])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])

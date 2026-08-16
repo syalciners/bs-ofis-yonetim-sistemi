@@ -27,6 +27,8 @@ jobs:
         run: npm run check:rules
       - name: Takvim UX kuralları
         run: node scripts/check-calendar-ux.mjs
+      - name: İptal ders Takvim kuralı
+        run: node scripts/check-cancelled-calendar.mjs
       - name: Öğretmenler UX kuralları
         run: node scripts/check-teachers-ux.mjs
       - name: Öğrenciler UX kuralları

@@ -12,13 +12,19 @@ Tarih: 16.08.2026
 - Portal RPC'lerinde `public` ve `anon` EXECUTE yetkisi kaldırıldı; yalnız `authenticated` çağırabilir.
 - Her portal RPC'si `auth.uid()` ve aktif `portal_kullanicilari` kaydını doğrulayıp yalnız ilgili öğrenci/öğretmenin verisini döndürüyor.
 - Portal UI V1 tamamlandı: Bugün, Program, Ödevler, Profil.
-- PWA manifesti ve portal marka işareti hazırlandı.
 - GitHub Actions Portal CI kuruldu ve portal build'i başarılı geçti.
 - `package-lock.json` branch'e kalıcı olarak eklendi; bağımlılık sürümleri sabitlendi.
 - Supabase Security Advisor çalıştırıldı; portal için anonim erişim açığı bulunmadı.
 - Yönetim ve portal kimlikleri çift taraflı trigger ile birbirinden ayrıldı. Aynı `auth_user_id` iki sistemde aynı anda kullanılamaz.
 - Kimlik izolasyonu kontrollü negatif testten geçti: mevcut yönetim hesabının portal kullanıcısı olarak eklenmesi veritabanı tarafından engellendi.
 - Gerçek portal kullanıcısı henüz oluşturulmadı; `portal_kullanicilari` tablosu boş tutuluyor.
+- BS ana marka standardı portal için kabul edildi. Portal marka adı `BS Eğitim Portalı`; finans ürününe ait `Bütçe Yönetimi` alt adı kullanılmayacak.
+- Portal renk standardı: Deep Navy `#0B1F3A`, Satin Silver `#B8C1CC`, Growth Blue `#168BFF`.
+- Geçici CSS marka işareti gerçek BS app icon ile değiştirildi; 192 px ve 512 px PWA ikonları portal paketine eklendi.
+- PWA theme color `#0B1F3A`, açık yüzey rengi `#F7F9FC` olarak sabitlendi.
+
+## Marka ve tasarım kararı
+BS monogramı aynen korunacak; portal için yeni veya benzer bir logo türetilmeyecek. Eğitim ürünü aynı ana marka ailesinde kalacak. Arayüzde lacivert ana kurumsal renk, Growth Blue yalnız vurgu/aktif durumlarda, Satin Silver ise ikincil yüzey ve ayırıcı tonlarda kullanılacak. Neon, yoğun glow, aşırı gradient ve dekoratif 3D efekt kullanılmayacak.
 
 ## Güvenlik kararı
 Portal kullanıcılarına ana tablolarda doğrudan SELECT policy açılmayacak. Ana tabloların mevcut yönetici RLS modeli korunacak. Portal yalnız sınırlı veri döndüren `portal_*` SECURITY DEFINER RPC'lerini çağıracak. Portal tarafında INSERT, UPDATE, DELETE RPC'si bulunmayacak.

@@ -16,8 +16,14 @@ export function LessonCard({ lesson, onClick, compact=false }: { lesson:Ders;onC
     <div className="lesson-main">
       <strong>{studentName(data,lesson.ogrenci_id)}</strong>
       <small className="lesson-meta-default">{teacher} · {branch} · {room}</small>
-      <div className="lesson-meta-calendar"><small>{teacher} • {branch}</small><small>{room}</small></div>
+      <div className="lesson-meta-calendar">
+        <div className="lesson-meta-calendar-row">
+          <small>{teacher} • {branch}</small>
+          <span className="lesson-status lesson-status-calendar"><span>{lesson.ders_durumu||'Planlandı'}</span>{lesson.zoom_katilim_baglantisi&&<Video size={14}/>}</span>
+        </div>
+        <small>{room}</small>
+      </div>
     </div>
-    <div className="lesson-status"><span>{lesson.ders_durumu||'Planlandı'}</span>{lesson.zoom_katilim_baglantisi&&<Video size={14}/>}</div>
+    <div className="lesson-status lesson-status-default"><span>{lesson.ders_durumu||'Planlandı'}</span>{lesson.zoom_katilim_baglantisi&&<Video size={14}/>}</div>
   </button>
 }

@@ -20,15 +20,15 @@
   font-weight:900 !important;
 }
 
-/* Takvim kartı: üç satırlı okunaklı bilgi, durum sağ üstte; gereksiz dikey boşluk yok. */
-.lesson-meta-calendar{display:none}
-.calendar-v2 .lesson-card{align-items:start;padding-top:9px;padding-bottom:9px}
+/* Takvim kartı: öğrenci; öğretmen • branş + durum; derslik. */
+.lesson-meta-calendar,.lesson-status-calendar{display:none}
+.calendar-v2 .lesson-card{grid-template-columns:80px minmax(0,1fr);align-items:start;padding-top:9px;padding-bottom:9px}
 .calendar-v2 .lesson-time{align-self:center}
 .calendar-v2 .lesson-main{align-self:start;min-width:0;gap:2px}
 .calendar-v2 .lesson-main>strong{font-size:12.5px;line-height:1.2}
-.calendar-v2 .lesson-meta-default{display:none}
+.calendar-v2 .lesson-meta-default,.calendar-v2 .lesson-status-default{display:none}
 .calendar-v2 .lesson-meta-calendar{display:grid;gap:1px;min-width:0}
-.calendar-v2 .lesson-meta-calendar small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-.calendar-v2 .lesson-meta-calendar small:first-child{font-size:11.5px}
-.calendar-v2 .lesson-meta-calendar small:last-child{font-size:11px}
-.calendar-v2 .lesson-status{align-self:start;justify-self:end}
+.calendar-v2 .lesson-meta-calendar-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;min-width:0}
+.calendar-v2 .lesson-meta-calendar-row>small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;line-height:1.25}
+.calendar-v2 .lesson-meta-calendar>small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:1.25}
+.calendar-v2 .lesson-status-calendar{display:flex;align-items:center;justify-self:end;white-space:nowrap}

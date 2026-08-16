@@ -42,7 +42,10 @@
 }
 .calendar-title-week-action svg{flex:0 0 auto}
 
-.calendar-command-summary{display:grid!important;gap:3px!important;min-width:0}
+.calendar-command-summary{display:grid!important;gap:5px!important;min-width:0}
+.calendar-command-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.calendar-command-heading>b{min-width:0;line-height:1.2;overflow-wrap:anywhere}
+.calendar-command-heading .calendar-pdf-btn{flex:0 0 auto;min-height:34px;padding:5px 10px;font-size:10px;white-space:nowrap}
 .calendar-command-title{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
 .calendar-command-title>b{font-size:13px;line-height:1.2;overflow-wrap:anywhere}
 .calendar-command-date{
@@ -101,6 +104,9 @@
   .calendar-title-line{gap:8px}
   .calendar-title-week-action{min-height:36px;max-width:60%;padding:5px 9px;font-size:9px;gap:5px}
   .calendar-title-week-action svg{width:15px;height:15px}
+  .calendar-command-heading{gap:8px}
+  .calendar-command-heading .calendar-pdf-btn{min-height:32px;padding:5px 8px;font-size:9.5px}
+  .calendar-command-heading .calendar-pdf-btn svg{width:15px;height:15px}
   .calendar-command-title{align-items:flex-start;flex-direction:column;gap:5px}
   .program-share-lesson{grid-template-columns:78px minmax(0,1fr)}
 }

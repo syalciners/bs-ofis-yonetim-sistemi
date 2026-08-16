@@ -27,26 +27,37 @@
   /* Takvim / ders kartları: ana saat ve isimler değişmez. */
   .lesson-main small{font-size:10.5px;line-height:1.25}
 
-  /* Öğrenci ve finans liste yardımcı metinleri */
-  .student-name span,
-  .student-meta span,
-  .finance-card small,
-  .menu-grid small,
-  .settings-list small{font-size:11px;line-height:1.4}
+  /* Öğrenci kartları: ana isim yardımcı bilgiden belirgin biçimde güçlü kalır. */
+  .student-name strong{font-size:11.5px}
+  .student-name span{font-size:10.5px;line-height:1.4}
+  .student-meta span{font-size:10.5px;line-height:1.4}
   .student-balance span{font-size:11.5px}
   .student-balance b{font-size:12px}
+
+  /* Finans listeleri: kişi/işlem adı > tarih/yöntem > tutar hiyerarşisi. */
+  .finance-card strong{font-size:11.5px}
+  .finance-card small{font-size:10.5px;line-height:1.4}
   .finance-card>b{font-size:12px}
+
+  /* Menü: başlık açıklamadan bir kademe güçlü. */
+  .menu-grid strong{font-size:12px}
+  .menu-grid small{font-size:11px;line-height:1.4}
+
+  /* Ayarlar ve sistem listeleri: başlık yardımcı açıklamadan büyük. */
+  .settings-list b{font-size:11.5px}
+  .settings-list small{font-size:10.5px;line-height:1.4}
 
   /* Sabit Ders Programı: ders bilgisi ve ücret hiyerarşisi */
   .program-main small{font-size:9.5px;line-height:1.35}
   .program-price b{font-size:11px}
   .program-price small{font-size:8.5px}
 
-  /* Menü / Rapor seçim kartları */
+  /* Rapor seçim kartları */
   .report-choice small{font-size:9px;line-height:1.4}
 
-  /* Ödev kartı ikincil bilgi; durum ve süre pill'leri bilerek değişmez. */
-  .assignment-card-copy small{font-size:11px;line-height:1.35}
+  /* Ödev kartları: ana bilgi yardımcı bilgiden güçlü; pill'ler değişmez. */
+  .assignment-card-copy strong{font-size:11.5px}
+  .assignment-card-copy small{font-size:10.5px;line-height:1.35}
 
   /* Rapor ekran önizlemesi. @media screen sayesinde basılı PDF etkilenmez. */
   .report-doc-brand p{font-size:10px!important}

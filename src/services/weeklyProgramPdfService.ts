@@ -5,7 +5,6 @@ import { branchName, roomName, studentName, teacherName } from './metrics'
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 const NAVY='#14213d'
 const BLUE='#2563eb'
-const TEAL='#2f9c95'
 const MUTED='#71809a'
 const LINE='#dfe6f1'
 const SOFT='#f7f9fc'
@@ -52,12 +51,12 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
   const sorted=[...lessons].sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||''))||String(a.ogretmen_id||'').localeCompare(String(b.ogretmen_id||'')))
   if(!sorted.length)throw new Error('Seçili programda PDF oluşturulacak ders yok.')
 
-  const [{default:pdfMakeModule},{default:pdfFontsModule}]=await Promise.all([
+  const[pdfMakeImport,pdfFontsImport]=await Promise.all([
     import('pdfmake/build/pdfmake'),
     import('pdfmake/build/vfs_fonts'),
   ])
-  const pdfMake:any=pdfMakeModule
-  const pdfFonts:any=pdfFontsModule
+  const pdfMake:any=(pdfMakeImport as any).default??pdfMakeImport
+  const pdfFonts:any=(pdfFontsImport as any).default??pdfFontsImport
   pdfMake.addVirtualFileSystem(pdfFonts)
 
   const generatedAt=new Intl.DateTimeFormat('tr-TR',{timeZone:'Europe/Istanbul',dateStyle:'long',timeStyle:'short'}).format(new Date())
@@ -106,7 +105,7 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
 
   const logoBlock=logoData
     ?{image:logoData,width:34,height:34,margin:[0,0,9,0]}
-    :{text:'BS',width:34,alignment:'center',bold:true,fontSize:15,color:'#fff',fillColor:NAVY,margin:[0,7,9,7]}
+    :{text:'BS',width:34,alignment:'center',bold:true,fontSize:15,color:'#fff',background:NAVY,margin:[0,7,9,7]}
 
   const docDefinition:any={
     pageSize:'A4',
@@ -143,7 +142,7 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
         ],
         columnGap:4,
       },
-      {canvas:[{type:'line',x1:0,y1:0,x2:798,y2:0,lineWidth:1.2,lineColor:BLUE}],margin:[0,8,0,8]},
+      {canvas:[{type:'line',x1:0,y1:0,x2:795,y2:0,lineWidth:1.2,lineColor:BLUE}],margin:[0,8,0,8]},
       {
         table:{
           widths:['*','*','*','*'],
@@ -171,9 +170,9 @@ export async function openWeeklyProgramPdf(data:AppData,lessons:Ders[],monday:st
         margin:[1,0,1,5],
       },
       {
-        table:{headerRows:1,widths:[80,150,125,150,125,95],body:tableBody,dontBreakRows:true},
+        table:{headerRows:1,widths:[82,162,132,162,132,108],body:tableBody,dontBreakRows:true},
         layout:{
-          hLineWidth:(i:number)=>i===0||i===1?.7:.35,
+          hLineWidth:(i:number)=>(i===0||i===1)?.7:.35,
           vLineWidth:()=>0,
           hLineColor:()=>LINE,
           paddingLeft:()=>3,

@@ -3,7 +3,9 @@ import { readFileSync } from 'node:fs'
 const read = (path) => readFileSync(path, 'utf8')
 const calendar = read('src/pages/CalendarPage.tsx')
 const lessonDetail = read('src/components/LessonDetail.tsx')
-const office = read('src/services/officeService.ts')
+const weekService = read('src/services/weekPlanningService.ts')
+const weekMigration = read('supabase/migrations/20260816001408_hafta_eksik_ders_guvenli_v5.sql')
+const conflictMigration = read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
 const fixed = read('src/pages/FixedProgramPage.tsx')
 const more = read('src/pages/MorePage.tsx')
 const app = read('src/App.tsx')
@@ -46,12 +48,19 @@ const checks = [
   ['Ders durumu alanı onay davranışını kullanıcıya bildirir', lessonDetail.includes('Finansal etkisi onaylandıktan sonra kaydedilir.')],
   ['Haftalık ders üretimi kullanıcı onayı ister', (calendar.match(/if\(!confirmWeekCreation\(status\)\)return/g)||[]).length===2],
   ['Haftalık üretim onayı kişi filtresinden bağımsız kapsamı açıklar', calendar.includes('Takvim kişi filtresinden bağımsız olarak tüm aktif sabit programlar işlenir.')],
-  ['Haftalık üretim onayı hazır haftaların yeniden işlenmeyeceğini açıklar', calendar.includes('Hazır haftalar yeniden işlenmez; mevcut dersler korunur.')],
-  ['Haftalık üretim güvenli V4 RPC çağrısını korur', calendar.includes('await createWeek(monday)')],
-  ['Hafta hazırlık durumu güvenli RPC üzerinden okunur', office.includes("haftalik_ders_uretim_durumu_v1")],
+  ['Haftalık üretim yalnız eksik dersleri ekleyeceğini açıklar', calendar.includes('Mevcut dersler korunur; yalnız eksik dersler eklenir.')],
+  ['Mevcut haftada geçmiş derslerin değişmeyeceği açıkça belirtilir', calendar.includes('yalnız şu andan sonraki eksik dersler eklenir; geçmiş dersler değiştirilmez.')],
+  ['Haftalık üretim güvenli V5 RPC kullanır', weekService.includes("supabase.rpc('haftalik_dersleri_olustur_guvenli_v5'") && calendar.includes('await createWeek(monday)')],
+  ['Hafta hazırlık durumu dinamik V2 RPC üzerinden okunur', weekService.includes("supabase.rpc('haftalik_ders_uretim_durumu_v2'")],
+  ['Haftalık çakışma kontrolü geçmişi koruyan V2 RPC kullanır', weekService.includes("supabase.rpc('haftalik_program_kontrol_oneri_v2'")],
   ['Seçilen ve sonraki haftanın hazırlık durumu birlikte kontrol edilir', calendar.includes('getWeekCreationStatus(monday)') && calendar.includes('getWeekCreationStatus(addDays(monday,7))')],
-  ['Hazır haftalarda oluşturma düğmesi pasifleşir', calendar.includes('disabled={weekBusy||weekStatusBusy||allWeeksReady}') && calendar.includes("allWeeksReady?'Haftalar Hazır'" )],
-  ['Yalnız eksik haftanın adı kullanıcıya gösterilir', calendar.includes("'Sonraki Haftayı Hazırla'") && calendar.includes("'Bu Haftayı Hazırla'" )],
+  ['Geçmiş haftada hazırlama aksiyonu pasiftir', calendar.includes("isPastWeek?'Geçmiş Hafta'") && calendar.includes('disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady}')],
+  ['Mevcut hafta yeni sabit program için eksik ders tamamlama aksiyonu gösterir', calendar.includes("isCurrentWeek&&!selectedWeekReady?'Eksik Dersleri Tamamla'")],
+  ['Hazır seçili haftada sonraki eksik hafta açıkça adlandırılır', calendar.includes("selectedWeekReady&&!nextWeekReady?'Sonraki Haftayı Hazırla'")],
+  ['Geçmiş hafta üretimi backend tarafından da reddedilir', weekMigration.includes("raise exception 'Geçmiş haftalar otomatik olarak hazırlanamaz.'")],
+  ['Mevcut haftanın geçmiş saatleri backend tarafından atlanır', weekMigration.includes('r.baslangic_saati<=v_simdi::time') && weekMigration.includes('v_gecmis_atlanan')],
+  ['Hafta durumu eski üretim kilidine değil güncel eksik sayısına bakar', weekMigration.includes("'eksik',greatest(v_beklenen-v_mevcut,0)") && !weekMigration.includes('select * into v_kayit from public.haftalik_ders_uretimleri')],
+  ['Tek seferlik dersler sabit program çakışma kontrolünden NULL nedeniyle düşmez', conflictMigration.includes('d.program_id is distinct from p_program_id')],
   ['Takvim Sabit Program formunu doğrudan içermez', !calendar.includes('ProgramForm') && !calendar.includes("mode==='program'")],
   ['Sabit Program ayrı sayfadır', fixed.includes('Sabit Ders Programı') && fixed.includes('fixed-program-groups')],
   ['Sabit Program günlere göre gruplanır', fixed.includes('dayNames.map(day=>')],

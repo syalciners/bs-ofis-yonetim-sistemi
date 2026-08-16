@@ -3,6 +3,7 @@ import type { Ders, Odev, Ogrenci, Ogretmen, SabitProgram } from '../lib/types'
 import { formatClockInput, todayISO, uid } from '../lib/format'
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
+import { PremiumLessonForm } from './PremiumLessonForm'
 import { lessonConflict, moveProgramDate, previewProgram, saveAssignment, saveCollection, saveExpense, saveLesson, saveProgram, saveStudent, saveTeacher, saveTeacherPayment, updateAssignmentStatus, updateLesson, programConflict } from '../services/officeService'
 
 function FormActions({ busy, onCancel, label = 'Kaydet' }: { busy: boolean; onCancel: () => void; label?: string }) {
@@ -65,7 +66,7 @@ export function TeacherPaymentForm({ teacherId, onDone, onCancel }: { teacherId?
   </form>
 }
 
-export function LessonForm({ lesson, studentId, onDone, onCancel }: { lesson?:Ders;studentId?:string;onDone:()=>void;onCancel:()=>void }) {
+export function LegacyLessonForm({ lesson, studentId, onDone, onCancel }: { lesson?:Ders;studentId?:string;onDone:()=>void;onCancel:()=>void }) {
   const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
   const[student,setStudent]=useState(lesson?.ogrenci_id||studentId||'');const[teacher,setTeacher]=useState(lesson?.ogretmen_id||'');const[branch,setBranch]=useState(lesson?.brans_id||'')
   const[studentPrice,setStudentPrice]=useState(lesson?.ogrenci_birim_ucreti!=null?String(lesson.ogrenci_birim_ucreti):'');const[teacherPrice,setTeacherPrice]=useState(lesson?.ogretmen_birim_hakedisi!=null?String(lesson.ogretmen_birim_hakedisi):'')
@@ -88,6 +89,9 @@ export function LessonForm({ lesson, studentId, onDone, onCancel }: { lesson?:De
     <div className="wide"><FormActions busy={busy} onCancel={onCancel} label={lesson?'Dersi Güncelle':'Dersi Oluştur'}/></div>
   </form>
 }
+
+export const LessonForm=PremiumLessonForm
+
 export function ProgramForm({ program, onDone, onCancel }: { program?:SabitProgram;onDone:()=>void;onCancel:()=>void }) {
   const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false);const[teacher,setTeacher]=useState(program?.ogretmen_id||'');if(!data)return null
   const branchIds=new Set(data.ogretmenBranslari.filter(x=>x.ogretmen_id===teacher&&x.aktif!==false).map(x=>x.brans_id));const branches=data.branslar.filter(x=>x.aktif!==false&&(!teacher||branchIds.has(x.brans_id)))

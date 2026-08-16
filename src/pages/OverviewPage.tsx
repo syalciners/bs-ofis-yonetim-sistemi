@@ -33,7 +33,7 @@ export function OverviewPage() {
 
     <section><div className="section-heading"><div><h2>Hızlı İşlemler</h2><span>tek dokunuş</span></div></div><div className="quick-actions">
       <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>öğrenci ödemesi</small></button>
-      <button onClick={()=>setModal('lesson')}><span className="quick-icon blue"><CalendarPlus/></span><b>Ders Ekle</b><small>tek seferlik ders</small></button>
+      <button onClick={()=>setModal('lesson')}><span className="quick-icon blue"><CalendarPlus/></span><b>Ders Ekle</b><small>yeni ders kaydı</small></button>
       <button onClick={()=>setModal('student')}><span className="quick-icon orange"><UserPlus/></span><b>Öğrenci Ekle</b><small>yeni kayıt</small></button>
       <button onClick={()=>nav('/odevler?yeni=1')}><span className="quick-icon green"><ReceiptText/></span><b>Ödev Ekle</b><small>öğrenci ödevi</small></button>
     </div></section>
@@ -46,7 +46,7 @@ export function OverviewPage() {
 
     <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle="Öğrenciyi seç; güncel bakiye otomatik gösterilir." onClose={()=>setModal(null)}><CollectionQuickForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='student'} title="Yeni Öğrenci" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setModal(null)}><StudentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
-    <Sheet open={modal==='lesson'} title="Yeni Ders" subtitle="Çakışma kaydetmeden önce otomatik kontrol edilir." onClose={()=>setModal(null)}><LessonForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
+    <Sheet open={modal==='lesson'} title="Ders Ekle" subtitle="Uygunluk kaydetmeden önce otomatik kontrol edilir." onClose={()=>setModal(null)}><LessonForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Ders sonucu ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Tarih, saat ve ders bilgileri" onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
   </div>

@@ -40,17 +40,18 @@ type PremiumLessonFormProps={
   studentId?:string
   defaultDate?:string
   defaultStartTime?:string
+  defaultRoomId?:string
   lockDateTime?:boolean
   onDone:()=>void
   onCancel:()=>void
 }
 
-export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime,lockDateTime=false,onDone,onCancel}:PremiumLessonFormProps){
+export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime,defaultRoomId,lockDateTime=false,onDone,onCancel}:PremiumLessonFormProps){
   const{data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
   const[student,setStudent]=useState(lesson?.ogrenci_id||studentId||'')
   const[teacher,setTeacher]=useState(lesson?.ogretmen_id||'')
   const[branch,setBranch]=useState(lesson?.brans_id||'')
-  const[room,setRoom]=useState(lesson?.derslik_id||'')
+  const[room,setRoom]=useState(lesson?.derslik_id||defaultRoomId||'')
   const[date,setDate]=useState(lesson?.tarih||defaultDate||todayISO())
   const[startTime,setStartTime]=useState(String(lesson?.baslangic_saati||defaultStartTime||'').slice(0,5))
   const[units,setUnits]=useState(Number(lesson?.ders_sayisi||1))
@@ -106,7 +107,8 @@ export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime
   if(!data)return null
 
   const lockedSlot=Boolean(!lesson&&lockDateTime&&defaultDate&&defaultStartTime)
-  const slotLabel=date&&startTime?`${new Date(`${date}T12:00:00`).toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})} · ${startTime}`:''
+  const selectedRoomName=data.derslikler.find(x=>x.derslik_id===room)?.mekan_adi||''
+  const slotLabel=date&&startTime?`${new Date(`${date}T12:00:00`).toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})} · ${startTime}${selectedRoomName?` · ${selectedRoomName}`:''}`:''
   const hasLegacyUnits=units>2
   const canSubmit=!busy&&Boolean(student&&teacher&&branch&&room&&date&&proposedStart!=null)&&!studentBusy&&!teacherBusy
 
@@ -134,13 +136,13 @@ export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime
     {lockedSlot&&<div className="wide lesson-slot-lock"><span className="lesson-slot-icon"><Clock3 size={18}/></span><div><small>TAKVİMDEN SEÇİLEN ZAMAN</small><strong>{slotLabel}</strong></div><span className="lesson-slot-ready"><Check size={14}/>Hazır</span></div>}
 
     <label className="lesson-primary-field">Öğrenci<select name="ogrenci_id" value={student} onChange={e=>setStudent(e.target.value)} required><option value="">Seçin</option>{data.ogrenciler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select></label>
-    <label className="lesson-primary-field">Öğretmen<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('');setRoom('')}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
+    <label className="lesson-primary-field">Öğretmen<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('')}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
 
     <div className="wide lesson-choice-field"><span className="field-label">Branş</span>{!teacher?<small className="lesson-choice-help">Önce öğretmen seçin.</small>:branchOptions.length?<div className="lesson-chip-row">{branchOptions.map(x=><button key={x.brans_id} type="button" className={`lesson-choice-chip ${branch===x.brans_id?'active':''}`} onClick={()=>chooseBranch(x.brans_id)}>{branch===x.brans_id&&<Check size={14}/>}<span>{x.brans_adi}</span></button>)}</div>:<div className="lesson-inline-alert danger">Bu öğretmene aktif branş tanımlanmamış.</div>}<input type="hidden" name="brans_id" value={branch}/>{teacher&&branchOptions.length===1&&<small className="lesson-auto-note">Tek branş otomatik seçildi.</small>}</div>
 
-    {!lockedSlot?<><label>Tarih<input name="tarih" type="date" value={date} onChange={e=>{setDate(e.target.value);setRoom('')}} required/></label><label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." value={startTime} onChange={e=>{setStartTime(formatClockInput(e.target.value));setRoom('')}} required/></label></>:<><input type="hidden" name="tarih" value={date}/><input type="hidden" name="baslangic_saati" value={startTime}/></>}
+    {!lockedSlot?<><label>Tarih<input name="tarih" type="date" value={date} onChange={e=>setDate(e.target.value)} required/></label><label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." value={startTime} onChange={e=>setStartTime(formatClockInput(e.target.value))} required/></label></>:<><input type="hidden" name="tarih" value={date}/><input type="hidden" name="baslangic_saati" value={startTime}/></>}
 
-    <div className="lesson-choice-field"><span className="field-label">Ders Sayısı</span><div className="lesson-chip-row compact">{[1,2].map(x=><button key={x} type="button" className={`lesson-unit-chip ${units===x?'active':''}`} onClick={()=>{setUnits(x);setRoom('')}}><strong>{x}</strong><span>{x===1?'Ders':'Ders'}</span></button>)}</div><input type="hidden" name="ders_sayisi" value={units}/>{hasLegacyUnits&&<small className="lesson-auto-note warning">Mevcut kayıtta {units} ders birimi var. Değiştirmek için 1 veya 2 seçin.</small>}</div>
+    <div className="lesson-choice-field"><span className="field-label">Ders Sayısı</span><div className="lesson-chip-row compact">{[1,2].map(x=><button key={x} type="button" className={`lesson-unit-chip ${units===x?'active':''}`} onClick={()=>setUnits(x)}><strong>{x}</strong><span>Ders</span></button>)}</div><input type="hidden" name="ders_sayisi" value={units}/>{hasLegacyUnits&&<small className="lesson-auto-note warning">Mevcut kayıtta {units} ders birimi var. Değiştirmek için 1 veya 2 seçin.</small>}</div>
 
     <div className="wide lesson-choice-field"><div className="lesson-field-heading"><span className="field-label">Müsait Derslikler</span>{scheduleReady&&<small>{availableRooms.length} uygun</small>}</div>{!scheduleReady?<small className="lesson-choice-help">Tarih ve saat belirlenince uygun derslikler burada görünür.</small>:availableRooms.length?<div className="lesson-chip-row room-row">{availableRooms.map(x=>{const capacity=Math.max(Number(x.kapasite||1),1);const occupied=overlappingLessons.filter(d=>d.derslik_id===x.derslik_id).length;return <button key={x.derslik_id} type="button" className={`lesson-choice-chip room ${room===x.derslik_id?'active':''}`} onClick={()=>chooseRoom(x.derslik_id)}><MapPin size={14}/><span>{x.mekan_adi}</span><small>{capacity-occupied} yer</small></button>})}</div>:<div className="lesson-inline-alert danger">Bu saat aralığında müsait derslik yok.</div>}<input type="hidden" name="derslik_id" value={room}/></div>
 

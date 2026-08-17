@@ -4,6 +4,7 @@ import { useAppData } from '../components/AppDataProvider'
 import { addDays, fullDate, money, todayISO } from '../lib/format'
 import { reportFilename } from '../lib/reportFilename'
 import { branchName, cashBalance, totalOpenDebt, totalTeacherBalance } from '../services/metrics'
+import { openStudentAccountPdf } from '../services/studentAccountPdfService'
 
 type ReportType = 'kurum' | 'ogrenci' | 'ogretmen'
 type RangePreset = 'thisMonth' | 'lastMonth' | 'last3Months' | 'thisYear' | 'all' | 'custom'
@@ -147,7 +148,78 @@ export function ReportsPage() {
   })
   const logoSrc = `${import.meta.env.BASE_URL}bs-egitim-icon-512-v2.png`
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    if (type === 'ogrenci') {
+      if (!student || !selectedStudent) {
+        window.alert('PDF oluşturmak için öğrenci seçin.')
+        return
+      }
+
+      const allStudentLessons = data.dersler.filter(x => x.ogrenci_id === student && x.ders_durumu === 'Yapıldı')
+      const allStudentPayments = data.tahsilatlar.filter(x => x.ogrenci_id === student && !x.iptal_mi)
+      const openingAccrual = studentRange.start
+        ? allStudentLessons
+            .filter(x => (x.tarih || '') < studentRange.start!)
+            .reduce((sum, x) => sum + Number(x.ogrenci_toplam_tutar || 0), 0)
+        : 0
+      const openingPayments = studentRange.start
+        ? allStudentPayments
+            .filter(x => x.tarih < studentRange.start!)
+            .reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+        : 0
+      const openingBalance = openingAccrual - openingPayments
+      const periodLessons = allStudentLessons.filter(x => inRange(x.tarih, studentRange))
+      const periodPayments = allStudentPayments.filter(x => inRange(x.tarih, studentRange))
+      const totalAccrual = periodLessons.reduce((sum, x) => sum + Number(x.ogrenci_toplam_tutar || 0), 0)
+      const totalPaid = periodPayments.reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const periodEndBalance = openingBalance + totalAccrual - totalPaid
+      const lessonUnits = periodLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)
+
+      let running = openingBalance
+      const movements = [
+        ...periodLessons.map(x => ({
+          date: x.tarih || '',
+          label: `${branchName(data, x.brans_id)} · ${Number(x.ders_sayisi || 1)} Ders`,
+          debit: Number(x.ogrenci_toplam_tutar || 0),
+          credit: 0,
+          order: `${x.tarih || ''}-1-${x.ders_id}`,
+        })),
+        ...periodPayments.map(x => ({
+          date: x.tarih || '',
+          label: `Tahsilat · ${x.odeme_yontemi || 'Ödeme'}`,
+          debit: 0,
+          credit: Number(x.tutar || 0),
+          order: `${x.tarih || ''}-2-${x.tahsilat_id}`,
+        })),
+      ].sort((a, b) => a.order.localeCompare(b.order))
+      const ledger: StudentMovement[] = movements.map(x => {
+        running += x.debit - x.credit
+        return { date: x.date, label: x.label, debit: x.debit, credit: x.credit, balance: running }
+      })
+
+      try {
+        await openStudentAccountPdf({
+          studentName: selectedStudent.ad_soyad,
+          guardianName: selectedStudent.veli_adi,
+          periodLabel: studentRange.label,
+          reportCode,
+          documentDate: today,
+          openingDate: studentRange.start,
+          openingBalance,
+          totalAccrual,
+          totalPaid,
+          periodEndBalance,
+          lessonUnits,
+          paymentCount: periodPayments.length,
+          movements: ledger,
+          filename: pdfFilename,
+        })
+      } catch (error: any) {
+        window.alert(error?.message || 'Öğrenci ekstresi PDF olarak oluşturulamadı.')
+      }
+      return
+    }
+
     const previousTitle = document.title
     const restore = () => {
       if (document.title === pdfFilename) document.title = previousTitle
@@ -194,7 +266,7 @@ export function ReportsPage() {
           <h1>Raporlar</h1>
           <p>Yönetim, öğrenci ve öğretmen raporlarını kurumsal belge düzeninde görüntüle.</p>
         </div>
-        <button className="secondary-btn" onClick={handlePrint}>
+        <button className="secondary-btn" onClick={() => void handlePrint()}>
           <Printer size={17} />
           Yazdır / PDF
         </button>
@@ -503,6 +575,7 @@ export function ReportsPage() {
               const totalAccrual = periodLessons.reduce((sum, x) => sum + Number(x.ogrenci_toplam_tutar || 0), 0)
               const totalPaid = periodPayments.reduce((sum, x) => sum + Number(x.tutar || 0), 0)
               const periodEndBalance = openingBalance + totalAccrual - totalPaid
+              const lessonUnits = periodLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)
 
               let running = openingBalance
               const movements = [
@@ -556,7 +629,7 @@ export function ReportsPage() {
                     <div>
                       <span>Dönem Ders Borcu</span>
                       <b>{money(totalAccrual)}</b>
-                      <small>{periodLessons.length} yapılan ders</small>
+                      <small>{lessonUnits} ders</small>
                     </div>
                     <div>
                       <span>Dönem Tahsilatı</span>

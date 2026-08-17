@@ -1,5 +1,5 @@
 import { CalendarCheck2, Check, ChevronLeft, ChevronRight, List, Plus, X } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { LessonDetail } from '../components/LessonDetail'
@@ -10,6 +10,7 @@ import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
 import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
 import { teacherTone } from '../lib/teacherTone'
+import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
 import { createWeek, getWeekCreationStatus, reviewWeekPlanning, type WeekCreationStatus } from '../services/weekPlanningService'
 
@@ -36,11 +37,17 @@ const SLOT_HEIGHT=42
 const DEFAULT_START=8*60
 const DEFAULT_END=21*60
 const DEFAULT_LESSON_MINUTES=60
+const LONG_PRESS_MS=550
+const DRAG_MOVE_THRESHOLD=6
+const TOUCH_CANCEL_THRESHOLD=10
 const CALENDAR_HIDDEN_STATUSES=new Set(['İptal','Ertelendi','Öğretmen İptali'])
 
 type TwoWeekCreationStatus={monday:string;selected:WeekCreationStatus;next:WeekCreationStatus}
 type QuickSlot={date:string;time:string;roomId:string}
 type PlacedLesson={lesson:Ders;start:number;end:number;lane:number;laneCount:number}
+type DragTarget={roomId:string;minute:number}
+type DragView={lessonId:string;active:boolean;target:DragTarget|null;clientX:number;clientY:number}
+type DragRuntime={lesson:Ders;pointerId:number;pointerType:string;startX:number;startY:number;moved:boolean;active:boolean;target:DragTarget|null;element:HTMLButtonElement;timer:number|null}
 
 const allWeeksAreReady=(status:TwoWeekCreationStatus)=>status.selected.calisti&&status.next.calisti
 const timeToMinutes=(value?:string|null)=>{
@@ -57,6 +64,15 @@ const abbreviateName=(value:string)=>{
   const parts=value.trim().split(/\s+/).filter(Boolean)
   if(parts.length<2)return value
   return `${parts[0][0]?.toLocaleUpperCase('tr-TR')||''}. ${parts[parts.length-1]}`
+}
+const conflictMessage=(result:any)=>{
+  const messages:string[]=[]
+  if(result?.ogrenci_cakisma)messages.push('Öğrenci bu saat aralığında başka bir derste.')
+  if(result?.ogretmen_cakisma)messages.push('Öğretmen bu saat aralığında başka bir derste.')
+  if(result?.derslik_dolu)messages.push('Seçilen derslik bu saat aralığında dolu.')
+  const first=result?.ilk_cakisma
+  const detail=first?` Çakışan ders: ${first.ogrenci||'—'} · ${first.ogretmen||'—'} · ${String(first.baslangic||'').slice(0,5)}–${String(first.bitis||'').slice(0,5)}.`:''
+  return `${messages.join(' ')}${detail}`.trim()||result?.mesaj||'Bu tarih ve saatte çakışma var.'
 }
 const weekTitle=(monday:string)=>{
   const sunday=addDays(monday,6)
@@ -111,10 +127,13 @@ export function DailyCalendarPage(){
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
+  const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false)
+  const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
+  useEffect(()=>()=>{const runtime=dragRef.current;if(runtime?.timer!=null)window.clearTimeout(runtime.timer)},[])
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
   const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
   const selectedWeekReady=Boolean(activeWeekStatus?.selected.calisti);const nextWeekReady=Boolean(activeWeekStatus?.next.calisti)
@@ -137,6 +156,84 @@ export function DailyCalendarPage(){
   const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const changeWeek=(delta:number)=>{setMonday(addDays(monday,delta*7));setWeekReview(null)}
+  const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
+  const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{
+    const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
+    const column=element?.closest('.daily-room-column[data-room-id]') as HTMLElement|null
+    if(!column)return null
+    const roomId=column.dataset.roomId
+    if(!roomId)return null
+    const rect=column.getBoundingClientRect();const offset=clientY-rect.top
+    if(offset<0||offset>=rect.height)return null
+    const slotIndex=Math.max(0,Math.min(slotCount-1,Math.floor(offset/SLOT_HEIGHT)))
+    return{roomId,minute:rangeStart+slotIndex*SLOT_MINUTES}
+  }
+  const releaseDrag=(runtime?:DragRuntime|null)=>{
+    const current=runtime||dragRef.current
+    if(current?.timer!=null)window.clearTimeout(current.timer)
+    if(current){try{if(current.element.hasPointerCapture(current.pointerId))current.element.releasePointerCapture(current.pointerId)}catch{/* no-op */}}
+    dragRef.current=null;setDragView(null)
+  }
+  const activateDrag=(runtime:DragRuntime,clientX:number,clientY:number)=>{
+    if(dragRef.current!==runtime)return
+    runtime.active=true
+    try{runtime.element.setPointerCapture(runtime.pointerId)}catch{/* no-op */}
+    const target=dragTargetAt(clientX,clientY);runtime.target=target
+    setDragView({lessonId:runtime.lesson.ders_id,active:true,target,clientX,clientY})
+  }
+  const beginLessonPointer=(e:React.PointerEvent<HTMLButtonElement>,lesson:Ders)=>{
+    if(moveBusy||!canDragLesson(lesson)||e.button!==0)return
+    suppressClickRef.current=false
+    const runtime:DragRuntime={lesson,pointerId:e.pointerId,pointerType:e.pointerType,startX:e.clientX,startY:e.clientY,moved:false,active:false,target:null,element:e.currentTarget,timer:null}
+    dragRef.current=runtime;setDragView({lessonId:lesson.ders_id,active:false,target:null,clientX:e.clientX,clientY:e.clientY})
+    if(e.pointerType==='touch'||e.pointerType==='pen')runtime.timer=window.setTimeout(()=>activateDrag(runtime,runtime.startX,runtime.startY),LONG_PRESS_MS)
+  }
+  const moveLessonPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    const distance=Math.hypot(e.clientX-runtime.startX,e.clientY-runtime.startY)
+    if(!runtime.active){
+      if(runtime.pointerType==='mouse'&&distance>=DRAG_MOVE_THRESHOLD){runtime.moved=true;activateDrag(runtime,e.clientX,e.clientY)}
+      else if(runtime.pointerType!=='mouse'&&distance>=TOUCH_CANCEL_THRESHOLD){runtime.moved=true;if(runtime.timer!=null){window.clearTimeout(runtime.timer);runtime.timer=null}}
+      return
+    }
+    e.preventDefault();runtime.moved=true
+    const target=dragTargetAt(e.clientX,e.clientY);runtime.target=target
+    setDragView({lessonId:runtime.lesson.ders_id,active:true,target,clientX:e.clientX,clientY:e.clientY})
+  }
+  const moveLessonToTarget=async(lesson:Ders,target:DragTarget)=>{
+    const targetTime=minutesToTime(target.minute);const currentTime=String(lesson.baslangic_saati||'').slice(0,5)
+    if(lesson.derslik_id===target.roomId&&currentTime===targetTime)return
+    if(!lesson.ogrenci_id||!lesson.ogretmen_id||!lesson.brans_id||!lesson.tarih){toast('Ders bilgileri eksik olduğu için taşınamadı.','error');return}
+    const units=Math.max(Number(lesson.ders_sayisi||1),1)
+    const input={ders_id:lesson.ders_id,tarih:selectedDate,ogrenci_id:lesson.ogrenci_id,ogretmen_id:lesson.ogretmen_id,brans_id:lesson.brans_id,derslik_id:target.roomId,baslangic_saati:targetTime,ders_sayisi:units,ogrenci_birim_ucreti:Number(lesson.ogrenci_birim_ucreti||0),ogretmen_birim_hakedisi:Number(lesson.ogretmen_birim_hakedisi||0),aciklama:lesson.aciklama||null}
+    setMoveBusy(true)
+    try{
+      const check:any=await lessonConflict({...input,haric_ders_id:lesson.ders_id})
+      if(!check?.uygun)throw new Error(conflictMessage(check))
+      if(lesson.program_id)await moveProgramDate({program_id:lesson.program_id,orijinal_tarih:lesson.tarih,yeni_tarih:selectedDate,yeni_baslangic_saati:targetTime,yeni_derslik_id:target.roomId,aciklama:'Takvim sürükle-bırak ile taşındı'})
+      else await updateLesson(input)
+      await refresh()
+      const roomLabel=roomColumns.find(x=>x.id===target.roomId)?.label||'Derslik'
+      toast(`Ders ${targetTime} · ${roomLabel} konumuna taşındı.`)
+    }catch(err:any){toast(err?.message||String(err),'error')}finally{setMoveBusy(false)}
+  }
+  const endLessonPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    const target=runtime.target;const shouldMove=runtime.active&&target
+    if(runtime.active||runtime.moved){suppressClickRef.current=true;window.setTimeout(()=>{suppressClickRef.current=false},80)}
+    releaseDrag(runtime)
+    if(shouldMove)void moveLessonToTarget(runtime.lesson,target)
+  }
+  const cancelLessonPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    if(runtime.active||runtime.moved){suppressClickRef.current=true;window.setTimeout(()=>{suppressClickRef.current=false},80)}
+    releaseDrag(runtime)
+  }
+  const dragLesson=dragView?dayLessons.find(x=>x.ders_id===dragView.lessonId):null
+  const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target?.roomId):null
 
   return <div className="page-stack calendar-v2 daily-calendar-page">
     <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Günü seç, boş derslik ve saate dokunarak ders ekle.</p></div></section>
@@ -152,7 +249,7 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b></div><div className="daily-lesson-count"><strong>{dayLessons.length}</strong><span>ders</span></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessons.length}</strong><span>ders</span></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
         <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
           <div className="daily-room-header-row">
@@ -167,20 +264,22 @@ export function DailyCalendarPage(){
             {roomColumns.map(column=>{
               const roomLessons=dayLessons.filter(x=>x.derslik_id===column.id)
               const placed=placeLessons(roomLessons)
-              return <div className="daily-room-column" key={column.id} style={{height:slotCount*SLOT_HEIGHT}}>
+              return <div className="daily-room-column" data-room-id={column.id} key={column.id} style={{height:slotCount*SLOT_HEIGHT}}>
                 {slots.map((minute,i)=>{
                   const occupied=placed.some(x=>overlaps(minute,minute+DEFAULT_LESSON_MINUTES,x.start,x.end))
+                  const target=Boolean(dragView?.active&&dragView.target?.roomId===column.id&&dragView.target.minute===minute)
                   return occupied
-                    ?<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>
-                    :<button key={minute} type="button" className={`daily-room-slot addable ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute),roomId:column.id})} aria-label={`${column.label}, ${minutesToTime(minute)} saatine ders ekle`} title="Ders ekle"><Plus size={12}/></button>
+                    ?<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''} ${target?'drag-target':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>
+                    :<button key={minute} type="button" className={`daily-room-slot addable ${minute%60===0?'whole':''} ${target?'drag-target':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute),roomId:column.id})} aria-label={`${column.label}, ${minutesToTime(minute)} saatine ders ekle`} title="Ders ekle"><Plus size={12}/></button>
                 })}
                 {placed.map(({lesson,start,end,lane,laneCount})=>{
-                  const fullStudent=studentName(lesson.ogrenci_id);const fullTeacher=teacherName(lesson.ogretmen_id)
+                  const fullStudent=studentName(lesson.ogrenci_id);const fullTeacher=teacherName(lesson.ogretmen_id);const draggable=canDragLesson(lesson)
                   const top=((start-rangeStart)/SLOT_MINUTES)*SLOT_HEIGHT+3
                   const height=Math.max(((end-start)/SLOT_MINUTES)*SLOT_HEIGHT-6,38)
                   const left=`calc(${(lane/laneCount)*100}% + 3px)`
                   const width=`calc(${100/laneCount}% - 6px)`
-                  return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(fullTeacher)} ${laneCount>=2?'compact':''}`} style={{top,height,left,width}} onClick={()=>setSelected(lesson)} title={`${fullStudent} · ${branchName(lesson.brans_id)} · ${fullTeacher} · ${lesson.ders_durumu||'Planlandı'}`} aria-label={`${fullStudent}, ${branchName(lesson.brans_id)}, ${fullTeacher}, ${lesson.ders_durumu||'Planlandı'}, ${minutesToTime(start)} ders detayını aç`}><strong>{abbreviateName(fullStudent)}</strong><span className="daily-lesson-branch">{branchName(lesson.brans_id)}</span><small>{abbreviateName(fullTeacher)}</small><StatusIndicator status={lesson.ders_durumu}/></button>
+                  const dragging=dragView?.active&&dragView.lessonId===lesson.ders_id;const arming=Boolean(dragView&&!dragView.active&&dragView.lessonId===lesson.ders_id)
+                  return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(fullTeacher)} ${laneCount>=2?'compact':''} ${draggable?'drag-enabled':''} ${dragging?'dragging':''} ${arming?'drag-arming':''}`} style={{top,height,left,width}} onPointerDown={e=>beginLessonPointer(e,lesson)} onPointerMove={moveLessonPointer} onPointerUp={endLessonPointer} onPointerCancel={cancelLessonPointer} onClick={()=>{if(suppressClickRef.current)return;setSelected(lesson)}} title={`${fullStudent} · ${branchName(lesson.brans_id)} · ${fullTeacher} · ${lesson.ders_durumu||'Planlandı'}${draggable?' · Sürükleyerek taşı':''}`} aria-label={`${fullStudent}, ${branchName(lesson.brans_id)}, ${fullTeacher}, ${lesson.ders_durumu||'Planlandı'}, ${minutesToTime(start)} ders detayını aç${draggable?', basılı tutup sürükleyerek taşı':''}`}><strong>{abbreviateName(fullStudent)}</strong><span className="daily-lesson-branch">{branchName(lesson.brans_id)}</span><small>{abbreviateName(fullTeacher)}</small><StatusIndicator status={lesson.ders_durumu}/></button>
                 })}
               </div>
             })}
@@ -188,6 +287,8 @@ export function DailyCalendarPage(){
         </div>
       </div>
     </section>
+
+    {dragView?.active&&dragLesson&&<div className="daily-drag-ghost" style={{left:dragView.clientX+14,top:dragView.clientY+14}} aria-hidden="true"><strong>{abbreviateName(studentName(dragLesson.ogrenci_id))}</strong><span>{dragView.target?`${dragRoom?.label||'Derslik'} · ${minutesToTime(dragView.target.minute)}`:'Takvim içine bırak'}</span></div>}
 
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Sonuç ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>

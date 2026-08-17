@@ -52,3 +52,5 @@ Frontend yalnız public/publishable Supabase anahtarını içerir. Zoom secret v
 - Ödev ekleme/düzenleme/durum yönetimi
 - Kurum, öğrenci ve öğretmen raporları / yazdır-PDF
 - Sistem ve program sağlık kontrolü
+
+<!-- pages-refresh: 2026-08-17T18:03+03:00 -->

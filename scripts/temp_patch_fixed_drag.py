@@ -1,0 +1,178 @@
+from pathlib import Path
+
+
+def replace_once(text, old, new, label):
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'{label}: beklenen 1 eşleşme, bulunan {count}')
+    return text.replace(old, new, 1)
+
+
+p = Path('src/pages/FixedProgramPage.tsx')
+s = p.read_text()
+
+s = replace_once(
+    s,
+    "import { useEffect, useMemo, useState } from 'react'",
+    "import { useEffect, useMemo, useRef, useState } from 'react'",
+    'React useRef importu',
+)
+s = replace_once(
+    s,
+    "import { saveProgramManual } from '../services/manualProgramService'",
+    "import { saveProgramManual } from '../services/manualProgramService'\nimport { suggestProgram } from '../services/programSuggestionService'",
+    'suggestProgram importu',
+)
+s = replace_once(
+    s,
+    "const DEFAULT_END=21*60\n",
+    "const DEFAULT_END=21*60\nconst LONG_PRESS_MS=550\nconst DRAG_MOVE_THRESHOLD=6\nconst TOUCH_CANCEL_THRESHOLD=10\n",
+    'sürükleme sabitleri',
+)
+s = replace_once(
+    s,
+    "type PlacedProgram={program:SabitProgram;start:number;end:number;lane:number;laneCount:number}\n",
+    "type PlacedProgram={program:SabitProgram;start:number;end:number;lane:number;laneCount:number}\ntype ProgramDragTarget={roomId:string;minute:number}\ntype ProgramDragView={programId:string;active:boolean;target:ProgramDragTarget|null;clientX:number;clientY:number}\ntype ProgramDragRuntime={program:SabitProgram;pointerId:number;pointerType:string;startX:number;startY:number;moved:boolean;active:boolean;target:ProgramDragTarget|null;element:HTMLButtonElement;timer:number|null}\n",
+    'sürükleme tipleri',
+)
+s = replace_once(
+    s,
+    "const todayDayName=()=>dayNames[(new Date(`${todayISO()}T12:00:00`).getDay()+6)%7]\n",
+    "const programConflictMessage=(result:any)=>{\n  const messages:string[]=[]\n  if(result?.ogrenci_cakisma)messages.push('Öğrenci bu saatte başka sabit derste.')\n  if(result?.ogretmen_cakisma)messages.push('Öğretmen bu saatte başka sabit derste.')\n  if(result?.derslik_dolu)messages.push('Seçilen derslik bu saatte dolu.')\n  const detail=result?.ilk_cakisma_tarihi?` İlk çakışma: ${fullDate(result.ilk_cakisma_tarihi)}${result.ilk_cakisan_kayit?` · ${result.ilk_cakisan_kayit}`:''}.`:''\n  return `${messages.join(' ')}${detail}`.trim()||result?.mesaj||'Sabit program bu gün ve saatte çakışıyor.'\n}\nconst todayDayName=()=>dayNames[(new Date(`${todayISO()}T12:00:00`).getDay()+6)%7]\n",
+    'çakışma mesajı',
+)
+s = replace_once(
+    s,
+    "  const[preview,setPreview]=useState<any[]|null>(null)\n\n  useEffect(()=>{sessionStorage.setItem('bs-sabit-program-gorunum',viewMode)},[viewMode])",
+    "  const[preview,setPreview]=useState<any[]|null>(null)\n  const[dragView,setDragView]=useState<ProgramDragView|null>(null)\n  const[dragBusy,setDragBusy]=useState(false)\n  const dragRef=useRef<ProgramDragRuntime|null>(null)\n  const suppressClickRef=useRef(false)\n\n  useEffect(()=>{sessionStorage.setItem('bs-sabit-program-gorunum',viewMode)},[viewMode])\n  useEffect(()=>()=>{const runtime=dragRef.current;if(runtime?.timer!=null)window.clearTimeout(runtime.timer)},[])",
+    'sürükleme state ve cleanup',
+)
+
+anchor = "  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))\n\n  return <div className=\"page-stack fixed-program-page\">"
+drag_logic = """  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)
+  const dragTargetAt=(clientX:number,clientY:number):ProgramDragTarget|null=>{
+    const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
+    const column=element?.closest('.fixed-program-room-column[data-room-id]') as HTMLElement|null
+    if(!column)return null
+    const roomId=column.dataset.roomId
+    if(!roomId)return null
+    const rect=column.getBoundingClientRect();const offset=clientY-rect.top
+    if(offset<0||offset>=rect.height)return null
+    const slotIndex=Math.max(0,Math.min(slotCount-1,Math.floor(offset/SLOT_HEIGHT)))
+    return{roomId,minute:rangeStart+slotIndex*SLOT_MINUTES}
+  }
+  const releaseProgramDrag=(runtime?:ProgramDragRuntime|null)=>{
+    const current=runtime||dragRef.current
+    if(current?.timer!=null)window.clearTimeout(current.timer)
+    if(current){try{if(current.element.hasPointerCapture(current.pointerId))current.element.releasePointerCapture(current.pointerId)}catch{/* no-op */}}
+    dragRef.current=null;setDragView(null)
+  }
+  const activateProgramDrag=(runtime:ProgramDragRuntime,clientX:number,clientY:number)=>{
+    if(dragRef.current!==runtime)return
+    runtime.active=true
+    try{runtime.element.setPointerCapture(runtime.pointerId)}catch{/* no-op */}
+    const target=dragTargetAt(clientX,clientY);runtime.target=target
+    setDragView({programId:runtime.program.program_id,active:true,target,clientX,clientY})
+  }
+  const beginProgramPointer=(e:React.PointerEvent<HTMLButtonElement>,program:SabitProgram)=>{
+    if(!canDragProgram(program)||e.button!==0)return
+    suppressClickRef.current=false
+    const runtime:ProgramDragRuntime={program,pointerId:e.pointerId,pointerType:e.pointerType,startX:e.clientX,startY:e.clientY,moved:false,active:false,target:null,element:e.currentTarget,timer:null}
+    dragRef.current=runtime;setDragView({programId:program.program_id,active:false,target:null,clientX:e.clientX,clientY:e.clientY})
+    if(e.pointerType==='touch'||e.pointerType==='pen')runtime.timer=window.setTimeout(()=>activateProgramDrag(runtime,runtime.startX,runtime.startY),LONG_PRESS_MS)
+  }
+  const moveProgramPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    const distance=Math.hypot(e.clientX-runtime.startX,e.clientY-runtime.startY)
+    if(!runtime.active){
+      if(runtime.pointerType==='mouse'&&distance>=DRAG_MOVE_THRESHOLD){runtime.moved=true;activateProgramDrag(runtime,e.clientX,e.clientY)}
+      else if(runtime.pointerType!=='mouse'&&distance>=TOUCH_CANCEL_THRESHOLD){runtime.moved=true;if(runtime.timer!=null){window.clearTimeout(runtime.timer);runtime.timer=null}}
+      return
+    }
+    e.preventDefault();runtime.moved=true
+    const target=dragTargetAt(e.clientX,e.clientY);runtime.target=target
+    setDragView({programId:runtime.program.program_id,active:true,target,clientX:e.clientX,clientY:e.clientY})
+  }
+  const moveProgramToTarget=async(program:SabitProgram,target:ProgramDragTarget)=>{
+    const targetTime=minutesToTime(target.minute);const currentTime=String(program.baslangic_saati||'').slice(0,5)
+    if(program.derslik_id===target.roomId&&currentTime===targetTime)return
+    if(!canDragProgram(program))return
+    const roomLabel=roomColumns.find(x=>x.id===target.roomId)?.label||'Derslik'
+    if(!window.confirm(`Sabit program ${targetTime} · ${roomLabel} konumuna taşınsın mı?\n\nSabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; değişiklik ilgili haftada Haftayı Hazırla ile uygulanır.`))return
+    const nextProgram:SabitProgram={...program,haftanin_gunu:selectedDay,derslik_id:target.roomId,baslangic_saati:targetTime}
+    setDragBusy(true)
+    try{
+      const check=await suggestProgram(nextProgram)
+      if(!check?.uygun)throw new Error(programConflictMessage(check))
+      await saveProgramManual(nextProgram)
+      await refresh()
+      toast(`Sabit program ${targetTime} · ${roomLabel} konumuna taşındı. Mevcut dersler korunur; değişiklik Haftayı Hazırla ile uygulanır.`)
+    }catch(err:any){toast(err?.message||String(err),'error')}finally{setDragBusy(false)}
+  }
+  const endProgramPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    const target=runtime.target;const shouldMove=runtime.active&&target
+    if(runtime.active||runtime.moved){suppressClickRef.current=true;window.setTimeout(()=>{suppressClickRef.current=false},80)}
+    releaseProgramDrag(runtime)
+    if(shouldMove)void moveProgramToTarget(runtime.program,target)
+  }
+  const cancelProgramPointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+    const runtime=dragRef.current
+    if(!runtime||runtime.pointerId!==e.pointerId)return
+    if(runtime.active||runtime.moved){suppressClickRef.current=true;window.setTimeout(()=>{suppressClickRef.current=false},80)}
+    releaseProgramDrag(runtime)
+  }
+  const draggedProgram=dragView?selectedPrograms.find(x=>x.program_id===dragView.programId):null
+  const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target.roomId):null
+
+  return <div className="page-stack fixed-program-page">"""
+s = replace_once(s, anchor, drag_logic, 'sürükleme iş mantığı')
+
+s = replace_once(
+    s,
+    '<header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{selectedDay}</b></div><div className="daily-lesson-count">',
+    '<header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{selectedDay}</b><small className="daily-drag-help">Aktif program: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count">',
+    'sürükleme ipucu',
+)
+s = replace_once(
+    s,
+    'return <div className="daily-room-column fixed-program-room-column" key={column.id} style={{height:slotCount*SLOT_HEIGHT}}>',
+    'return <div className="daily-room-column fixed-program-room-column" data-room-id={column.id} key={column.id} style={{height:slotCount*SLOT_HEIGHT}}>',
+    'derslik hedef datası',
+)
+s = replace_once(
+    s,
+    "                    const addable=concurrent<capacity\n                    return addable\n                      ?<button key={minute} type=\"button\" className={`daily-room-slot addable ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>openNewProgram({day:selectedDay,time:minutesToTime(minute),roomId:column.id})} aria-label={`${selectedDay}, ${column.label}, ${minutesToTime(minute)} sabit ders ekle`} title=\"Sabit ders ekle\"><Plus size={12}/></button>\n                      :<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>",
+    "                    const addable=concurrent<capacity\n                    const target=dragView?.active&&dragView.target?.roomId===column.id&&dragView.target.minute===minute\n                    return addable\n                      ?<button key={minute} type=\"button\" className={`daily-room-slot addable ${minute%60===0?'whole':''} ${target?'drag-target':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>openNewProgram({day:selectedDay,time:minutesToTime(minute),roomId:column.id})} aria-label={`${selectedDay}, ${column.label}, ${minutesToTime(minute)} sabit ders ekle`} title=\"Sabit ders ekle\"><Plus size={12}/></button>\n                      :<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''} ${target?'drag-target':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>",
+    'slot hedef vurgusu',
+)
+old_button = """                    const passive=program.program_durumu==='Pasif'||program.aktif===false
+                    return <button key={program.program_id} type="button" className={`daily-lesson-block fixed-calendar-program-block ${teacherTone(teacher)} ${laneCount>=2?'compact':''} ${passive?'muted-card':''}`} style={{top,height,left,width}} onClick={()=>setSelectedProgram(program)} title={`${student} · ${branchName(data,program.brans_id)} · ${teacher} · ${program.program_durumu||'Aktif'}`}><strong>{abbreviateName(student)}</strong><span className="daily-lesson-branch">{branchName(data,program.brans_id)}</span><small>{abbreviateName(teacher)}</small><span className={`fixed-program-status ${passive?'passive':'active'}`}><i/>{passive?'Pasif':'Aktif'}</span></button>"""
+new_button = """                    const passive=program.program_durumu==='Pasif'||program.aktif===false
+                    const draggable=!passive&&!dragBusy
+                    const dragState=dragView?.programId===program.program_id
+                    return <button key={program.program_id} type="button" className={`daily-lesson-block fixed-calendar-program-block ${teacherTone(teacher)} ${laneCount>=2?'compact':''} ${passive?'muted-card':''} ${draggable?'drag-enabled':''} ${dragState&&!dragView?.active?'drag-arming':''} ${dragState&&dragView?.active?'dragging':''}`} style={{top,height,left,width}} onPointerDown={e=>beginProgramPointer(e,program)} onPointerMove={moveProgramPointer} onPointerUp={endProgramPointer} onPointerCancel={cancelProgramPointer} onClick={()=>{if(suppressClickRef.current)return;setSelectedProgram(program)}} title={`${student} · ${branchName(data,program.brans_id)} · ${teacher} · ${program.program_durumu||'Aktif'}`}><strong>{abbreviateName(student)}</strong><span className="daily-lesson-branch">{branchName(data,program.brans_id)}</span><small>{abbreviateName(teacher)}</small><span className={`fixed-program-status ${passive?'passive':'active'}`}><i/>{passive?'Pasif':'Aktif'}</span></button>"""
+s = replace_once(s, old_button, new_button, 'program kartı pointer olayları')
+s = replace_once(
+    s,
+    "      </section>\n    </>:<section className=\"fixed-program-groups\">",
+    "      </section>\n      {dragView?.active&&draggedProgram&&<div className=\"daily-drag-ghost\" style={{left:dragView.clientX+14,top:dragView.clientY+14}}><strong>{abbreviateName(studentName(data,draggedProgram.ogrenci_id))}</strong><span>{dragRoom?.label||'Derslik'} · {dragView.target?minutesToTime(dragView.target.minute):'—'}</span></div>}\n    </>:<section className=\"fixed-program-groups\">",
+    'sürükleme hayaleti',
+)
+p.write_text(s)
+
+t = Path('scripts/check-smart-scheduling.mjs')
+s = t.read_text()
+anchor = "  ['Sabit program yakın uygun saat önerir',form.includes('Yakın uygun saatler')&&form.includes('onerilen_saatler')],\n"
+additions = """  ['Sabit program Takvim dokunmatik sürükleme 0,55 saniye kullanır',fixed.includes('const LONG_PRESS_MS=550')&&fixed.includes('window.setTimeout(()=>activateProgramDrag')],
+  ['Sabit program Takvim yalnız aktif kayıtları sürükler',fixed.includes("const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)")],
+  ['Sabit program Takvim derslik ve 30 dakikalık slotu sürükleme hedefi yapar',fixed.includes('data-room-id={column.id}')&&fixed.includes("target?'drag-target':''")],
+  ['Sabit program bırakmada sunucu çakışma önerisi yeniden kontrol edilir',fixed.includes('const check=await suggestProgram(nextProgram)')&&fixed.includes('if(!check?.uygun)throw new Error(programConflictMessage(check))')],
+  ['Sabit program sürükleme güvenli V4 kayıt akışını kullanır',fixed.includes('await saveProgramManual(nextProgram)')&&fixed.includes('Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez')&&fixed.includes('Haftayı Hazırla ile uygulanır')],
+  ['Sabit program sürükleme sonrası normal detay tıklamasını bastırır',fixed.includes('suppressClickRef.current=true')&&fixed.includes('if(suppressClickRef.current)return;setSelectedProgram(program)')],
+"""
+s = replace_once(s, anchor, anchor + additions, 'Akıllı Programlama sürükleme testleri')
+t.write_text(s)

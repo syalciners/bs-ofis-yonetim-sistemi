@@ -275,7 +275,7 @@ export async function openInstitutionManagementPdf(input:InstitutionManagementPd
         table:{
           widths:['*','*','*','*'],
           body:[[
-            {stack:[metric('Öğrenci Alacağı',money(input.openStudentDebt),'Açık öğrenci bakiyeleri',ORANGE)]},
+            {stack:[metric('Öğrenci Bakiyesi',money(input.openStudentDebt),'Açık öğrenci bakiyeleri',ORANGE)]},
             {stack:[metric('Öğretmen Borcu',money(input.teacherDebt),'Ödenmemiş hakediş',BLUE)]},
             {stack:[metric('Kasa / Banka',money(input.cashBank),'Güncel hesap bakiyesi',TEAL)]},
             {stack:[metric('Yapılan Ders',String(input.completedLessons),'Seçili dönem toplamı',SILVER)]},
@@ -287,7 +287,7 @@ export async function openInstitutionManagementPdf(input:InstitutionManagementPd
         },
         margin:[0,0,0,9],
       },
-      {text:[{text:'Ders Durumu Dağılımı',bold:true,color:NAVY,fontSize:8.8},{text:'  operasyon kalitesi',color:'#8390a3',fontSize:5.8}],margin:[0,0,0,5]},
+      {text:[{text:'Program Durumu Dağılımı',bold:true,color:NAVY,fontSize:8.8},{text:'  operasyon kalitesi',color:'#8390a3',fontSize:5.8}],margin:[0,0,0,5]},
       {
         table:{headerRows:1,widths:[120,48,275,88],body:statusBody,dontBreakRows:true},
         layout:{

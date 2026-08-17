@@ -323,7 +323,7 @@ export function ReportsPage() {
           openStudentDebt: totalOpenDebt(data),
           teacherDebt: totalTeacherBalance(data),
           cashBank: cashBalance(data),
-          completedLessons: completedLessonsForPdf.length,
+          completedLessons: completedLessonsForPdf.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0),
           statusRows,
           collectionRate: collectionRateForPdf,
           teacherCostRate: teacherCostRateForPdf,
@@ -597,7 +597,7 @@ export function ReportsPage() {
 
               <div className="report-kpis corporate report-kpis-premium">
                 <div>
-                  <span>Öğrenci Alacağı</span>
+                  <span>Öğrenci Bakiyesi</span>
                   <b>{money(totalOpenDebt(data))}</b>
                   <small>Açık öğrenci bakiyeleri</small>
                 </div>
@@ -613,13 +613,13 @@ export function ReportsPage() {
                 </div>
                 <div>
                   <span>Yapılan Ders</span>
-                  <b>{completedInstitutionLessons.length}</b>
+                  <b>{completedInstitutionLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)}</b>
                   <small>Seçili dönem toplamı</small>
                 </div>
               </div>
 
               <h3>
-                Ders Durumu Dağılımı <span className="report-section-note">operasyon kalitesi</span>
+                Program Durumu Dağılımı <span className="report-section-note">operasyon kalitesi</span>
               </h3>
               <div className="report-status-distribution">
                 {institutionStatusRows.map(row => (

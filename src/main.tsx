@@ -17,6 +17,7 @@ import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
 import './daily-calendar.css'
+import './fixed-program-calendar.css'
 import './premium-lesson-form.css'
 import './premium-typography.css'
 

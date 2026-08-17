@@ -1,17 +1,26 @@
 import { useState } from 'react'
 import type { SabitProgram } from '../lib/types'
 import { formatClockInput, fullDate, todayISO, uid } from '../lib/format'
-import { saveProgram } from '../services/officeService'
+import { saveProgramManual } from '../services/manualProgramService'
 import { suggestProgram, type ProgramConflictSuggestion, type ProgramSuggestion } from '../services/programSuggestionService'
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
 
 const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 
-export function SmartProgramForm({ program, onDone, onCancel }: { program?:SabitProgram;onDone:()=>void;onCancel:()=>void }) {
-  const {data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
+type SmartProgramFormProps={
+  program?:SabitProgram
+  defaultDay?:string
+  defaultStartTime?:string
+  defaultRoomId?:string
+  onDone:()=>void
+  onCancel:()=>void
+}
+
+export function SmartProgramForm({program,defaultDay,defaultStartTime,defaultRoomId,onDone,onCancel}:SmartProgramFormProps){
+  const{data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
   const[teacher,setTeacher]=useState(program?.ogretmen_id||'');const[branch,setBranch]=useState(program?.brans_id||'')
-  const[room,setRoom]=useState(program?.derslik_id||'');const[day,setDay]=useState(program?.haftanin_gunu||'Pazartesi');const[startTime,setStartTime]=useState((program?.baslangic_saati||'').slice(0,5))
+  const[room,setRoom]=useState(program?.derslik_id||defaultRoomId||'');const[day,setDay]=useState(program?.haftanin_gunu||defaultDay||'Pazartesi');const[startTime,setStartTime]=useState((program?.baslangic_saati||defaultStartTime||'').slice(0,5))
   const[conflict,setConflict]=useState<ProgramConflictSuggestion|null>(null)
   if(!data)return null
 
@@ -20,8 +29,22 @@ export function SmartProgramForm({ program, onDone, onCancel }: { program?:Sabit
   const clearConflict=()=>setConflict(null)
   const applySuggestion=(s:ProgramSuggestion)=>{setRoom(s.derslik_id);setStartTime(formatClockInput(s.saat));setConflict(null)}
   const reasonText=conflict?[conflict.ogrenci_cakisma?'Öğrenci bu saatte başka sabit derste.':'',conflict.ogretmen_cakisma?'Öğretmen bu saatte başka sabit derste.':'',conflict.derslik_dolu?'Seçilen derslik bu saatte dolu.':''].filter(Boolean):[]
+  const calendarDefault=Boolean(!program&&(defaultDay||defaultStartTime||defaultRoomId))
 
-  return <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);const p:SabitProgram={program_id:program?.program_id||uid('SP'),ogrenci_id:String(f.get('ogrenci_id')),ogretmen_id:teacher,brans_id:branch,derslik_id:room,haftanin_gunu:day,baslangic_saati:startTime,ders_sayisi:Number(f.get('ders_sayisi')),ogrenci_birim_ucreti:Number(f.get('ogrenci_birim_ucreti')),ogretmen_birim_hakedisi:Number(f.get('ogretmen_birim_hakedisi')),tekrar_sikligi:String(f.get('tekrar_sikligi')),baslangic_tarihi:String(f.get('baslangic_tarihi')||'')||null,bitis_tarihi:String(f.get('bitis_tarihi')||'')||null,program_durumu:String(f.get('program_durumu')),aciklama:String(f.get('aciklama')||'')||null};try{const c=await suggestProgram(p);if(!c.uygun){setConflict(c);toast('Program çakışıyor. Uygun alternatifleri aşağıda gösterdim.','error');return}if(program&&!window.confirm('Sabit program güncellensin mi?\\n\\nYalnız şu andan sonraki “Planlandı” dersler yeni program bilgilerine göre güncellenir. Geçmiş, Yapıldı, İptal ve tek seferlik değiştirilmiş dersler korunur.'))return;const result=await saveProgram(p);await refresh();if(program){const updated=Number(result?.guncellenen_gelecek_ders||0);const protectedCount=Number(result?.korunan_gelecek_ders||0);const exceptionCount=Number(result?.korunan_istisna||0);const updatedText=updated>0?`${updated} gelecek planlı ders güncellendi.`:'Gelecekte oluşturulacak dersler yeni programa göre hazırlanacak.';const protectedText=protectedCount>0?` ${protectedCount} planlı ders tarih/tekrar aralığı dışında kaldığı için korundu.`:'';const exceptionText=exceptionCount>0?` ${exceptionCount} tek seferlik değişiklik korundu.`:'';toast(`Sabit program güncellendi. ${updatedText}${protectedText}${exceptionText}`)}else toast('Sabit program eklendi.');onDone()}catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}}}>
+  return <form className="form-grid" onSubmit={async e=>{
+    e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget)
+    const p:SabitProgram={program_id:program?.program_id||uid('SP'),ogrenci_id:String(f.get('ogrenci_id')),ogretmen_id:teacher,brans_id:branch,derslik_id:room,haftanin_gunu:day,baslangic_saati:startTime,ders_sayisi:Number(f.get('ders_sayisi')),ogrenci_birim_ucreti:Number(f.get('ogrenci_birim_ucreti')),ogretmen_birim_hakedisi:Number(f.get('ogretmen_birim_hakedisi')),tekrar_sikligi:String(f.get('tekrar_sikligi')),baslangic_tarihi:String(f.get('baslangic_tarihi')||'')||null,bitis_tarihi:String(f.get('bitis_tarihi')||'')||null,program_durumu:String(f.get('program_durumu')),aciklama:String(f.get('aciklama')||'')||null}
+    try{
+      const c=await suggestProgram(p)
+      if(!c.uygun){setConflict(c);toast('Program çakışıyor. Uygun alternatifleri aşağıda gösterdim.','error');return}
+      if(program&&!window.confirm('Sabit program güncellensin mi?\n\nDeğişiklik sabit program şablonuna kaydedilir. Mevcut dersler otomatik değiştirilmez; ilgili haftada “Haftayı Hazırla” çalıştırıldığında henüz sonuçlanmamış derslere uygulanır.'))return
+      await saveProgramManual(p)
+      await refresh()
+      toast(program?'Sabit program güncellendi. Mevcut dersler korunuyor; değişiklik Haftayı Hazırla ile ilgili haftaya uygulanacak.':'Sabit program eklendi. Dersler Haftayı Hazırla çalıştırıldığında oluşturulacak.')
+      onDone()
+    }catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}
+  }}>
+    {calendarDefault&&<div className="wide form-summary">Takvimden seçilen başlangıç: <b>{day} · {startTime||'Saat'}{room?` · ${data.derslikler.find(x=>x.derslik_id===room)?.mekan_adi||'Derslik'}`:''}</b></div>}
     <label>Öğrenci<select name="ogrenci_id" defaultValue={program?.ogrenci_id||''} onChange={clearConflict} required><option value="">Seçin</option>{data.ogrenciler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select></label>
     <label>Öğretmen<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('');clearConflict()}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
     <label>Branş<select name="brans_id" value={branch} onChange={e=>{setBranch(e.target.value);clearConflict()}} required><option value="">Seçin</option>{branches.map(x=><option key={x.brans_id} value={x.brans_id}>{x.brans_adi}</option>)}</select></label>
@@ -45,7 +68,7 @@ export function SmartProgramForm({ program, onDone, onCancel }: { program?:Sabit
       {!conflict.onerilen_derslikler?.length&&!conflict.onerilen_saatler?.length&&<div className="form-hint">Yakın bir uygun seçenek bulunamadı. Gün veya öğretmeni değiştirmeyi deneyin.</div>}
     </section>}
 
-    <div className="wide form-hint">Düzenlemede yalnız şu andan sonraki Planlandı dersler yeni gün, saat, öğretmen, derslik, ücret ve ders birimine göre güncellenir. Geçmiş, sonuçlanmış ve tek seferlik değiştirilmiş dersler korunur. Çakışma olursa hiçbir değişiklik kaydedilmez.</div>
+    <div className="wide form-hint">Sabit program yalnız şablonu değiştirir. Mevcut Planlandı dersler otomatik taşınmaz; ilgili hafta başında Haftayı Hazırla çalıştırıldığında eksik dersler oluşturulur ve değişmiş gün/saat/derslik bilgileri güvenli biçimde uygulanır. Yapıldı, İptal ve tek seferlik değişiklikler korunur.</div>
     <div className="wide form-actions"><button className="secondary-btn" type="button" onClick={onCancel}>Vazgeç</button><button className="primary-btn" type="submit" disabled={busy}>{busy?'Kontrol ediliyor…':program?'Programı Güncelle':'Programı Kaydet'}</button></div>
   </form>
 }

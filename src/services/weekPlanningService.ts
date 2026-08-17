@@ -9,25 +9,35 @@ export type WeekCreationStatus={
   guncel_hafta?:boolean
   beklenen?:number
   mevcut?:number
+  hazir?:number
   eksik?:number
+  degismis?:number
+  korunan?:number
+  fazla?:number
 }
 
-function addDaysISO(date:string,days:number){
-  const d=new Date(`${date}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate()+days)
-  return d.toISOString().slice(0,10)
+export type WeekCreationResult={
+  basarili:boolean
+  hafta_baslangici:string
+  olusturulan:number
+  guncellenen:number
+  zaten_mevcut:number
+  korunan:number
+  istisna:number
+  gecmis_atlanan:number
+  durum?:WeekCreationStatus
 }
 
 export async function getWeekCreationStatus(monday:string):Promise<WeekCreationStatus>{
-  const{data,error}=await supabase.rpc('haftalik_ders_uretim_durumu_v2',{p_hafta_baslangici:monday})
+  const{data,error}=await supabase.rpc('haftalik_ders_uretim_durumu_v3',{p_hafta_baslangici:monday})
   if(error)throw error
   return data as WeekCreationStatus
 }
 
-export async function createWeek(monday:string){
-  const{data,error}=await supabase.rpc('haftalik_dersleri_olustur_guvenli_v5',{p_hafta_baslangici:monday})
+export async function createWeek(monday:string):Promise<WeekCreationResult>{
+  const{data,error}=await supabase.rpc('haftalik_dersleri_hazirla_guvenli_v6',{p_hafta_baslangici:monday})
   if(error)throw error
-  return data
+  return data as WeekCreationResult
 }
 
 async function checkSingleWeek(monday:string){
@@ -37,14 +47,13 @@ async function checkSingleWeek(monday:string){
 }
 
 export async function reviewWeekPlanning(monday:string):Promise<WeekPlanningReview>{
-  const nextMonday=addDaysISO(monday,7)
-  const[first,second]=await Promise.all([checkSingleWeek(monday),checkSingleWeek(nextMonday)])
-  const sorunlar=[...(first.sorunlar||[]),...(second.sorunlar||[])]
+  const result=await checkSingleWeek(monday)
+  const sorunlar=result.sorunlar||[]
   return{
-    basarili:Boolean(first.basarili&&second.basarili),
+    basarili:Boolean(result.basarili),
     uygun:sorunlar.length===0,
     sorun_sayisi:sorunlar.length,
     sorunlar,
-    haftalar:[monday,nextMonday],
+    haftalar:[monday],
   }
 }

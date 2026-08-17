@@ -43,12 +43,6 @@ export interface WeekPlanningReview {
   haftalar: string[]
 }
 
-function addDaysISO(date: string, days: number) {
-  const d = new Date(`${date}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
 export async function suggestProgram(input: SabitProgram): Promise<ProgramConflictSuggestion> {
   const { data, error } = await supabase.rpc('sabit_program_oneri_v1', {
     p_ogrenci_id: input.ogrenci_id,
@@ -67,20 +61,19 @@ export async function suggestProgram(input: SabitProgram): Promise<ProgramConfli
 }
 
 async function checkSingleWeek(monday: string) {
-  const { data, error } = await supabase.rpc('haftalik_program_kontrol_oneri_v1', { p_hafta_baslangici: monday })
+  const { data, error } = await supabase.rpc('haftalik_program_kontrol_oneri_v2', { p_hafta_baslangici: monday })
   if (error) throw error
   return data as { basarili: boolean; uygun: boolean; sorun_sayisi: number; sorunlar: WeekPlanningIssue[] }
 }
 
 export async function reviewWeekPlanning(monday: string): Promise<WeekPlanningReview> {
-  const nextMonday = addDaysISO(monday, 7)
-  const [first, second] = await Promise.all([checkSingleWeek(monday), checkSingleWeek(nextMonday)])
-  const sorunlar = [...(first.sorunlar || []), ...(second.sorunlar || [])]
+  const result=await checkSingleWeek(monday)
+  const sorunlar=result.sorunlar||[]
   return {
-    basarili: Boolean(first.basarili && second.basarili),
-    uygun: sorunlar.length === 0,
-    sorun_sayisi: sorunlar.length,
+    basarili:Boolean(result.basarili),
+    uygun:sorunlar.length===0,
+    sorun_sayisi:sorunlar.length,
     sorunlar,
-    haftalar: [monday, nextMonday],
+    haftalar:[monday],
   }
 }

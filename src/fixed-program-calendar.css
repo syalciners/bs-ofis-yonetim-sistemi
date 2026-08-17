@@ -1,0 +1,34 @@
+.fixed-program-view-switch{display:flex;align-items:center;justify-content:center;gap:6px;width:100%}
+.fixed-program-view-switch button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:118px;min-height:36px;padding:7px 16px;border:1px solid #d9e0e8;border-radius:11px;background:#eef1f5;color:#667487;font-size:10.5px;font-weight:900;cursor:pointer;box-shadow:0 3px 9px rgba(30,52,82,.035);transition:transform .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease,border-color .15s ease}
+.fixed-program-view-switch button.active{border-color:#f08a18;background:linear-gradient(135deg,#f6a51c,#f47a16);color:#fff;box-shadow:0 7px 16px rgba(244,122,22,.22)}
+.fixed-program-view-switch button:active{transform:scale(.98)}
+
+.fixed-program-day-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.fixed-program-day-tabs button{display:grid;place-items:center;gap:2px;min-height:48px;padding:6px 2px;border:1px solid #dfe6ee;border-radius:12px;background:#fff;color:#617084;cursor:pointer;box-shadow:0 3px 9px rgba(30,52,82,.03)}
+.fixed-program-day-tabs button span{font-size:9px;font-weight:900}
+.fixed-program-day-tabs button small{font-size:8px;font-weight:850;color:#8a96a6}
+.fixed-program-day-tabs button.active{border-color:#ef8b1b;background:linear-gradient(180deg,#f7a722,#f17b16);color:#fff;box-shadow:0 7px 16px rgba(244,122,22,.2)}
+.fixed-program-day-tabs button.active small{color:#fff;opacity:.82}
+
+.fixed-program-calendar-card{overflow:hidden}
+.fixed-program-room-grid{min-width:650px}
+.fixed-calendar-program-block{cursor:pointer}
+.fixed-calendar-program-block.muted-card{opacity:.48;filter:saturate(.55)}
+.fixed-program-status{display:inline-flex;align-items:center;gap:4px;margin-top:1px;font-size:7px;font-weight:900;line-height:1;white-space:nowrap}
+.fixed-program-status i{display:block;width:7px;height:7px;border-radius:999px}
+.fixed-program-status.active{color:#20865a}
+.fixed-program-status.active i{background:#28a56c;box-shadow:0 0 0 1.5px rgba(40,165,108,.12)}
+.fixed-program-status.passive{color:#7c8796}
+.fixed-program-status.passive i{background:transparent;border:1.5px solid #8b96a5}
+
+/* Haftayı Hazırla tek bir yönetim noktasıdır; günlük grid aynı işi ikinci kez göstermez. */
+.daily-calendar-page .calendar-title-week-action{display:none}
+
+@media(max-width:700px){
+  .fixed-program-view-switch button{min-width:108px;min-height:34px;padding:6px 12px;font-size:10px}
+  .fixed-program-day-tabs{gap:3px}
+  .fixed-program-day-tabs button{min-height:43px;padding:5px 1px;border-radius:10px}
+  .fixed-program-day-tabs button span{font-size:8px}
+  .fixed-program-day-tabs button small{font-size:7px}
+  .fixed-program-room-grid{min-width:630px}
+}

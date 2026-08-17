@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "check:rules": "node scripts/check-business-rules.mjs",
+    "check:rules": "node scripts/check-business-rules-current.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },

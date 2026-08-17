@@ -7,32 +7,32 @@ const sharedForms=read('src/components/forms.tsx')
 const panel=read('src/components/WeekPlanningReviewPanel.tsx')
 const calendar=read('src/pages/CalendarPage.tsx')
 const fixed=read('src/pages/FixedProgramPage.tsx')
-const office=read('src/services/officeService.ts')
+const manualProgram=read('src/services/manualProgramService.ts')
 const css=read('src/ux-overrides.css')
 const prepareStart=calendar.indexOf('const prepareWeek=async()=>')
-const prepareEnd=calendar.indexOf('\n\n  return <div',prepareStart)
+const prepareEnd=calendar.indexOf('\n  const openWeekPdf',prepareStart)
 const prepareBlock=prepareStart>=0&&prepareEnd>prepareStart?calendar.slice(prepareStart,prepareEnd):''
 
 const checks=[
-  ['Sabit program önerisi sunucu RPC üzerinden alınır',service.includes("sabit_program_oneri_v1")],
-  ['Haftalık program ön kontrolü sunucu RPC üzerinden alınır',service.includes("haftalik_program_kontrol_oneri_v1")],
-  ['Haftalık ön kontrol seçilen ve sonraki haftayı birlikte kapsar',service.includes('nextMonday')&&service.includes('Promise.all([checkSingleWeek(monday), checkSingleWeek(nextMonday)])')],
+  ['Sabit program önerisi sunucu RPC üzerinden alınır',service.includes('sabit_program_oneri_v1')],
+  ['Haftalık program ön kontrolü güncel V2 RPC üzerinden alınır',service.includes('haftalik_program_kontrol_oneri_v2')],
+  ['Haftalık ön kontrol yalnız seçilen haftayı kapsar',service.includes('const result=await checkSingleWeek(monday)')&&!service.includes('nextMonday')&&!service.includes('Promise.all([checkSingleWeek')],
   ['Sabit Program akıllı formu kullanır',fixed.includes('<SmartProgramForm')],
-  ['Sabit program kaydetme gelecekteki dersleri senkronlayan v3 RPC kullanır',office.includes("sabit_program_kaydet_guvenli_v3")],
+  ['Sabit program kaydetme manuel V4 RPC kullanır',manualProgram.includes("sabit_program_kaydet_guvenli_v4")&&form.includes('saveProgramManual')&&fixed.includes('saveProgramManual')],
   ['Sabit program kaydetmeden önce öneri kontrolü çalışır',form.includes('await suggestProgram(p)')],
-  ['Program düzenleme yalnız gelecek Planlandı dersler için onay ister',form.includes('Sabit program güncellensin mi?')&&form.includes('şu andan sonraki “Planlandı” dersler')],
-  ['Program düzenleme geçmiş ve tek seferlik dersleri koruduğunu açıklar',form.includes('Geçmiş, sonuçlanmış ve tek seferlik değiştirilmiş dersler korunur')],
-  ['Pasife alma mevcut planlı dersleri koruduğunu açıklar',fixed.includes('Mevcut planlı dersler korunur; yalnız yeni ders üretimi durdurulur.')],
+  ['Program düzenleme manuel hafta uygulamasını açıkça onaylatır',form.includes('Sabit program güncellensin mi?')&&form.includes('Mevcut dersler otomatik değiştirilmez')&&form.includes('Haftayı Hazırla')],
+  ['Program düzenleme sonuçlanmış ve tek seferlik dersleri koruduğunu açıklar',form.includes('Yapıldı, İptal ve tek seferlik değişiklikler korunur')],
+  ['Pasife alma mevcut dersleri korur ve yeni hafta hazırlamasını durdurur',fixed.includes('Mevcut dersler korunur; bu sabit program yeni Haftayı Hazırla işlemlerine dahil edilmez.')],
   ['Sabit program aynı saatte uygun derslik önerir',form.includes('Aynı saatte uygun derslik')&&form.includes('onerilen_derslikler')],
   ['Sabit program yakın uygun saat önerir',form.includes('Yakın uygun saatler')&&form.includes('onerilen_saatler')],
   ['Öneri seçildiğinde saat ve derslik forma uygulanır',form.includes('setRoom(s.derslik_id)')&&form.includes('setStartTime(formatClockInput(s.saat))')],
   ['Sabit program saat girişi iOS çarkı yerine yazılabilir sayısal klavye kullanır',form.includes('inputMode="numeric"')&&form.includes('formatClockInput')&&!form.includes('type="time"')],
   ['Ders ve tek seferlik program saat girişleri yazılabilir sayısal klavye kullanır',sharedForms.includes('formatClockInput')&&!sharedForms.includes('type="time"')],
-  ['Haftayı Oluştur üretimden önce ön kontrol yapar',prepareBlock.indexOf('await reviewWeekPlanning(monday)')>=0&&prepareBlock.indexOf('await reviewWeekPlanning(monday)')<prepareBlock.indexOf('await createWeek(monday)')],
+  ['Haftayı Hazırla üretimden önce ön kontrol yapar',prepareBlock.indexOf('await reviewWeekPlanning(monday)')>=0&&prepareBlock.indexOf('await reviewWeekPlanning(monday)')<prepareBlock.indexOf('await createWeek(monday)')],
   ['Hazır hafta kontrolü çakışma taramasından önce yapılır',prepareBlock.indexOf('await readWeekStatus()')>=0&&prepareBlock.indexOf('await readWeekStatus()')<prepareBlock.indexOf('await reviewWeekPlanning(monday)')],
   ['Çakışmada haftalık ders üretimi yerine çözüm paneli açılır',calendar.includes('setWeekReview(review)')&&calendar.includes('<WeekPlanningReviewPanel')],
   ['Haftalık öneri tek seferlik güvenli taşıma mekanizmasını kullanır',panel.includes('await moveProgramDate(')],
-  ['Öneri uygulandıktan sonra çakışmalar yeniden kontrol edilir',panel.includes('await reviewWeekPlanning(review.haftalar[0])')],
+  ['Öneri uygulandıktan sonra seçilen hafta yeniden kontrol edilir',panel.includes('await reviewWeekPlanning(review.haftalar[0])')&&panel.includes('Seçilen hafta çakışmasız görünüyor.')],
   ['Haftalık panel Sabit Program ekranına erişim verir',panel.includes("nav('/sabit-program')")],
   ['Akıllı öneri butonları mobil uyumlu biçimlendirilir',css.includes('.suggestion-btn')&&css.includes('.smart-suggestion-panel')&&css.includes('.week-review-card')],
 ]

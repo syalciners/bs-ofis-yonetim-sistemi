@@ -5,12 +5,25 @@ const sourcePath='scripts/check-business-rules.mjs'
 const tempPath='scripts/.check-business-rules-current.generated.mjs'
 let source=readFileSync(sourcePath,'utf8')
 const deployWorkflow=readFileSync('.github/workflows/deploy-pages.yml','utf8')
+const ciWorkflow=readFileSync('.github/workflows/ci.yml','utf8')
+const viteConfig=readFileSync('vite.config.ts','utf8')
+const appIndex=readFileSync('app/index.html','utf8')
+const syncScript=readFileSync('scripts/sync-pages-root.mjs','utf8')
+const publishedCheck=readFileSync('scripts/check-published-pages.mjs','utf8')
 
-if(!deployWorkflow.includes('GitHub Pages kaynağını Actions olarak sabitle')||!deployWorkflow.includes(`-d '{"build_type":"workflow"}'`)){
-  console.error('✗ GitHub Pages kaynağı workflow olarak sabitlenmiyor.')
-  process.exit(1)
+const pageRules=[
+  ['Vite kaynak indexi yayın indexinden ayrıdır',viteConfig.includes("root: 'app'")&&appIndex.includes('../src/main.tsx')],
+  ['Canlı doğrulama custom deploy-pages ile legacy yayına rakip olmaz',!deployWorkflow.includes('actions/deploy-pages@')&&!deployWorkflow.includes('actions/upload-pages-artifact@')],
+  ['Canlı doğrulama repo kökündeki production paketini kontrol eder',deployWorkflow.includes('node scripts/check-published-pages.mjs')],
+  ['Branch CI production paketini repo köküne senkronlar',ciWorkflow.includes('node scripts/sync-pages-root.mjs')&&ciWorkflow.includes('git push origin "HEAD:${GITHUB_REF_NAME}"')],
+  ['Pages senkron scripti dist paketini köke kopyalar',syncScript.includes("const distRoot=resolve('dist')")&&syncScript.includes('copyFileSync(source,target)')],
+  ['Pages yayın kontrolü dosyaları hash ile doğrular',publishedCheck.includes("createHash('sha256')")&&publishedCheck.includes("index.includes('src/main.tsx')")],
+]
+for(const[name,ok]of pageRules){
+  console.log(`${ok?'✓':'✗'} ${name}`)
+  if(!ok)process.exitCode=1
 }
-console.log('✓ GitHub Pages kaynağı workflow olarak sabitlenir')
+if(process.exitCode)process.exit(process.exitCode)
 
 const replaceExact=(from,to)=>{
   if(!source.includes(from))throw new Error(`Güncellenecek eski kontrol bulunamadı: ${from}`)

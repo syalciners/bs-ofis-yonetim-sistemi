@@ -1,4 +1,4 @@
-name: GitHub Pages
+name: Canlı yayın doğrulama
 
 on:
   push:
@@ -7,31 +7,12 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: GitHub Pages kaynağını Actions olarak sabitle
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail-with-body -L \
-            -X PUT \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages" \
-            -d '{"build_type":"workflow"}'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -59,22 +40,11 @@ jobs:
       - name: Ödev ve WhatsApp kuralları
         run: node scripts/check-assignments-ux.mjs
       - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Repo kökündeki canlı Pages paketini doğrula
+        run: node scripts/check-published-pages.mjs
+
   smoke:
-    needs: deploy
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Gerçek derlenmiş uygulama adresini doğrula
@@ -82,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           URL="https://syalciners.github.io/bs-ofis-yonetim-sistemi/?smoke=${GITHUB_SHA}"
-          for i in 1 2 3 4 5 6; do
+          for i in $(seq 1 24); do
             HTML="$(curl -fsSL --max-time 20 "$URL" || true)"
             if printf '%s' "$HTML" | grep -q 'BS Eğitim Yönetimi' \
               && printf '%s' "$HTML" | grep -Eq 'assets/index-[A-Za-z0-9_-]+\.js' \

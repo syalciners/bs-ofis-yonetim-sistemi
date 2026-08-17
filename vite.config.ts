@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  root: 'app',
+  publicDir: '../public',
   base: './',
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
   plugins: [
     react(),
     VitePWA({

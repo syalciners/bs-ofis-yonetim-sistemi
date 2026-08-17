@@ -1,0 +1,32 @@
+name: Geçici Sabit Program görünüm patch
+
+on:
+  push:
+    branches:
+      - v1-sabit-program-gorunum-sadelestir
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v1-sabit-program-gorunum-sadelestir
+          fetch-depth: 0
+      - name: Patch uygula
+        run: python3 scripts/_tmp_patch_fixed_program_view.py
+      - name: Değişiklikleri kaydet
+        run: |
+          if git diff --quiet; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/FixedProgramPage.tsx src/fixed-program-calendar.css scripts/check-smart-scheduling.mjs
+          git commit -m "Sabit Program görünümünü sadeleştir"
+          git push origin HEAD:v1-sabit-program-gorunum-sadelestir

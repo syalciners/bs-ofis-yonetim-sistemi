@@ -14,7 +14,7 @@ const checks = [
   ['Öğrenci ders adedi kayıt sayısı yerine ders_sayisi toplamıdır', reports.includes('const lessonUnits = periodLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)') && reports.includes('<small>{lessonUnits} ders</small>')],
   ['Öğrenci ekstresi gerçek PDF motorunu kullanır', reports.includes('openStudentAccountPdf') && studentPdf.includes("import('pdfmake/build/pdfmake')") && studentPdf.includes('.download(filename)')],
   ['Öğrenci PDF tablosunda Tahsilat sütunu korunur', studentPdf.includes("{text:'TAHSİLAT',style:'th',alignment:'right'}") && studentPdf.includes('widths:[68,205,74,74,74]')],
-  ['Öğrenci PDF tarayıcı footerı yerine kontrollü footer kullanır', studentPdf.includes("BS Eğitim Yönetimi',bold:true,color:NAVY") && studentPdf.includes('currentPage') && !studentPdf.includes('window.print'))],
+  ['Öğrenci PDF tarayıcı footerı yerine kontrollü footer kullanır', studentPdf.includes("BS Eğitim Yönetimi',bold:true,color:NAVY") && studentPdf.includes('currentPage') && !studentPdf.includes('window.print')],
   ['Öğrenci PDF mevcut BS Eğitim public logo ailesini kullanır', studentPdf.includes("bs-egitim-icon-512-v2.png") && studentPdf.includes("bs-egitim-icon-192-v2.png")],
   ['Öğretmen detayında branş ve birim hakediş var', reports.includes('Birim Hakediş') && reports.includes('Hakediş Tutarı') && reports.includes('branchName(data, x.brans_id)')],
   ['Kurum operasyon ve nakit ayrımı var', reports.includes('OPERASYONEL SONUÇ') && reports.includes('NAKİT AKIŞI') && reports.includes('operationalResult') && reports.includes('netCashMovement')],

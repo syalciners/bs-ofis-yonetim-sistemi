@@ -39,6 +39,10 @@ replaceExact(
   "expectText('Takvim manuel Haftayı Hazırla işlemini korur', calendar, \"'Haftayı Hazırla'\")"
 )
 replaceExact(
+  "expectText('Alt menü Takvim girişini korur', bottomNav, \"label: 'Takvim'\")",
+  "expectText('Alt menü Program girişini korur', bottomNav, \"label: 'Program'\")"
+)
+replaceExact(
   "expectText('Canlı dağıtım Takvim UX kontrolünü çalıştırır', deployWorkflow, 'node scripts/check-calendar-ux.mjs')",
   "expectText('Canlı dağıtım Takvim UX kontrolünü çalıştırır', deployWorkflow, 'node scripts/check-calendar-ux.mjs')"
 )

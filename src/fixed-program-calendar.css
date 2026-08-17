@@ -1,6 +1,6 @@
-.fixed-program-summary-toolbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
-.fixed-program-summary-toolbar>div{min-width:0;display:grid;gap:3px}
-.fixed-program-summary-toolbar .fixed-program-view-toggle{flex:0 0 auto;width:auto!important;min-width:92px!important;margin-left:auto!important}
+.fixed-program-summary-toolbar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;min-height:80px!important;padding:10px 14px!important;box-sizing:border-box}
+.fixed-program-summary-toolbar>div{min-width:0;display:grid;gap:3px;justify-items:start;text-align:left}
+.fixed-program-summary-toolbar .fixed-program-view-toggle{flex:0 0 auto;width:auto!important;min-width:92px!important;margin-left:auto!important;align-self:center!important}
 
 .fixed-program-day-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .fixed-program-day-tabs button{display:grid;place-items:center;gap:2px;min-height:48px;padding:6px 2px;border:1px solid #dfe6ee;border-radius:12px;background:#fff;color:#617084;cursor:pointer;box-shadow:0 3px 9px rgba(30,52,82,.03)}
@@ -24,8 +24,9 @@
 .daily-calendar-page .calendar-title-week-action{display:none}
 
 @media(max-width:700px){
-  .fixed-program-summary-toolbar{display:flex!important;align-items:center!important}
-  .fixed-program-summary-toolbar .fixed-program-view-toggle{width:auto!important;min-width:88px!important;margin-left:auto!important}
+  .fixed-program-summary-toolbar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;min-height:78px!important;padding:9px 12px!important}
+  .fixed-program-summary-toolbar>div{justify-items:start!important;text-align:left!important}
+  .fixed-program-summary-toolbar .fixed-program-view-toggle{width:auto!important;min-width:88px!important;margin-left:auto!important;align-self:center!important}
   .fixed-program-day-tabs{gap:3px}
   .fixed-program-day-tabs button{min-height:43px;padding:5px 1px;border-radius:10px}
   .fixed-program-day-tabs button span{font-size:8px}

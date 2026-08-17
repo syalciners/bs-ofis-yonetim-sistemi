@@ -1,101 +1,115 @@
 import { readFileSync } from 'node:fs'
 
-const read = (path) => readFileSync(path, 'utf8')
-const calendar = read('src/pages/CalendarPage.tsx')
-const lessonDetail = read('src/components/LessonDetail.tsx')
-const weekService = read('src/services/weekPlanningService.ts')
-const pdfService = read('src/services/weeklyProgramPdfService.ts')
-const packageJson = read('package.json')
-const weekMigration = read('supabase/migrations/20260816001408_hafta_eksik_ders_guvenli_v5.sql')
-const conflictMigration = read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
-const fixed = read('src/pages/FixedProgramPage.tsx')
-const more = read('src/pages/MorePage.tsx')
-const app = read('src/App.tsx')
-const tone = read('src/lib/teacherTone.ts')
-const css = read('src/ux-overrides.css')
-const stability = read('src/navigation-stability.css')
-const programCss = read('src/program-share.css')
-const main = read('src/main.tsx')
+const read=(path)=>readFileSync(path,'utf8')
+const calendar=read('src/pages/CalendarPage.tsx')
+const lessonDetail=read('src/components/LessonDetail.tsx')
+const weekService=read('src/services/weekPlanningService.ts')
+const pdfService=read('src/services/weeklyProgramPdfService.ts')
+const packageJson=read('package.json')
+const manualWeekMigration=read('supabase/migrations/20260817162500_manuel_hafta_hazirlama_v6.sql')
+const conflictMigration=read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
+const fixed=read('src/pages/FixedProgramPage.tsx')
+const fixedCss=read('src/fixed-program-calendar.css')
+const smartProgram=read('src/components/SmartProgramForm.tsx')
+const manualProgramService=read('src/services/manualProgramService.ts')
+const more=read('src/pages/MorePage.tsx')
+const app=read('src/App.tsx')
+const tone=read('src/lib/teacherTone.ts')
+const css=read('src/ux-overrides.css')
+const stability=read('src/navigation-stability.css')
+const programCss=read('src/program-share.css')
+const main=read('src/main.tsx')
 
-const checks = [
-  ['Takvim Önceki Hafta butonunu içerir', calendar.includes("label:'Önceki Hafta'")],
-  ['Takvim Bu Hafta butonunu içerir', calendar.includes("label:'Bu Hafta'")],
-  ['Takvim Gelecek Hafta butonunu içerir', calendar.includes("label:'Gelecek Hafta'")],
-  ['Hafta hazırlama aksiyonu Takvim başlığının sağındadır', calendar.includes('calendar-title-line') && calendar.includes('calendar-title-week-action') && calendar.indexOf('calendar-title-week-action') < calendar.indexOf('week-switcher')],
-  ['Program Gönder Ders Ekle ile aynı komut satırındadır', calendar.includes('calendar-command-bar') && calendar.includes('calendar-share-btn') && calendar.includes('Program Gönder')],
-  ['Program Gönder yalnız tek kişi ve görünür ders varken aktiftir', calendar.includes('disabled={!shareTarget||!visibleLessons.length}')],
-  ['Program paylaşımı mevcut önizleme bileşenini kullanır', calendar.includes("import { ProgramSharePreview }") && calendar.includes('<ProgramSharePreview target={shareTarget}')],
-  ['PDF Al Takvim komut satırındadır', calendar.includes('calendar-pdf-btn') && calendar.includes('PDF Al') && calendar.includes('openWeeklyProgramPdf')],
-  ['Haftalık PDF seçili Takvim programındaki tüm dersleri kullanır', !calendar.includes('const allWeekLessons=useMemo') && calendar.includes('openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)') && calendar.includes('disabled={!lessons.length}')],
-  ['Haftalık PDF seçili program adını belge başlığında taşır', pdfService.includes('programLabel') && pdfService.includes('{text:programLabel,fontSize:16,bold:true,color:NAVY}')],
-  ['Haftalık PDF gerçek PDF motoru kullanır', packageJson.includes('"pdfmake"') && pdfService.includes("import('pdfmake/build/pdfmake')") && pdfService.includes('addVirtualFileSystem')],
-  ['Haftalık PDF A4 dikey ve tam program sütunlarını içerir', pdfService.includes("pageSize:'A4'") && pdfService.includes("pageOrientation:'portrait'") && ['SAAT','ÖĞRENCİ','BRANŞ','ÖĞRETMEN','DERSLİK','DURUM'].every(x=>pdfService.includes(`text:'${x}'`))],
-  ['Haftalık PDF doğrudan dosya indirir ve tarayıcı yazdırmasını kullanmaz', pdfService.includes('.download(filename)') && !pdfService.includes('window.print()') && !pdfService.includes("window.open('','_blank')")],
-  ['Haftalık PDF mevcut BS Eğitim ikon ailesini ve kontrollü footerı kullanır', pdfService.includes('bs-egitim-icon-512-v2.png') && pdfService.includes("text:'BS Eğitim'") && pdfService.includes("text:'Yönetimi'") && pdfService.includes("footer:(currentPage:number,pageCount:number)") && !pdfService.includes('https://syalciners.github.io')],
-  ['PDF butonu mobilde iki ana aksiyonun altında tam genişliktedir', programCss.includes('.calendar-command-bar .calendar-pdf-btn{grid-column:1/-1}')],
-  ['Yönetici öğretmenler üstte ayrı gruptadır', calendar.includes('teacher-manager-grid') && calendar.includes('teacher-manager-chip')],
-  ['Yönetici öğretmenler Yönetici etiketi taşır', calendar.includes('<small>Yönetici</small>')],
-  ['Alt filtre satırı Tümü Öğretmen seç Öğrenci seç düzenindedir', calendar.includes('teacher-secondary-compact') && calendar.includes('aria-label="Öğretmen seç"') && calendar.includes('aria-label="Öğrenci seç"') && !calendar.includes('Diğer Öğretmenler')],
-  ['Tümü tek dokunuşta erişilebilir kalır', calendar.includes('teacher-all') && calendar.includes("chooseFilter({type:'all'})")],
-  ['Takvim filtresi tek aktif kişi union modeli kullanır', calendar.includes("type CalendarFilter={type:'all'}|{type:'teacher';id:string}|{type:'student';id:string}")],
-  ['Öğretmen seçimi yalnız öğretmenin derslerini gösterir', calendar.includes("filter.type==='teacher'&&x.ogretmen_id===filter.id")],
-  ['Öğrenci seçimi yalnız öğrencinin derslerini gösterir', calendar.includes("filter.type==='student'&&x.ogrenci_id===filter.id")],
-  ['Öğrenci seçicisi yalnız aktif öğrencileri listeler', calendar.includes("data.ogrenciler.filter(x=>x.durum!=='Pasif')") && calendar.includes('{activeStudents.map')],
-  ['Boş öğretmen veya öğrenci seçimi tüm programa döner', (calendar.match(/e\.target\.value\?\{type:'(?:teacher|student)',id:e\.target\.value\}:\{type:'all'\}/g)||[]).length===2],
-  ['Kişi filtresi oturumda korunur', calendar.includes("sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter))")],
-  ['Eski öğretmen oturum anahtarı geriye uyumlu korunur', calendar.includes("sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')")],
-  ['URL ogrenci parametresi öğrenci filtresini açabilir', calendar.includes("params.get('ogrenci')") && calendar.includes("return{type:'student',id:studentParam}")],
-  ['Üçlü kompakt filtre mobilde aynı satırda kalır', programCss.includes('.teacher-secondary-compact:has(.student-picker){grid-template-columns:auto repeat(2,minmax(0,1fr))}')],
-  ['Öğrenci seçicisi turkuaz kimlik taşır', programCss.includes('.student-picker{border-color:#99ddd6}') && programCss.includes('.student-picker.active{border-color:#2f9c95')],
-  ['Takvim günlere göre haftalık ajanda kullanır', calendar.includes('week-agenda') && calendar.includes('agenda-day')],
-  ['Takvim yalnız ders bulunan günleri gösterir', calendar.includes('const visibleDays=') && calendar.includes('.filter(x=>x.items.length>0)')],
-  ['Takvim boş gün kartı üretmez', !calendar.includes('agenda-empty')],
-  ['Derssiz hafta öğretmen veya öğrenci seçimini önerir', calendar.includes('Bu haftada ders yok.') && calendar.includes('Başka bir hafta, öğretmen veya öğrenci seçebilirsin.') && calendar.includes('calendar-empty-week')],
-  ['Ders durumu değişikliği açık kullanıcı onayı ister', lessonDetail.includes('if(!window.confirm(statusChangeMessage(current,status)))return')],
-  ['Yapıldı onayı öğrenci ücreti ve öğretmen hakedişini açıklar', lessonDetail.includes('öğrenci ücretini ve öğretmen hakedişini finansal sonuçlara dahil eder')],
-  ['Yapıldı durumundan dönüşün finansal etkisi açıklanır', lessonDetail.includes('artık finansal sonuçlara dahil edilmez')],
-  ['Durum onayından sonra güvenli RPC çağrısı korunur', lessonDetail.includes('await setLessonStatus(lesson.ders_id,status)')],
-  ['Ders durumu alanı onay davranışını kullanıcıya bildirir', lessonDetail.includes('Finansal etkisi onaylandıktan sonra kaydedilir.')],
-  ['Haftalık ders üretimi kullanıcı onayı ister', (calendar.match(/if\(!confirmWeekCreation\(status\)\)return/g)||[]).length===2],
-  ['Haftalık üretim onayı kişi filtresinden bağımsız kapsamı açıklar', calendar.includes('Takvim kişi filtresinden bağımsız olarak tüm aktif sabit programlar işlenir.')],
-  ['Haftalık üretim yalnız eksik dersleri ekleyeceğini açıklar', calendar.includes('Mevcut dersler korunur; yalnız eksik dersler eklenir.')],
-  ['Mevcut haftada geçmiş derslerin değişmeyeceği açıkça belirtilir', calendar.includes('yalnız şu andan sonraki eksik dersler eklenir; geçmiş dersler değiştirilmez.')],
-  ['Haftalık üretim güvenli V5 RPC kullanır', weekService.includes("supabase.rpc('haftalik_dersleri_olustur_guvenli_v5'") && calendar.includes('await createWeek(monday)')],
-  ['Hafta hazırlık durumu dinamik V2 RPC üzerinden okunur', weekService.includes("supabase.rpc('haftalik_ders_uretim_durumu_v2'")],
-  ['Haftalık çakışma kontrolü geçmişi koruyan V2 RPC kullanır', weekService.includes("supabase.rpc('haftalik_program_kontrol_oneri_v2'")],
-  ['Seçilen ve sonraki haftanın hazırlık durumu birlikte kontrol edilir', calendar.includes('getWeekCreationStatus(monday)') && calendar.includes('getWeekCreationStatus(addDays(monday,7))')],
-  ['Geçmiş haftada hazırlama aksiyonu pasiftir', calendar.includes("isPastWeek?'Geçmiş Hafta'") && calendar.includes('disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady}')],
-  ['Mevcut hafta yeni sabit program için eksik ders tamamlama aksiyonu gösterir', calendar.includes("isCurrentWeek&&!selectedWeekReady?'Eksik Dersleri Tamamla'")],
-  ['Hazır seçili haftada sonraki eksik hafta açıkça adlandırılır', calendar.includes("selectedWeekReady&&!nextWeekReady?'Sonraki Haftayı Hazırla'")],
-  ['Geçmiş hafta üretimi backend tarafından da reddedilir', weekMigration.includes("raise exception 'Geçmiş haftalar otomatik olarak hazırlanamaz.'")],
-  ['Mevcut haftanın geçmiş saatleri backend tarafından atlanır', weekMigration.includes('r.baslangic_saati<=v_simdi::time') && weekMigration.includes('v_gecmis_atlanan')],
-  ['Hafta durumu eski üretim kilidine değil güncel eksik sayısına bakar', weekMigration.includes("'eksik',greatest(v_beklenen-v_mevcut,0)") && !weekMigration.includes('select * into v_kayit from public.haftalik_ders_uretimleri')],
-  ['Tek seferlik dersler sabit program çakışma kontrolünden NULL nedeniyle düşmez', conflictMigration.includes('d.program_id is distinct from p_program_id')],
-  ['Takvim Sabit Program formunu doğrudan içermez', !calendar.includes('ProgramForm') && !calendar.includes("mode==='program'")],
-  ['Sabit Program ayrı sayfadır', fixed.includes('Sabit Ders Programı') && fixed.includes('fixed-program-groups')],
-  ['Sabit Program günlere göre gruplanır', fixed.includes('dayNames.map(day=>')],
-  ['Sabit Program Menü içindedir', more.includes("to:'/sabit-program'")],
-  ['Sabit Program rotası tanımlıdır', app.includes('path="/sabit-program"')],
-  ['Başak Atilla pembe öğretmen rengidir', tone.includes("'BAŞAK ATİLLA'") && tone.includes("return 'teacher-pink'")],
-  ['Süleyman Yalçıner mavi öğretmen rengidir', tone.includes("'SÜLEYMAN YALÇINER'") && tone.includes("return 'teacher-blue'")],
-  ['Diğer öğretmenler sarı renktir', tone.includes("return 'teacher-yellow'")],
-  ['Seçili hafta belirgin mavi zemindir', css.includes('.week-switcher button.active{background:#2563eb;color:#fff')],
-  ['Başak Takvim butonu beyaz zemin ve pembe çerçeve kullanır', stability.includes('.calendar-v2 .teacher-chip.teacher-pink') && stability.includes('border-color:#ec4899')],
-  ['Süleyman Takvim butonu beyaz zemin ve mavi çerçeve kullanır', stability.includes('.calendar-v2 .teacher-chip.teacher-blue') && stability.includes('border-color:#3b82f6')],
-  ['Öğretmen seçicisi beyaz zeminlidir', stability.includes('.teacher-other-picker') && stability.includes('background:#fff')],
-  ['Seçili öğretmen sarı çerçeveyle ayrılır', stability.includes('.teacher-other-picker.active') && stability.includes('border-color:#eab308')],
-  ['Takvim ders kartlarında öğretmen rengi yalnız çerçeve vurgusudur', stability.includes('.calendar-v2 .lesson-card.teacher-pink') && stability.includes('border-left:4px solid #ec4899') && stability.includes('background:#fff !important')],
-  ['Yönetici öğretmen butonları iki sütundur', css.includes('.teacher-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))')],
-  ['Uygulama yatay sayfa taşmasını engeller', stability.includes('overflow-x:hidden') && stability.includes('overscroll-behavior-x:none')],
-  ['Üst bar gerçek sabit konumdadır', stability.includes('.app-header-wrap') && stability.includes('position:fixed !important')],
-  ['Alt bar gerçek sabit konumdadır', stability.includes('.bottom-nav') && stability.includes('bottom:0 !important')],
-  ['Alt bar sekme isimlerini sürekli görünür tutar', stability.includes('.bottom-nav a span') && stability.includes('visibility:visible !important') && stability.includes('opacity:1 !important')],
-  ['Navigasyon stabilite CSS katmanı en son yüklenir', main.includes("import './navigation-stability.css'" )],
+const checks=[
+  ['Takvim Önceki Hafta butonunu içerir',calendar.includes("label:'Önceki Hafta'")],
+  ['Takvim Bu Hafta butonunu içerir',calendar.includes("label:'Bu Hafta'")],
+  ['Takvim Gelecek Hafta butonunu içerir',calendar.includes("label:'Gelecek Hafta'")],
+  ['Manuel Haftayı Hazırla aksiyonu Takvim başlığının sağındadır',calendar.includes('calendar-title-line')&&calendar.includes('calendar-title-week-action')&&calendar.includes("'Haftayı Hazırla'")&&calendar.indexOf('calendar-title-week-action')<calendar.indexOf('week-switcher')],
+  ['Program Gönder Ders Ekle ile aynı komut satırındadır',calendar.includes('calendar-command-bar')&&calendar.includes('calendar-share-btn')&&calendar.includes('Program Gönder')],
+  ['Program Gönder yalnız tek kişi ve görünür ders varken aktiftir',calendar.includes('disabled={!shareTarget||!visibleLessons.length}')],
+  ['Program paylaşımı mevcut önizleme bileşenini kullanır',calendar.includes("import { ProgramSharePreview }")&&calendar.includes('<ProgramSharePreview target={shareTarget}')],
+  ['PDF Al Takvim komut satırındadır',calendar.includes('calendar-pdf-btn')&&calendar.includes('PDF Al')&&calendar.includes('openWeeklyProgramPdf')],
+  ['Haftalık PDF seçili Takvim programındaki tüm dersleri kullanır',!calendar.includes('const allWeekLessons=useMemo')&&calendar.includes('openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)')&&calendar.includes('disabled={!lessons.length}')],
+  ['Haftalık PDF seçili program adını belge başlığında taşır',pdfService.includes('programLabel')&&pdfService.includes('{text:programLabel,fontSize:16,bold:true,color:NAVY}')],
+  ['Haftalık PDF gerçek PDF motoru kullanır',packageJson.includes('"pdfmake"')&&pdfService.includes("import('pdfmake/build/pdfmake')")&&pdfService.includes('addVirtualFileSystem')],
+  ['Haftalık PDF A4 dikey ve tam program sütunlarını içerir',pdfService.includes("pageSize:'A4'")&&pdfService.includes("pageOrientation:'portrait'")&&['SAAT','ÖĞRENCİ','BRANŞ','ÖĞRETMEN','DERSLİK','DURUM'].every(x=>pdfService.includes(`text:'${x}'`))],
+  ['Haftalık PDF doğrudan dosya indirir ve tarayıcı yazdırmasını kullanmaz',pdfService.includes('.download(filename)')&&!pdfService.includes('window.print()')&&!pdfService.includes("window.open('','_blank')")],
+  ['Haftalık PDF mevcut BS Eğitim ikon ailesini ve kontrollü footerı kullanır',pdfService.includes('bs-egitim-icon-512-v2.png')&&pdfService.includes("text:'BS Eğitim'")&&pdfService.includes("text:'Yönetimi'")&&pdfService.includes('footer:(currentPage:number,pageCount:number)')&&!pdfService.includes('https://syalciners.github.io')],
+  ['PDF butonu mobilde iki ana aksiyonun altında tam genişliktedir',programCss.includes('.calendar-command-bar .calendar-pdf-btn{grid-column:1/-1}')],
+  ['Yönetici öğretmenler üstte ayrı gruptadır',calendar.includes('teacher-manager-grid')&&calendar.includes('teacher-manager-chip')],
+  ['Yönetici öğretmenler Yönetici etiketi taşır',calendar.includes('<small>Yönetici</small>')],
+  ['Alt filtre satırı Tümü Öğretmen seç Öğrenci seç düzenindedir',calendar.includes('teacher-secondary-compact')&&calendar.includes('aria-label="Öğretmen seç"')&&calendar.includes('aria-label="Öğrenci seç"')&&!calendar.includes('Diğer Öğretmenler')],
+  ['Tümü tek dokunuşta erişilebilir kalır',calendar.includes('teacher-all')&&calendar.includes("chooseFilter({type:'all'})")],
+  ['Takvim filtresi tek aktif kişi union modeli kullanır',calendar.includes("type CalendarFilter={type:'all'}|{type:'teacher';id:string}|{type:'student';id:string}")],
+  ['Öğretmen seçimi yalnız öğretmenin derslerini gösterir',calendar.includes("filter.type==='teacher'&&x.ogretmen_id===filter.id")],
+  ['Öğrenci seçimi yalnız öğrencinin derslerini gösterir',calendar.includes("filter.type==='student'&&x.ogrenci_id===filter.id")],
+  ['Öğrenci seçicisi yalnız aktif öğrencileri listeler',calendar.includes("data.ogrenciler.filter(x=>x.durum!=='Pasif')")&&calendar.includes('{activeStudents.map')],
+  ['Boş öğretmen veya öğrenci seçimi tüm programa döner',(calendar.match(/e\.target\.value\?\{type:'(?:teacher|student)',id:e\.target\.value\}:\{type:'all'\}/g)||[]).length===2],
+  ['Kişi filtresi oturumda korunur',calendar.includes("sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter))")],
+  ['Eski öğretmen oturum anahtarı geriye uyumlu korunur',calendar.includes("sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')")],
+  ['URL ogrenci parametresi öğrenci filtresini açabilir',calendar.includes("params.get('ogrenci')")&&calendar.includes("return{type:'student',id:studentParam}")],
+  ['Üçlü kompakt filtre mobilde aynı satırda kalır',programCss.includes('.teacher-secondary-compact:has(.student-picker){grid-template-columns:auto repeat(2,minmax(0,1fr))}')],
+  ['Öğrenci seçicisi turkuaz kimlik taşır',programCss.includes('.student-picker{border-color:#99ddd6}')&&programCss.includes('.student-picker.active{border-color:#2f9c95')],
+  ['Takvim günlere göre haftalık ajanda kullanır',calendar.includes('week-agenda')&&calendar.includes('agenda-day')],
+  ['Takvim yalnız ders bulunan günleri gösterir',calendar.includes('const visibleDays=')&&calendar.includes('.filter(x=>x.items.length>0)')],
+  ['Takvim boş gün kartı üretmez',!calendar.includes('agenda-empty')],
+  ['Derssiz hafta öğretmen veya öğrenci seçimini önerir',calendar.includes('Bu haftada ders yok.')&&calendar.includes('Başka bir hafta, öğretmen veya öğrenci seçebilirsin.')&&calendar.includes('calendar-empty-week')],
+  ['Ders durumu değişikliği açık kullanıcı onayı ister',lessonDetail.includes('if(!window.confirm(statusChangeMessage(current,status)))return')],
+  ['Yapıldı onayı öğrenci ücreti ve öğretmen hakedişini açıklar',lessonDetail.includes('öğrenci ücretini ve öğretmen hakedişini finansal sonuçlara dahil eder')],
+  ['Yapıldı durumundan dönüşün finansal etkisi açıklanır',lessonDetail.includes('artık finansal sonuçlara dahil edilmez')],
+  ['Durum onayından sonra güvenli RPC çağrısı korunur',lessonDetail.includes('await setLessonStatus(lesson.ders_id,status)')],
+  ['Ders durumu alanı onay davranışını kullanıcıya bildirir',lessonDetail.includes('Finansal etkisi onaylandıktan sonra kaydedilir.')],
+  ['Haftalık hazırlama kullanıcı onayı ister',(calendar.match(/if\(!confirmWeekCreation\(\)\)return/g)||[]).length===2],
+  ['Haftalık hazırlama tüm aktif sabit programları işler',calendar.includes('Tüm aktif sabit programlar işlenir.')],
+  ['Haftalık hazırlama eksik ve değişmiş dersleri açıklar',calendar.includes('Daha önce oluşturulmamış dersler eklenir')&&calendar.includes('günü, saati, dersliği veya temel bilgileri değişmiş')],
+  ['Yapıldı İptal ve tek seferlik derslerin korunacağı açıklanır',calendar.includes('Yapıldı, İptal ve tek seferlik değişiklikler korunur.')],
+  ['Mevcut haftada geçmiş derslerin değişmeyeceği açıkça belirtilir',calendar.includes('Bugünden önceki veya saati geçmiş dersler değiştirilmez.')],
+  ['Haftalık hazırlama güvenli V6 RPC kullanır',weekService.includes("supabase.rpc('haftalik_dersleri_hazirla_guvenli_v6'")&&calendar.includes('await createWeek(monday)')],
+  ['Hafta hazırlık durumu V3 RPC üzerinden okunur',weekService.includes("supabase.rpc('haftalik_ders_uretim_durumu_v3'")],
+  ['Haftalık çakışma kontrolü V2 RPC kullanır',weekService.includes("supabase.rpc('haftalik_program_kontrol_oneri_v2'")],
+  ['Haftayı Hazırla yalnız seçilen haftanın durumunu kontrol eder',calendar.includes('getWeekCreationStatus(monday)')&&!calendar.includes('getWeekCreationStatus(addDays(monday,7))')],
+  ['Geçmiş haftada hazırlama aksiyonu pasiftir',calendar.includes("isPastWeek?'Geçmiş Hafta'")&&calendar.includes('disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady}')],
+  ['Hazır hafta Hafta Hazır olarak gösterilir',calendar.includes("weekReady?'Hafta Hazır':'Haftayı Hazırla'")],
+  ['Hazırlama sonucu oluşturulan ve güncellenen sayısını bildirir',calendar.includes('${created} ders oluşturuldu, ${updated} ders güncellendi. Hafta hazır.')],
+  ['V6 yalnız seçilen haftayı işler',!manualWeekMigration.match(/for\s+i\s+in\s+0\.\.1\s+loop/i)&&manualWeekMigration.includes('haftalik_dersleri_hazirla_guvenli_v6')],
+  ['V6 eksik dersi oluşturur ve değişmiş Planlandı dersi günceller',manualWeekMigration.includes('v_olusturulan := v_olusturulan+1')&&manualWeekMigration.includes('v_guncellenen := v_guncellenen+1')&&manualWeekMigration.includes('update public.dersler set')],
+  ['V6 geçmiş haftayı backend tarafında reddeder',manualWeekMigration.includes("raise exception 'Geçmiş haftalar hazırlanamaz.'")],
+  ['V6 güncel haftanın geçmiş saatlerini atlar',manualWeekMigration.includes('v_gecmis := v_gecmis+1')&&manualWeekMigration.includes('r.baslangic_saati<=v_simdi::time')],
+  ['V3 eksik ve değişmiş kayıtları ayrı izler',manualWeekMigration.includes("'eksik',v_eksik")&&manualWeekMigration.includes("'degismis',v_degismis")],
+  ['Tek seferlik dersler sabit program çakışma kontrolünden NULL nedeniyle düşmez',conflictMigration.includes('d.program_id is distinct from p_program_id')],
+  ['Takvim Sabit Program formunu doğrudan içermez',!calendar.includes('ProgramForm')&&!calendar.includes("mode==='program'")],
+  ['Sabit Program ayrı sayfadır',fixed.includes('Sabit Ders Programı')&&fixed.includes('fixed-program-groups')],
+  ['Sabit Program Liste görünümü eski gün gruplarını korur',fixed.includes("viewMode==='calendar'")&&fixed.includes('fixed-program-groups')&&fixed.includes('dayNames.map(day=>')],
+  ['Sabit Program başlığının altında ortalanmış Takvim Liste geçişi vardır',fixed.includes('fixed-program-view-switch')&&fixed.includes('<CalendarDays size={16}/>Takvim')&&fixed.includes('<List size={16}/>Liste')&&fixedCss.includes('.fixed-program-view-switch{display:flex;align-items:center;justify-content:center')],
+  ['Sabit Program seçili görünüm turuncu diğer görünüm gridir',fixedCss.includes('.fixed-program-view-switch button{')&&fixedCss.includes('background:#eef1f5')&&fixedCss.includes('.fixed-program-view-switch button.active')&&fixedCss.includes('#f47a16')],
+  ['Sabit Program Takvimi beş gerçek derslik sütununu içerir',['LOC-002','LOC-001','LOC-003','LOC-005','LOC-004'].every(id=>fixed.includes(`id:'${id}'`))],
+  ['Sabit Program Takviminde boş hücre gün saat dersliği forma taşır',fixed.includes('openNewProgram({day:selectedDay,time:minutesToTime(minute),roomId:column.id})')&&fixed.includes('defaultDay={programDefaults?.day}')&&fixed.includes('defaultStartTime={programDefaults?.time}')&&fixed.includes('defaultRoomId={programDefaults?.roomId}')],
+  ['Sabit Program kartında Aktif Pasif durum göstergesi vardır',fixed.includes('fixed-program-status')&&fixed.includes("passive?'Pasif':'Aktif'")],
+  ['Sabit Program kayıtları manuel V4 servisini kullanır',fixed.includes('saveProgramManual')&&smartProgram.includes('saveProgramManual')&&manualProgramService.includes("supabase.rpc('sabit_program_kaydet_guvenli_v4'")],
+  ['Sabit Program düzenleme mevcut dersleri otomatik taşımadığını açıklar',smartProgram.includes('Mevcut dersler otomatik değiştirilmez')&&smartProgram.includes('Haftayı Hazırla')],
+  ['Sabit Program Menü içindedir',more.includes("to:'/sabit-program'")],
+  ['Sabit Program rotası tanımlıdır',app.includes('path="/sabit-program"')],
+  ['Başak Atilla pembe öğretmen rengidir',tone.includes("'BAŞAK ATİLLA'")&&tone.includes("return 'teacher-pink'")],
+  ['Süleyman Yalçıner mavi öğretmen rengidir',tone.includes("'SÜLEYMAN YALÇINER'")&&tone.includes("return 'teacher-blue'")],
+  ['Diğer öğretmenler sarı renktir',tone.includes("return 'teacher-yellow'")],
+  ['Seçili hafta belirgin mavi zemindir',css.includes('.week-switcher button.active{background:#2563eb;color:#fff')],
+  ['Başak Takvim butonu beyaz zemin ve pembe çerçeve kullanır',stability.includes('.calendar-v2 .teacher-chip.teacher-pink')&&stability.includes('border-color:#ec4899')],
+  ['Süleyman Takvim butonu beyaz zemin ve mavi çerçeve kullanır',stability.includes('.calendar-v2 .teacher-chip.teacher-blue')&&stability.includes('border-color:#3b82f6')],
+  ['Öğretmen seçicisi beyaz zeminlidir',stability.includes('.teacher-other-picker')&&stability.includes('background:#fff')],
+  ['Seçili öğretmen sarı çerçeveyle ayrılır',stability.includes('.teacher-other-picker.active')&&stability.includes('border-color:#eab308')],
+  ['Takvim ders kartlarında öğretmen rengi yalnız çerçeve vurgusudur',stability.includes('.calendar-v2 .lesson-card.teacher-pink')&&stability.includes('border-left:4px solid #ec4899')&&stability.includes('background:#fff !important')],
+  ['Yönetici öğretmen butonları iki sütundur',css.includes('.teacher-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))')],
+  ['Uygulama yatay sayfa taşmasını engeller',stability.includes('overflow-x:hidden')&&stability.includes('overscroll-behavior-x:none')],
+  ['Üst bar gerçek sabit konumdadır',stability.includes('.app-header-wrap')&&stability.includes('position:fixed !important')],
+  ['Alt bar gerçek sabit konumdadır',stability.includes('.bottom-nav')&&stability.includes('bottom:0 !important')],
+  ['Alt bar sekme isimlerini sürekli görünür tutar',stability.includes('.bottom-nav a span')&&stability.includes('visibility:visible !important')&&stability.includes('opacity:1 !important')],
+  ['Sabit Program Takvim CSS katmanı yüklenir',main.includes("import './fixed-program-calendar.css'")],
+  ['Navigasyon stabilite CSS katmanı korunur',main.includes("import './navigation-stability.css'")],
 ]
 
-const failed = checks.filter(([,ok])=>!ok)
-for (const [name,ok] of checks) console.log(`${ok?'✓':'✗'} ${name}`)
-if (failed.length) {
+const failed=checks.filter(([,ok])=>!ok)
+for(const[name,ok]of checks)console.log(`${ok?'✓':'✗'} ${name}`)
+if(failed.length){
   console.error(`\n${failed.length} Takvim UX kontrolü başarısız.`)
   process.exit(1)
 }

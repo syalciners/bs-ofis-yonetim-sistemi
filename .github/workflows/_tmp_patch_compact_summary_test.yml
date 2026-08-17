@@ -1,0 +1,32 @@
+name: Geçici kompakt özet test patch
+
+on:
+  push:
+    branches:
+      - v1-sabit-program-ozet-kompakt
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v1-sabit-program-ozet-kompakt
+          fetch-depth: 0
+      - name: Test patch uygula
+        run: python3 scripts/_tmp_patch_compact_summary_test.py
+      - name: Değişikliği kaydet
+        run: |
+          if git diff --quiet; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/check-calendar-ux.mjs
+          git commit -m "Sabit Program kompakt özet testini güncelle"
+          git push origin HEAD:v1-sabit-program-ozet-kompakt

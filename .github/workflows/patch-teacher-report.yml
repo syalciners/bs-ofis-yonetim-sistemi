@@ -1,0 +1,130 @@
+name: Geçici öğretmen raporu patch
+
+on:
+  push:
+    branches:
+      - v1-ogretmen-hakedis-pdf
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[skip patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v1-ogretmen-hakedis-pdf
+          fetch-depth: 0
+      - name: Raporlar sayfasını ve regresyon testini kontrollü güncelle
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          report_path = Path('src/pages/ReportsPage.tsx')
+          source = report_path.read_text()
+          import_line = "import { openStudentAccountPdf } from '../services/studentAccountPdfService'\n"
+          teacher_import = "import { openTeacherEarningPdf } from '../services/teacherEarningPdfService'\n"
+          if teacher_import not in source:
+              if import_line not in source:
+                  raise SystemExit('Öğrenci PDF import satırı bulunamadı.')
+              source = source.replace(import_line, import_line + teacher_import, 1)
+
+          marker = "\n    const previousTitle = document.title\n"
+          teacher_block = r'''
+
+    if (type === 'ogretmen') {
+      if (!teacher || !selectedTeacher || !teacherPeriod || !selectedPeriod) {
+        window.alert('PDF oluşturmak için öğretmen ve hakediş dönemi seçin.')
+        return
+      }
+
+      const allLessons = data.dersler
+        .filter(x=>x.ogretmen_id===teacher&&x.ders_durumu==='Yapıldı'&&(x.tarih||'')>=selectedPeriod.baslangic_tarihi&&(x.tarih||'')<=selectedPeriod.bitis_tarihi)
+        .sort(
+          (a, b) =>
+            String(a.tarih || '').localeCompare(String(b.tarih || '')) ||
+            String(a.baslangic_saati || '').localeCompare(String(b.baslangic_saati || '')),
+        )
+      const allPayments = data.ogretmenOdemeleri
+        .filter(x=>x.ogretmen_id===teacher&&x.hakedis_donemi_id===teacherPeriod&&!x.iptal_mi)
+        .sort((a, b) => String(a.tarih || '').localeCompare(String(b.tarih || '')))
+      const totalEarned = allLessons.reduce((sum, x) => sum + Number(x.ogretmen_toplam_hakedis || 0), 0)
+      const totalPaid = allPayments.reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const remaining = totalEarned - totalPaid
+      const paymentStatus: 'Ödendi'|'Kısmi Ödendi'|'Ödenmedi' = remaining <= 0 ? 'Ödendi' : totalPaid > 0 ? 'Kısmi Ödendi' : 'Ödenmedi'
+      const lessonUnits = allLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)
+
+      try {
+        await openTeacherEarningPdf({
+          teacherName: selectedTeacher.ad_soyad,
+          branches: selectedTeacher.branslar,
+          periodName: selectedPeriod.donem_adi,
+          periodStart: selectedPeriod.baslangic_tarihi,
+          periodEnd: selectedPeriod.bitis_tarihi,
+          reportCode,
+          documentDate: today,
+          lessonUnits,
+          totalEarned,
+          totalPaid,
+          remaining,
+          paymentStatus,
+          lessons: allLessons.map(x => ({
+            date: x.tarih || '',
+            studentName: data.ogrenciler.find(s => s.ogrenci_id === x.ogrenci_id)?.ad_soyad || 'Öğrenci',
+            branchName: branchName(data, x.brans_id),
+            lessonCount: Number(x.ders_sayisi || 1),
+            unitEarning: Number(x.ogretmen_birim_hakedisi || 0),
+            totalEarning: Number(x.ogretmen_toplam_hakedis || 0),
+          })),
+          payments: allPayments.map(x => ({
+            date: x.tarih || '',
+            method: x.odeme_yontemi || '—',
+            description: x.aciklama || '—',
+            amount: Number(x.tutar || 0),
+          })),
+          filename: pdfFilename,
+        })
+      } catch (error: any) {
+        window.alert(error?.message || 'Öğretmen hakediş raporu PDF olarak oluşturulamadı.')
+      }
+      return
+    }
+'''
+          if "await openTeacherEarningPdf({" not in source:
+              if source.count(marker) != 1:
+                  raise SystemExit('Yazdırma fallback işareti benzersiz bulunamadı.')
+              source = source.replace(marker, teacher_block + marker, 1)
+          report_path.write_text(source)
+
+          test_path = Path('scripts/check-reports-ux.mjs')
+          test = test_path.read_text()
+          student_decl = "const studentPdf = fs.readFileSync('src/services/studentAccountPdfService.ts', 'utf8')\n"
+          teacher_decl = "const teacherPdf = fs.readFileSync('src/services/teacherEarningPdfService.ts', 'utf8')\n"
+          if teacher_decl not in test:
+              if student_decl not in test:
+                  raise SystemExit('Öğrenci PDF test bildirimi bulunamadı.')
+              test = test.replace(student_decl, student_decl + teacher_decl, 1)
+
+          check_marker = "  ['Öğrenci PDF mevcut BS Eğitim public logo ailesini kullanır', studentPdf.includes(\"bs-egitim-icon-512-v2.png\") && studentPdf.includes(\"bs-egitim-icon-192-v2.png\")],\n"
+          teacher_checks = """  ['Öğretmen hakedişi gerçek PDF motorunu kullanır', reports.includes('openTeacherEarningPdf') && teacherPdf.includes(\"import('pdfmake/build/pdfmake')\") && teacherPdf.includes('.download(filename)')],\n  ['Öğretmen PDF ders tablosu altı hakediş sütununu korur', teacherPdf.includes(\"{text:'BİRİM HAKEDİŞ',style:'th',alignment:'right'}\") && teacherPdf.includes(\"{text:'HAKEDİŞ TUTARI',style:'th',alignment:'right'}\") && teacherPdf.includes('widths:[58,120,88,48,105,112]')],\n  ['Öğretmen PDF ödemeleri seçilen hakediş dönemine bağlıdır', reports.includes('x.hakedis_donemi_id===teacherPeriod&&!x.iptal_mi') && teacherPdf.includes('Dönem Ödemeleri')],\n  ['Öğretmen PDF kontrollü footer ve mevcut logo ailesini kullanır', teacherPdf.includes(\"BS Eğitim Yönetimi',bold:true,color:NAVY\") && teacherPdf.includes('currentPage') && !teacherPdf.includes('window.print') && teacherPdf.includes(\"bs-egitim-icon-512-v2.png\")],\n"""
+          if "Öğretmen hakedişi gerçek PDF motorunu kullanır" not in test:
+              if check_marker not in test:
+                  raise SystemExit('Rapor PDF test ekleme işareti bulunamadı.')
+              test = test.replace(check_marker, check_marker + teacher_checks, 1)
+          test_path.write_text(test)
+          PY
+      - name: Değişikliği commit et
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Patch zaten uygulanmış."
+            exit 0
+          fi
+          git config user.name "syalciners"
+          git config user.email "syalciners@gmail.com"
+          git add src/pages/ReportsPage.tsx scripts/check-reports-ux.mjs
+          git commit -m "Öğretmen hakediş PDF bağlantısını uygula [skip patch]"
+          git push origin HEAD:v1-ogretmen-hakedis-pdf

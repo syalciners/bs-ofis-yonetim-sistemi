@@ -32,7 +32,7 @@ const ROOM_COLUMNS=[
 ] as const
 
 const SLOT_MINUTES=30
-const SLOT_HEIGHT=48
+const SLOT_HEIGHT=42
 const DEFAULT_START=8*60
 const DEFAULT_END=21*60
 const DEFAULT_LESSON_MINUTES=60
@@ -99,9 +99,9 @@ function placeLessons(lessons:Ders[]):PlacedLesson[]{
 }
 
 function StatusIndicator({status}:{status?:string|null}){
-  if(status==='Yapıldı')return <span className="daily-status-indicator done" title="Yapıldı" aria-label="Yapıldı"><Check size={10} strokeWidth={3}/></span>
-  if(CALENDAR_HIDDEN_STATUSES.has(String(status||'')))return <span className="daily-status-indicator cancelled" title="İptal" aria-label="İptal"><X size={10} strokeWidth={3}/></span>
-  return <span className="daily-status-indicator planned" title="Planlandı" aria-label="Planlandı"/>
+  if(status==='Yapıldı')return <span className="daily-status-line done" title="Yapıldı"><span className="daily-status-indicator done" aria-hidden="true"><Check size={9} strokeWidth={3}/></span><span>Yapıldı</span></span>
+  if(CALENDAR_HIDDEN_STATUSES.has(String(status||'')))return <span className="daily-status-line cancelled" title="İptal"><span className="daily-status-indicator cancelled" aria-hidden="true"><X size={9} strokeWidth={3}/></span><span>İptal</span></span>
+  return <span className="daily-status-line planned" title="Planlandı"><span className="daily-status-indicator planned" aria-hidden="true"/><span>Planlandı</span></span>
 }
 
 export function DailyCalendarPage(){
@@ -172,15 +172,15 @@ export function DailyCalendarPage(){
                   const occupied=placed.some(x=>overlaps(minute,minute+DEFAULT_LESSON_MINUTES,x.start,x.end))
                   return occupied
                     ?<div key={minute} className={`daily-room-slot occupied ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}}/>
-                    :<button key={minute} type="button" className={`daily-room-slot addable ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute),roomId:column.id})} aria-label={`${column.label}, ${minutesToTime(minute)} saatine ders ekle`}><Plus size={13}/><span>Ders ekle</span></button>
+                    :<button key={minute} type="button" className={`daily-room-slot addable ${minute%60===0?'whole':''}`} style={{top:i*SLOT_HEIGHT,height:SLOT_HEIGHT}} onClick={()=>setQuickSlot({date:selectedDate,time:minutesToTime(minute),roomId:column.id})} aria-label={`${column.label}, ${minutesToTime(minute)} saatine ders ekle`} title="Ders ekle"><Plus size={12}/></button>
                 })}
                 {placed.map(({lesson,start,end,lane,laneCount})=>{
                   const fullStudent=studentName(lesson.ogrenci_id);const fullTeacher=teacherName(lesson.ogretmen_id)
-                  const top=((start-rangeStart)/SLOT_MINUTES)*SLOT_HEIGHT+4
-                  const height=Math.max(((end-start)/SLOT_MINUTES)*SLOT_HEIGHT-8,42)
-                  const left=`calc(${(lane/laneCount)*100}% + 4px)`
-                  const width=`calc(${100/laneCount}% - 8px)`
-                  return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(fullTeacher)} ${laneCount>=2?'compact':''}`} style={{top,height,left,width}} onClick={()=>setSelected(lesson)} title={`${fullStudent} · ${branchName(lesson.brans_id)} · ${fullTeacher}`} aria-label={`${fullStudent}, ${branchName(lesson.brans_id)}, ${fullTeacher}, ${minutesToTime(start)} ders detayını aç`}><StatusIndicator status={lesson.ders_durumu}/><strong>{abbreviateName(fullStudent)}</strong><span>{branchName(lesson.brans_id)}</span><small>{abbreviateName(fullTeacher)}</small></button>
+                  const top=((start-rangeStart)/SLOT_MINUTES)*SLOT_HEIGHT+3
+                  const height=Math.max(((end-start)/SLOT_MINUTES)*SLOT_HEIGHT-6,38)
+                  const left=`calc(${(lane/laneCount)*100}% + 3px)`
+                  const width=`calc(${100/laneCount}% - 6px)`
+                  return <button key={lesson.ders_id} type="button" className={`daily-lesson-block ${teacherTone(fullTeacher)} ${laneCount>=2?'compact':''}`} style={{top,height,left,width}} onClick={()=>setSelected(lesson)} title={`${fullStudent} · ${branchName(lesson.brans_id)} · ${fullTeacher} · ${lesson.ders_durumu||'Planlandı'}`} aria-label={`${fullStudent}, ${branchName(lesson.brans_id)}, ${fullTeacher}, ${lesson.ders_durumu||'Planlandı'}, ${minutesToTime(start)} ders detayını aç`}><strong>{abbreviateName(fullStudent)}</strong><span className="daily-lesson-branch">{branchName(lesson.brans_id)}</span><small>{abbreviateName(fullTeacher)}</small><StatusIndicator status={lesson.ders_durumu}/></button>
                 })}
               </div>
             })}

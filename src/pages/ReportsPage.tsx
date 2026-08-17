@@ -5,6 +5,7 @@ import { addDays, fullDate, money, todayISO } from '../lib/format'
 import { reportFilename } from '../lib/reportFilename'
 import { branchName, cashBalance, totalOpenDebt, totalTeacherBalance } from '../services/metrics'
 import { openStudentAccountPdf } from '../services/studentAccountPdfService'
+import { openTeacherEarningPdf } from '../services/teacherEarningPdfService'
 
 type ReportType = 'kurum' | 'ogrenci' | 'ogretmen'
 type RangePreset = 'thisMonth' | 'lastMonth' | 'last3Months' | 'thisYear' | 'all' | 'custom'
@@ -216,6 +217,64 @@ export function ReportsPage() {
         })
       } catch (error: any) {
         window.alert(error?.message || 'Öğrenci ekstresi PDF olarak oluşturulamadı.')
+      }
+      return
+    }
+
+    if (type === 'ogretmen') {
+      if (!teacher || !selectedTeacher || !teacherPeriod || !selectedPeriod) {
+        window.alert('PDF oluşturmak için öğretmen ve hakediş dönemi seçin.')
+        return
+      }
+
+      const allLessons = data.dersler
+        .filter(x=>x.ogretmen_id===teacher&&x.ders_durumu==='Yapıldı'&&(x.tarih||'')>=selectedPeriod.baslangic_tarihi&&(x.tarih||'')<=selectedPeriod.bitis_tarihi)
+        .sort(
+          (a, b) =>
+            String(a.tarih || '').localeCompare(String(b.tarih || '')) ||
+            String(a.baslangic_saati || '').localeCompare(String(b.baslangic_saati || '')),
+        )
+      const allPayments = data.ogretmenOdemeleri
+        .filter(x=>x.ogretmen_id===teacher&&x.hakedis_donemi_id===teacherPeriod&&!x.iptal_mi)
+        .sort((a, b) => String(a.tarih || '').localeCompare(String(b.tarih || '')))
+      const totalEarned = allLessons.reduce((sum, x) => sum + Number(x.ogretmen_toplam_hakedis || 0), 0)
+      const totalPaid = allPayments.reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const remaining = totalEarned - totalPaid
+      const paymentStatus: 'Ödendi'|'Kısmi Ödendi'|'Ödenmedi' = remaining <= 0 ? 'Ödendi' : totalPaid > 0 ? 'Kısmi Ödendi' : 'Ödenmedi'
+      const lessonUnits = allLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)
+
+      try {
+        await openTeacherEarningPdf({
+          teacherName: selectedTeacher.ad_soyad,
+          branches: selectedTeacher.branslar,
+          periodName: selectedPeriod.donem_adi,
+          periodStart: selectedPeriod.baslangic_tarihi,
+          periodEnd: selectedPeriod.bitis_tarihi,
+          reportCode,
+          documentDate: today,
+          lessonUnits,
+          totalEarned,
+          totalPaid,
+          remaining,
+          paymentStatus,
+          lessons: allLessons.map(x => ({
+            date: x.tarih || '',
+            studentName: data.ogrenciler.find(s => s.ogrenci_id === x.ogrenci_id)?.ad_soyad || 'Öğrenci',
+            branchName: branchName(data, x.brans_id),
+            lessonCount: Number(x.ders_sayisi || 1),
+            unitEarning: Number(x.ogretmen_birim_hakedisi || 0),
+            totalEarning: Number(x.ogretmen_toplam_hakedis || 0),
+          })),
+          payments: allPayments.map(x => ({
+            date: x.tarih || '',
+            method: x.odeme_yontemi || '—',
+            description: x.aciklama || '—',
+            amount: Number(x.tutar || 0),
+          })),
+          filename: pdfFilename,
+        })
+      } catch (error: any) {
+        window.alert(error?.message || 'Öğretmen hakediş raporu PDF olarak oluşturulamadı.')
       }
       return
     }

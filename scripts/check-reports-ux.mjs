@@ -3,6 +3,7 @@ import fs from 'node:fs'
 const reports = fs.readFileSync('src/pages/ReportsPage.tsx', 'utf8')
 const css = fs.readFileSync('src/report-corporate.css', 'utf8')
 const studentPdf = fs.readFileSync('src/services/studentAccountPdfService.ts', 'utf8')
+const teacherPdf = fs.readFileSync('src/services/teacherEarningPdfService.ts', 'utf8')
 
 const checks = [
   ['Öğrenci ve dönem filtresi aynı satırda', reports.includes("type === 'ogrenci'") && reports.includes('studentRangePreset') && reports.includes('report-filter-row no-print')],
@@ -16,6 +17,10 @@ const checks = [
   ['Öğrenci PDF tablosunda Tahsilat sütunu korunur', studentPdf.includes("{text:'TAHSİLAT',style:'th',alignment:'right'}") && studentPdf.includes('widths:[68,205,74,74,74]')],
   ['Öğrenci PDF tarayıcı footerı yerine kontrollü footer kullanır', studentPdf.includes("BS Eğitim Yönetimi',bold:true,color:NAVY") && studentPdf.includes('currentPage') && !studentPdf.includes('window.print')],
   ['Öğrenci PDF mevcut BS Eğitim public logo ailesini kullanır', studentPdf.includes("bs-egitim-icon-512-v2.png") && studentPdf.includes("bs-egitim-icon-192-v2.png")],
+  ['Öğretmen hakedişi gerçek PDF motorunu kullanır', reports.includes('openTeacherEarningPdf') && teacherPdf.includes("import('pdfmake/build/pdfmake')") && teacherPdf.includes('.download(filename)')],
+  ['Öğretmen PDF ders tablosu altı hakediş sütununu korur', teacherPdf.includes("{text:'BİRİM HAKEDİŞ',style:'th',alignment:'right'}") && teacherPdf.includes("{text:'HAKEDİŞ TUTARI',style:'th',alignment:'right'}") && teacherPdf.includes('widths:[58,120,88,48,105,112]')],
+  ['Öğretmen PDF ödemeleri seçilen hakediş dönemine bağlıdır', reports.includes('x.hakedis_donemi_id===teacherPeriod&&!x.iptal_mi') && teacherPdf.includes('Dönem Ödemeleri')],
+  ['Öğretmen PDF kontrollü footer ve mevcut logo ailesini kullanır', teacherPdf.includes("BS Eğitim Yönetimi',bold:true,color:NAVY") && teacherPdf.includes('currentPage') && !teacherPdf.includes('window.print') && teacherPdf.includes("bs-egitim-icon-512-v2.png")],
   ['Öğretmen detayında branş ve birim hakediş var', reports.includes('Birim Hakediş') && reports.includes('Hakediş Tutarı') && reports.includes('branchName(data, x.brans_id)')],
   ['Kurum operasyon ve nakit ayrımı var', reports.includes('OPERASYONEL SONUÇ') && reports.includes('NAKİT AKIŞI') && reports.includes('operationalResult') && reports.includes('netCashMovement')],
   ['Kurum finansal durum KPI alanları var', reports.includes('Öğrenci Alacağı') && reports.includes('Öğretmen Borcu') && reports.includes('Kasa / Banka')],

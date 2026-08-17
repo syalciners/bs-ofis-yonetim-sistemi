@@ -26,6 +26,15 @@ const checks=[
   ['Mobilde derslik grid yatay kaydırılır',css.includes('.daily-room-grid-scroll')&&css.includes('overflow-x:auto')&&css.includes('.daily-room-grid{min-width:')],
   ['Saat sütunu yatay kaydırmada sabit kalır',css.includes('.daily-time-axis{position:sticky;left:0')&&css.includes('.daily-time-head{position:sticky;left:0')],
   ['PDF servisi Takvim kısaltma fonksiyonunu kullanmaz',!pdf.includes('abbreviateName')],
+  ['Dokunmatik sürükleme 0,55 saniyelik uzun basma kullanır',daily.includes('const LONG_PRESS_MS=550')&&daily.includes('window.setTimeout(()=>activateDrag')],
+  ['Yalnız Planlandı ders sürüklenebilir',daily.includes("const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'")],
+  ['Masaüstünde hareket eşiğiyle sürükleme başlar',daily.includes("runtime.pointerType==='mouse'&&distance>=DRAG_MOVE_THRESHOLD")],
+  ['Derslik sütunları sürükleme hedefi olarak işaretlidir',daily.includes('data-room-id={column.id}')&&daily.includes("target?'drag-target':''")&&css.includes('.daily-room-slot.drag-target'))],
+  ['Sürükleme bırakılınca sunucuda çakışma tekrar kontrol edilir',daily.includes('await lessonConflict({...input,haric_ders_id:lesson.ders_id})')&&daily.includes('if(!check?.uygun)throw new Error(conflictMessage(check))')],
+  ['Tek seferlik ders güvenli güncelleme RPC akışını kullanır',daily.includes('else await updateLesson(input)')],
+  ['Sabit program dersi tek seferlik taşıma mekanizmasını kullanır',daily.includes('if(lesson.program_id)await moveProgramDate({program_id:lesson.program_id')],
+  ['Dokunmatik kartta özel sürükleme hareketi tarayıcı kaydırmasından ayrılır',css.includes('@media (pointer:coarse)')&&css.includes('.daily-lesson-block.drag-enabled{touch-action:none')],
+  ['Sürüklenen kart ve hedef için görsel geri bildirim vardır',css.includes('.daily-lesson-block.dragging')&&css.includes('.daily-drag-ghost')&&daily.includes('daily-drag-ghost')],
 ]
 
 const failed=checks.filter(([,ok])=>!ok)

@@ -89,14 +89,14 @@ export function ReportsPage() {
   const [institutionCustomEnd, setInstitutionCustomEnd] = useState(monthEnd(today))
 
   const periods = (data?.hakedisDonemleri || [])
-    .filter(x => x.aktif !== false && x.baslangic_tarihi <= today)
+    .filter(x=>x.aktif!==false&&x.baslangic_tarihi<=today)
     .sort((a, b) => b.baslangic_tarihi.localeCompare(a.baslangic_tarihi))
   const currentPeriod = periods.find(x => today >= x.baslangic_tarihi && today <= x.bitis_tarihi)
   const [teacherPeriod, setTeacherPeriod] = useState('')
 
   useEffect(() => {
     if (!teacherPeriod && periods.length) {
-      setTeacherPeriod(currentPeriod?.hakedis_donemi_id || periods[0].hakedis_donemi_id)
+      setTeacherPeriod(currentPeriod?.hakedis_donemi_id||periods[0].hakedis_donemi_id)
     }
   }, [teacherPeriod, currentPeriod?.hakedis_donemi_id, periods])
 
@@ -335,8 +335,8 @@ export function ReportsPage() {
           <div className="report-brand-lockup">
             <img src={logoSrc} alt="BS Eğitim" />
             <div>
-              <strong>BS EĞİTİM</strong>
-              <span>YÖNETİMİ</span>
+              <h2>BS Eğitim Yönetimi</h2>
+              <span>Kurumsal eğitim operasyonları</span>
             </div>
           </div>
           <div className="report-doc-heading">
@@ -634,20 +634,14 @@ export function ReportsPage() {
               if (!p) return <div className="report-placeholder">Hakediş dönemi bulunamadı.</div>
 
               const allLessons = data.dersler
-                .filter(
-                  x =>
-                    x.ogretmen_id === teacher &&
-                    x.ders_durumu === 'Yapıldı' &&
-                    (x.tarih || '') >= p.baslangic_tarihi &&
-                    (x.tarih || '') <= p.bitis_tarihi,
-                )
+                .filter(x=>x.ogretmen_id===teacher&&x.ders_durumu==='Yapıldı'&&(x.tarih||'')>=p.baslangic_tarihi&&(x.tarih||'')<=p.bitis_tarihi)
                 .sort(
                   (a, b) =>
                     String(a.tarih || '').localeCompare(String(b.tarih || '')) ||
                     String(a.baslangic_saati || '').localeCompare(String(b.baslangic_saati || '')),
                 )
               const allPayments = data.ogretmenOdemeleri
-                .filter(x => x.ogretmen_id === teacher && x.hakedis_donemi_id === teacherPeriod && !x.iptal_mi)
+                .filter(x=>x.ogretmen_id===teacher&&x.hakedis_donemi_id===teacherPeriod&&!x.iptal_mi)
                 .sort((a, b) => String(a.tarih || '').localeCompare(String(b.tarih || '')))
               const totalEarned = allLessons.reduce((sum, x) => sum + Number(x.ogretmen_toplam_hakedis || 0), 0)
               const totalPaid = allPayments.reduce((sum, x) => sum + Number(x.tutar || 0), 0)
@@ -703,7 +697,7 @@ export function ReportsPage() {
                       <span>Branş</span>
                       <span className="num">Ders</span>
                       <span className="num">Birim Hakediş</span>
-                      <span className="num">Toplam Hakediş</span>
+                      <span className="num">Hakediş Tutarı</span>
                     </div>
                     {allLessons.length ? (
                       allLessons.map(x => (

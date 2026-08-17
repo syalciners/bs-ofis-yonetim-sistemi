@@ -28,6 +28,8 @@ jobs:
         run: node scripts/check-teachers-ux.mjs
       - name: Öğrenciler UX kuralları
         run: node scripts/check-students-ux.mjs
+      - name: Raporlar UX kuralları
+        run: node scripts/check-reports-ux.mjs
       - name: Detay ekranı UX kuralları
         run: node scripts/check-detail-ux.mjs
       - name: Akıllı Programlama kuralları

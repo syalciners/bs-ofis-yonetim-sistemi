@@ -4,6 +4,7 @@
 .calendar-mode-btn:active{transform:translateY(0)}
 
 .daily-calendar-page{gap:14px}
+.daily-mode-switch-row{display:flex;align-items:center;justify-content:flex-start;min-height:34px}
 .daily-week-nav{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:8px;padding:8px;border:1px solid #dbe4ef;border-radius:18px;background:linear-gradient(180deg,#fff,#fbfcfe);box-shadow:0 8px 24px rgba(30,52,82,.045)}
 .daily-week-nav>button{width:42px;height:42px;display:grid;place-items:center;border:1px solid #dce5ef;border-radius:13px;background:#fff;color:#17345b;cursor:pointer;box-shadow:0 3px 9px rgba(32,58,88,.05)}
 .daily-week-nav>button:active{transform:scale(.97)}
@@ -103,6 +104,7 @@
   .calendar-title-actions{gap:5px}
   .calendar-mode-btn{min-height:32px;padding:6px 9px;font-size:9.5px;border-radius:10px}
   .daily-calendar-page{gap:11px}
+  .daily-mode-switch-row{min-height:32px}
   .daily-week-nav{grid-template-columns:38px minmax(0,1fr) 38px;padding:6px;border-radius:16px}
   .daily-week-nav>button{width:38px;height:38px;border-radius:11px}
   .daily-week-nav b{font-size:11.5px}

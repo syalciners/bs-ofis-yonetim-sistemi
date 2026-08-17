@@ -10,7 +10,7 @@ const checks = [
   ['Kurum dönem ve özel tarih aralığı', reports.includes('institutionRangePreset') && reports.includes("institutionRangePreset === 'custom'")],
   ['Öğrenci devir bakiyesi hesaplanıyor', reports.includes('openingBalance') && reports.includes('Önceki Dönemden Devir')],
   ['Öğrenci dönem sonu bakiyesi hesaplanıyor', reports.includes('periodEndBalance') && reports.includes('Ödenecek Bakiye') && reports.includes('Peşin Bakiye')],
-  ['Öğretmen detayında branş ve birim hakediş var', reports.includes('Birim Hakediş') && reports.includes('Toplam Hakediş') && reports.includes('branchName(data, x.brans_id)')],
+  ['Öğretmen detayında branş ve birim hakediş var', reports.includes('Birim Hakediş') && reports.includes('Hakediş Tutarı') && reports.includes('branchName(data, x.brans_id)')],
   ['Kurum operasyon ve nakit ayrımı var', reports.includes('OPERASYONEL SONUÇ') && reports.includes('NAKİT AKIŞI') && reports.includes('operationalResult') && reports.includes('netCashMovement')],
   ['Kurum finansal durum KPI alanları var', reports.includes('Öğrenci Alacağı') && reports.includes('Öğretmen Borcu') && reports.includes('Kasa / Banka')],
   ['Mevcut BS Eğitim public logo ailesi kullanılıyor', reports.includes('bs-egitim-icon-512-v2.png')],

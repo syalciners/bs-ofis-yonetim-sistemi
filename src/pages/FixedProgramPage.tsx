@@ -92,7 +92,6 @@ function placePrograms(programs:SabitProgram[]):PlacedProgram[]{
 
 export function FixedProgramPage(){
   const{data,refresh}=useAppData();const{toast}=useToast()
-  const[showPassive,setShowPassive]=useState(false)
   const[viewMode,setViewMode]=useState<ViewMode>(()=>sessionStorage.getItem('bs-sabit-program-gorunum')==='list'?'list':'calendar')
   const[selectedDay,setSelectedDay]=useState(todayDayName)
   const[programDefaults,setProgramDefaults]=useState<ProgramDefaults|null>(null)
@@ -107,7 +106,7 @@ export function FixedProgramPage(){
 
   useEffect(()=>{sessionStorage.setItem('bs-sabit-program-gorunum',viewMode)},[viewMode])
   useEffect(()=>()=>{const runtime=dragRef.current;if(runtime?.timer!=null)window.clearTimeout(runtime.timer)},[])
-  const programs=useMemo(()=>{if(!data)return[];return data.sabitProgramlar.filter(x=>showPassive||!(x.program_durumu==='Pasif'||x.aktif===false)).sort((a,b)=>dayNames.indexOf(a.haftanin_gunu||'')-dayNames.indexOf(b.haftanin_gunu||'')||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,showPassive])
+  const programs=useMemo(()=>{if(!data)return[];return data.sabitProgramlar.filter(x=>!(x.program_durumu==='Pasif'||x.aktif===false)).sort((a,b)=>dayNames.indexOf(a.haftanin_gunu||'')-dayNames.indexOf(b.haftanin_gunu||'')||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data])
   if(!data)return null
 
   const toggleProgram=async(p:SabitProgram)=>{
@@ -216,12 +215,12 @@ Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; deği
   return <div className="page-stack fixed-program-page">
     <section className="page-title-row"><div><span className="eyebrow">PROGRAM ŞABLONLARI</span><h1>Sabit Ders Programı</h1><p>Tekrar eden dersleri gün, saat ve dersliklere göre yönetin.</p></div><button className="primary-btn" onClick={()=>openNewProgram()}><Plus size={17}/>Sabit Ders Ekle</button></section>
 
-    <section className="fixed-program-view-switch" aria-label="Sabit program görünümü">
-      <button type="button" className={viewMode==='calendar'?'active':''} aria-pressed={viewMode==='calendar'} onClick={()=>setViewMode('calendar')}><CalendarDays size={16}/>Takvim</button>
-      <button type="button" className={viewMode==='list'?'active':''} aria-pressed={viewMode==='list'} onClick={()=>setViewMode('list')}><List size={16}/>Liste</button>
+    <section className="fixed-program-toolbar fixed-program-summary-toolbar" aria-label="Sabit program özeti ve görünüm">
+      <div><b>{programs.length} program</b><span>Yalnız aktif kayıtlar</span></div>
+      <button className="calendar-mode-btn fixed-program-view-toggle" type="button" onClick={()=>setViewMode(viewMode==='calendar'?'list':'calendar')} aria-label={viewMode==='calendar'?'Liste görünümüne geç':'Takvim görünümüne geç'}>
+        {viewMode==='calendar'?<><List size={16}/>Liste</>:<><CalendarDays size={16}/>Takvim</>}
+      </button>
     </section>
-
-    <section className="fixed-program-toolbar"><div><b>{programs.length} program</b><span>{showPassive?'Aktif ve pasif kayıtlar':'Yalnız aktif kayıtlar'}</span></div><button className="secondary-btn" onClick={()=>setShowPassive(x=>!x)}>{showPassive?'Pasifleri Gizle':'Pasifleri Göster'}</button></section>
 
     {viewMode==='calendar'?<>
       <section className="fixed-program-day-tabs" aria-label="Sabit program günü seç">
@@ -273,7 +272,7 @@ Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; deği
       {dragView?.active&&draggedProgram&&<div className="daily-drag-ghost" style={{left:dragView.clientX+14,top:dragView.clientY+14}}><strong>{abbreviateName(studentName(data,draggedProgram.ogrenci_id))}</strong><span>{dragRoom?.label||'Derslik'} · {dragView.target?minutesToTime(dragView.target.minute):'—'}</span></div>}
     </>:<section className="fixed-program-groups">
       {dayNames.map(day=>{const items=programs.filter(x=>x.haftanin_gunu===day);if(!items.length)return null;return <div className="fixed-day-group" key={day}><header><b>{day}</b><span>{items.length} ders</span></header><div>{items.map(p=>{const teacher=teacherName(data,p.ogretmen_id);return <button className={`program-card ${teacherTone(teacher)} ${p.program_durumu==='Pasif'||p.aktif===false?'muted-card':''}`} key={p.program_id} onClick={()=>setSelectedProgram(p)}><div className="program-time"><b>{time(p.baslangic_saati)}</b><span>{Number(p.ders_sayisi||1)} ders</span></div><div className="program-main"><strong>{studentName(data,p.ogrenci_id)}</strong><small>{teacher} · {branchName(data,p.brans_id)} · {roomName(data,p.derslik_id)}</small><span>{p.tekrar_sikligi} · {p.program_durumu||'Aktif'}</span></div><div className="program-price"><b>{money(p.ogrenci_birim_ucreti)}</b><small>öğrenci / ders</small></div></button>})}</div></div>})}
-      {!programs.length&&<div className="calm-empty"><Repeat2/><b>Sabit program bulunamadı.</b><span>Yeni sabit ders ekleyebilir veya pasif kayıtları gösterebilirsiniz.</span></div>}
+      {!programs.length&&<div className="calm-empty"><Repeat2/><b>Sabit program bulunamadı.</b><span>Yeni sabit ders ekleyerek başlayabilirsiniz.</span></div>}
     </section>}
 
     <Sheet open={programForm!==undefined} title={programForm?'Sabit Programı Düzenle':'Yeni Sabit Ders'} subtitle="Uygunluk kontrolü ve akıllı alternatifler" onClose={closeProgramForm}>{programForm!==undefined&&<SmartProgramForm key={`${programForm?.program_id||'new'}-${programDefaults?.day||''}-${programDefaults?.time||''}-${programDefaults?.roomId||''}`} program={programForm||undefined} defaultDay={programDefaults?.day} defaultStartTime={programDefaults?.time} defaultRoomId={programDefaults?.roomId} onDone={closeProgramForm} onCancel={closeProgramForm}/>}</Sheet>

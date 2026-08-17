@@ -18,6 +18,30 @@ interface AppCtx {
 }
 const Ctx = createContext<AppCtx | null>(null)
 
+const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
+
+function portalSessionUrl(session: Session) {
+  const fragment = new URLSearchParams({
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_in: String(session.expires_in ?? 3600),
+    token_type: session.token_type || 'bearer',
+  })
+  if (session.expires_at) fragment.set('expires_at', String(session.expires_at))
+  return `${PORTAL_URL}#${fragment.toString()}`
+}
+
+async function redirectToPortalIfEligible(session: Session) {
+  const { data, error } = await supabase.rpc('portal_oturum_bilgisi_v2')
+  if (error || !data || typeof data !== 'object') return false
+
+  const role = (data as { rol?: unknown }).rol
+  if (role !== 'Öğrenci' && role !== 'Öğretmen') return false
+
+  window.location.replace(portalSessionUrl(session))
+  return true
+}
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<KullaniciProfili | null>(null)
@@ -32,7 +56,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setRefreshing(true)
     try {
       const [nextData, nextProfile] = await Promise.all([loadAppData(), loadProfile(session.user.id)])
-      if (!nextProfile?.aktif) throw new Error('Bu kullanıcı hesabı uygulama için aktif değil.')
+      if (!nextProfile?.aktif) {
+        const redirected = await redirectToPortalIfEligible(session)
+        if (redirected) return
+        throw new Error('Bu kullanıcı hesabı uygulama için aktif değil.')
+      }
       setData(nextData)
       setProfile(nextProfile as KullaniciProfili)
       setError(null)

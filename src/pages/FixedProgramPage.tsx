@@ -210,7 +210,8 @@ Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; deği
     releaseProgramDrag(runtime)
   }
   const draggedProgram=dragView?selectedPrograms.find(x=>x.program_id===dragView.programId):null
-  const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target.roomId):null
+  const dragRoomTarget=dragView?.target||null
+  const dragRoom=dragRoomTarget?roomColumns.find(x=>x.id===dragRoomTarget.roomId):null
 
   return <div className="page-stack fixed-program-page">
     <section className="page-title-row"><div><span className="eyebrow">PROGRAM ŞABLONLARI</span><h1>Sabit Ders Programı</h1><p>Tekrar eden dersleri gün, saat ve dersliklere göre yönetin.</p></div><button className="primary-btn" onClick={()=>openNewProgram()}><Plus size={17}/>Sabit Ders Ekle</button></section>

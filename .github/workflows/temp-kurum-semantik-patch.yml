@@ -1,0 +1,31 @@
+name: Geçici kurum raporu semantik patch
+
+on:
+  push:
+    branches:
+      - v1-kurum-ogrenci-bakiyesi
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v1-kurum-ogrenci-bakiyesi
+          fetch-depth: 0
+      - name: Kurum raporu etiketlerini ve ders birimini düzelt
+        run: python3 -c "from pathlib import Path; p=Path('src/pages/ReportsPage.tsx'); s=p.read_text(); s=s.replace('<span>Öğrenci Alacağı</span>','<span>Öğrenci Bakiyesi</span>').replace('<b>{completedInstitutionLessons.length}</b>','<b>{completedInstitutionLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)}</b>').replace('Ders Durumu Dağılımı <span className=\"report-section-note\">operasyon kalitesi</span>','Program Durumu Dağılımı <span className=\"report-section-note\">operasyon kalitesi</span>').replace('completedLessons: completedLessonsForPdf.length,','completedLessons: completedLessonsForPdf.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0),'); p.write_text(s); p=Path('src/services/institutionManagementPdfService.ts'); s=p.read_text().replace("metric('Öğrenci Alacağı',money(input.openStudentDebt)","metric('Öğrenci Bakiyesi',money(input.openStudentDebt)").replace("{text:[{text:'Ders Durumu Dağılımı'","{text:[{text:'Program Durumu Dağılımı'"); p.write_text(s); p=Path('scripts/check-reports-ux.mjs'); s=p.read_text().replace("reports.includes('Öğrenci Alacağı')","reports.includes('Öğrenci Bakiyesi')").replace("institutionPdf.includes('Öğrenci Alacağı')","institutionPdf.includes('Öğrenci Bakiyesi')").replace("institutionPdf.includes('Ders Durumu Dağılımı')","institutionPdf.includes('Program Durumu Dağılımı')"); anchor=\"  ['Kurum PDF finansal durum ve ders dağılımını korur',\"; check=\"  ['Kurum yapılan ders KPI gerçek ders_sayisi toplamıdır', reports.includes('completedInstitutionLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)') && reports.includes('completedLessons: completedLessonsForPdf.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)')],\\n\"; s=s.replace(anchor,check+anchor) if 'Kurum yapılan ders KPI gerçek ders_sayisi toplamıdır' not in s else s; p.write_text(s)"
+      - name: Patch'i commit et
+        run: |
+          git config user.name "syalciners"
+          git config user.email "syalciners@gmail.com"
+          git add src/pages/ReportsPage.tsx src/services/institutionManagementPdfService.ts scripts/check-reports-ux.mjs
+          if git diff --cached --quiet; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git commit -m "Kurum raporu öğrenci bakiyesi ve ders birimini düzelt"
+          git push origin HEAD:v1-kurum-ogrenci-bakiyesi

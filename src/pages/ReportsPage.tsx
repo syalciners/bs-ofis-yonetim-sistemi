@@ -4,6 +4,7 @@ import { useAppData } from '../components/AppDataProvider'
 import { addDays, fullDate, money, todayISO } from '../lib/format'
 import { reportFilename } from '../lib/reportFilename'
 import { branchName, cashBalance, totalOpenDebt, totalTeacherBalance } from '../services/metrics'
+import { openInstitutionManagementPdf } from '../services/institutionManagementPdfService'
 import { openStudentAccountPdf } from '../services/studentAccountPdfService'
 import { openTeacherEarningPdf } from '../services/teacherEarningPdfService'
 
@@ -279,14 +280,60 @@ export function ReportsPage() {
       return
     }
 
-    const previousTitle = document.title
-    const restore = () => {
-      if (document.title === pdfFilename) document.title = previousTitle
+    if (type === 'kurum') {
+      const institutionLessonsForPdf = data.dersler.filter(x => inRange(x.tarih, institutionRange))
+      const completedLessonsForPdf = institutionLessonsForPdf.filter(x => x.ders_durumu === 'Yapıldı')
+      const revenue = completedLessonsForPdf.reduce((sum, x) => sum + Number(x.ogrenci_toplam_tutar || 0), 0)
+      const teacherAccrual = completedLessonsForPdf.reduce((sum, x) => sum + Number(x.ogretmen_toplam_hakedis || 0), 0)
+      const collections = data.tahsilatlar
+        .filter(x => !x.iptal_mi && inRange(x.tarih, institutionRange))
+        .reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const expenses = data.giderler
+        .filter(x => !x.iptal_mi && inRange(x.tarih, institutionRange))
+        .reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const teacherPaid = data.ogretmenOdemeleri
+        .filter(x => !x.iptal_mi && inRange(x.tarih, institutionRange))
+        .reduce((sum, x) => sum + Number(x.tutar || 0), 0)
+      const operationalResultForPdf = revenue - teacherAccrual - expenses
+      const netCashMovementForPdf = collections - teacherPaid - expenses
+      const collectionRateForPdf = revenue ? (collections / revenue) * 100 : 0
+      const teacherCostRateForPdf = revenue ? (teacherAccrual / revenue) * 100 : 0
+      const operationalMarginForPdf = revenue ? (operationalResultForPdf / revenue) * 100 : 0
+      const statusRows = lessonStatuses.map(status => {
+        const rows = institutionLessonsForPdf.filter(x => x.ders_durumu === status)
+        return {
+          status,
+          count: rows.length,
+          percent: institutionLessonsForPdf.length ? (rows.length / institutionLessonsForPdf.length) * 100 : 0,
+        }
+      })
+
+      try {
+        await openInstitutionManagementPdf({
+          periodLabel: institutionRange.label,
+          reportCode,
+          documentDate: today,
+          revenue,
+          teacherAccrual,
+          expenses,
+          operationalResult: operationalResultForPdf,
+          collections,
+          teacherPaid,
+          netCashMovement: netCashMovementForPdf,
+          openStudentDebt: totalOpenDebt(data),
+          teacherDebt: totalTeacherBalance(data),
+          cashBank: cashBalance(data),
+          completedLessons: completedLessonsForPdf.length,
+          statusRows,
+          collectionRate: collectionRateForPdf,
+          teacherCostRate: teacherCostRateForPdf,
+          operationalMargin: operationalMarginForPdf,
+          filename: pdfFilename,
+        })
+      } catch (error: any) {
+        window.alert(error?.message || 'Kurum yönetim raporu PDF olarak oluşturulamadı.')
+      }
     }
-    document.title = pdfFilename
-    window.addEventListener('focus', () => window.setTimeout(restore, 1200), { once: true })
-    requestAnimationFrame(() => requestAnimationFrame(() => window.print()))
-    window.setTimeout(restore, 120000)
   }
 
   const institutionLessons = data.dersler.filter(x => inRange(x.tarih, institutionRange))

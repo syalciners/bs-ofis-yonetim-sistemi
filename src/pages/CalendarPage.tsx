@@ -25,9 +25,8 @@ const weekChoices=[
   {offset:1,label:'Gelecek Hafta'},
 ]
 
-type TwoWeekCreationStatus={monday:string;selected:WeekCreationStatus;next:WeekCreationStatus}
 type CalendarFilter={type:'all'}|{type:'teacher';id:string}|{type:'student';id:string}
-const allWeeksAreReady=(status:TwoWeekCreationStatus)=>status.selected.calisti&&status.next.calisti
+type WeekStatusState={monday:string;status:WeekCreationStatus}
 const serializeFilter=(filter:CalendarFilter)=>filter.type==='all'?'all':`${filter.type}:${filter.id}`
 const parseFilter=(value:string|null):CalendarFilter|null=>{
   if(!value)return null
@@ -45,7 +44,7 @@ const storedWeekOffset=()=>{
 }
 
 export function CalendarPage(){
-  const {data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams();const nav=useNavigate()
+  const{data,refresh}=useAppData();const{toast}=useToast();const[params]=useSearchParams();const nav=useNavigate()
   const[filter,setFilter]=useState<CalendarFilter>(()=>{
     const studentParam=params.get('ogrenci')
     if(studentParam)return{type:'student',id:studentParam}
@@ -57,10 +56,10 @@ export function CalendarPage(){
     const oldTeacher=sessionStorage.getItem('bs-takvim-ogretmen')
     return oldTeacher&&oldTeacher!=='tum'?{type:'teacher',id:oldTeacher}:{type:'all'}
   })
-  const[weekOffset,setWeekOffset]=useState(storedWeekOffset);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[shareOpen,setShareOpen]=useState(false);const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<TwoWeekCreationStatus|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
+  const[weekOffset,setWeekOffset]=useState(storedWeekOffset);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[newLesson,setNewLesson]=useState(false);const[shareOpen,setShareOpen]=useState(false);const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<WeekStatusState|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
   const baseMonday=mondayOf(todayISO());const monday=addDays(baseMonday,weekOffset*7);const end=addDays(monday,7)
   const isPastWeek=weekOffset<0;const isCurrentWeek=weekOffset===0
-  const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
+  const readWeekStatus=useCallback(async():Promise<WeekStatusState>=>({monday,status:await getWeekCreationStatus(monday)}),[monday])
   const lessons=useMemo(()=>{if(!data)return[];return data.dersler.filter(x=>(filter.type==='all'||(filter.type==='teacher'&&x.ogretmen_id===filter.id)||(filter.type==='student'&&x.ogrenci_id===filter.id))&&(x.tarih||'')>=monday&&(x.tarih||'')<end).sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))},[data,filter,monday,end])
   const visibleLessons=useMemo(()=>lessons.filter(x=>!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))),[lessons])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-kisi',serializeFilter(filter));sessionStorage.setItem('bs-takvim-ogretmen',filter.type==='teacher'?filter.id:'tum')},[filter])
@@ -76,22 +75,47 @@ export function CalendarPage(){
   const shareTarget:ProgramShareTarget|null=filter.type==='teacher'?{type:'teacher',id:filter.id}:filter.type==='student'?{type:'student',id:filter.id}:null
   const weekProgramCount=visibleLessons.filter(x=>x.program_id).length
   const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:visibleLessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
-  const activeWeekStatus=weekStatus?.monday===monday?weekStatus:null
-  const allWeeksReady=activeWeekStatus?allWeeksAreReady(activeWeekStatus):false
-  const selectedWeekReady=Boolean(activeWeekStatus?.selected.calisti)
-  const nextWeekReady=Boolean(activeWeekStatus?.next.calisti)
-  const weekActionText=isPastWeek?'Geçmiş Hafta':weekBusy||weekStatusBusy?'Kontrol ediliyor…':allWeeksReady?'Haftalar Hazır':isCurrentWeek&&!selectedWeekReady?'Eksik Dersleri Tamamla':selectedWeekReady&&!nextWeekReady?'Sonraki Haftayı Hazırla':!selectedWeekReady&&nextWeekReady?'Haftayı Oluştur':activeWeekStatus?'İki Haftayı Hazırla':'Haftayı Oluştur'
+  const activeWeekStatus=weekStatus?.monday===monday?weekStatus.status:null
+  const weekReady=Boolean(activeWeekStatus?.calisti)
+  const weekActionText=isPastWeek?'Geçmiş Hafta':weekBusy||weekStatusBusy?'Kontrol ediliyor…':weekReady?'Hafta Hazır':'Haftayı Hazırla'
   const filterLabel=filter.type==='all'?'Tüm Öğretmenler':filter.type==='teacher'?activeTeachers.find(x=>x.ogretmen_id===filter.id)?.ad_soyad||'Öğretmen':activeStudents.find(x=>x.ogrenci_id===filter.id)?.ad_soyad||'Öğrenci'
   const chooseFilter=(next:CalendarFilter)=>{setFilter(next);setShareOpen(false)}
 
-  const confirmWeekCreation=(status:TwoWeekCreationStatus)=>{const ranges=[!status.selected.calisti?`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`:null,!status.next.calisti?`${shortDate(addDays(monday,7))} – ${shortDate(addDays(monday,13))}`:null].filter((x):x is string=>Boolean(x));if(!ranges.length)return false;const scope=ranges.length===1?`${ranges[0]} haftasının`:`${ranges.join(' ve ')} haftalarının`;const currentSafety=isCurrentWeek?'\n\nİçinde bulunduğumuz haftada yalnız şu andan sonraki eksik dersler eklenir; geçmiş dersler değiştirilmez.':'';return window.confirm(`${scope} eksik dersleri oluşturulsun mu?\n\nTakvim kişi filtresinden bağımsız olarak tüm aktif sabit programlar işlenir. Mevcut dersler korunur; yalnız eksik dersler eklenir.${currentSafety}`)}
-
-  const createWeekNow=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){setWeekReview(null);toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());setWeekReview(null);toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
-  const prepareWeek=async()=>{setWeekBusy(true);try{if(isPastWeek){toast('Geçmiş haftalar otomatik olarak hazırlanamaz.');return}const status=await readWeekStatus();setWeekStatus(status);if(allWeeksAreReady(status)){toast('Seçilen hafta ve sonraki hafta zaten hazır.');return}const review=await reviewWeekPlanning(monday);if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}if(!confirmWeekCreation(status))return;const r:any=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());toast(r?.olusturulan!==undefined?`${r.olusturulan} eksik ders oluşturuldu. Haftalar güncel.`:'Haftalar güncellendi.')}catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}}
+  const confirmWeekCreation=()=>{
+    const currentSafety=isCurrentWeek?'\n\nBugünden önceki veya saati geçmiş dersler değiştirilmez.':''
+    return window.confirm(`${shortDate(monday)} – ${shortDate(addDays(monday,6))} haftası hazırlansın mı?\n\nTüm aktif sabit programlar işlenir. Daha önce oluşturulmamış dersler eklenir; sabit programda günü, saati, dersliği veya temel bilgileri değişmiş henüz sonuçlanmamış dersler güncellenir. Yapıldı, İptal ve tek seferlik değişiklikler korunur.${currentSafety}`)
+  }
+  const resultToast=(r:{olusturulan?:number;guncellenen?:number})=>{
+    const created=Number(r.olusturulan||0),updated=Number(r.guncellenen||0)
+    if(created===0&&updated===0){toast('Hafta zaten güncel. Yeni ders oluşturulmadı veya güncellenmedi.');return}
+    toast(`${created} ders oluşturuldu, ${updated} ders güncellendi. Hafta hazır.`)
+  }
+  const createWeekNow=async()=>{
+    setWeekBusy(true)
+    try{
+      if(isPastWeek){toast('Geçmiş haftalar hazırlanamaz.');return}
+      const status=await readWeekStatus();setWeekStatus(status)
+      if(status.status.calisti){setWeekReview(null);toast('Seçilen hafta zaten hazır.');return}
+      if(!confirmWeekCreation())return
+      const r=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());setWeekReview(null);resultToast(r)
+    }catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}
+  }
+  const prepareWeek=async()=>{
+    setWeekBusy(true)
+    try{
+      if(isPastWeek){toast('Geçmiş haftalar hazırlanamaz.');return}
+      const status=await readWeekStatus();setWeekStatus(status)
+      if(status.status.calisti){toast('Seçilen hafta zaten hazır.');return}
+      const review=await reviewWeekPlanning(monday)
+      if(!review.uygun){setWeekReview(review);toast(`${review.sorun_sayisi} ders için çakışma bulundu. Önerileri hazırladım.`,'error');return}
+      if(!confirmWeekCreation())return
+      const r=await createWeek(monday);await refresh();setWeekStatus(await readWeekStatus());resultToast(r)
+    }catch(e:any){toast(e.message||String(e),'error')}finally{setWeekBusy(false)}
+  }
   const openWeekPdf=async()=>{if(!lessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
 
   return <div className="page-stack calendar-v2">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Haftayı seç, öğretmen veya öğrenciyi filtrele, dersi yönet.</p></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Haftayı seç, öğretmen veya öğrenciyi filtrele, dersi yönet.</p></div></section>
 
     <section className="week-switcher" aria-label="Hafta seçimi">
       {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null);setShareOpen(false)}}>{x.label}</button>)}
@@ -135,6 +159,6 @@ export function CalendarPage(){
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Çakışma otomatik kontrol edilir." onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>
     <Sheet open={newLesson} title="Ders Ekle" subtitle="Öğrenci, öğretmen ve derslik uygunluğu otomatik kontrol edilir." onClose={()=>setNewLesson(false)}><LessonForm onDone={()=>setNewLesson(false)} onCancel={()=>setNewLesson(false)}/></Sheet>
     <Sheet open={shareOpen&&!!shareTarget} title="Program Gönder" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,6))}`} onClose={()=>setShareOpen(false)}>{shareTarget&&<ProgramSharePreview target={shareTarget} lessons={visibleLessons} monday={monday} sunday={addDays(monday,6)} onClose={()=>setShareOpen(false)}/>}</Sheet>
-    <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,13))} · iki hafta birlikte kontrol edilir`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
+    <Sheet open={!!weekReview} title="Haftalık Program Kontrolü" subtitle={`${shortDate(monday)} – ${shortDate(addDays(monday,6))} · yalnız seçilen hafta`} onClose={()=>setWeekReview(null)}>{weekReview&&<WeekPlanningReviewPanel review={weekReview} onChange={setWeekReview} onClose={()=>setWeekReview(null)} onCreate={()=>void createWeekNow()}/>}</Sheet>
   </div>
 }

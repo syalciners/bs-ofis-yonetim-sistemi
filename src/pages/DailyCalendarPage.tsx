@@ -236,7 +236,11 @@ export function DailyCalendarPage(){
   const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target?.roomId):null
 
   return <div className="page-stack calendar-v2 daily-calendar-page">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div><p>Günü seç, boş derslik ve saate dokunarak ders ekle.</p></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></div></section>
+
+    <section className="daily-mode-switch-row" aria-label="Program görünümü">
+      <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
+    </section>
 
     <section className="daily-week-nav" aria-label="Hafta değiştir">
       <button type="button" aria-label="Önceki hafta" onClick={()=>changeWeek(-1)}><ChevronLeft size={20}/></button>

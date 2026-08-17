@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 
 const read=(path)=>readFileSync(path,'utf8')
 const calendar=read('src/pages/CalendarPage.tsx')
+const dailyCalendar=read('src/pages/DailyCalendarPage.tsx')
+const dailyCalendarCss=read('src/daily-calendar.css')
 const lessonDetail=read('src/components/LessonDetail.tsx')
 const weekService=read('src/services/weekPlanningService.ts')
 const pdfService=read('src/services/weeklyProgramPdfService.ts')
@@ -21,6 +23,9 @@ const programCss=read('src/program-share.css')
 const main=read('src/main.tsx')
 
 const checks=[
+  ['Program Liste görünümünde tek Takvim karşı-görünüm düğmesi vardır',calendar.includes("onClick={()=>nav('/takvim/gunluk')}")&&calendar.includes('<CalendarDays size={16}/>Takvim')],
+  ['Günlük Takvimde tek Liste karşı-görünüm düğmesi başlığın altında soldadır',dailyCalendar.includes('daily-mode-switch-row')&&dailyCalendar.includes("onClick={()=>nav('/takvim')}")&&dailyCalendar.includes('<List size={16}/>Liste')&&dailyCalendar.indexOf('daily-mode-switch-row')>dailyCalendar.indexOf('<h1>Takvim</h1>')&&dailyCalendar.indexOf('daily-mode-switch-row')<dailyCalendar.indexOf('daily-week-nav')&&dailyCalendarCss.includes('.daily-mode-switch-row{display:flex;align-items:center;justify-content:flex-start')],
+  ['Günlük Takvim açıklaması ve başlık sağındaki eski Liste düğmesi kaldırılmıştır',!dailyCalendar.includes('Günü seç, boş derslik ve saate dokunarak ders ekle.')&&(dailyCalendar.match(/calendar-mode-btn/g)||[]).length===1],
   ['Takvim Önceki Hafta butonunu içerir',calendar.includes("label:'Önceki Hafta'")],
   ['Takvim Bu Hafta butonunu içerir',calendar.includes("label:'Bu Hafta'")],
   ['Takvim Gelecek Hafta butonunu içerir',calendar.includes("label:'Gelecek Hafta'")],

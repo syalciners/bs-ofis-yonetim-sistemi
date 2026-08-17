@@ -4,6 +4,13 @@ import { spawnSync } from 'node:child_process'
 const sourcePath='scripts/check-business-rules.mjs'
 const tempPath='scripts/.check-business-rules-current.generated.mjs'
 let source=readFileSync(sourcePath,'utf8')
+const deployWorkflow=readFileSync('.github/workflows/deploy-pages.yml','utf8')
+
+if(!deployWorkflow.includes('GitHub Pages kaynağını Actions olarak sabitle')||!deployWorkflow.includes(`-d '{"build_type":"workflow"}'`)){
+  console.error('✗ GitHub Pages kaynağı workflow olarak sabitlenmiyor.')
+  process.exit(1)
+}
+console.log('✓ GitHub Pages kaynağı workflow olarak sabitlenir')
 
 const replaceExact=(from,to)=>{
   if(!source.includes(from))throw new Error(`Güncellenecek eski kontrol bulunamadı: ${from}`)

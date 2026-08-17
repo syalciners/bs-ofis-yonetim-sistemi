@@ -4,6 +4,7 @@ const reports = fs.readFileSync('src/pages/ReportsPage.tsx', 'utf8')
 const css = fs.readFileSync('src/report-corporate.css', 'utf8')
 const studentPdf = fs.readFileSync('src/services/studentAccountPdfService.ts', 'utf8')
 const teacherPdf = fs.readFileSync('src/services/teacherEarningPdfService.ts', 'utf8')
+const institutionPdf = fs.readFileSync('src/services/institutionManagementPdfService.ts', 'utf8')
 
 const checks = [
   ['Öğrenci ve dönem filtresi aynı satırda', reports.includes("type === 'ogrenci'") && reports.includes('studentRangePreset') && reports.includes('report-filter-row no-print')],
@@ -24,6 +25,11 @@ const checks = [
   ['Öğretmen detayında branş ve birim hakediş var', reports.includes('Birim Hakediş') && reports.includes('Hakediş Tutarı') && reports.includes('branchName(data, x.brans_id)')],
   ['Kurum operasyon ve nakit ayrımı var', reports.includes('OPERASYONEL SONUÇ') && reports.includes('NAKİT AKIŞI') && reports.includes('operationalResult') && reports.includes('netCashMovement')],
   ['Kurum finansal durum KPI alanları var', reports.includes('Öğrenci Alacağı') && reports.includes('Öğretmen Borcu') && reports.includes('Kasa / Banka')],
+  ['Kurum yönetim raporu gerçek PDF motorunu kullanır', reports.includes('openInstitutionManagementPdf') && institutionPdf.includes("import('pdfmake/build/pdfmake')") && institutionPdf.includes('.download(input.filename)')],
+  ['Kurum PDF operasyon ve nakit bloklarını ayrı tutar', institutionPdf.includes('OPERASYONEL SONUÇ') && institutionPdf.includes('NAKİT AKIŞI') && institutionPdf.includes('Gerçekleşen Ciro') && institutionPdf.includes('Öğretmen Ödemesi')],
+  ['Kurum PDF finansal durum ve ders dağılımını korur', institutionPdf.includes('Öğrenci Alacağı') && institutionPdf.includes('Öğretmen Borcu') && institutionPdf.includes('Kasa / Banka') && institutionPdf.includes('Ders Durumu Dağılımı')],
+  ['Kurum PDF kontrollü footer ve mevcut logo ailesini kullanır', institutionPdf.includes("BS Eğitim Yönetimi',bold:true,color:NAVY") && institutionPdf.includes('currentPage') && !institutionPdf.includes('window.print') && institutionPdf.includes("bs-egitim-icon-512-v2.png")],
+  ['Raporlar sayfasında tarayıcı window.print fallbackı kalmadı', !reports.includes('window.print()') && !reports.includes('requestAnimationFrame(() => requestAnimationFrame(() => window.print()))')],
   ['Mevcut BS Eğitim public logo ailesi kullanılıyor', reports.includes('bs-egitim-icon-512-v2.png')],
   ['Premium A4 dikey baskı korunuyor', css.includes('@page{size:A4 portrait') && css.includes('.report-brand-lockup') && css.includes('.report-dual-summary')],
   ['Mobilde filtreler kontrollü olarak tek kolona düşüyor', css.includes('@media(max-width:650px)') && css.includes('.report-page .report-filter-row,.report-date-row{grid-template-columns:1fr}')],

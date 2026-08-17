@@ -29,7 +29,7 @@ const checks=[
   ['Dokunmatik sürükleme 0,55 saniyelik uzun basma kullanır',daily.includes('const LONG_PRESS_MS=550')&&daily.includes('window.setTimeout(()=>activateDrag')],
   ['Yalnız Planlandı ders sürüklenebilir',daily.includes("const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'")],
   ['Masaüstünde hareket eşiğiyle sürükleme başlar',daily.includes("runtime.pointerType==='mouse'&&distance>=DRAG_MOVE_THRESHOLD")],
-  ['Derslik sütunları sürükleme hedefi olarak işaretlidir',daily.includes('data-room-id={column.id}')&&daily.includes("target?'drag-target':''")&&css.includes('.daily-room-slot.drag-target'))],
+  ['Derslik sütunları sürükleme hedefi olarak işaretlidir',daily.includes('data-room-id={column.id}')&&daily.includes("target?'drag-target':''")&&css.includes('.daily-room-slot.drag-target')],
   ['Sürükleme bırakılınca sunucuda çakışma tekrar kontrol edilir',daily.includes('await lessonConflict({...input,haric_ders_id:lesson.ders_id})')&&daily.includes('if(!check?.uygun)throw new Error(conflictMessage(check))')],
   ['Tek seferlik ders güvenli güncelleme RPC akışını kullanır',daily.includes('else await updateLesson(input)')],
   ['Sabit program dersi tek seferlik taşıma mekanizmasını kullanır',daily.includes('if(lesson.program_id)await moveProgramDate({program_id:lesson.program_id')],

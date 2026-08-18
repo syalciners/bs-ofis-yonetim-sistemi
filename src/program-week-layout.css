@@ -1,0 +1,25 @@
+/* Program hafta kontrolü: Takvim/Liste düğmesinden sonra kalan alan tarih ve Bu Hafta için eşit ikiye bölünür. */
+.calendar-week-toolbar-balanced{
+  --program-week-center-width:auto;
+  grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);
+}
+.calendar-week-toolbar-balanced .calendar-week-range-long{
+  width:100%;
+  min-width:0;
+  justify-self:stretch;
+}
+.calendar-week-toolbar-balanced .calendar-week-nav-compact{
+  --current-week-width:auto;
+  width:100%;
+  min-width:0;
+  justify-self:stretch;
+  grid-template-columns:26px minmax(0,1fr) 26px;
+}
+@media(max-width:520px){
+  .calendar-week-toolbar-balanced{grid-template-columns:80px minmax(0,1fr) minmax(0,1fr)}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact{grid-template-columns:24px minmax(0,1fr) 24px}
+}
+@media(max-width:360px){
+  .calendar-week-toolbar-balanced{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact{grid-template-columns:22px minmax(0,1fr) 22px}
+}

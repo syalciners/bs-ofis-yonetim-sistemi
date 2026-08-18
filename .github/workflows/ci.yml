@@ -38,6 +38,8 @@ jobs:
         run: node scripts/check-settings-ux.mjs
       - name: Ödev ve WhatsApp kuralları
         run: node scripts/check-assignments-ux.mjs
+      - name: Yönetici portal önizleme kuralları
+        run: node scripts/check-manager-portal-preview.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - name: Legacy Pages paketini repo köküne senkronla

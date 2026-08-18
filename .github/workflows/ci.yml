@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Geçici Program genişlik patch'i
+        run: python scripts/_tmp_equalize_week_width.py
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

@@ -1,0 +1,64 @@
+name: Demo Brand Verify Once
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - '.github/workflows/demo-brand-verify-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: demo
+      VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: demo-hazirlik
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: install
+        continue-on-error: true
+        run: npm ci --no-audit --no-fund
+      - id: isolation
+        continue-on-error: true
+        run: npm run check:demo-isolation
+      - id: rules
+        continue-on-error: true
+        run: npm run check:rules
+      - id: build
+        continue-on-error: true
+        run: npm run build
+      - name: Sonucu kaydet
+        if: always()
+        env:
+          INSTALL: ${{ steps.install.outcome }}
+          ISOLATION: ${{ steps.isolation.outcome }}
+          RULES: ${{ steps.rules.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          printf 'install=%s\nisolation=%s\nrules=%s\nbuild=%s\nsource_commit=%s\n' "$INSTALL" "$ISOLATION" "$RULES" "$BUILD" "$GITHUB_SHA" > .demo-brand-verify-result.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .demo-brand-verify-result.txt
+          git commit -m 'Demo marka doğrulama sonucunu kaydet' || true
+          git push origin HEAD:demo-hazirlik
+      - name: Kontrolleri zorunlu tut
+        if: always()
+        env:
+          INSTALL: ${{ steps.install.outcome }}
+          ISOLATION: ${{ steps.isolation.outcome }}
+          RULES: ${{ steps.rules.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          test "$INSTALL" = success
+          test "$ISOLATION" = success
+          test "$RULES" = success
+          test "$BUILD" = success

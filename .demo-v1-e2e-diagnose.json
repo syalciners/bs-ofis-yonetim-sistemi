@@ -1,12 +1,26 @@
 {
   "success": false,
-  "step": "A demo session seed",
+  "step": "A collection",
   "error": {
-    "message": "insert or update on table \"ogretmen_odemeleri\" violates foreign key constraint \"fk_ogretmen_odemeleri_kasa_hareketi\"",
-    "code": "23503",
-    "details": "Key (kasa_hareket_id)=(Dd045db929d-KHR-ODE-001) is not present in table \"kasa_hareketleri\".",
+    "message": "Geçersiz ödeme yöntemi.",
+    "code": "P0001",
+    "details": null,
     "hint": null
   },
-  "aId": "d045db92-9d11-4177-a613-7ac08cb0af2d",
-  "bId": null
+  "aId": "5988daea-09b0-4857-a7a2-d3eab054c76a",
+  "bId": null,
+  "aSession": {
+    "yeni": true,
+    "auth_user_id": "5988daea-09b0-4857-a7a2-d3eab054c76a",
+    "bitis_zamani": "2026-08-19T00:49:43.688028+00:00",
+    "baslangic_zamani": "2026-08-18T22:49:43.688028+00:00"
+  },
+  "aStudents": 18,
+  "aTeachers": 6,
+  "aLessons": 24,
+  "aCollections": 10,
+  "aStudent": "E2E-A-1787093386604",
+  "aStudentsAfter": 19,
+  "aTahsilat": "E2E-TAH-1787093388156",
+  "aKasa": "E2E-KH-1787093388156"
 }

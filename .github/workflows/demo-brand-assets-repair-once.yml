@@ -16,7 +16,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: demo-hazirlik
-      - name: Doğrulanmış PNG dosyalarını üret
+
+      - id: decode
+        continue-on-error: true
+        name: Doğrulanmış PNG dosyalarını üret
         run: |
           base64 -d .brand-source/bs-logo.b64 > public/bs-logo.png
           base64 -d .brand-source/bs-icon-192.b64 > public/bs-egitim-icon-192-v2.png
@@ -24,7 +27,10 @@ jobs:
           base64 -d .brand-source/bs-icon-512.b64 > public/bs-egitim-icon-512-v2.png
           cp public/bs-egitim-icon-512-v2.png public/bs-app-icon-512.png
           base64 -d .brand-source/bs-icon-maskable-512.b64 > public/bs-icon-maskable-512.png
-      - name: SHA-256 ve PNG doğrulaması
+
+      - id: verify
+        continue-on-error: true
+        name: SHA-256 ve PNG doğrulaması
         run: |
           echo 'bffa501826a9bbfb16c2e31e8cb1caeea08689943bec327b99e64e07b2ba2f08  public/bs-logo.png' | sha256sum -c -
           echo 'cf9b7f6d5b6d39e14a0aca850b3bf4aa2dc686c0a69a8cc2ac95801e81237d83  public/bs-egitim-icon-192-v2.png' | sha256sum -c -
@@ -34,16 +40,39 @@ jobs:
           file public/bs-egitim-icon-192-v2.png | grep -q '192 x 192'
           file public/bs-egitim-icon-512-v2.png | grep -q '512 x 512'
           file public/bs-icon-maskable-512.png | grep -q '512 x 512'
-      - name: Binary varlıkları branch'e commit et
+
+      - id: commit_assets
+        if: steps.decode.outcome == 'success' && steps.verify.outcome == 'success'
+        continue-on-error: true
+        name: Binary varlıkları branch'e commit et
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/bs-logo.png public/bs-egitim-icon-192-v2.png public/bs-app-icon-192.png public/bs-egitim-icon-512-v2.png public/bs-app-icon-512.png public/bs-icon-maskable-512.png
           git commit -m 'Demo marka PNG varlıklarını SHA doğrulamasıyla onar' || true
           git push origin HEAD:demo-hazirlik
+
       - name: Sonucu kaydet
+        if: always()
+        env:
+          DECODE: ${{ steps.decode.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+          COMMIT_ASSETS: ${{ steps.commit_assets.outcome }}
         run: |
-          printf 'status=success\nrun_id=%s\n' "$GITHUB_RUN_ID" > .demo-brand-assets-repair-result.txt
+          printf 'decode=%s\nverify=%s\ncommit_assets=%s\nrun_id=%s\nsource_commit=%s\n' "$DECODE" "$VERIFY" "$COMMIT_ASSETS" "$GITHUB_RUN_ID" "$GITHUB_SHA" > .demo-brand-assets-repair-result.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .demo-brand-assets-repair-result.txt
           git commit -m 'Demo marka varlık onarım sonucunu kaydet' || true
           git push origin HEAD:demo-hazirlik
+
+      - name: Kapıları zorunlu tut
+        if: always()
+        env:
+          DECODE: ${{ steps.decode.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+          COMMIT_ASSETS: ${{ steps.commit_assets.outcome }}
+        run: |
+          test "$DECODE" = success
+          test "$VERIFY" = success
+          test "$COMMIT_ASSETS" = success

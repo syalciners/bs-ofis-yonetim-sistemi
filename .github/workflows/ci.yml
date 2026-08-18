@@ -36,6 +36,8 @@ jobs:
         run: node scripts/check-smart-scheduling.mjs
       - name: Ayarlar profil güvenliği
         run: node scripts/check-settings-ux.mjs
+      - name: Program ayarları güvenliği
+        run: node scripts/check-program-settings.mjs
       - name: Ödev ve WhatsApp kuralları
         run: node scripts/check-assignments-ux.mjs
       - name: Yönetici portal önizleme kuralları

@@ -20,6 +20,7 @@ import { EducationDefinitionsPanel } from '../components/EducationDefinitionsPan
 import { FinancialDefinitionsPanel } from '../components/FinancialDefinitionsPanel'
 import { InstitutionSettingsPanel } from '../components/InstitutionSettingsPanel'
 import { ProfileSettingsForm } from '../components/ProfileSettingsForm'
+import { ProgramSettingsPanel } from '../components/ProgramSettingsPanel'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import type { KullaniciProfili, Ogretmen } from '../lib/types'
@@ -97,12 +98,13 @@ export function SettingsPage(){
     }
   },[data])
 
+  const programDefaults=institution||DEFAULT_KURUM_AYARLARI
   const managerItems=[
     {key:'kurum' as const,Icon:Building2,title:'Kurum',text:'Kurum bilgileri, marka ve logo',meta:institution?.marka_adi||'Kurum ayarları'},
     {key:'kullanicilar' as const,Icon:UsersRound,title:'Kullanıcılar ve Yetkiler',text:'Yönetim kullanıcıları ve hesap durumu',meta:'Güvenli kullanıcı yönetimi'},
     {key:'egitim' as const,Icon:MapPinned,title:'Branşlar ve Derslikler',text:'Eğitim alanları, ders yerleri ve kapasiteler',meta:summary?`${summary.branches} branş · ${summary.rooms} derslik`:'Tanımlar'},
     {key:'finans' as const,Icon:Landmark,title:'Finans Tanımları',text:'Kasa, banka ve gider sınıflandırmaları',meta:summary?`${summary.accounts} hesap · ${summary.categories} kategori`:'Tanımlar'},
-    {key:'program' as const,Icon:CalendarClock,title:'Program Ayarları',text:'Kurum genelindeki program varsayılanları',meta:summary?`${summary.fixedPrograms} aktif sabit program`:'Program'},
+    {key:'program' as const,Icon:CalendarClock,title:'Program Ayarları',text:'Yeni kayıt ve Takvim varsayılanları',meta:`${programDefaults.varsayilan_ders_birimi} ders · ${programDefaults.takvim_baslangic_saati}–${programDefaults.takvim_bitis_saati}`},
     {key:'portal' as const,Icon:PlugZap,title:'Portal ve Entegrasyonlar',text:'Portal erişimleri ve dış servis bağlantıları',meta:'Portal · Zoom'},
   ]
 
@@ -111,12 +113,12 @@ export function SettingsPage(){
     kullanicilar:{title:'Kullanıcılar ve Yetkiler',body:'Yönetim kullanıcılarının profil bilgileri ve hesap durumu güvenli servis üzerinden yönetilir.',rows:[['Mevcut kullanıcı',profile?.ad_soyad||'—'],['Rol',profile?.rol||'—'],['Güvenlik','E-posta ve rol salt okunur']]},
     egitim:{title:'Branşlar ve Derslikler',body:'Branş ve derslik tanımları güvenli servis üzerinden eklenir ve düzenlenir. Kimlikler değiştirilmez, geçmiş kayıtlar silinmez.',rows:[['Aktif branş',summary?String(summary.branches):'—'],['Aktif derslik',summary?String(summary.rooms):'—'],['Güvenlik','ID ve geçmiş bağlantılar korunur']]},
     finans:{title:'Finans Tanımları',body:'Kasa/banka hesapları ile gider kategorileri güvenli servis üzerinden yönetilir. Geçmiş hareketi bulunan hesapların açılış bakiyesi değiştirilmez.',rows:[['Aktif hesap',summary?String(summary.accounts):'—'],['Aktif gider kategorisi',summary?String(summary.categories):'—'],['Güvenlik','ID, geçmiş hareketler ve açılış bakiyesi korunur']]},
-    program:{title:'Program Ayarları',body:'Kişiye özel ücret, hakediş veya ders planları buraya taşınmayacak. Bu alan yalnız kurum genelindeki program varsayılanları için kullanılacak.',rows:[['Aktif sabit program',summary?String(summary.fixedPrograms):'—'],['Kapsam','Kurum genel ayarları'],['Sonraki adım','Varsayılan program değerleri']]},
+    program:{title:'Program Ayarları',body:'Yeni ders ve sabit program formlarının varsayılan ders birimi ile günlük Takvim görünüm aralığı buradan yönetilir. Mevcut kayıtlar geriye dönük değiştirilmez.',rows:[['Varsayılan ders birimi',String(programDefaults.varsayilan_ders_birimi)],['Takvim',`${programDefaults.takvim_baslangic_saati}–${programDefaults.takvim_bitis_saati}`],['Ders birimi standardı','60 dakika · salt okunur']]},
     portal:{title:'Portal ve Entegrasyonlar',body:'Öğretmen ve öğrenci portalı ile dış servis bağlantıları burada merkezi olarak yönetilecek. Gizli servis anahtarları hiçbir zaman uygulama ekranında gösterilmeyecek.',rows:[['Portal önizleme','Yönetici Menüsünde'],['Entegrasyon','Gizli bilgiler korunur'],['Sonraki adım','Portal ve bağlantı ayarları']]},
   }
 
   const selectedInfo=info?infoContent[info]:null
-  const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':'Yönetim ayarı'
+  const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':info==='program'?'Program varsayılanları':'Yönetim ayarı'
 
   return <div className="page-stack settings-hub-page">
     <section className="page-title-row"><div><span className="eyebrow">AYARLAR</span><h1>Ayarlar</h1></div></section>
@@ -155,7 +157,7 @@ export function SettingsPage(){
     </section>
 
     <Sheet open={editing} title="Profili Düzenle" subtitle="Kendi iletişim bilgileriniz" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
-    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kurum'?<InstitutionSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
+    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kurum'?<InstitutionSettingsPanel settings={programDefaults} onUpdated={refresh}/>:info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:info==='program'?<ProgramSettingsPanel settings={programDefaults} onUpdated={refresh}/>:<div className="settings-info-sheet">
       <p>{selectedInfo.body}</p>
       <div className="settings-info-rows">{selectedInfo.rows.map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
       <div className="settings-info-note"><BookOpenCheck size={17}/><span>Bu ekranda henüz veri değiştirilmez; yalnız mevcut yapı ve sıradaki güvenli yönetim alanı gösterilir.</span></div>

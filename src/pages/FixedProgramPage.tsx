@@ -15,13 +15,6 @@ import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 const dayShort=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']
-const ROOM_COLUMNS=[
-  {id:'LOC-001'},
-  {id:'LOC-002'},
-  {id:'LOC-003'},
-  {id:'LOC-005'},
-  {id:'LOC-004'},
-] as const
 const SLOT_MINUTES=30
 const SLOT_HEIGHT=42
 const DEFAULT_START=8*60
@@ -130,10 +123,14 @@ export function FixedProgramPage(){
   const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
-  const roomColumns=ROOM_COLUMNS.map(column=>{
-    const room=data.derslikler.find(x=>x.derslik_id===column.id)
-    return{...column,room,label:room?.mekan_adi||'Derslik'}
+  const roomColumns=[...data.derslikler]
+  .filter(room=>room.aktif!==false)
+  .sort((a,b)=>{
+    const aOnline=String(a.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
+    const bOnline=String(b.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
+    return aOnline-bOnline||String(a.derslik_id).localeCompare(String(b.derslik_id),'tr-TR')
   })
+  .map(room=>({id:room.derslik_id,room,label:room.mekan_adi||'Derslik'}))
   const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)
   const dragTargetAt=(clientX:number,clientY:number):ProgramDragTarget|null=>{
     const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null

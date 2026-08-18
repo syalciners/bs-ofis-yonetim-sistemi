@@ -20,7 +20,7 @@ const checks=[
   ['Branş derslik finans ve program özetleri mevcut AppData üzerinden hesaplanır',page.includes('data.branslar.filter')&&page.includes('data.derslikler.filter')&&page.includes('data.kasaHesaplari.filter')&&page.includes('data.giderKategorileri.filter')&&page.includes('data.sabitProgramlar.filter')],
   ['Henüz güvenli yazma servisi olmayan yönetim alanları veri değiştirmez',page.includes('Bu ekranda henüz veri değiştirilmez')&&!page.includes('supabase.')&&!page.includes('update(')&&!page.includes('insert(')],
   ['Ayarlar yönetim merkezi responsive kart düzenine sahiptir',css.includes('.settings-hub-grid')&&css.includes('grid-template-columns:repeat(2,minmax(0,1fr))')&&css.includes('@media(max-width:620px)')],
-  ['Yeni Ayarlar stili production girişinden yüklenir',main.includes("import './settings-hub.css'"))],
+  ['Yeni Ayarlar stili production girişinden yüklenir',main.includes("import './settings-hub.css'")],
 ]
 const failed=checks.filter(([,ok])=>!ok)
 for(const[name,ok]of checks)console.log(`${ok?'✓':'✗'} ${name}`)

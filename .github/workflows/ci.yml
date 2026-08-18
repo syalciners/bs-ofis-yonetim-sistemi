@@ -13,6 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Canlı GitHub Pages commitini doğrula
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: 3075951c3d4d4f479c83e3ed971a57e485b7da72
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            json=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest")
+            status=$(printf '%s' "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')
+            commit=$(printf '%s' "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("commit",""))')
+            echo "Pages: status=$status commit=$commit"
+            if [ "$status" = "built" ] && [ "$commit" = "$TARGET_SHA" ]; then
+              printf 'BUILT %s\n' "$commit" > scripts/_tmp_pages_live_ok.txt
+              break
+            fi
+            sleep 5
+          done
+          test -f scripts/_tmp_pages_live_ok.txt
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -56,5 +75,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Derlenmiş Pages yayın paketini güncelle [skip ci]"
+          git commit -m "Canlı Pages doğrulaması başarılı [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"

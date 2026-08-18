@@ -9,14 +9,22 @@ import {
 } from '../services/institutionService'
 import { useToast } from './Toast'
 
+const DEFAULT_LOGO='./bs-egitim-icon-512-v2.png'
+
 export function InstitutionSettingsPanel({settings,onUpdated}:{settings:KurumAyarlari;onUpdated:()=>Promise<void>}){
   const{toast}=useToast()
   const[draft,setDraft]=useState(settings)
   const[file,setFile]=useState<File|null>(null)
+  const[preview,setPreview]=useState(settings.logo_url||DEFAULT_LOGO)
   const[busy,setBusy]=useState(false)
-  useEffect(()=>{setDraft(settings);setFile(null)},[settings])
 
-  const preview=file?URL.createObjectURL(file):draft.logo_url||'./bs-egitim-icon-512-v2.png'
+  useEffect(()=>{setDraft(settings);setFile(null);setPreview(settings.logo_url||DEFAULT_LOGO)},[settings])
+  useEffect(()=>{
+    if(!file){setPreview(draft.logo_url||DEFAULT_LOGO);return}
+    const objectUrl=URL.createObjectURL(file)
+    setPreview(objectUrl)
+    return()=>URL.revokeObjectURL(objectUrl)
+  },[file,draft.logo_url])
 
   return <div className="institution-settings-panel">
     <div className="settings-info-note settings-definitions-safety"><ShieldCheck size={17}/><span>Kurum bilgileri tek merkezden yönetilir. Kurum logosu uygulama başlığı ve giriş ekranında kullanılır; yüklü PWA uygulama ikonu ve favicon ayrı ürün varlıkları olarak değişmez.</span></div>
@@ -27,7 +35,7 @@ export function InstitutionSettingsPanel({settings,onUpdated}:{settings:KurumAya
     </div>
 
     <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);let uploaded:{path:string;url:string}|null=null;try{
-      let logoUrl=draft.logo_url||settings.logo_url||'./bs-egitim-icon-512-v2.png'
+      let logoUrl=draft.logo_url||settings.logo_url||DEFAULT_LOGO
       if(file){uploaded=await uploadInstitutionLogo(file);logoUrl=uploaded.url}
       await saveInstitutionSettings({...draft,logo_url:logoUrl})
       const oldPath=institutionLogoPath(settings.logo_url)

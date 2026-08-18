@@ -1,4 +1,4 @@
-import { CalendarCheck2, Check, ChevronLeft, ChevronRight, List, Plus, X } from 'lucide-react'
+import { CalendarCheck2, Check, List, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -22,6 +22,11 @@ const days=[
   {short:'Cum',long:'Cuma'},
   {short:'Cmt',long:'Cumartesi'},
   {short:'Paz',long:'Pazar'},
+]
+const weekChoices=[
+  {offset:-1,label:'Önceki Hafta'},
+  {offset:0,label:'Bu Hafta'},
+  {offset:1,label:'Gelecek Hafta'},
 ]
 
 const ROOM_COLUMNS=[
@@ -74,16 +79,6 @@ const conflictMessage=(result:any)=>{
   const detail=first?` Çakışan ders: ${first.ogrenci||'—'} · ${first.ogretmen||'—'} · ${String(first.baslangic||'').slice(0,5)}–${String(first.bitis||'').slice(0,5)}.`:''
   return `${messages.join(' ')}${detail}`.trim()||result?.mesaj||'Bu tarih ve saatte çakışma var.'
 }
-const weekTitle=(monday:string)=>{
-  const sunday=addDays(monday,6)
-  const left=new Date(`${monday}T12:00:00`)
-  const right=new Date(`${sunday}T12:00:00`)
-  const leftDay=left.toLocaleDateString('tr-TR',{day:'numeric'})
-  const rightFull=right.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})
-  if(left.getMonth()===right.getMonth()&&left.getFullYear()===right.getFullYear())return `${leftDay} – ${rightFull}`
-  const leftFull=left.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:left.getFullYear()===right.getFullYear()?undefined:'numeric'})
-  return `${leftFull} – ${rightFull}`
-}
 const dayTitle=(date:string,index:number)=>`${days[index].long} · ${new Date(`${date}T12:00:00`).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`
 
 function placeLessons(lessons:Ders[]):PlacedLesson[]{
@@ -130,6 +125,8 @@ export function DailyCalendarPage(){
   const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false)
   const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
+  const weekOffset=Math.round((new Date(`${monday}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
+  const selectWeek=(offset:number)=>{setMonday(addDays(baseMonday,offset*7));setWeekReview(null)}
   const readWeekStatus=useCallback(async():Promise<TwoWeekCreationStatus>=>{const[selectedStatus,nextStatus]=await Promise.all([getWeekCreationStatus(monday),getWeekCreationStatus(addDays(monday,7))]);return{monday,selected:selectedStatus,next:nextStatus}},[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
@@ -155,7 +152,6 @@ export function DailyCalendarPage(){
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
   const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
-  const changeWeek=(delta:number)=>{setMonday(addDays(monday,delta*7));setWeekReview(null)}
   const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
   const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{
     const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
@@ -236,16 +232,15 @@ export function DailyCalendarPage(){
   const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target?.roomId):null
 
   return <div className="page-stack calendar-v2 daily-calendar-page">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Takvim</h1><div className="calendar-title-actions"><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1></div></div></section>
 
-    <section className="daily-mode-switch-row" aria-label="Program görünümü">
-      <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
+    <section className="week-context-row" aria-label="Program hafta komutları" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) auto minmax(0,1fr)',alignItems:'center',gap:10}}>
+      <button className="calendar-mode-btn" type="button" style={{justifySelf:'start'}} onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
+      <div className="week-range" style={{justifySelf:'center'}}><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
+      <button className="primary-btn calendar-title-week-action" style={{justifySelf:'end',maxWidth:'none'}} disabled={isPastWeek||weekBusy||weekStatusBusy||allWeeksReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button>
     </section>
-
-    <section className="daily-week-nav" aria-label="Hafta değiştir">
-      <button type="button" aria-label="Önceki hafta" onClick={()=>changeWeek(-1)}><ChevronLeft size={20}/></button>
-      <div><span>HAFTA</span><b>{weekTitle(monday)}</b></div>
-      <button type="button" aria-label="Sonraki hafta" onClick={()=>changeWeek(1)}><ChevronRight size={20}/></button>
+    <section className="week-switcher" aria-label="Hafta seçimi">
+      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>selectWeek(x.offset)}>{x.label}</button>)}
     </section>
 
     <section className="daily-day-tabs" aria-label="Gün seçimi">

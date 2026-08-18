@@ -24,9 +24,9 @@ function ProtectedApp() {
   const { session, loading, error, data } = useAppData()
   const location = useLocation()
   const portalDetail = /^\/portal-onizleme\/(ogretmen|ogrenci)\/[^/]+$/.test(location.pathname)
-  if (loading) return <main className="boot"><img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
+  if (loading) return <main className="boot"><img src="./bs-logo.png" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
   if (!session) return <LoginScreen />
-  if (error && !data) return <main className="boot error-boot"><img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
+  if (error && !data) return <main className="boot error-boot"><img src="./bs-logo.png" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
   return <div className="app-shell"><AppHeader/><main className="page-container"><Routes>
     <Route path="/" element={<OverviewPage/>}/>
     <Route path="/takvim" element={<CalendarPage/>}/>

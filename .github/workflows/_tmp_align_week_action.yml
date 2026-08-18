@@ -1,0 +1,29 @@
+name: Geçici günlük Program hafta aksiyonu patch
+
+on:
+  push:
+    branches: ['v1-program-hafta-aksiyon-esitle']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Günlük hafta aksiyonunu seçili haftaya eşitle
+        run: python3 scripts/_tmp_align_week_action.py
+      - name: Değişiklikleri kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add src/pages/DailyCalendarPage.tsx scripts/check-calendar-ux.mjs
+          if git diff --cached --quiet; then
+            echo "Patch zaten uygulanmış."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Günlük Program hafta aksiyonunu seçili haftaya eşitle"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

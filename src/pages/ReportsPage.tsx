@@ -370,7 +370,7 @@ export function ReportsPage() {
         <div>
           <span className="eyebrow">RAPORLAR</span>
           <h1>Raporlar</h1>
-          <p>Yönetim, öğrenci ve öğretmen raporlarını kurumsal belge düzeninde görüntüle.</p>
+          
         </div>
         <button className="secondary-btn" onClick={() => void handlePrint()}>
           <Printer size={17} />

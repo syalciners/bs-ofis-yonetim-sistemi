@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAppData } from '../components/AppDataProvider'
+import { EducationDefinitionsPanel } from '../components/EducationDefinitionsPanel'
 import { ProfileSettingsForm } from '../components/ProfileSettingsForm'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
@@ -59,7 +60,7 @@ function UserManagementPanel({currentUserId,teachers,onUpdated}:{currentUserId:s
 
       <div className="settings-user-editor">
         {!draft?<div className="settings-users-empty"><UsersRound/><strong>Düzenlemek için kullanıcı seçin</strong><span>Ad soyad, telefon ve hesap durumu güvenli olarak yönetilebilir.</span></div>:
-        <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);try{await updateManagedUser({auth_user_id:draft.auth_user_id,ad_soyad:draft.ad_soyad,telefon:draft.telefon||null,aktif:draft.aktif});await onUpdated();await reload(draft.auth_user_id);toast('Kullanıcı bilgileri güncellendi.')}catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}}}>
+        <form className="form-grid" onSubmit={async e=>{e.preventDefault();const current=draft;setBusy(true);try{await updateManagedUser({auth_user_id:current.auth_user_id,ad_soyad:current.ad_soyad,telefon:current.telefon||null,aktif:current.aktif});await onUpdated();await reload(current.auth_user_id);toast('Kullanıcı bilgileri güncellendi.')}catch(err:any){toast(err.message||String(err),'error')}finally{setBusy(false)}}}>
           <label className="wide">Ad Soyad<input value={draft.ad_soyad} onChange={e=>setDraft({...draft,ad_soyad:e.target.value})} required/></label>
           <label className="wide">Telefon<input value={draft.telefon||''} onChange={e=>setDraft({...draft,telefon:e.target.value})} inputMode="tel"/></label>
           <label className="wide">Hesap Durumu<select value={draft.aktif?'Aktif':'Pasif'} onChange={e=>setDraft({...draft,aktif:e.target.value==='Aktif'})} disabled={isSelf}><option>Aktif</option><option>Pasif</option></select></label>
@@ -105,13 +106,14 @@ export function SettingsPage(){
   const infoContent:Record<SettingsInfoKey,{title:string;body:string;rows:Array<[string,string]>}>={
     kurum:{title:'Kurum',body:'Kurum kimliği ve genel bilgiler burada yönetilecek. Bu aşamada kurum için merkezi bir ayar kaydı henüz kullanılmıyor.',rows:[['Durum','Yönetim merkezi hazır'],['Sonraki adım','Kurum bilgileri için güvenli kayıt yapısı']]},
     kullanicilar:{title:'Kullanıcılar ve Yetkiler',body:'Yönetim kullanıcılarının profil bilgileri ve hesap durumu güvenli servis üzerinden yönetilir.',rows:[['Mevcut kullanıcı',profile?.ad_soyad||'—'],['Rol',profile?.rol||'—'],['Güvenlik','E-posta ve rol salt okunur']]},
-    egitim:{title:'Branşlar ve Derslikler',body:'Mevcut branş ve derslik kayıtları uygulama verisinde hazır. Bir sonraki geliştirmede ekleme, düzenleme ve aktif/pasif yönetimi kontrollü olarak açılacak.',rows:[['Aktif branş',summary?String(summary.branches):'—'],['Aktif derslik',summary?String(summary.rooms):'—'],['Sonraki adım','Branş ve derslik yönetimi']]},
+    egitim:{title:'Branşlar ve Derslikler',body:'Branş ve derslik tanımları güvenli servis üzerinden eklenir ve düzenlenir. Kimlikler değiştirilmez, geçmiş kayıtlar silinmez.',rows:[['Aktif branş',summary?String(summary.branches):'—'],['Aktif derslik',summary?String(summary.rooms):'—'],['Güvenlik','ID ve geçmiş bağlantılar korunur']]},
     finans:{title:'Finans Tanımları',body:'Günlük tahsilat ve gider işlemleri Finans ekranında kalacak. Burada yalnız işlem sırasında kullanılan kasa/banka hesapları ve gider kategorileri yönetilecek.',rows:[['Aktif hesap',summary?String(summary.accounts):'—'],['Aktif gider kategorisi',summary?String(summary.categories):'—'],['Sonraki adım','Finans tanımlarını yönetme']]},
     program:{title:'Program Ayarları',body:'Kişiye özel ücret, hakediş veya ders planları buraya taşınmayacak. Bu alan yalnız kurum genelindeki program varsayılanları için kullanılacak.',rows:[['Aktif sabit program',summary?String(summary.fixedPrograms):'—'],['Kapsam','Kurum genel ayarları'],['Sonraki adım','Varsayılan program değerleri']]},
     portal:{title:'Portal ve Entegrasyonlar',body:'Öğretmen ve öğrenci portalı ile dış servis bağlantıları burada merkezi olarak yönetilecek. Gizli servis anahtarları hiçbir zaman uygulama ekranında gösterilmeyecek.',rows:[['Portal önizleme','Yönetici Menüsünde'],['Entegrasyon','Gizli bilgiler korunur'],['Sonraki adım','Portal ve bağlantı ayarları']]},
   }
 
   const selectedInfo=info?infoContent[info]:null
+  const sheetSubtitle=info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':'Yönetim ayarı'
 
   return <div className="page-stack settings-hub-page">
     <section className="page-title-row"><div><span className="eyebrow">AYARLAR</span><h1>Ayarlar</h1></div></section>
@@ -150,7 +152,7 @@ export function SettingsPage(){
     </section>
 
     <Sheet open={editing} title="Profili Düzenle" subtitle="Kendi iletişim bilgileriniz" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
-    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={info==='kullanicilar'?'Yönetim kullanıcıları':'Yönetim ayarı'} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
+    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
       <p>{selectedInfo.body}</p>
       <div className="settings-info-rows">{selectedInfo.rows.map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
       <div className="settings-info-note"><BookOpenCheck size={17}/><span>Bu ekranda henüz veri değiştirilmez; yalnız mevcut yapı ve sıradaki güvenli yönetim alanı gösterilir.</span></div>

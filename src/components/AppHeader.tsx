@@ -32,7 +32,7 @@ export function AppHeader() {
     <div className="app-header">
       <div className="app-header-main">
         <button className="brand" type="button" onClick={() => nav('/')}>
-          <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
+          <img src="./bs-logo.png" alt="BS Eğitim" />
           <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
         </button>
         <div className="header-actions">

@@ -1,5 +1,6 @@
 import { Cloud, RefreshCw, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { APP_MODE } from '../lib/supabase'
 import { useAppData } from './AppDataProvider'
 
 const pageSection=(pathname:string)=>{
@@ -26,15 +27,16 @@ export function AppHeader() {
   const nav = useNavigate()
   const location = useLocation()
   const sectionLabel=pageSection(location.pathname)
+  const isDemo=APP_MODE==='demo'
   return <header className="app-header-wrap">
     <div className="app-header">
       <div className="app-header-main">
         <button className="brand" type="button" onClick={() => nav('/')}>
           <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
-          <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
+          <span><strong>BS Eğitim</strong><small>{isDemo?'Yönetimi · Demo':'Yönetimi'}</small></span>
         </button>
         <div className="header-actions">
-          <span className="cloud-chip"><Cloud size={13}/> Bulut</span>
+          <span className="cloud-chip"><Cloud size={13}/> {isDemo?'DEMO':'Bulut'}</span>
           <button className="icon-btn" type="button" onClick={() => void refresh()} aria-label="Yenile"><RefreshCw size={17} className={refreshing ? 'spin' : ''}/></button>
           <button className="icon-btn" type="button" onClick={() => nav('/ayarlar')} aria-label="Ayarlar"><Settings size={17}/></button>
         </div>

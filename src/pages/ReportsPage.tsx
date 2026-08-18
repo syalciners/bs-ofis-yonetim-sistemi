@@ -612,7 +612,7 @@ export function ReportsPage() {
                   <small>Güncel hesap bakiyesi</small>
                 </div>
                 <div>
-                  <span>Yapılan Ders</span>
+                  <span>Yapılan Ders Saati</span>
                   <b>{completedInstitutionLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)}</b>
                   <small>Seçili dönem toplamı</small>
                 </div>
@@ -845,7 +845,7 @@ export function ReportsPage() {
 
                   <div className="report-kpis corporate report-kpis-premium">
                     <div>
-                      <span>Yapılan Ders</span>
+                      <span>Yapılan Ders Saati</span>
                       <b>{allLessons.reduce((sum, x) => sum + Number(x.ders_sayisi || 1), 0)}</b>
                       <small>Dönem toplamı</small>
                     </div>
@@ -874,7 +874,7 @@ export function ReportsPage() {
                       <span>Tarih</span>
                       <span>Öğrenci</span>
                       <span>Branş</span>
-                      <span className="num">Ders</span>
+                      <span className="num">Ders Saati</span>
                       <span className="num">Birim Hakediş</span>
                       <span className="num">Hakediş Tutarı</span>
                     </div>

@@ -15,8 +15,10 @@ export function OverviewPage() {
   const {data}=useAppData();const nav=useNavigate();const[modal,setModal]=useState<'collection'|'student'|'lesson'|null>(null);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null)
   const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),recentCollections:data.tahsilatlar.filter(x=>!x.iptal_mi).slice(0,3),debt:totalOpenDebt(data),debtors:data.ogrenciler.filter(x=>x.durum!=='Pasif'&&studentDebt(data,x.ogrenci_id)>0).length,teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
   if(!data||!metrics)return null
+  const todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
+  const plannedLessonHours=metrics.today.filter(x=>x.ders_durumu==='Planlandı').reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const attention=[
-    {show:metrics.today.filter(x=>x.ders_durumu==='Planlandı').length>0,icon:CalendarCheck2,title:`${metrics.today.filter(x=>x.ders_durumu==='Planlandı').length} planlı ders`,text:'Bugün sonuç bekleyen dersler',go:()=>nav('/takvim')},
+    {show:plannedLessonHours>0,icon:CalendarCheck2,title:`${plannedLessonHours} planlı ders saati`,text:'Bugün sonuç bekleyen dersler',go:()=>nav('/takvim')},
     {show:metrics.debtors>0,icon:WalletCards,title:`${metrics.debtors} öğrencide açık bakiye`,text:`${money(metrics.debt)} tahsilat bekliyor`,go:()=>nav('/ogrenciler?filtre=borclu')},
     {show:metrics.assign.length>0,icon:ReceiptText,title:`${metrics.assign.length} geciken ödev`,text:'Son teslim tarihi geçmiş kayıtlar',go:()=>nav('/odevler')},
     {show:metrics.zoom.length>0,icon:AlertCircle,title:`${metrics.zoom.length} Zoom uyarısı`,text:'Kontrol edilmesi gereken online ders',go:()=>nav('/sistem')},
@@ -25,7 +27,7 @@ export function OverviewPage() {
     <section className="page-title-row"><div><span className="eyebrow">YÖNETİM ÖZETİ</span><h1>Bugün</h1></div></section>
 
     <section className="kpi-grid four">
-      <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Dersler</span><strong>{metrics.today.length}</strong><small>{metrics.today.filter(x=>x.ders_durumu==='Planlandı').length} planlandı</small></button>
+      <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Ders Saati</span><strong>{todayLessonHours}</strong><small>{plannedLessonHours} planlandı</small></button>
       <button className="kpi-card blue" onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="kpi-icon"><Banknote/></div><span>Bu Ay Tahsilat</span><strong>{money(metrics.collections)}</strong><small>gerçek nakit girişi</small></button>
       <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>öğrenci bakiyeleri</small></button>
       <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>Öğretmen Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
@@ -40,7 +42,7 @@ export function OverviewPage() {
 
     <section><div className="section-heading"><div><h2>Son Tahsilatlar</h2><span>son {metrics.recentCollections.length} kayıt</span></div><button className="text-btn" onClick={()=>nav('/finans?tab=tahsilatlar')}>Tümünü Gör</button></div><div className="finance-list">{metrics.recentCollections.length?metrics.recentCollections.map(x=><button className="finance-card income" key={x.tahsilat_id} onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="finance-icon"><Banknote/></div><div><strong>{studentName(data,x.ogrenci_id)}</strong><small>{fullDate(x.tarih)} · {x.odeme_yontemi||'—'}</small></div><b>{money(x.tutar)}</b></button>):<div className="calm-empty"><Banknote/><b>Henüz aktif tahsilat yok.</b><span>İlk tahsilatı “Tahsilat Al” ile kaydedebilirsin.</span></div>}</div></section>
 
-    <section><div className="section-heading"><div><h2>Bugünün Programı</h2><span>{metrics.today.length} ders</span></div><button className="text-btn" onClick={()=>nav('/takvim')}>Tümünü Gör</button></div><div className="list-card">{metrics.today.length?metrics.today.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="calm-empty"><CalendarCheck2/><b>Bugün ders yok.</b><span>Yeni ders ekleyebilir veya Takvim ekranından haftayı oluşturabilirsin.</span></div>}</div></section>
+    <section><div className="section-heading"><div><h2>Bugünün Programı</h2><span>{todayLessonHours} ders saati</span></div><button className="text-btn" onClick={()=>nav('/takvim')}>Tümünü Gör</button></div><div className="list-card">{metrics.today.length?metrics.today.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>):<div className="calm-empty"><CalendarCheck2/><b>Bugün ders yok.</b><span>Yeni ders ekleyebilir veya Takvim ekranından haftayı oluşturabilirsin.</span></div>}</div></section>
 
     <section><div className="section-heading"><div><h2>Dikkat Gerektirenler</h2><span>yalnız gerekenler</span></div></div>{attention.length?<div className="attention-grid">{attention.map((x,i)=><button key={i} onClick={x.go}><span className="attention-icon"><x.icon/></span><span><b>{x.title}</b><small>{x.text}</small></span></button>)}</div>:<div className="all-good"><CalendarCheck2/><span><b>Kontrol bekleyen kritik iş yok.</b><small>Günlük akış normal görünüyor.</small></span></div>}</section>
 

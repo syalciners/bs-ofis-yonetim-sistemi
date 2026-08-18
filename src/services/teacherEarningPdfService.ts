@@ -121,7 +121,7 @@ export async function openTeacherEarningPdf(input:TeacherEarningPdfInput){
     {text:'TARİH',style:'th'},
     {text:'ÖĞRENCİ',style:'th'},
     {text:'BRANŞ',style:'th'},
-    {text:'DERS',style:'th',alignment:'right'},
+    {text:'DERS SAATİ',style:'th',alignment:'right'},
     {text:'BİRİM HAKEDİŞ',style:'th',alignment:'right'},
     {text:'HAKEDİŞ TUTARI',style:'th',alignment:'right'},
   ]]
@@ -256,7 +256,7 @@ export async function openTeacherEarningPdf(input:TeacherEarningPdfInput){
         table:{
           widths:['*','*','*','*'],
           body:[[
-            {stack:[metric('Yapılan Ders',String(input.lessonUnits),'Dönem toplamı',BLUE)]},
+            {stack:[metric('Yapılan Ders Saati',String(input.lessonUnits),'Dönem toplamı',BLUE)]},
             {stack:[metric('Dönem Hakedişi',money(input.totalEarned),'Tahakkuk',TEAL)]},
             {stack:[metric('Dönem Ödemesi',money(input.totalPaid),'Gerçek ödeme',GREEN)]},
             {stack:[metric('Kalan Hakediş',money(input.remaining),'Ödenecek',ORANGE)]},

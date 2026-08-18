@@ -23,6 +23,7 @@ const programCss=read('src/program-share.css')
 const main=read('src/main.tsx')
 const appHeader=read('src/components/AppHeader.tsx')
 const format=read('src/lib/format.ts')
+const overview=read('src/pages/OverviewPage.tsx')
 
 const checks=[
   ['Sayfa etiketi beyaz header kartında kullanıcı ile aynı meta satırındadır',appHeader.includes('className="app-header-main"')&&appHeader.includes('className="app-header-meta"')&&appHeader.includes('className="app-header-section"')&&appHeader.includes('className="app-header-profile"')&&appHeader.indexOf('app-header-main')<appHeader.indexOf('app-header-meta')],
@@ -43,6 +44,9 @@ const checks=[
   ['Bu Hafta iki görünümde güncel haftaya döner',calendar.includes('onClick={goCurrentWeek}>Bu Hafta</button>')&&dailyCalendar.includes('onClick={goCurrentWeek}>Bu Hafta</button>')],
   ['Takvim gelecek hafta oku göreli olarak bir hafta ileri gider',calendar.includes('onClick={()=>moveWeek(1)}>›</button>')&&dailyCalendar.includes('onClick={()=>moveWeek(1)}>›</button>')],
   ['Manuel Haftayı Hazırla aksiyonu Program başlığının sağındadır',calendar.includes('calendar-title-line')&&calendar.includes('calendar-title-week-action')&&calendar.includes("'Haftayı Hazırla'")&&calendar.indexOf('calendar-title-week-action')<calendar.indexOf('calendar-week-toolbar')&&dailyCalendar.indexOf('calendar-title-week-action')<dailyCalendar.indexOf('calendar-week-toolbar')],
+  ['Program Liste özeti kayıt adedi yerine ders saati toplamını gösterir',calendar.includes('visibleLessonHours=visibleLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&calendar.includes('sabit program ders saati')&&calendar.includes('ders saati</span></header>')],
+  ['Günlük Takvim seçili gün toplamını ders saati olarak gösterir',dailyCalendar.includes('dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&dailyCalendar.includes('<span>ders saati</span>')],
+  ['Ana sayfa günlük program özetleri ders saati kullanır',overview.includes('todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&overview.includes('plannedLessonHours=')&&overview.includes('Bugünkü Ders Saati')&&overview.includes('ders saati</span>')],
   ['Program Gönder Ders Ekle ile aynı komut satırındadır',calendar.includes('calendar-command-bar')&&calendar.includes('calendar-share-btn')&&calendar.includes('Program Gönder')],
   ['Program Gönder yalnız tek kişi ve görünür ders varken aktiftir',calendar.includes('disabled={!shareTarget||!visibleLessons.length}')],
   ['Program paylaşımı mevcut önizleme bileşenini kullanır',calendar.includes("import { ProgramSharePreview }")&&calendar.includes('<ProgramSharePreview target={shareTarget}')],

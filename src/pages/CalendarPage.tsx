@@ -67,7 +67,8 @@ export function CalendarPage(){
   const selectedOtherTeacher=filter.type==='teacher'&&otherTeachers.some(x=>x.ogretmen_id===filter.id)?filter.id:''
   const selectedStudent=filter.type==='student'&&activeStudents.some(x=>x.ogrenci_id===filter.id)?filter.id:''
   const shareTarget:ProgramShareTarget|null=filter.type==='teacher'?{type:'teacher',id:filter.id}:filter.type==='student'?{type:'student',id:filter.id}:null
-  const weekProgramCount=visibleLessons.filter(x=>x.program_id).length
+  const visibleLessonHours=visibleLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
+  const weekProgramHours=visibleLessons.filter(x=>x.program_id).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const visibleDays=Array.from({length:7},(_,i)=>{const date=addDays(monday,i);return{date,dayName:dayNames[i],items:visibleLessons.filter(x=>x.tarih===date)}}).filter(x=>x.items.length>0)
   const activeWeekStatus=weekStatus?.monday===monday?weekStatus.status:null
   const weekReady=Boolean(activeWeekStatus?.calisti)
@@ -145,13 +146,13 @@ export function CalendarPage(){
     </section>
 
     <section className="calendar-command-bar">
-      <div className="calendar-command-summary"><div className="calendar-command-heading"><b>{filterLabel}</b><button className="secondary-btn calendar-pdf-btn" disabled={!lessons.length} onClick={()=>void openWeekPdf()} title="Seçili programı PDF olarak al"><FileDown size={16}/>PDF Al</button></div><span>{visibleLessons.length} ders · {weekProgramCount} sabit program dersi</span></div>
+      <div className="calendar-command-summary"><div className="calendar-command-heading"><b>{filterLabel}</b><button className="secondary-btn calendar-pdf-btn" disabled={!lessons.length} onClick={()=>void openWeekPdf()} title="Seçili programı PDF olarak al"><FileDown size={16}/>PDF Al</button></div><span>{visibleLessonHours} ders saati · {weekProgramHours} sabit program ders saati</span></div>
       <div><button className="secondary-btn" onClick={()=>setNewLesson(true)}><Plus size={17}/>Ders Ekle</button><button className="secondary-btn calendar-share-btn" disabled={!shareTarget||!visibleLessons.length} onClick={()=>setShareOpen(true)}><MessageCircle size={17}/>Program Gönder</button></div>
     </section>
 
     <section className="week-agenda">
       {visibleDays.length?visibleDays.map(({date,dayName,items})=>{const isToday=date===todayISO();return <div className={`agenda-day ${isToday?'today':''}`} key={date}>
-        <header><div><b>{dayName}</b>{isToday&&<span className="today-pill">Bugün</span>}</div><span>{shortDate(date)} · {items.length} ders</span></header>
+        <header><div><b>{dayName}</b>{isToday&&<span className="today-pill">Bugün</span>}</div><span>{shortDate(date)} · {items.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)} ders saati</span></header>
         <div className="agenda-lessons">{items.map(x=><LessonCard key={x.ders_id} lesson={x} onClick={()=>setSelected(x)}/>)}</div>
       </div>}):<div className="calm-empty calendar-empty-week"><CalendarDays/><b>Bu haftada ders yok.</b><span>Başka bir hafta, öğretmen veya öğrenci seçebilirsin.</span></div>}
     </section>

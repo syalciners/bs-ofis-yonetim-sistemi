@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 const service=readFileSync('src/services/profileService.ts','utf8')
+const userService=readFileSync('src/services/userManagementService.ts','utf8')
 const form=readFileSync('src/components/ProfileSettingsForm.tsx','utf8')
 const page=readFileSync('src/pages/SettingsPage.tsx','utf8')
 const css=readFileSync('src/settings-hub.css','utf8')
@@ -19,6 +20,12 @@ const checks=[
   ['Ayarlar altı temel yönetim alanını içerir',['Kurum','Kullanıcılar ve Yetkiler','Branşlar ve Derslikler','Finans Tanımları','Program Ayarları','Portal ve Entegrasyonlar'].every(x=>page.includes(x))],
   ['Branş derslik finans ve program özetleri mevcut AppData üzerinden hesaplanır',page.includes('data.branslar.filter')&&page.includes('data.derslikler.filter')&&page.includes('data.kasaHesaplari.filter')&&page.includes('data.giderKategorileri.filter')&&page.includes('data.sabitProgramlar.filter')],
   ['Henüz güvenli yazma servisi olmayan yönetim alanları veri değiştirmez',page.includes('Bu ekranda henüz veri değiştirilmez')&&!page.includes('supabase.')&&!page.includes('update(')&&!page.includes('insert(')],
+  ['Yönetici kullanıcı listesi RLS korumalı profil tablosundan okunur',userService.includes("from('kullanici_profilleri')")&&userService.includes("select('auth_user_id,email,ad_soyad,rol,ogretmen_id,aktif,telefon')")],
+  ['Yönetici kullanıcı güncellemesi güvenli v2 RPC kullanır',userService.includes('kullanici_profili_guncelle_guvenli_v2')],
+  ['Yönetici kullanıcı servisi rol e-posta ve öğretmen bağlantısı yazmaz',!userService.includes('p_rol')&&!userService.includes('p_email')&&!userService.includes('p_ogretmen_id')],
+  ['Kullanıcı yönetiminde rol ve e-posta salt okunur kalır',page.includes('Rol değişikliği bu aşamada kapalıdır')&&page.includes('Giriş e-postası normal profil alanı olarak değiştirilemez')],
+  ['Kendi hesabını pasifleştirme arayüzde engellenir',page.includes('disabled={isSelf}')&&page.includes('kendi hesabınızı bu ekrandan pasifleştiremezsiniz')],
+  ['Kullanıcı yönetimi responsive iki kolon düzenine sahiptir',css.includes('.settings-users-layout')&&css.includes('grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr)')&&css.includes('@media(max-width:760px)')],
   ['Ayarlar yönetim merkezi responsive kart düzenine sahiptir',css.includes('.settings-hub-grid')&&css.includes('grid-template-columns:repeat(2,minmax(0,1fr))')&&css.includes('@media(max-width:620px)')],
   ['Yeni Ayarlar stili production girişinden yüklenir',main.includes("import './settings-hub.css'")],
 ]

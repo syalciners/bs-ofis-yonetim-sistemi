@@ -25,7 +25,7 @@ export interface Ogretmen {
 
 export interface Brans { brans_id: Id; brans_adi: string; aktif?: boolean | null }
 export interface OgretmenBransi { ogretmen_id: Id; brans_id: Id; aktif: boolean }
-export interface Derslik { derslik_id: Id; mekan_adi: string; mekan_turu?: string | null; kapasite?: number | null; aktif?: boolean | null }
+export interface Derslik { derslik_id: Id; mekan_adi: string; mekan_turu?: string | null; kapasite?: number | null; aktif?: boolean | null; aciklama?: string | null }
 
 export interface SabitProgram {
   program_id: Id

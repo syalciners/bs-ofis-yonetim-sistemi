@@ -1,0 +1,30 @@
+name: Demo Build Probe Tek Sefer
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - '.github/workflows/demo-build-probe-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-demo-build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: demo
+      VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check:demo-isolation
+      - run: npm run check:rules
+      - run: npm run build
+      - name: Başarı probu
+        run: curl --fail --silent --show-error -A 'BS-Egitim-Demo-Build-Probe-363056aa' 'https://pparlcdctnivmpiofuvz.supabase.co/auth/v1/health?probe=363056aa' >/dev/null

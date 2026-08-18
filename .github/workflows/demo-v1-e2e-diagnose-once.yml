@@ -1,5 +1,6 @@
 name: Demo V1 E2E Diagnose Once
 
+# rerun: seed order fixed
 on:
   push:
     branches: [demo-hazirlik]

@@ -1,1 +1,0 @@
-BS Eğitim demo marka varlıkları, kullanıcının onayladığı BS monogramından üretilir. Teknik dosya adları regresyon riskini azaltmak için mevcut PWA sözleşmesiyle uyumlu tutulur; yalnız görsel içerik marka ailesine güncellenir.

@@ -1,0 +1,11 @@
+logo_decode=success
+logo_sha=dc236a21c791d9b47b54c7cb5334e443dc639e0a91809cfd36887f050cd1812c
+logo_size=13663
+icon192_decode=success
+icon192_sha=cf9b7f6d5b6d39e14a0aca850b3bf4aa2dc686c0a69a8cc2ac95801e81237d83
+icon192_size=4107
+icon512_decode=success
+icon512_sha=3cce855f32a200ddfa0e849e012a353bb134a528c54fce2fd327d20e1b35a748
+icon512_size=1417
+mask512_decode=failure
+mask512_error=base64: invalid input 

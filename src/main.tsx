@@ -20,6 +20,7 @@ import './daily-calendar.css'
 import './fixed-program-calendar.css'
 import './premium-lesson-form.css'
 import './premium-typography.css'
+import './page-title-standard.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

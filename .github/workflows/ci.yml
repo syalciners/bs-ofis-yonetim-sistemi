@@ -16,15 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Günlük Program hafta aksiyonunu seçili haftaya eşitle
-        run: python3 scripts/_tmp_align_week_action.py
-      - name: Geçici patch dosyalarını çalışma ağacından temizle
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f scripts/_tmp_align_week_action.py .github/workflows/_tmp_align_week_action.yml
-          git fetch origin main --depth=1
-          git show FETCH_HEAD:.github/workflows/ci.yml > .github/workflows/ci.yml
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları
@@ -65,5 +56,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Günlük Program hafta aksiyonunu eşitle ve Pages paketini güncelle [skip ci]"
+          git commit -m "Derlenmiş Pages yayın paketini güncelle [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"

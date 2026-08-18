@@ -3,6 +3,7 @@ import { AppDataProvider, useAppData } from './components/AppDataProvider'
 import { ToastProvider } from './components/Toast'
 import { LoginScreen } from './components/LoginScreen'
 import { AppHeader } from './components/AppHeader'
+import { DemoBanner } from './components/DemoBanner'
 import { BottomNav } from './components/BottomNav'
 import { OverviewPage } from './pages/OverviewPage'
 import { CalendarPage } from './pages/CalendarPage'
@@ -27,7 +28,7 @@ function ProtectedApp() {
   if (loading) return <main className="boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
   if (!session) return <LoginScreen />
   if (error && !data) return <main className="boot error-boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
-  return <div className="app-shell"><AppHeader/><main className="page-container"><Routes>
+  return <div className="app-shell"><AppHeader/><DemoBanner/><main className="page-container"><Routes>
     <Route path="/" element={<OverviewPage/>}/>
     <Route path="/takvim" element={<CalendarPage/>}/>
     <Route path="/takvim/gunluk" element={<DailyCalendarPage/>}/>

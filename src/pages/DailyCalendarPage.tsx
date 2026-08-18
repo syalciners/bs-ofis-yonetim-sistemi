@@ -109,7 +109,7 @@ function StatusIndicator({status}:{status?:string|null}){
 }
 
 export function DailyCalendarPage(){
-  const{data,refresh}=useAppData();const{toast}=useToast();const nav=useNavigate()
+  const{data,refresh,institution}=useAppData();const{toast}=useToast();const nav=useNavigate()
   const baseMonday=mondayOf(todayISO())
   const[monday,setMonday]=useState(()=>{const stored=sessionStorage.getItem('bs-takvim-hafta');return stored&&/^\d{4}-\d{2}-\d{2}$/.test(stored)?stored:baseMonday})
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
@@ -165,8 +165,10 @@ export function DailyCalendarPage(){
   const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
   const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const allPlaced=placeLessons(dayLessons)
-  const rangeStart=allPlaced.length?Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
-  const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
+  const configuredStart=timeToMinutes(institution?.takvim_baslangic_saati)??DEFAULT_START
+  const configuredEnd=timeToMinutes(institution?.takvim_bitis_saati)??DEFAULT_END
+  const rangeStart=allPlaced.length?Math.min(configuredStart,Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES):configuredStart
+  const rangeEnd=allPlaced.length?Math.max(configuredEnd,Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES):configuredEnd
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
   const studentName=(id?:string|null)=>data.ogrenciler.find(x=>x.ogrenci_id===id)?.ad_soyad||'Öğrenci'

@@ -54,6 +54,22 @@ async function ensureDemoSession(): Promise<string | null> {
   return typeof expires === 'string' ? expires : null
 }
 
+async function captureDemoSource() {
+  if (!IS_DEMO) return
+  const params = new URLSearchParams(window.location.search)
+  const payload = {
+    p_utm_source: params.get('utm_source'),
+    p_utm_medium: params.get('utm_medium'),
+    p_utm_campaign: params.get('utm_campaign'),
+    p_utm_content: params.get('utm_content'),
+    p_utm_term: params.get('utm_term'),
+    p_referer: document.referrer || null,
+    p_landing_path: `${window.location.pathname}${window.location.search}`,
+  }
+  const { error } = await supabase.rpc('demo_oturum_kaynak_guncelle_v1', payload)
+  if (error && error.code !== 'PGRST202') console.warn('Demo kaynak bilgisi kaydedilemedi:', error.message)
+}
+
 function demoProfile(user: User): KullaniciProfili {
   return {
     auth_user_id: user.id,
@@ -83,6 +99,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       if (IS_DEMO && session.user.is_anonymous) {
         const expiresAt = await ensureDemoSession()
         if (expiresAt) setDemoExpiresAt(expiresAt)
+        await captureDemoSource()
         const nextData = await loadAppData()
         setData(nextData)
         setProfile(demoProfile(session.user))

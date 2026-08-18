@@ -33,7 +33,7 @@ export function TeacherPaymentsPage(){
   const cancelSelected=async()=>{if(!selected||selected.iptal_mi)return;if(!window.confirm('Öğretmen ödemesi iptal edilsin mi?\n\nKayıt silinmeyecek; bağlı kasa hareketi de aynı işlemde iptal edilecek.'))return;setCancelBusy(true);try{await cancelTeacherPayment(selected.ogretmen_odeme_id,'Kullanıcı tarafından iptal edildi');await refresh();toast('Öğretmen ödemesi iptal edildi.');setSelected(null)}catch(e:any){toast(e.message||String(e),'error')}finally{setCancelBusy(false)}}
 
   return <div className="page-stack teacher-payments-page">
-    <section className="page-title-row"><div><span className="eyebrow">ÖĞRETMEN YÖNETİMİ</span><h1>Öğretmen Ödemeleri</h1><p>Hakedişi, ödeneni ve kalan tutarı dönem bazında takip edin.</p></div><button className="primary-btn" onClick={()=>setPaymentTeacher('')}><Plus size={17}/>Ödeme Yap</button></section>
+    <section className="page-title-row"><div><span className="eyebrow">ÖĞRETMEN YÖNETİMİ</span><h1>Öğretmen Ödemeleri</h1></div><button className="primary-btn" onClick={()=>setPaymentTeacher('')}><Plus size={17}/>Ödeme Yap</button></section>
     <TeacherSectionNav active="payments"/>
 
     <section className="teacher-payment-toolbar">

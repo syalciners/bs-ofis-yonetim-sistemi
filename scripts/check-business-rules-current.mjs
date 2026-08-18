@@ -62,6 +62,10 @@ replaceExact(
   "expectText('Üst başlık açık zeminli eğitim ikonunu kullanır', appHeader, '<img src=\"./bs-egitim-icon-192-v2.png\" alt=\"BS Eğitim\" />')",
   "expectText('Üst başlık kurum ayarındaki logoyu kullanır', appHeader, 'institution?.logo_url')\nrejectRegex('Üst başlık kurum logosunu sabit kaynakla ezmez', appHeader, /<img\\s+src=[\"']\\.\\/bs-egitim-icon-192-v2\\.png[\"']/, 'Üst başlık logosu hâlâ sabit kaynak kullanıyor.')"
 )
+replaceExact(
+  "expectText('Giriş ekranı BS Eğitim Yönetimi adını kullanır', login, '<h1>BS Eğitim Yönetimi</h1>')",
+  "expectText('Giriş ekranı kurum ayarındaki kurum adını kullanır', login, 'institution?.kurum_adi')\nexpectText('Giriş ekranı kurum ayarındaki logoyu kullanır', login, 'institution?.logo_url')"
+)
 
 try{
   writeFileSync(tempPath,source,'utf8')

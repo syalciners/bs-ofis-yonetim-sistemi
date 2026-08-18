@@ -24,11 +24,11 @@ const days=[
   {short:'Paz',long:'Pazar'},
 ]
 const ROOM_COLUMNS=[
-  {id:'LOC-002',label:'Yalçıner'},
-  {id:'LOC-001',label:'Başak'},
-  {id:'LOC-003',label:'Salon'},
-  {id:'LOC-005',label:'OSM'},
-  {id:'LOC-004',label:'Online'},
+  {id:'LOC-001'},
+  {id:'LOC-002'},
+  {id:'LOC-003'},
+  {id:'LOC-005'},
+  {id:'LOC-004'},
 ] as const
 
 const SLOT_MINUTES=30
@@ -172,7 +172,10 @@ export function DailyCalendarPage(){
   const studentName=(id?:string|null)=>data.ogrenciler.find(x=>x.ogrenci_id===id)?.ad_soyad||'Öğrenci'
   const teacherName=(id?:string|null)=>data.ogretmenler.find(x=>x.ogretmen_id===id)?.ad_soyad||'Öğretmen'
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
-  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const roomColumns=ROOM_COLUMNS.map(column=>{
+  const room=data.derslikler.find(x=>x.derslik_id===column.id)
+  return{...column,room,label:room?.mekan_adi||'Derslik'}
+})
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
   const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{

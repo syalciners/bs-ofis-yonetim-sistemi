@@ -20,7 +20,7 @@ export function InstitutionSettingsPanel({settings,onUpdated}:{settings:KurumAya
 
   useEffect(()=>{setDraft(settings);setFile(null);setPreview(settings.logo_url||DEFAULT_LOGO)},[settings])
   useEffect(()=>{
-    if(!file){setPreview(draft.logo_url||DEFAULT_LOGO);return}
+    if(!file){setPreview(draft.logo_url||DEFAULT_LOGO);return undefined}
     const objectUrl=URL.createObjectURL(file)
     setPreview(objectUrl)
     return()=>URL.revokeObjectURL(objectUrl)
@@ -37,7 +37,14 @@ export function InstitutionSettingsPanel({settings,onUpdated}:{settings:KurumAya
     <form className="form-grid" onSubmit={async e=>{e.preventDefault();setBusy(true);let uploaded:{path:string;url:string}|null=null;try{
       let logoUrl=draft.logo_url||settings.logo_url||DEFAULT_LOGO
       if(file){uploaded=await uploadInstitutionLogo(file);logoUrl=uploaded.url}
-      await saveInstitutionSettings({...draft,logo_url:logoUrl})
+      await saveInstitutionSettings({
+        kurum_adi:draft.kurum_adi,
+        marka_adi:draft.marka_adi,
+        telefon:draft.telefon||null,
+        email:draft.email||null,
+        adres:draft.adres||null,
+        logo_url:logoUrl,
+      })
       const oldPath=institutionLogoPath(settings.logo_url)
       await onUpdated()
       if(uploaded&&oldPath&&oldPath!==uploaded.path){void removeInstitutionLogo(oldPath).catch(()=>{})}

@@ -1,6 +1,9 @@
 /* Ana ekran başlık hizası ve Program görünüm düğmesi standardı */
 .page-title-row{min-height:44px}
 
+/* Program Liste/Takvim görünümünde başlığı diğer ana ekranlarla aynı alt çizgiye hizala. */
+.calendar-title-line-balanced{align-items:end}
+
 /* Program Liste/Takvim görünümünde yalnız üst bölüm ritmini sıkılaştır. */
 .calendar-v2,.daily-calendar-page{gap:12px}
 @media(max-width:640px){.calendar-v2,.daily-calendar-page{gap:11px}}

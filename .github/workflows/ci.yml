@@ -3,6 +3,8 @@ name: Build doğrulama
 on:
   push:
     branches: ['v1-*', clean-v1-golden]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:

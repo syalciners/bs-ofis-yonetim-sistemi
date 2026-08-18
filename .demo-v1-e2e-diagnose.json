@@ -1,0 +1,12 @@
+{
+  "success": false,
+  "step": "A demo session seed",
+  "error": {
+    "message": "insert or update on table \"ogretmen_odemeleri\" violates foreign key constraint \"fk_ogretmen_odemeleri_kasa_hareketi\"",
+    "code": "23503",
+    "details": "Key (kasa_hareket_id)=(Dd045db929d-KHR-ODE-001) is not present in table \"kasa_hareketleri\".",
+    "hint": null
+  },
+  "aId": "d045db92-9d11-4177-a613-7ac08cb0af2d",
+  "bId": null
+}

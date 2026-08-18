@@ -1,0 +1,7 @@
+install=success
+isolation=success
+rules=success
+build=success
+assets=success
+run_id=32186095148
+source_commit=405f6bd1d9b74f96133ae6ba4cd0c90f18c96151

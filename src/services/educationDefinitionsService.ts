@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase'
 import { uid } from '../lib/format'
 import type { Brans, Derslik } from '../lib/types'
 
-export async function saveBranch(input: Pick<Brans, 'brans_id'|'brans_adi'|'aktif'> & { brans_id?: string }) {
+export async function saveBranch(input: Pick<Brans, 'brans_adi'|'aktif'> & { brans_id?: string }) {
   const id = input.brans_id || uid('BR')
   const { data, error } = await supabase.rpc('brans_kaydet_guvenli_v1', {
     p_brans_id: id,
@@ -13,7 +13,7 @@ export async function saveBranch(input: Pick<Brans, 'brans_id'|'brans_adi'|'akti
   return { id, data }
 }
 
-export async function saveRoom(input: Pick<Derslik, 'derslik_id'|'mekan_adi'|'mekan_turu'|'kapasite'|'aktif'|'aciklama'> & { derslik_id?: string }) {
+export async function saveRoom(input: Pick<Derslik, 'mekan_adi'|'mekan_turu'|'kapasite'|'aktif'|'aciklama'> & { derslik_id?: string }) {
   const id = input.derslik_id || uid('LOC')
   const { data, error } = await supabase.rpc('derslik_kaydet_guvenli_v1', {
     p_derslik_id: id,

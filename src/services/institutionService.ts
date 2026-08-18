@@ -24,7 +24,13 @@ export const DEFAULT_KURUM_AYARLARI: KurumAyarlari = {
 export async function loadInstitutionBrand(): Promise<KurumAyarlari> {
   const { data, error } = await supabase.rpc('kurum_public_bilgisi_v1')
   if (error) throw error
-  return { ...DEFAULT_KURUM_AYARLARI, ...((data || {}) as Partial<KurumAyarlari>) }
+  const brand = (data || {}) as { kurum_adi?: string | null; marka_adi?: string | null; logo_url?: string | null }
+  return {
+    ...DEFAULT_KURUM_AYARLARI,
+    kurum_adi: brand.kurum_adi || DEFAULT_KURUM_AYARLARI.kurum_adi,
+    marka_adi: brand.marka_adi || DEFAULT_KURUM_AYARLARI.marka_adi,
+    logo_url: brand.logo_url || DEFAULT_KURUM_AYARLARI.logo_url,
+  }
 }
 
 export async function loadInstitutionSettings(): Promise<KurumAyarlari> {

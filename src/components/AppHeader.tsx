@@ -33,7 +33,7 @@ export function AppHeader() {
       <div className="app-header-main">
         <button className="brand" type="button" onClick={() => nav('/')}>
           <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
-          <span><strong>BS Eğitim</strong><small>{isDemo?'Yönetimi · Demo':'Yönetimi'}</small></span>
+          <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
         </button>
         <div className="header-actions">
           <span className="cloud-chip"><Cloud size={13}/> {isDemo?'DEMO':'Bulut'}</span>

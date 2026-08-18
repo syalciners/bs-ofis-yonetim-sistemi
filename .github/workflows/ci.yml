@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Dengeli header ve Program yerleşimini uygula
+        run: python scripts/_tmp_apply_header_balance.py
       - uses: actions/setup-node@v4
         with:
           node-version: 22

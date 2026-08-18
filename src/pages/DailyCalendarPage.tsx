@@ -8,7 +8,7 @@ import { LessonForm } from '../components/forms'
 import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
-import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
+import { addDays, compactWeekRange, mondayOf, shortDate, todayISO } from '../lib/format'
 import { teacherTone } from '../lib/teacherTone'
 import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
@@ -23,12 +23,6 @@ const days=[
   {short:'Cmt',long:'Cumartesi'},
   {short:'Paz',long:'Pazar'},
 ]
-const weekChoices=[
-  {offset:-1,label:'Önceki Hafta'},
-  {offset:0,label:'Bu Hafta'},
-  {offset:1,label:'Gelecek Hafta'},
-]
-
 const ROOM_COLUMNS=[
   {id:'LOC-002',label:'Yalçıner'},
   {id:'LOC-001',label:'Başak'},
@@ -125,7 +119,8 @@ export function DailyCalendarPage(){
   const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const weekOffset=Math.round((new Date(`${monday}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
-  const selectWeek=(offset:number)=>{setMonday(addDays(baseMonday,offset*7));setWeekReview(null)}
+  const moveWeek=(delta:number)=>{setMonday(current=>addDays(current,delta*7));setWeekReview(null)}
+  const goCurrentWeek=()=>{setMonday(baseMonday);setWeekReview(null)}
   const readWeekStatus=useCallback(async():Promise<WeekStatusState>=>({monday,status:await getWeekCreationStatus(monday)}),[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
@@ -258,15 +253,16 @@ export function DailyCalendarPage(){
   const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target?.roomId):null
 
   return <div className="page-stack calendar-v2 daily-calendar-page">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1></div></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
 
-    <section className="week-context-row" aria-label="Program hafta komutları" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) auto minmax(0,1fr)',alignItems:'center',gap:10}}>
-      <button className="calendar-mode-btn" type="button" style={{justifySelf:'start'}} onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
-      <div className="week-range" style={{justifySelf:'center'}}><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
-      <button className="primary-btn calendar-title-week-action" style={{justifySelf:'end',maxWidth:'none'}} disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button>
-    </section>
-    <section className="week-switcher" aria-label="Hafta seçimi">
-      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>selectWeek(x.offset)}>{x.label}</button>)}
+    <section className="calendar-week-toolbar" aria-label="Program hafta gezintisi">
+      <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
+      <div className="calendar-week-range-compact"><b>{compactWeekRange(monday,addDays(monday,6))}</b></div>
+      <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
+        <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
+        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>
+        <button type="button" aria-label="Gelecek hafta" onClick={()=>moveWeek(1)}>›</button>
+      </div>
     </section>
 
     <section className="daily-day-tabs" aria-label="Gün seçimi">

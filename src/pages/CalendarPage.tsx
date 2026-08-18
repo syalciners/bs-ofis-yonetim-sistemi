@@ -9,7 +9,7 @@ import { Sheet } from '../components/Sheet'
 import { LessonForm } from '../components/forms'
 import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import type { Ders } from '../lib/types'
-import { addDays, mondayOf, shortDate, todayISO } from '../lib/format'
+import { addDays, compactWeekRange, mondayOf, shortDate, todayISO } from '../lib/format'
 import { isManagerTeacher, teacherTone } from '../lib/teacherTone'
 import type { ProgramShareTarget } from '../services/programShareService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
@@ -19,12 +19,6 @@ import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 const CALENDAR_HIDDEN_STATUSES=new Set(['İptal','Ertelendi','Öğretmen İptali'])
-const weekChoices=[
-  {offset:-1,label:'Önceki Hafta'},
-  {offset:0,label:'Bu Hafta'},
-  {offset:1,label:'Gelecek Hafta'},
-]
-
 type CalendarFilter={type:'all'}|{type:'teacher';id:string}|{type:'student';id:string}
 type WeekStatusState={monday:string;status:WeekCreationStatus}
 const serializeFilter=(filter:CalendarFilter)=>filter.type==='all'?'all':`${filter.type}:${filter.id}`
@@ -80,6 +74,8 @@ export function CalendarPage(){
   const weekActionText=isPastWeek?'Geçmiş Hafta':weekBusy||weekStatusBusy?'Kontrol ediliyor…':weekReady?'Hafta Hazır':'Haftayı Hazırla'
   const filterLabel=filter.type==='all'?'Tüm Öğretmenler':filter.type==='teacher'?activeTeachers.find(x=>x.ogretmen_id===filter.id)?.ad_soyad||'Öğretmen':activeStudents.find(x=>x.ogrenci_id===filter.id)?.ad_soyad||'Öğrenci'
   const chooseFilter=(next:CalendarFilter)=>{setFilter(next);setShareOpen(false)}
+  const moveWeek=(delta:number)=>{setWeekOffset(current=>current+delta);setWeekReview(null);setShareOpen(false)}
+  const goCurrentWeek=()=>{setWeekOffset(0);setWeekReview(null);setShareOpen(false)}
 
   const confirmWeekCreation=()=>{
     const currentSafety=isCurrentWeek?'\n\nBugünden önceki veya saati geçmiş dersler değiştirilmez.':''
@@ -115,15 +111,16 @@ export function CalendarPage(){
   const openWeekPdf=async()=>{if(!lessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
 
   return <div className="page-stack calendar-v2">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1></div></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
 
-    <section className="week-context-row" aria-label="Program hafta komutları" style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) auto minmax(0,1fr)',alignItems:'center',gap:10}}>
-      <button className="calendar-mode-btn" type="button" style={{justifySelf:'start'}} onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button>
-      <div className="week-range" style={{justifySelf:'center'}}><b>{shortDate(monday)} – {shortDate(addDays(monday,6))}</b></div>
-      <button className="primary-btn calendar-title-week-action" style={{justifySelf:'end',maxWidth:'none'}} disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button>
-    </section>
-    <section className="week-switcher" aria-label="Hafta seçimi">
-      {weekChoices.map(x=><button key={x.offset} className={weekOffset===x.offset?'active':''} onClick={()=>{setWeekOffset(x.offset);setWeekReview(null);setShareOpen(false)}}>{x.label}</button>)}
+    <section className="calendar-week-toolbar" aria-label="Program hafta gezintisi">
+      <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button>
+      <div className="calendar-week-range-compact"><b>{compactWeekRange(monday,addDays(monday,6))}</b></div>
+      <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
+        <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
+        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>
+        <button type="button" aria-label="Gelecek hafta" onClick={()=>moveWeek(1)}>›</button>
+      </div>
     </section>
 
     <section className="teacher-filter-wrap">

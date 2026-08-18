@@ -1,6 +1,14 @@
 export const money = (value?: number | null) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(Number(value || 0))
 export const money2 = (value?: number | null) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 2 }).format(Number(value || 0))
 export const shortDate = (iso?: string | null) => iso ? new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'short' }).format(new Date(`${iso}T12:00:00+03:00`)) : '—'
+export const compactWeekRange = (start: string, end: string) => {
+  const parse = (iso: string) => new Date(`${iso}T12:00:00+03:00`)
+  const day = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', timeZone: 'Europe/Istanbul' })
+  const month = new Intl.DateTimeFormat('tr-TR', { month: 'short', timeZone: 'Europe/Istanbul' })
+  const startDate = parse(start), endDate = parse(end)
+  const startMonth = month.format(startDate), endMonth = month.format(endDate)
+  return startMonth === endMonth ? `${day.format(startDate)}–${day.format(endDate)} ${startMonth}` : `${day.format(startDate)} ${startMonth}–${day.format(endDate)} ${endMonth}`
+}
 export const fullDate = (iso?: string | null) => iso ? new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(`${iso}T12:00:00+03:00`)) : '—'
 export const time = (value?: string | null) => value ? value.slice(0, 5) : '—'
 export const formatClockInput = (value?: string | null) => {

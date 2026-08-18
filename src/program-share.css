@@ -42,6 +42,14 @@
 }
 .calendar-title-week-action svg{flex:0 0 auto}
 
+.calendar-week-toolbar{display:grid;grid-template-columns:auto minmax(62px,1fr) auto;align-items:center;gap:8px;min-width:0}
+.calendar-week-toolbar .calendar-mode-btn{min-height:38px;padding:6px 10px;font-size:10.5px;white-space:nowrap}
+.calendar-week-range-compact{min-width:0;text-align:center;color:#475569;font-size:12px;font-weight:900;white-space:nowrap}
+.calendar-week-nav-compact{display:grid;grid-template-columns:30px auto 30px;align-items:center;gap:3px;padding:3px;background:#eef2f7;border:1px solid #e2e8f0;border-radius:12px}
+.calendar-week-nav-compact button{height:32px;min-width:30px;padding:0 7px;border:0;border-radius:9px;background:transparent;color:#475569;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}
+.calendar-week-nav-compact button:first-child,.calendar-week-nav-compact button:last-child{font-size:22px;line-height:1}
+.calendar-week-nav-compact button.active{background:#2563eb;color:#fff;box-shadow:0 4px 10px rgba(37,99,235,.18)}
+
 .calendar-command-summary{display:grid!important;gap:5px!important;min-width:0}
 .calendar-command-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .calendar-command-heading>b{min-width:0;line-height:1.2;overflow-wrap:anywhere}
@@ -104,6 +112,13 @@
   .calendar-title-line{gap:8px}
   .calendar-title-week-action{min-height:36px;max-width:60%;padding:5px 9px;font-size:9px;gap:5px}
   .calendar-title-week-action svg{width:15px;height:15px}
+  .calendar-week-toolbar{gap:6px}
+  .calendar-week-toolbar .calendar-mode-btn{min-height:36px;padding:5px 8px;font-size:9.5px;gap:5px}
+  .calendar-week-toolbar .calendar-mode-btn svg{width:15px;height:15px}
+  .calendar-week-range-compact{font-size:10.5px}
+  .calendar-week-nav-compact{grid-template-columns:28px auto 28px;gap:2px;padding:3px}
+  .calendar-week-nav-compact button{height:30px;min-width:28px;padding:0 5px;font-size:9.5px}
+  .calendar-week-nav-compact button:first-child,.calendar-week-nav-compact button:last-child{font-size:20px}
   .calendar-command-heading{gap:8px}
   .calendar-command-heading .calendar-pdf-btn{min-height:32px;padding:5px 8px;font-size:9.5px}
   .calendar-command-heading .calendar-pdf-btn svg{width:15px;height:15px}

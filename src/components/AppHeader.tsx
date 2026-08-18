@@ -27,22 +27,24 @@ export function AppHeader() {
   const sectionLabel=pageSection(location.pathname)
   return <header className="app-header-wrap">
     <div className="app-header">
-      <button className="brand" type="button" onClick={() => nav('/')}>
-        <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
-        <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
-      </button>
-      <div className="header-actions">
-        <span className="cloud-chip"><Cloud size={13}/> Bulut</span>
-        <button className="icon-btn" type="button" onClick={() => void refresh()} aria-label="Yenile"><RefreshCw size={17} className={refreshing ? 'spin' : ''}/></button>
-        <button className="icon-btn" type="button" onClick={() => nav('/ayarlar')} aria-label="Ayarlar"><Settings size={17}/></button>
+      <div className="app-header-main">
+        <button className="brand" type="button" onClick={() => nav('/')}>
+          <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
+          <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
+        </button>
+        <div className="header-actions">
+          <span className="cloud-chip"><Cloud size={13}/> Bulut</span>
+          <button className="icon-btn" type="button" onClick={() => void refresh()} aria-label="Yenile"><RefreshCw size={17} className={refreshing ? 'spin' : ''}/></button>
+          <button className="icon-btn" type="button" onClick={() => nav('/ayarlar')} aria-label="Ayarlar"><Settings size={17}/></button>
+        </div>
       </div>
-    </div>
-    <div className="app-header-meta">
-      <span className="app-header-section">{sectionLabel}</span>
-      {profile&&<div className="app-header-profile" aria-label={`${profile.ad_soyad}, ${profile.rol}`}>
-        <strong>{profile.ad_soyad.toLocaleUpperCase('tr-TR')}</strong>
-        <small>{profile.rol}</small>
-      </div>}
+      <div className="app-header-meta">
+        <span className="app-header-section">{sectionLabel}</span>
+        {profile&&<div className="app-header-profile" aria-label={`${profile.ad_soyad}, ${profile.rol}`}>
+          <strong>{profile.ad_soyad.toLocaleUpperCase('tr-TR')}</strong>
+          <small>{profile.rol}</small>
+        </div>}
+      </div>
     </div>
   </header>
 }

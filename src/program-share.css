@@ -133,3 +133,56 @@
   .calendar-week-range-long{font-size:8.8px;padding:0 5px}
   .calendar-week-nav-compact{--current-week-width:128px}
 }
+
+
+/* Header ve Program dengeli yerleşim */
+.app-header{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:7px;padding:8px 12px 7px}
+.app-header-main{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.app-header-meta{width:100%;margin:0;padding:6px 2px 0;border-top:1px solid #edf1f5;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.05}
+.app-header-section{padding:0;color:#2a8a85;font-size:8.8px;font-weight:900;letter-spacing:.14em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-header-profile{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;text-align:right;white-space:nowrap}
+.app-header-profile strong{max-width:180px;font-size:8.8px;font-weight:850;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-header-profile small{font-size:8px;font-weight:750;color:#7b8798}
+.app-header-profile small:before{content:'·';margin-right:4px;color:#a3adbb}
+
+.calendar-title-line-balanced{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.calendar-title-line-balanced h1{justify-self:start}
+.calendar-title-line-balanced .calendar-title-week-action{width:auto;max-width:145px;min-height:34px;padding:5px 10px;font-size:9px;box-shadow:0 4px 10px rgba(37,99,235,.10)}
+.calendar-title-line-balanced .calendar-title-week-action:disabled{box-shadow:none;opacity:.68}
+
+.calendar-week-toolbar-balanced{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:7px;min-width:0}
+.calendar-toolbar-mode-btn{min-width:88px;min-height:36px;padding:5px 10px;border:1px solid #dfe6f1!important;background:#fff!important;color:#384965!important;box-shadow:none!important;font-size:9.8px;white-space:nowrap}
+.calendar-toolbar-mode-btn:hover{background:#f8fafc!important}
+.calendar-week-toolbar-balanced .calendar-week-range-long{min-width:0;min-height:36px;justify-content:center;padding:0 8px;text-align:center;font-size:10px;letter-spacing:-.015em}
+.calendar-week-toolbar-balanced .calendar-week-nav-compact{--current-week-width:clamp(90px,12vw,132px);grid-template-columns:26px var(--current-week-width) 26px;gap:2px;padding:3px}
+.calendar-week-toolbar-balanced .calendar-week-nav-compact button{height:30px;min-width:26px;padding:0 5px;font-size:9.5px}
+.calendar-week-toolbar-balanced .calendar-week-nav-compact button:first-child,.calendar-week-toolbar-balanced .calendar-week-nav-compact button:last-child{font-size:19px}
+
+@media(max-width:520px){
+  .app-header{gap:6px;padding:8px 10px 7px}
+  .app-header-meta{gap:8px;padding-top:5px}
+  .app-header-section{font-size:8.2px;letter-spacing:.12em}
+  .app-header-profile strong{max-width:148px;font-size:8.2px}
+  .app-header-profile small{font-size:7.6px}
+  .calendar-title-line-balanced{gap:8px}
+  .calendar-title-line-balanced .calendar-title-week-action{max-width:122px;min-height:34px;padding:5px 8px;font-size:8.5px}
+  .calendar-title-line-balanced .calendar-title-week-action svg{width:14px;height:14px}
+  .calendar-week-toolbar-balanced{grid-template-columns:80px minmax(0,1fr) auto;gap:5px}
+  .calendar-toolbar-mode-btn{min-width:0;width:80px;min-height:34px;padding:4px 7px;font-size:9px;gap:5px}
+  .calendar-toolbar-mode-btn svg{width:14px;height:14px}
+  .calendar-week-toolbar-balanced .calendar-week-range-long{min-height:34px;padding:0 5px;font-size:9px}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact{--current-week-width:90px;grid-template-columns:24px var(--current-week-width) 24px;gap:2px;padding:3px}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact button{height:28px;min-width:24px;padding:0 4px;font-size:9px}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact button:first-child,.calendar-week-toolbar-balanced .calendar-week-nav-compact button:last-child{font-size:18px}
+}
+@media(max-width:360px){
+  .app-header-section{font-size:7.7px;letter-spacing:.10em}
+  .app-header-profile strong{max-width:120px;font-size:7.8px}
+  .app-header-profile small{font-size:7.2px}
+  .calendar-title-line-balanced .calendar-title-week-action{max-width:112px;font-size:8px;padding:4px 6px}
+  .calendar-week-toolbar-balanced{grid-template-columns:72px minmax(0,1fr) auto;gap:4px}
+  .calendar-toolbar-mode-btn{width:72px;font-size:8.5px;padding:4px 5px}
+  .calendar-week-toolbar-balanced .calendar-week-range-long{font-size:8.2px;padding:0 4px}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact{--current-week-width:82px;grid-template-columns:22px var(--current-week-width) 22px}
+  .calendar-week-toolbar-balanced .calendar-week-nav-compact button{min-width:22px;padding:0 3px;font-size:8.6px}
+}

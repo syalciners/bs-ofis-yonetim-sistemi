@@ -1,0 +1,72 @@
+name: Demo Room Labels Fix Once
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - '.github/workflows/demo-room-labels-fix-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: demo
+      VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: demo-hazirlik
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Günlük takvim derslik etiketlerini dinamik yap
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/DailyCalendarPage.tsx')
+          s=p.read_text()
+          old="""const ROOM_COLUMNS=[
+            {id:'LOC-002',label:'Yalçıner'},
+            {id:'LOC-001',label:'Başak'},
+            {id:'LOC-003',label:'Salon'},
+            {id:'LOC-005',label:'OSM'},
+            {id:'LOC-004',label:'Online'},
+          ] as const"""
+          new="""const ROOM_COLUMNS=[
+            {id:'LOC-001'},
+            {id:'LOC-002'},
+            {id:'LOC-003'},
+            {id:'LOC-005'},
+            {id:'LOC-004'},
+          ] as const"""
+          old_map="const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))"
+          new_map="""const roomColumns=ROOM_COLUMNS.map(column=>{
+            const room=data.derslikler.find(x=>x.derslik_id===column.id)
+            return{...column,room,label:room?.mekan_adi||'Derslik'}
+          })"""
+          if old not in s:
+              raise SystemExit('Eski ROOM_COLUMNS bloğu bulunamadı; değişiklik yapılmadı.')
+          if old_map not in s:
+              raise SystemExit('Eski roomColumns eşlemesi bulunamadı; değişiklik yapılmadı.')
+          s=s.replace(old,new,1).replace(old_map,new_map,1)
+          for forbidden in ['Başak','Yalçıner',"label:'Salon'","label:'OSM'"]:
+              if forbidden in s:
+                  raise SystemExit(f'Yasaklı eski derslik etiketi kaldı: {forbidden}')
+          p.write_text(s)
+          PY
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check:demo-isolation
+      - run: npm run check:rules
+      - run: npm run build
+      - name: Kaynak değişikliğini commit et
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/DailyCalendarPage.tsx
+          git commit -m 'Demo günlük takvim dersliklerini dinamik yap'
+          git push origin HEAD:demo-hazirlik

@@ -5,9 +5,15 @@ const definitionsService=readFileSync('src/services/educationDefinitionsService.
 const definitionsPanel=readFileSync('src/components/EducationDefinitionsPanel.tsx','utf8')
 const financeService=readFileSync('src/services/financeDefinitionsService.ts','utf8')
 const financePanel=readFileSync('src/components/FinancialDefinitionsPanel.tsx','utf8')
+const institutionService=readFileSync('src/services/institutionService.ts','utf8')
+const institutionPanel=readFileSync('src/components/InstitutionSettingsPanel.tsx','utf8')
+const provider=readFileSync('src/components/AppDataProvider.tsx','utf8')
+const header=readFileSync('src/components/AppHeader.tsx','utf8')
+const login=readFileSync('src/components/LoginScreen.tsx','utf8')
 const form=readFileSync('src/components/ProfileSettingsForm.tsx','utf8')
 const page=readFileSync('src/pages/SettingsPage.tsx','utf8')
 const css=readFileSync('src/settings-hub.css','utf8')
+const institutionCss=readFileSync('src/institution-settings.css','utf8')
 const main=readFileSync('src/main.tsx','utf8')
 
 const checks=[
@@ -48,8 +54,22 @@ const checks=[
   ['Finans paneli hesap ve gider kategorisi eklemeyi destekler',financePanel.includes('Yeni Kasa / Banka Hesabı')&&financePanel.includes('Yeni Gider Kategorisi')&&financePanel.includes('Hesabı Kaydet')&&financePanel.includes('Kategoriyi Kaydet')],
   ['Ödeme yöntemleri için gereksiz yeni tanım katmanı açılmaz',!financePanel.includes('Ödeme Yöntemleri')&&!financeService.includes('odeme_yontemi')],
   ['Finans tanımları paneli Ayarlar ekranına bağlanmıştır',page.includes('<FinancialDefinitionsPanel')&&page.includes("info==='finans'")],
+  ['Tam kurum ayarı yalnız yönetici oturumunda tablodan yüklenir',institutionService.includes("from('kurum_ayarlari')")&&institutionService.includes("eq('kurum_id', 'ANA')")&&institutionService.includes('maybeSingle()')],
+  ['Anonim kurum markası dar kapsamlı public RPCden yüklenir',institutionService.includes('loadInstitutionBrand')&&institutionService.includes("rpc('kurum_public_bilgisi_v1')")],
+  ['Kurum ayarı doğrudan tablo yazmak yerine güvenli RPC kullanır',institutionService.includes('kurum_ayarlari_guncelle_guvenli_v1')&&!institutionService.includes('.update(')&&!institutionService.includes('.insert(')],
+  ['Kurum logosu ayrı marka bucketına yüklenir',institutionService.includes("LOGO_BUCKET = 'kurum-markasi'")&&institutionService.includes("storage.from(LOGO_BUCKET).upload")],
+  ['Kurum logosu yalnız PNG JPEG WebP ve 2 MB ile sınırlandırılır',institutionService.includes("'image/png'")&&institutionService.includes("'image/jpeg'")&&institutionService.includes("'image/webp'")&&institutionService.includes('2 * 1024 * 1024')],
+  ['Kurum paneli logo URL metni yerine dosya seçimi kullanır',institutionPanel.includes('type="file"')&&institutionPanel.includes('accept="image/png,image/jpeg,image/webp"')&&!institutionPanel.includes('name="logo_url"')],
+  ['Kurum teknik kimliği düzenlenebilir alan değildir',institutionPanel.includes('Tek kurum kaydı sistem tarafından korunur')&&!institutionPanel.includes('name="kurum_id"')],
+  ['Kurum paneli PWA ikonunu kurum logosundan ayrı tutar',institutionPanel.includes('PWA uygulama ikonu')&&institutionPanel.includes('favicon ayrı ürün varlıkları')],
+  ['Kurum markası oturum öncesinde public RPC ile ortak duruma yüklenir',provider.includes('loadInstitutionBrand().then')&&provider.includes('institution: KurumAyarlari | null')],
+  ['Normal yenileme tam kurum ayarını tekrar yükler',provider.includes('nextInstitution')&&provider.includes('loadInstitutionSettings()')&&provider.includes('setInstitution(nextInstitution)')],
+  ['Header marka adı ve logoyu kurum ayarından kullanır',header.includes('institution?.marka_adi')&&header.includes('institution?.logo_url')&&!header.includes('src="./bs-egitim-icon-192-v2.png"')],
+  ['Giriş ekranı kurum adı ve logoyu ortak ayardan kullanır',login.includes('institution?.kurum_adi')&&login.includes('institution?.logo_url')&&login.includes('<h1>{institutionName}</h1>')],
+  ['Kurum paneli Ayarlar ekranına bağlanmıştır',page.includes('<InstitutionSettingsPanel')&&page.includes("info==='kurum'")],
+  ['Kurum paneli responsive logo düzenine sahiptir',institutionCss.includes('.institution-logo-card')&&institutionCss.includes('@media(max-width:520px)')],
   ['Ayarlar yönetim merkezi responsive kart düzenine sahiptir',css.includes('.settings-hub-grid')&&css.includes('grid-template-columns:repeat(2,minmax(0,1fr))')&&css.includes('@media(max-width:620px)')],
-  ['Yeni Ayarlar stili production girişinden yüklenir',main.includes("import './settings-hub.css'")],
+  ['Ayarlar ve kurum stilleri production girişinden yüklenir',main.includes("import './settings-hub.css'")&&main.includes("import './institution-settings.css'")],
 ]
 const failed=checks.filter(([,ok])=>!ok)
 for(const[name,ok]of checks)console.log(`${ok?'✓':'✗'} ${name}`)

@@ -18,10 +18,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAppData } from '../components/AppDataProvider'
 import { EducationDefinitionsPanel } from '../components/EducationDefinitionsPanel'
 import { FinancialDefinitionsPanel } from '../components/FinancialDefinitionsPanel'
+import { InstitutionSettingsPanel } from '../components/InstitutionSettingsPanel'
 import { ProfileSettingsForm } from '../components/ProfileSettingsForm'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import type { KullaniciProfili, Ogretmen } from '../lib/types'
+import { DEFAULT_KURUM_AYARLARI } from '../services/institutionService'
 import { loadManagedUsers, updateManagedUser } from '../services/userManagementService'
 
 type SettingsInfoKey='kurum'|'kullanicilar'|'egitim'|'finans'|'program'|'portal'
@@ -79,7 +81,7 @@ function UserManagementPanel({currentUserId,teachers,onUpdated}:{currentUserId:s
 }
 
 export function SettingsPage(){
-  const{profile,user,signOut,data,refresh}=useAppData()
+  const{profile,user,signOut,data,institution,refresh}=useAppData()
   const[editing,setEditing]=useState(false)
   const[info,setInfo]=useState<SettingsInfoKey|null>(null)
   const isManager=profile?.rol==='Yönetici'
@@ -96,7 +98,7 @@ export function SettingsPage(){
   },[data])
 
   const managerItems=[
-    {key:'kurum' as const,Icon:Building2,title:'Kurum',text:'Kurum bilgileri, marka ve genel tanımlar',meta:'Kurum ayarları'},
+    {key:'kurum' as const,Icon:Building2,title:'Kurum',text:'Kurum bilgileri, marka ve logo',meta:institution?.marka_adi||'Kurum ayarları'},
     {key:'kullanicilar' as const,Icon:UsersRound,title:'Kullanıcılar ve Yetkiler',text:'Yönetim kullanıcıları ve hesap durumu',meta:'Güvenli kullanıcı yönetimi'},
     {key:'egitim' as const,Icon:MapPinned,title:'Branşlar ve Derslikler',text:'Eğitim alanları, ders yerleri ve kapasiteler',meta:summary?`${summary.branches} branş · ${summary.rooms} derslik`:'Tanımlar'},
     {key:'finans' as const,Icon:Landmark,title:'Finans Tanımları',text:'Kasa, banka ve gider sınıflandırmaları',meta:summary?`${summary.accounts} hesap · ${summary.categories} kategori`:'Tanımlar'},
@@ -105,7 +107,7 @@ export function SettingsPage(){
   ]
 
   const infoContent:Record<SettingsInfoKey,{title:string;body:string;rows:Array<[string,string]>}>={
-    kurum:{title:'Kurum',body:'Kurum kimliği ve genel bilgiler burada yönetilecek. Bu aşamada kurum için merkezi bir ayar kaydı henüz kullanılmıyor.',rows:[['Durum','Yönetim merkezi hazır'],['Sonraki adım','Kurum bilgileri için güvenli kayıt yapısı']]},
+    kurum:{title:'Kurum',body:'Kurum adı, kısa marka adı, iletişim bilgileri ve uygulamada kullanılan kurum logosu bu bölümden güvenli olarak yönetilir.',rows:[['Kurum',institution?.kurum_adi||DEFAULT_KURUM_AYARLARI.kurum_adi],['Marka',institution?.marka_adi||DEFAULT_KURUM_AYARLARI.marka_adi],['Logo','Yönetici kontrollü yükleme']]},
     kullanicilar:{title:'Kullanıcılar ve Yetkiler',body:'Yönetim kullanıcılarının profil bilgileri ve hesap durumu güvenli servis üzerinden yönetilir.',rows:[['Mevcut kullanıcı',profile?.ad_soyad||'—'],['Rol',profile?.rol||'—'],['Güvenlik','E-posta ve rol salt okunur']]},
     egitim:{title:'Branşlar ve Derslikler',body:'Branş ve derslik tanımları güvenli servis üzerinden eklenir ve düzenlenir. Kimlikler değiştirilmez, geçmiş kayıtlar silinmez.',rows:[['Aktif branş',summary?String(summary.branches):'—'],['Aktif derslik',summary?String(summary.rooms):'—'],['Güvenlik','ID ve geçmiş bağlantılar korunur']]},
     finans:{title:'Finans Tanımları',body:'Kasa/banka hesapları ile gider kategorileri güvenli servis üzerinden yönetilir. Geçmiş hareketi bulunan hesapların açılış bakiyesi değiştirilmez.',rows:[['Aktif hesap',summary?String(summary.accounts):'—'],['Aktif gider kategorisi',summary?String(summary.categories):'—'],['Güvenlik','ID, geçmiş hareketler ve açılış bakiyesi korunur']]},
@@ -114,7 +116,7 @@ export function SettingsPage(){
   }
 
   const selectedInfo=info?infoContent[info]:null
-  const sheetSubtitle=info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':'Yönetim ayarı'
+  const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':'Yönetim ayarı'
 
   return <div className="page-stack settings-hub-page">
     <section className="page-title-row"><div><span className="eyebrow">AYARLAR</span><h1>Ayarlar</h1></div></section>
@@ -153,7 +155,7 @@ export function SettingsPage(){
     </section>
 
     <Sheet open={editing} title="Profili Düzenle" subtitle="Kendi iletişim bilgileriniz" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
-    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
+    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kurum'?<InstitutionSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
       <p>{selectedInfo.body}</p>
       <div className="settings-info-rows">{selectedInfo.rows.map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
       <div className="settings-info-note"><BookOpenCheck size={17}/><span>Bu ekranda henüz veri değiştirilmez; yalnız mevcut yapı ve sıradaki güvenli yönetim alanı gösterilir.</span></div>

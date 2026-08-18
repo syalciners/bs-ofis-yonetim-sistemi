@@ -18,20 +18,24 @@ const pageSection=(pathname:string)=>{
     '/ayarlar':'AYARLAR',
     '/sistem':'SİSTEM',
   }
-  return labels[pathname]||'BS EĞİTİM'
+  return labels[pathname]||'YÖNETİM'
 }
 
 export function AppHeader() {
-  const { refreshing, refresh, profile } = useAppData()
+  const { refreshing, refresh, profile, institution } = useAppData()
   const nav = useNavigate()
   const location = useLocation()
   const sectionLabel=pageSection(location.pathname)
+  const brandName=institution?.marka_adi||'BS Eğitim'
+  const institutionName=institution?.kurum_adi||'BS Eğitim Yönetimi'
+  const brandSuffix=institutionName.startsWith(brandName)?institutionName.slice(brandName.length).trim():institutionName===brandName?'':institutionName
+  const logo=institution?.logo_url||'./bs-egitim-icon-512-v2.png'
   return <header className="app-header-wrap">
     <div className="app-header">
       <div className="app-header-main">
         <button className="brand" type="button" onClick={() => nav('/')}>
-          <img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim" />
-          <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
+          <img src={logo} alt={brandName} />
+          <span><strong>{brandName}</strong>{brandSuffix&&<small>{brandSuffix}</small>}</span>
         </button>
         <div className="header-actions">
           <span className="cloud-chip"><Cloud size={13}/> Bulut</span>

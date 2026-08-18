@@ -56,19 +56,15 @@ replaceExact(
 )
 replaceExact(
   "expectText('Üst başlık açık zeminli eğitim ikonunu kullanır', appHeader, '<img src=\"./bs-egitim-icon-192-v2.png\" alt=\"BS Eğitim\" />')",
-  "expectText('Üst başlık şeffaf BS monogramını kullanır', appHeader, '<img src=\"./bs-logo.png\" alt=\"BS Eğitim\" />')"
-)
-replaceExact(
-  "expectText('PWA maskelenebilir eğitim ikonunu kullanır', viteConfig, \"{ src: 'bs-egitim-icon-512-v2.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }\")",
-  "expectText('PWA maskelenebilir eğitim ikonunu kullanır', viteConfig, \"{ src: 'bs-icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }\")"
+  "expectText('Üst başlık BS SVG logosunu kullanır', appHeader, '<img src=\"./bs-logo.svg\" alt=\"BS Eğitim\" />')"
 )
 replaceExact(
   "expectText('PWA favicon varlıkları yeni eğitim ikon ailesini kullanır', viteConfig, \"includeAssets: ['bs-egitim-favicon-16-v2.png','bs-egitim-favicon-32-v2.png','bs-egitim-favicon-48-v2.png','bs-egitim-apple-touch-v2.png']\")",
-  "expectText('PWA marka varlıklarını kullanır', viteConfig, \"includeAssets: ['bs-logo.png','bs-egitim-favicon-16-v2.png','bs-egitim-favicon-32-v2.png','bs-egitim-favicon-48-v2.png','bs-egitim-apple-touch-v2.png','bs-icon-maskable-512.png']\")"
+  "expectText('PWA marka varlıklarını kullanır', viteConfig, \"includeAssets: ['bs-logo.svg','bs-egitim-favicon-16-v2.png','bs-egitim-favicon-32-v2.png','bs-egitim-favicon-48-v2.png','bs-egitim-apple-touch-v2.png']\")"
 )
 replaceExact(
   "expectText('Giriş ekranı BS Eğitim Yönetimi adını kullanır', login, '<h1>BS Eğitim Yönetimi</h1>')",
-  "expectText('Giriş ekranı BS Eğitim Yönetimi adını kullanır', login, '<h1>BS Eğitim Yönetimi</h1>')\nexpectText('Giriş ekranı şeffaf BS monogramını kullanır', login, '<img className=\"login-logo\" src=\"./bs-logo.png\" alt=\"BS Eğitim\" />')\nexpectText('Açılış ekranı şeffaf BS monogramını kullanır', app, '<img src=\"./bs-logo.png\" alt=\"BS Eğitim\"/>')\nexpectText('Marka paleti Deep Navy kullanır', brandPalette, '--brand-navy:#0B1F3A')\nexpectText('Marka paleti Growth Blue kullanır', brandPalette, '--brand-blue:#168BFF')\nexpectText('Marka paleti Satin Silver kullanır', brandPalette, '--brand-silver:#B8C1CC')"
+  "expectText('Giriş ekranı BS Eğitim Yönetimi adını kullanır', login, '<h1>BS Eğitim Yönetimi</h1>')\nexpectText('Giriş ekranı BS SVG logosunu kullanır', login, '<img className=\"login-logo\" src=\"./bs-logo.svg\" alt=\"BS Eğitim\" />')\nexpectText('Açılış ekranı BS SVG logosunu kullanır', app, '<img src=\"./bs-logo.svg\" alt=\"BS Eğitim\"/>')\nexpectText('Marka paleti Deep Navy kullanır', brandPalette, '--brand-navy:#0B1F3A')\nexpectText('Marka paleti Growth Blue kullanır', brandPalette, '--brand-blue:#168BFF')\nexpectText('Marka paleti Satin Silver kullanır', brandPalette, '--brand-silver:#B8C1CC')"
 )
 
 try{

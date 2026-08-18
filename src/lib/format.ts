@@ -9,6 +9,18 @@ export const compactWeekRange = (start: string, end: string) => {
   const startMonth = month.format(startDate), endMonth = month.format(endDate)
   return startMonth === endMonth ? `${day.format(startDate)}–${day.format(endDate)} ${startMonth}` : `${day.format(startDate)} ${startMonth}–${day.format(endDate)} ${endMonth}`
 }
+export const weekRangeLong = (start: string, end: string) => {
+  const parse = (iso: string) => new Date(`${iso}T12:00:00+03:00`)
+  const day = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', timeZone: 'Europe/Istanbul' })
+  const month = new Intl.DateTimeFormat('tr-TR', { month: 'long', timeZone: 'Europe/Istanbul' })
+  const year = new Intl.DateTimeFormat('tr-TR', { year: 'numeric', timeZone: 'Europe/Istanbul' })
+  const startDate=parse(start),endDate=parse(end)
+  const startMonth=month.format(startDate),endMonth=month.format(endDate)
+  const startYear=year.format(startDate),endYear=year.format(endDate)
+  if(startYear!==endYear)return `${day.format(startDate)} ${startMonth} ${startYear}-${day.format(endDate)} ${endMonth} ${endYear}`
+  if(startMonth!==endMonth)return `${day.format(startDate)} ${startMonth}-${day.format(endDate)} ${endMonth} ${endYear}`
+  return `${day.format(startDate)}-${day.format(endDate)} ${startMonth} ${endYear}`
+}
 export const fullDate = (iso?: string | null) => iso ? new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(`${iso}T12:00:00+03:00`)) : '—'
 export const time = (value?: string | null) => value ? value.slice(0, 5) : '—'
 export const formatClockInput = (value?: string | null) => {

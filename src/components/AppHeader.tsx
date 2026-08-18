@@ -1,10 +1,30 @@
 import { Cloud, RefreshCw, Settings } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppData } from './AppDataProvider'
+
+const pageSection=(pathname:string)=>{
+  if(pathname==='/')return 'YÖNETİM ÖZETİ'
+  if(pathname.startsWith('/takvim'))return 'DERS PROGRAMI'
+  const labels:Record<string,string>={
+    '/ogrenciler':'ÖĞRENCİ YÖNETİMİ',
+    '/finans':'FİNANS',
+    '/menu':'DİĞER İŞLEMLER',
+    '/ogretmenler':'PERSONEL',
+    '/ogretmen-odemeleri':'ÖĞRETMEN YÖNETİMİ',
+    '/odevler':'ÖDEV TAKİBİ',
+    '/raporlar':'RAPORLAR',
+    '/sabit-program':'PROGRAM ŞABLONLARI',
+    '/ayarlar':'AYARLAR',
+    '/sistem':'SİSTEM',
+  }
+  return labels[pathname]||'BS EĞİTİM'
+}
 
 export function AppHeader() {
   const { refreshing, refresh, profile } = useAppData()
   const nav = useNavigate()
+  const location = useLocation()
+  const sectionLabel=pageSection(location.pathname)
   return <header className="app-header-wrap">
     <div className="app-header">
       <button className="brand" type="button" onClick={() => nav('/')}>
@@ -17,9 +37,12 @@ export function AppHeader() {
         <button className="icon-btn" type="button" onClick={() => nav('/ayarlar')} aria-label="Ayarlar"><Settings size={17}/></button>
       </div>
     </div>
-    {profile && <div aria-label={`${profile.ad_soyad}, ${profile.rol}`} style={{width:'min(1040px,calc(100% - 28px))',margin:'5px auto 0',display:'grid',justifyItems:'end',gap:1,paddingRight:4,lineHeight:1.05}}>
-      <strong style={{fontSize:9.5,fontWeight:900,letterSpacing:'.02em',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:180}}>{profile.ad_soyad.toLocaleUpperCase('tr-TR')}</strong>
-      <small style={{fontSize:8.5,fontWeight:750,color:'#7b8798'}}>{profile.rol}</small>
-    </div>}
+    <div className="app-header-meta">
+      <span className="app-header-section">{sectionLabel}</span>
+      {profile&&<div className="app-header-profile" aria-label={`${profile.ad_soyad}, ${profile.rol}`}>
+        <strong>{profile.ad_soyad.toLocaleUpperCase('tr-TR')}</strong>
+        <small>{profile.rol}</small>
+      </div>}
+    </div>
   </header>
 }

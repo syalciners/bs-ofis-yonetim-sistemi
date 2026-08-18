@@ -1,0 +1,39 @@
+name: Sabit Program varsayılan migrasyonu v2
+
+on:
+  push:
+    branches: ['v1-ayarlar-program-ayarlari']
+    paths:
+      - 'scripts/patch-program-form-default-v2.mjs'
+      - '.github/workflows/program-default-migration-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sabit Program formunu kurum varsayılanına bağla
+        run: node scripts/patch-program-form-default-v2.mjs
+      - name: Geçici kaynak migrasyonlarını temizle ve kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/patch-program-form-default.mjs
+          rm -f scripts/patch-program-form-default-v2.mjs
+          rm -f .github/workflows/program-default-migration.yml
+          rm -f .github/workflows/program-default-migration-v2.yml
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Kaynak migrasyonu için değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sabit Program formunu kurum varsayılanına bağla [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

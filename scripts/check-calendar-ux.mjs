@@ -21,13 +21,18 @@ const css=read('src/ux-overrides.css')
 const stability=read('src/navigation-stability.css')
 const programCss=read('src/program-share.css')
 const main=read('src/main.tsx')
+const appHeader=read('src/components/AppHeader.tsx')
+const format=read('src/lib/format.ts')
 
 const checks=[
+  ['Sayfa etiketi headerda kullanıcı ile aynı meta satırındadır',appHeader.includes('className="app-header-meta"')&&appHeader.includes('className="app-header-section"')&&appHeader.includes('className="app-header-profile"')&&appHeader.includes("pathname.startsWith('/takvim')")],
+  ['Ana sayfa etiketleri sayfa başlık satırında gizlenir',read('src/styles.css').includes('.page-title-row .eyebrow{display:none}')],
+  ['Bu Hafta mobilde yönetici öğretmen kartı genişliği referansını kullanır',programCss.includes('--current-week-width:calc((100vw - 35px)/2)')],
   ['Program Liste görünümünde tek Takvim karşı-görünüm düğmesi vardır',calendar.includes("onClick={()=>nav('/takvim/gunluk')}")&&calendar.includes('<CalendarDays size={16}/>Takvim')],
   ['Program ve günlük Takvim aynı Program başlığını kullanır',calendar.includes('<h1>Program</h1>')&&dailyCalendar.includes('<h1>Program</h1>')&&!dailyCalendar.includes('<h1>Takvim</h1>')],
-  ['Günlük Takvimde Liste karşı-görünüm düğmesi kompakt hafta çubuğundadır',dailyCalendar.includes('className="calendar-week-toolbar"')&&dailyCalendar.includes("onClick={()=>nav('/takvim')}")&&dailyCalendar.includes('<List size={16}/>Liste')],
-  ['Program ve günlük Takvim tarih aralığını başlık satırının ortasında gösterir',[calendar,dailyCalendar].every(src=>src.includes('calendar-title-line calendar-title-line-with-range')&&src.includes('className="calendar-title-week-range"')&&src.includes('compactWeekRange(monday,addDays(monday,6))')&&src.indexOf('calendar-title-week-range')<src.indexOf('calendar-week-toolbar'))],
-  ['Program ve günlük Takvim alt satırda yalnız görünüm ve kompakt hafta gezintisini kullanır',[calendar,dailyCalendar].every(src=>src.includes('className="calendar-week-toolbar"')&&src.includes('className="calendar-week-nav-compact"')&&!src.includes('className="week-switcher"')&&!src.includes('calendar-week-range-compact'))],
+  ['Günlük Takvimde Liste karşı-görünüm düğmesi Program başlık satırındadır',dailyCalendar.includes('calendar-title-mode-btn')&&dailyCalendar.includes("onClick={()=>nav('/takvim')}")&&dailyCalendar.includes('<List size={16}/>Liste')&&dailyCalendar.indexOf('calendar-title-mode-btn')<dailyCalendar.indexOf('calendar-week-toolbar')],
+  ['Program ve günlük Takvim uzun tarih aralığını alt hafta satırının solunda gösterir',[calendar,dailyCalendar].every(src=>src.includes('calendar-title-line calendar-title-line-with-mode')&&src.includes('className="calendar-week-range-long"')&&src.includes('weekRangeLong(monday,addDays(monday,6))'))&&format.includes('export const weekRangeLong')],
+  ['Program ve günlük Takvim alt satırda tarih aralığı ve kompakt hafta gezintisini kullanır',[calendar,dailyCalendar].every(src=>src.includes('className="calendar-week-toolbar"')&&src.includes('calendar-week-range-long')&&src.includes('className="calendar-week-nav-compact"')&&!src.includes('className="week-switcher"'))],
   ['Kompakt hafta çubuğu önceki Bu Hafta gelecek kontrollerini iki görünümde de içerir',[calendar,dailyCalendar].every(src=>src.includes('aria-label="Önceki hafta"')&&src.includes('>Bu Hafta</button>')&&src.includes('aria-label="Gelecek hafta"'))],
   ['Günlük Takvimde eski büyük oklu hafta kartı ve açıklama kaldırılmıştır',!dailyCalendar.includes('daily-week-nav')&&!dailyCalendar.includes('weekTitle(')&&!dailyCalendar.includes('Günü seç, boş derslik ve saate dokunarak ders ekle.')&&(dailyCalendar.match(/calendar-mode-btn/g)||[]).length===1],
   ['Günlük Takvim Haftayı Hazırla yalnız seçilen haftanın durumunu kontrol eder',dailyCalendar.includes('getWeekCreationStatus(monday)')&&!dailyCalendar.includes('getWeekCreationStatus(addDays(monday,7))')&&!dailyCalendar.includes('TwoWeekCreationStatus')&&!dailyCalendar.includes('allWeeksAreReady')],

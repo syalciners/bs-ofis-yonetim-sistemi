@@ -8,7 +8,7 @@ import { LessonForm } from '../components/forms'
 import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
-import { addDays, compactWeekRange, mondayOf, shortDate, todayISO } from '../lib/format'
+import { addDays, mondayOf, shortDate, todayISO, weekRangeLong } from '../lib/format'
 import { teacherTone } from '../lib/teacherTone'
 import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
@@ -253,10 +253,10 @@ export function DailyCalendarPage(){
   const dragRoom=dragView?.target?roomColumns.find(x=>x.id===dragView.target?.roomId):null
 
   return <div className="page-stack calendar-v2 daily-calendar-page">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line calendar-title-line-with-range"><h1>Program</h1><div className="calendar-title-week-range"><b>{compactWeekRange(monday,addDays(monday,6))}</b></div><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line calendar-title-line-with-mode"><h1>Program</h1><button className="calendar-mode-btn calendar-title-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
 
     <section className="calendar-week-toolbar" aria-label="Program hafta gezintisi">
-      <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
+      <div className="calendar-week-range-long"><b>{weekRangeLong(monday,addDays(monday,6))}</b></div>
       <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
         <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
         <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>

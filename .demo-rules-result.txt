@@ -88,7 +88,7 @@
 ✓ Rapor dönem filtreleri telefonda alt alta iner
 ✓ Statik KPI kartları tıklanabilir imleç göstermez
 ✓ Gerçek KPI butonları tıklanabilir kalır
-✗ Üst başlık BS Eğitim Yönetimi adını eksiksiz kullanır
+✓ Üst başlık BS Eğitim Yönetimi adını eksiksiz kullanır
 ✓ Üst başlık açık zeminli eğitim ikonunu kullanır
 ✓ PWA 192 piksel eğitim ikonunu kullanır
 ✓ PWA 512 piksel eğitim ikonunu kullanır
@@ -156,5 +156,4 @@
 ✓ Genel tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür
 ✓ Öğrenci hızlı tahsilat tutarı borçla sınırlandırılmaz; avans ödeme mümkündür
 
-1 kritik iş kuralı / mimari kontrol başarısız:
-- Üst başlık BS Eğitim Yönetimi adını eksiksiz kullanır: Beklenen ifade bulunamadı: <strong>BS Eğitim</strong><small>Yönetimi</small>
+147 kritik iş kuralı ve mimari sınır doğrulandı.

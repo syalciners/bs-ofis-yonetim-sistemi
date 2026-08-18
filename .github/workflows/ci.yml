@@ -16,8 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Başlık tarih yerleşimini uygula
-        run: python scripts/_tmp_move_week_range.py
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

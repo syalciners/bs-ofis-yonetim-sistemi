@@ -3,7 +3,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
-import { loadInstitutionSettings, type KurumAyarlari } from '../services/institutionService'
+import { loadInstitutionBrand, loadInstitutionSettings, type KurumAyarlari } from '../services/institutionService'
 
 interface AppCtx {
   session: Session | null
@@ -79,7 +79,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-    void loadInstitutionSettings().then(next => { if (mounted) setInstitution(next) }).catch(() => undefined)
+    void loadInstitutionBrand().then(next => { if (mounted) setInstitution(next) }).catch(() => undefined)
     void supabase.auth.getSession().then(({ data }) => { if (mounted) { setSession(data.session); if (!data.session) setLoading(false) } })
     const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setLoading(!next); if (!next) { setData(null); setProfile(null) } })
     return () => { mounted = false; auth.subscription.unsubscribe() }

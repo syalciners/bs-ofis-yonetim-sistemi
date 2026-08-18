@@ -1,0 +1,36 @@
+:root{
+  --brand-navy:#0B1F3A;
+  --brand-silver:#B8C1CC;
+  --brand-blue:#168BFF;
+  --ink:var(--brand-navy);
+  --blue:var(--brand-blue);
+  --blue2:#EAF5FF;
+  --muted:#6F7D91;
+  --line:#DCE2E8;
+  --shadow:0 10px 28px rgba(11,31,58,.07);
+}
+
+body{color:var(--brand-navy)}
+.app-header-wrap{background:rgba(247,249,252,.9)}
+.app-header{border-color:rgba(184,193,204,.58);box-shadow:0 10px 30px rgba(11,31,58,.07)}
+.brand img{object-fit:contain;background:#F7F9FC;box-shadow:0 5px 14px rgba(11,31,58,.10)}
+.brand strong{color:var(--brand-navy)}
+.brand small,.app-header-section,.eyebrow{color:var(--brand-blue)}
+.cloud-chip{background:#EAF5FF;color:#0A69C7;border-color:#B9DCFF}
+.icon-btn{border-color:rgba(184,193,204,.58)}
+.icon-btn:hover{background:#F7FAFD}
+
+.login-page{background:radial-gradient(circle at 50% 16%,rgba(22,139,255,.14) 0,#F7F9FC 39%,#F7F9FC 100%)}
+.login-card{border-color:rgba(184,193,204,.62);box-shadow:0 26px 72px rgba(11,31,58,.13)}
+.login-logo{width:132px;height:132px;border-radius:26px;object-fit:contain;background:#F7F9FC;box-shadow:0 16px 38px rgba(11,31,58,.14)}
+.login-card h1{color:var(--brand-navy)}
+.login-security{color:#738196}
+
+.primary-btn{border-color:var(--brand-blue);background:var(--brand-blue);box-shadow:0 8px 20px rgba(22,139,255,.22)}
+.text-btn{color:var(--brand-blue)}
+.bottom-nav a.active{color:var(--brand-blue);background:#EDF7FF}
+.kpi-card.blue:before{background:var(--brand-blue)}
+.kpi-card.blue .kpi-icon{background:#EAF5FF;color:var(--brand-blue)}
+.quick-icon.blue{background:#EAF5FF;color:var(--brand-blue)}
+.status-planlandi .lesson-status span{background:#EAF5FF;color:#0A69C7}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{border-color:#7BC0FF;box-shadow:0 0 0 3px rgba(22,139,255,.12)}

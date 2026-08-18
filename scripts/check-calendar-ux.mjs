@@ -24,8 +24,10 @@ const main=read('src/main.tsx')
 
 const checks=[
   ['Program Liste görünümünde tek Takvim karşı-görünüm düğmesi vardır',calendar.includes("onClick={()=>nav('/takvim/gunluk')}")&&calendar.includes('<CalendarDays size={16}/>Takvim')],
-  ['Günlük Takvimde tek Liste karşı-görünüm düğmesi başlığın altında soldadır',dailyCalendar.includes('daily-mode-switch-row')&&dailyCalendar.includes("onClick={()=>nav('/takvim')}")&&dailyCalendar.includes('<List size={16}/>Liste')&&dailyCalendar.indexOf('daily-mode-switch-row')>dailyCalendar.indexOf('<h1>Takvim</h1>')&&dailyCalendar.indexOf('daily-mode-switch-row')<dailyCalendar.indexOf('daily-week-nav')&&dailyCalendarCss.includes('.daily-mode-switch-row{display:flex;align-items:center;justify-content:flex-start')],
-  ['Günlük Takvim açıklaması ve başlık sağındaki eski Liste düğmesi kaldırılmıştır',!dailyCalendar.includes('Günü seç, boş derslik ve saate dokunarak ders ekle.')&&(dailyCalendar.match(/calendar-mode-btn/g)||[]).length===1],
+  ['Program ve günlük Takvim aynı Program başlığını kullanır',calendar.includes('<h1>Program</h1>')&&dailyCalendar.includes('<h1>Program</h1>')&&!dailyCalendar.includes('<h1>Takvim</h1>')],
+  ['Günlük Takvimde Liste karşı-görünüm düğmesi ortak hafta komut satırındadır',dailyCalendar.includes('className="week-context-row"')&&dailyCalendar.includes("onClick={()=>nav('/takvim')}")&&dailyCalendar.includes('<List size={16}/>Liste')&&dailyCalendar.indexOf('<List size={16}/>Liste')<dailyCalendar.indexOf('className="week-switcher"')],
+  ['Program ve günlük Takvim aynı üçlü hafta seçim modelini kullanır',['Önceki Hafta','Bu Hafta','Gelecek Hafta'].every(label=>calendar.includes(`label:'${label}'`)&&dailyCalendar.includes(`label:'${label}'`))&&dailyCalendar.includes('className="week-switcher"')&&dailyCalendar.includes('{shortDate(monday)} – {shortDate(addDays(monday,6))}')],
+  ['Günlük Takvimde eski büyük oklu hafta kartı ve açıklama kaldırılmıştır',!dailyCalendar.includes('daily-week-nav')&&!dailyCalendar.includes('weekTitle(')&&!dailyCalendar.includes('ChevronLeft')&&!dailyCalendar.includes('ChevronRight')&&!dailyCalendar.includes('Günü seç, boş derslik ve saate dokunarak ders ekle.')&&(dailyCalendar.match(/calendar-mode-btn/g)||[]).length===1],
   ['Takvim Önceki Hafta butonunu içerir',calendar.includes("label:'Önceki Hafta'")],
   ['Takvim Bu Hafta butonunu içerir',calendar.includes("label:'Bu Hafta'")],
   ['Takvim Gelecek Hafta butonunu içerir',calendar.includes("label:'Gelecek Hafta'")],

@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppDataProvider, useAppData } from './components/AppDataProvider'
 import { ToastProvider } from './components/Toast'
 import { LoginScreen } from './components/LoginScreen'
@@ -17,10 +17,13 @@ import { ReportsPage } from './pages/ReportsPage'
 import { FixedProgramPage } from './pages/FixedProgramPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SystemPage } from './pages/SystemPage'
+import { PortalPreviewPage } from './pages/PortalPreviewPage'
 import { LoaderCircle } from 'lucide-react'
 
 function ProtectedApp() {
   const { session, loading, error, data } = useAppData()
+  const location = useLocation()
+  const portalDetail = /^\/portal-onizleme\/(ogretmen|ogrenci)\/[^/]+$/.test(location.pathname)
   if (loading) return <main className="boot"><img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
   if (!session) return <LoginScreen />
   if (error && !data) return <main className="boot error-boot"><img src="./bs-egitim-icon-192-v2.png" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
@@ -38,8 +41,12 @@ function ProtectedApp() {
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>
     <Route path="/ayarlar" element={<SettingsPage/>}/>
     <Route path="/sistem" element={<SystemPage/>}/>
+    <Route path="/portal-onizleme/ogretmen" element={<PortalPreviewPage role="Öğretmen"/>}/>
+    <Route path="/portal-onizleme/ogretmen/:personId" element={<PortalPreviewPage role="Öğretmen"/>}/>
+    <Route path="/portal-onizleme/ogrenci" element={<PortalPreviewPage role="Öğrenci"/>}/>
+    <Route path="/portal-onizleme/ogrenci/:personId" element={<PortalPreviewPage role="Öğrenci"/>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
-  </Routes></main><BottomNav/></div>
+  </Routes></main>{!portalDetail&&<BottomNav/>}</div>
 }
 
 export default function App() { return <ToastProvider><AppDataProvider><ProtectedApp/></AppDataProvider></ToastProvider> }

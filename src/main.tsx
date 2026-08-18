@@ -16,11 +16,13 @@ import './sheet-footer-fixed.css'
 import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
+import './program-week-layout.css'
 import './daily-calendar.css'
 import './fixed-program-calendar.css'
 import './premium-lesson-form.css'
 import './premium-typography.css'
 import './page-title-standard.css'
+import './portal-preview.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

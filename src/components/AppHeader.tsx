@@ -5,6 +5,7 @@ import { useAppData } from './AppDataProvider'
 const pageSection=(pathname:string)=>{
   if(pathname==='/')return 'YÖNETİM ÖZETİ'
   if(pathname.startsWith('/takvim'))return 'DERS PROGRAMI'
+  if(pathname.startsWith('/portal-onizleme'))return 'PORTAL ÖNİZLEMESİ'
   const labels:Record<string,string>={
     '/ogrenciler':'ÖĞRENCİ YÖNETİMİ',
     '/finans':'FİNANS',

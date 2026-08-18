@@ -1,5 +1,4 @@
 import {
-  BadgeDollarSign,
   BookOpenCheck,
   Building2,
   CalendarClock,

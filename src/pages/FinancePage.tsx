@@ -56,7 +56,7 @@ export function FinancePage(){
   const visibleExpenses=showCanceledExpenses?data.giderler:data.giderler.filter(x=>!x.iptal_mi)
   const shownExpenses=visibleExpenses.slice(0,expenseLimit)
   return <div className="page-stack">
-    <section className="page-title-row"><div><span className="eyebrow">FİNANS</span><h1>Finans</h1><p>Tahsilat, hakediş, gider ve kasa tek yerde.</p></div>{actionLabel&&<button className="primary-btn" onClick={()=>tab==='ogretmen'?openTeacherPayment():setAdd(tab)}><Plus size={17}/>{actionLabel}</button>}</section>
+    <section className="page-title-row"><div><span className="eyebrow">FİNANS</span><h1>Finans</h1></div>{actionLabel&&<button className="primary-btn" onClick={()=>tab==='ogretmen'?openTeacherPayment():setAdd(tab)}><Plus size={17}/>{actionLabel}</button>}</section>
 
     <section className="kpi-grid four compact-kpis">
       <button className="kpi-card teal" onClick={()=>setTab('tahsilatlar')}><span>Bu Ay Tahsilat</span><strong>{money(kpis.collections)}</strong><small>gerçek nakit girişi</small></button>

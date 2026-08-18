@@ -213,7 +213,7 @@ Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; deği
   const dragRoom=dragRoomTarget?roomColumns.find(x=>x.id===dragRoomTarget.roomId):null
 
   return <div className="page-stack fixed-program-page">
-    <section className="page-title-row"><div><span className="eyebrow">PROGRAM ŞABLONLARI</span><h1>Sabit Ders Programı</h1><p>Tekrar eden dersleri gün, saat ve dersliklere göre yönetin.</p></div><button className="primary-btn" onClick={()=>openNewProgram()}><Plus size={17}/>Sabit Ders Ekle</button></section>
+    <section className="page-title-row"><div><span className="eyebrow">PROGRAM ŞABLONLARI</span><h1>Sabit Ders Programı</h1></div><button className="primary-btn" onClick={()=>openNewProgram()}><Plus size={17}/>Sabit Ders Ekle</button></section>
 
     <section className="fixed-program-toolbar fixed-program-summary-toolbar" aria-label="Sabit program özeti ve görünüm">
       <div><b>{programs.length} program</b><span>Yalnız aktif kayıtlar</span></div>

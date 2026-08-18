@@ -19,7 +19,6 @@ jobs:
         with:
           node-version: 22
       - name: Geçici Takvim 50/50 regresyon güncellemesi
-        if: github.event_name == 'push'
         run: python scripts/_tmp_fix_calendar_50_50_check.py
       - name: Kritik iş kuralları
         run: npm run check:rules

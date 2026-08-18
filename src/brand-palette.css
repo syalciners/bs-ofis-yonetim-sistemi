@@ -13,17 +13,18 @@
 body{color:var(--brand-navy)}
 .app-header-wrap{background:rgba(247,249,252,.9)}
 .app-header{border-color:rgba(184,193,204,.58);box-shadow:0 10px 30px rgba(11,31,58,.07)}
-.brand img{object-fit:contain;background:#F7F9FC;box-shadow:0 5px 14px rgba(11,31,58,.10)}
+.brand img{width:58px;height:40px;border-radius:0;object-fit:contain;background:transparent;box-shadow:none}
 .brand strong{color:var(--brand-navy)}
 .brand small,.app-header-section,.eyebrow{color:var(--brand-blue)}
 .cloud-chip{background:#EAF5FF;color:#0A69C7;border-color:#B9DCFF}
 .icon-btn{border-color:rgba(184,193,204,.58)}
 .icon-btn:hover{background:#F7FAFD}
 
+.boot img{width:120px;height:82px;border-radius:0;object-fit:contain}
 .login-page{background:radial-gradient(circle at 50% 16%,rgba(22,139,255,.14) 0,#F7F9FC 39%,#F7F9FC 100%)}
 .login-card{border-color:rgba(184,193,204,.62);box-shadow:0 26px 72px rgba(11,31,58,.13)}
-.login-logo{width:132px;height:132px;border-radius:26px;object-fit:contain;background:#F7F9FC;box-shadow:0 16px 38px rgba(11,31,58,.14)}
-.login-card h1{color:var(--brand-navy)}
+.login-logo{width:190px;height:128px;border-radius:0;object-fit:contain;background:transparent;box-shadow:none;filter:drop-shadow(0 12px 20px rgba(11,31,58,.10))}
+.login-card h1{color:var(--brand-navy);margin-top:12px}
 .login-security{color:#738196}
 
 .primary-btn{border-color:var(--brand-blue);background:var(--brand-blue);box-shadow:0 8px 20px rgba(22,139,255,.22)}

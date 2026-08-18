@@ -56,14 +56,14 @@ jobs:
             HTML="$(curl -fsSL --max-time 20 "https://syalciners.github.io/bs-ofis-yonetim-sistemi/?verify=${TARGET}" || true)"
             JS_PATH="$(printf '%s' "$HTML" | grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' | head -n1 || true)"
             if [[ -n "$JS_PATH" ]]; then
-              JS="$(curl -fsSL --max-time 30 "https://syalciners.github.io/bs-ofis-yonetim-sistemi/${JS_PATH}?verify=${TARGET}" || true)"
-              if printf '%s' "$JS" | grep -q 'Öğretmen Portalı' && printf '%s' "$JS" | grep -q 'Öğrenci Portalı'; then LIVE_OK="true"; break; fi
+              curl -fsSL --max-time 30 "https://syalciners.github.io/bs-ofis-yonetim-sistemi/${JS_PATH}?verify=${TARGET}" -o /tmp/live-app.js || true
+              if [[ -s /tmp/live-app.js ]] && grep -Fq '/portal-onizleme/ogretmen' /tmp/live-app.js && grep -Fq '/portal-onizleme/ogrenci' /tmp/live-app.js; then LIVE_OK="true"; break; fi
             fi
             sleep 5
           done
-          [[ "$LIVE_OK" == "true" ]] || { echo "Canlı JS yeni portal etiketlerini içermiyor"; exit 1; }
-          echo "LIVE_OK $TARGET MAIN_RUN=$RUN_ID PAGES=$PAGES_STATUS PORTAL_LABELS=teacher+student"
-          printf 'LIVE_OK %s\nMAIN_RUN %s success\nPAGES %s %s\nPORTAL_LABELS teacher+student\n' "$TARGET" "$RUN_ID" "$PAGES_STATUS" "$PAGE_COMMIT" > scripts/_tmp_live_137.txt
+          [[ "$LIVE_OK" == "true" ]] || { echo "Canlı JS yeni portal route'larını içermiyor"; exit 1; }
+          echo "LIVE_OK $TARGET MAIN_RUN=$RUN_ID PAGES=$PAGES_STATUS PORTAL_ROUTES=teacher+student"
+          printf 'LIVE_OK %s\nMAIN_RUN %s success\nPAGES %s %s\nPORTAL_ROUTES teacher+student\n' "$TARGET" "$RUN_ID" "$PAGES_STATUS" "$PAGE_COMMIT" > scripts/_tmp_live_137.txt
       - name: Doğrulama sonucunu branch'e yaz
         if: github.event_name == 'push'
         shell: bash

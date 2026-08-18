@@ -1,0 +1,5 @@
+install=success
+isolation=success
+rules=failure
+build=success
+source_commit=aea549d8eaea1d5a89bbd0da1e99550949bc7ac8

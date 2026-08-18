@@ -21,7 +21,7 @@ export function LoginScreen() {
     }
   }
   return <main className="login-page"><section className="login-card">
-    <img className="login-logo" src="./bs-logo.png" alt="BS Eğitim" />
+    <img className="login-logo" src="./bs-logo.svg" alt="BS Eğitim" />
     <h1>BS Eğitim Yönetimi</h1>
     <p>{isDemo ? 'Satış demosunu gerçek kişisel veri kullanmadan deneyin.' : 'Ders, öğrenci, öğretmen, program ve finans işlemlerini tek yerden yönetin.'}</p>
     <button className="primary-btn login-btn" disabled={busy} onClick={() => void handleSignIn()}><LogIn size={18}/>{busy ? (isDemo ? 'Demo açılıyor…' : 'Yönlendiriliyor…') : (isDemo ? 'Yönetici Olarak Demoyu Aç' : 'Google ile Giriş Yap')}</button>

@@ -3,6 +3,8 @@ const service=readFileSync('src/services/profileService.ts','utf8')
 const userService=readFileSync('src/services/userManagementService.ts','utf8')
 const definitionsService=readFileSync('src/services/educationDefinitionsService.ts','utf8')
 const definitionsPanel=readFileSync('src/components/EducationDefinitionsPanel.tsx','utf8')
+const financeService=readFileSync('src/services/financeDefinitionsService.ts','utf8')
+const financePanel=readFileSync('src/components/FinancialDefinitionsPanel.tsx','utf8')
 const form=readFileSync('src/components/ProfileSettingsForm.tsx','utf8')
 const page=readFileSync('src/pages/SettingsPage.tsx','utf8')
 const css=readFileSync('src/settings-hub.css','utf8')
@@ -37,6 +39,15 @@ const checks=[
   ['Branş ve derslik aktiflik alanları arayüzden yönetilir',definitionsPanel.includes("value={branchDraft.aktif?'Aktif':'Pasif'}")&&definitionsPanel.includes("value={roomDraft.aktif?'Aktif':'Pasif'}")],
   ['Branş ve derslik paneli Ayarlar ekranına bağlanmıştır',page.includes('<EducationDefinitionsPanel')&&page.includes("info==='egitim'")],
   ['Eğitim tanımları responsive iki kolon düzenine sahiptir',css.includes('.settings-definition-layout')&&css.includes('grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr)')],
+  ['Kasa hesabı kaydı doğrudan tablo yazmak yerine güvenli RPC kullanır',financeService.includes('kasa_hesabi_kaydet_guvenli_v1')&&!financeService.includes("from('kasa_hesaplari')")],
+  ['Gider kategorisi kaydı doğrudan tablo yazmak yerine güvenli RPC kullanır',financeService.includes('gider_kategorisi_kaydet_guvenli_v1')&&!financeService.includes("from('gider_kategorileri')")],
+  ['Finans tanımları servisinde silme işlemi yoktur',!financeService.includes('.delete(')&&!financeService.includes('sil_')],
+  ['Yeni finans tanımı kimlikleri uygulama standardıyla otomatik üretilir',financeService.includes("uid('KASA')")&&financeService.includes("uid('GDR')")],
+  ['Finans paneli ID düzenlemeyi açmaz',financePanel.includes('kimlik değiştirilemez')&&!financePanel.includes('name="hesap_id"')&&!financePanel.includes('name="kategori_id"')],
+  ['Kasa hareketi olan hesabın açılış bakiyesi arayüzde kilitlenir',financePanel.includes('openingLocked')&&financePanel.includes('disabled={openingLocked}')&&financePanel.includes('açılış bakiyesi değiştirilemez')],
+  ['Finans paneli hesap ve gider kategorisi eklemeyi destekler',financePanel.includes('Yeni Kasa / Banka Hesabı')&&financePanel.includes('Yeni Gider Kategorisi')&&financePanel.includes('Hesabı Kaydet')&&financePanel.includes('Kategoriyi Kaydet')],
+  ['Ödeme yöntemleri için gereksiz yeni tanım katmanı açılmaz',!financePanel.includes('Ödeme Yöntemleri')&&!financeService.includes('odeme_yontemi')],
+  ['Finans tanımları paneli Ayarlar ekranına bağlanmıştır',page.includes('<FinancialDefinitionsPanel')&&page.includes("info==='finans'")],
   ['Ayarlar yönetim merkezi responsive kart düzenine sahiptir',css.includes('.settings-hub-grid')&&css.includes('grid-template-columns:repeat(2,minmax(0,1fr))')&&css.includes('@media(max-width:620px)')],
   ['Yeni Ayarlar stili production girişinden yüklenir',main.includes("import './settings-hub.css'")],
 ]

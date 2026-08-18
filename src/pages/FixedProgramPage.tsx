@@ -16,11 +16,11 @@ import { useToast } from '../components/Toast'
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 const dayShort=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']
 const ROOM_COLUMNS=[
-  {id:'LOC-002',label:'Yalçıner'},
-  {id:'LOC-001',label:'Başak'},
-  {id:'LOC-003',label:'Salon'},
-  {id:'LOC-005',label:'OSM'},
-  {id:'LOC-004',label:'Online'},
+  {id:'LOC-001'},
+  {id:'LOC-002'},
+  {id:'LOC-003'},
+  {id:'LOC-005'},
+  {id:'LOC-004'},
 ] as const
 const SLOT_MINUTES=30
 const SLOT_HEIGHT=42
@@ -130,7 +130,10 @@ export function FixedProgramPage(){
   const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
-  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const roomColumns=ROOM_COLUMNS.map(column=>{
+    const room=data.derslikler.find(x=>x.derslik_id===column.id)
+    return{...column,room,label:room?.mekan_adi||'Derslik'}
+  })
   const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)
   const dragTargetAt=(clientX:number,clientY:number):ProgramDragTarget|null=>{
     const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
@@ -181,9 +184,7 @@ export function FixedProgramPage(){
     if(program.derslik_id===target.roomId&&currentTime===targetTime)return
     if(!canDragProgram(program))return
     const roomLabel=roomColumns.find(x=>x.id===target.roomId)?.label||'Derslik'
-    if(!window.confirm(`Sabit program ${targetTime} · ${roomLabel} konumuna taşınsın mı?
-
-Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; değişiklik ilgili haftada Haftayı Hazırla ile uygulanır.`))return
+    if(!window.confirm(`Sabit program ${targetTime} · ${roomLabel} konumuna taşınsın mı?\n\nSabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; değişiklik ilgili haftada Haftayı Hazırla ile uygulanır.`))return
     const nextProgram:SabitProgram={...program,haftanin_gunu:selectedDay,derslik_id:target.roomId,baslangic_saati:targetTime}
     setDragBusy(true)
     try{

@@ -23,6 +23,7 @@ import './premium-lesson-form.css'
 import './premium-typography.css'
 import './page-title-standard.css'
 import './portal-preview.css'
+import './settings-hub.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

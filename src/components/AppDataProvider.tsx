@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { APP_MODE, supabase } from '../lib/supabase'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
 
@@ -17,7 +17,7 @@ interface AppCtx {
   signOut: () => Promise<void>
 }
 const Ctx = createContext<AppCtx | null>(null)
-
+const IS_DEMO = APP_MODE === 'demo'
 const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
 
 function portalSessionUrl(session: Session) {
@@ -32,14 +32,25 @@ function portalSessionUrl(session: Session) {
 }
 
 async function redirectToPortalIfEligible(session: Session) {
+  if (IS_DEMO) return false
   const { data, error } = await supabase.rpc('portal_oturum_bilgisi_v2')
   if (error || !data || typeof data !== 'object') return false
-
   const role = (data as { rol?: unknown }).rol
   if (role !== 'Öğrenci' && role !== 'Öğretmen') return false
-
   window.location.replace(portalSessionUrl(session))
   return true
+}
+
+function demoProfile(user: User): KullaniciProfili {
+  return {
+    auth_user_id: user.id,
+    email: 'demo@bsegitim.local',
+    ad_soyad: 'Demo Yönetici',
+    rol: 'Yönetici',
+    ogretmen_id: null,
+    aktif: true,
+    telefon: null,
+  }
 }
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
@@ -55,6 +66,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (!session?.user) return
     setRefreshing(true)
     try {
+      if (IS_DEMO && session.user.is_anonymous) {
+        const nextData = await loadAppData()
+        setData(nextData)
+        setProfile(demoProfile(session.user))
+        setError(null)
+        return
+      }
       const [nextData, nextProfile] = await Promise.all([loadAppData(), loadProfile(session.user.id)])
       if (!nextProfile?.aktif) {
         const redirected = await redirectToPortalIfEligible(session)
@@ -88,6 +106,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [session?.user?.id, refresh])
 
   const signIn = useCallback(async () => {
+    if (IS_DEMO) {
+      const { error } = await supabase.auth.signInAnonymously({ options: { data: { uygulama: 'BS Eğitim Demo' } } })
+      if (error) throw error
+      return
+    }
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href.split('#')[0] } })
     if (error) throw error
   }, [])

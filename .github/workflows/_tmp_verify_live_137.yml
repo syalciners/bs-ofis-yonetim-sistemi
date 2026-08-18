@@ -3,6 +3,8 @@ name: PR 137 canlı yayın doğrulama
 on:
   push:
     branches: [verify-live-137]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
@@ -23,6 +25,8 @@ jobs:
           API="https://api.github.com/repos/${GITHUB_REPOSITORY}"
           AUTH=(-H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json")
           RUN_ID=""
+          RUN_STATUS=""
+          RUN_RESULT=""
           for i in $(seq 1 36); do
             RUN_JSON="$(curl -fsSL "${AUTH[@]}" "${API}/actions/workflows/deploy-pages.yml/runs?branch=main&event=push&per_page=20")"
             RUN_ID="$(printf '%s' "$RUN_JSON" | jq -r --arg sha "$TARGET" '.workflow_runs[] | select(.head_sha==$sha) | .id' | head -n1)"
@@ -34,9 +38,10 @@ jobs:
             fi
             sleep 5
           done
-          [[ -n "$RUN_ID" ]] || { echo "Main canlı workflow bulunamadı"; exit 1; }
+          [[ -n "$RUN_ID" && "$RUN_STATUS" == "completed" && "$RUN_RESULT" == "success" ]] || { echo "Main canlı workflow doğrulanamadı"; exit 1; }
 
           PAGES_STATUS=""
+          PAGE_COMMIT=""
           for i in $(seq 1 36); do
             PAGE_JSON="$(curl -fsSL "${AUTH[@]}" "${API}/pages/builds/latest")"
             PAGE_COMMIT="$(printf '%s' "$PAGE_JSON" | jq -r '.commit')"
@@ -44,8 +49,7 @@ jobs:
             if [[ "$PAGE_COMMIT" == "$TARGET" && "$PAGES_STATUS" == "built" ]]; then break; fi
             sleep 5
           done
-          [[ "$PAGES_STATUS" == "built" ]] || { echo "Pages built olmadı: $PAGES_STATUS"; exit 1; }
-          [[ "$PAGE_COMMIT" == "$TARGET" ]] || { echo "Pages yanlış commit: $PAGE_COMMIT"; exit 1; }
+          [[ "$PAGES_STATUS" == "built" && "$PAGE_COMMIT" == "$TARGET" ]] || { echo "Pages doğrulanamadı: $PAGES_STATUS $PAGE_COMMIT"; exit 1; }
 
           LIVE_OK="false"
           for i in $(seq 1 36); do
@@ -58,9 +62,10 @@ jobs:
             sleep 5
           done
           [[ "$LIVE_OK" == "true" ]] || { echo "Canlı JS yeni portal etiketlerini içermiyor"; exit 1; }
-
+          echo "LIVE_OK $TARGET MAIN_RUN=$RUN_ID PAGES=$PAGES_STATUS PORTAL_LABELS=teacher+student"
           printf 'LIVE_OK %s\nMAIN_RUN %s success\nPAGES %s %s\nPORTAL_LABELS teacher+student\n' "$TARGET" "$RUN_ID" "$PAGES_STATUS" "$PAGE_COMMIT" > scripts/_tmp_live_137.txt
       - name: Doğrulama sonucunu branch'e yaz
+        if: github.event_name == 'push'
         shell: bash
         run: |
           git add scripts/_tmp_live_137.txt

@@ -12,6 +12,7 @@ interface AppCtx {
   loading: boolean
   refreshing: boolean
   error: string | null
+  demoExpiresAt: string | null
   refresh: () => Promise<void>
   signIn: () => Promise<void>
   signOut: () => Promise<void>
@@ -41,6 +42,18 @@ async function redirectToPortalIfEligible(session: Session) {
   return true
 }
 
+async function ensureDemoSession(): Promise<string | null> {
+  const { data, error } = await supabase.rpc('demo_oturum_baslat_v1')
+  if (error) {
+    const message = String(error.message || '')
+    if (error.code === 'PGRST202' || message.includes('Could not find the function')) return null
+    throw error
+  }
+  if (!data || typeof data !== 'object') return null
+  const expires = (data as { bitis_zamani?: unknown }).bitis_zamani
+  return typeof expires === 'string' ? expires : null
+}
+
 function demoProfile(user: User): KullaniciProfili {
   return {
     auth_user_id: user.id,
@@ -60,6 +73,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [demoExpiresAt, setDemoExpiresAt] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
   const refresh = useCallback(async () => {
@@ -67,6 +81,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setRefreshing(true)
     try {
       if (IS_DEMO && session.user.is_anonymous) {
+        const expiresAt = await ensureDemoSession()
+        if (expiresAt) setDemoExpiresAt(expiresAt)
         const nextData = await loadAppData()
         setData(nextData)
         setProfile(demoProfile(session.user))
@@ -83,18 +99,46 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setProfile(nextProfile as KullaniciProfili)
       setError(null)
     } catch (e: any) {
-      setError(e?.message || String(e))
+      const message = e?.message || String(e)
+      if (IS_DEMO && (message.includes('DEMO_SURE_DOLDU') || message.includes('Demo süresi doldu'))) {
+        setError('Demo süreniz doldu. Yeni ve temiz bir demo oturumu açabilirsiniz.')
+        setData(null)
+        setProfile(null)
+        setDemoExpiresAt(null)
+        await supabase.auth.signOut()
+      } else {
+        setError(message)
+      }
     } finally { setRefreshing(false); setLoading(false) }
   }, [session])
 
   useEffect(() => {
     let mounted = true
     void supabase.auth.getSession().then(({ data }) => { if (mounted) { setSession(data.session); if (!data.session) setLoading(false) } })
-    const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setLoading(!next); if (!next) { setData(null); setProfile(null) } })
+    const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next)
+      setLoading(!next)
+      if (!next) { setData(null); setProfile(null); setDemoExpiresAt(null) }
+    })
     return () => { mounted = false; auth.subscription.unsubscribe() }
   }, [])
 
   useEffect(() => { if (session?.user) void refresh() }, [session?.user?.id, refresh])
+
+  useEffect(() => {
+    if (!IS_DEMO || !session?.user?.is_anonymous || !demoExpiresAt) return
+    const tick = () => {
+      if (Date.now() < new Date(demoExpiresAt).getTime()) return
+      setError('Demo süreniz doldu. Yeni ve temiz bir demo oturumu açabilirsiniz.')
+      setData(null)
+      setProfile(null)
+      setDemoExpiresAt(null)
+      void supabase.auth.signOut()
+    }
+    tick()
+    const id = window.setInterval(tick, 15000)
+    return () => window.clearInterval(id)
+  }, [session?.user?.id, session?.user?.is_anonymous, demoExpiresAt])
 
   useEffect(() => {
     if (!session?.user) return
@@ -106,6 +150,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [session?.user?.id, refresh])
 
   const signIn = useCallback(async () => {
+    setError(null)
     if (IS_DEMO) {
       const { error } = await supabase.auth.signInAnonymously({ options: { data: { uygulama: 'BS Eğitim Demo' } } })
       if (error) throw error
@@ -114,9 +159,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href.split('#')[0] } })
     if (error) throw error
   }, [])
-  const signOut = useCallback(async () => { await supabase.auth.signOut() }, [])
+  const signOut = useCallback(async () => { setDemoExpiresAt(null); await supabase.auth.signOut() }, [])
 
-  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, data, loading, refreshing, error, refresh, signIn, signOut }), [session, profile, data, loading, refreshing, error, refresh, signIn, signOut])
+  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut }), [session, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

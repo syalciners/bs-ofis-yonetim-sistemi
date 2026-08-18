@@ -54,6 +54,14 @@ replaceExact(
   "expectText('Hafta hazırlık durumu güncel V2 RPC kullanır', weekPlanningService, \"supabase.rpc('haftalik_ders_uretim_durumu_v2'\")",
   "expectText('Hafta hazırlık durumu güncel V3 RPC kullanır', weekPlanningService, \"supabase.rpc('haftalik_ders_uretim_durumu_v3'\")\nexpectText('Sabit program manuel V4 kayıt RPC kullanır', manualProgramService, \"supabase.rpc('sabit_program_kaydet_guvenli_v4'\")\nexpectText('Manuel hafta hazırlama oluşturulan ders sayısını döndürür', manualWeekMigration, \"'olusturulan',v_olusturulan\")\nexpectText('Manuel hafta hazırlama güncellenen ders sayısını döndürür', manualWeekMigration, \"'guncellenen',v_guncellenen\")\nrejectRegex('Manuel V6 hafta hazırlama sonraki haftayı otomatik dolaşmaz', manualWeekMigration, /for\\s+i\\s+in\\s+0\\.\\.1\\s+loop/i, 'Manuel V6 içinde iki haftayı otomatik işleyen döngü bulundu.')"
 )
+replaceExact(
+  "expectText('Üst başlık BS Eğitim Yönetimi adını eksiksiz kullanır', appHeader, '<strong>BS Eğitim</strong><small>Yönetimi</small>')",
+  "expectText('Üst başlık kurum ayarındaki marka adını kullanır', appHeader, 'institution?.marka_adi')\nexpectText('Üst başlık kurum ayarındaki kurum adını kullanır', appHeader, 'institution?.kurum_adi')"
+)
+replaceExact(
+  "expectText('Üst başlık açık zeminli eğitim ikonunu kullanır', appHeader, '<img src=\"./bs-egitim-icon-192-v2.png\" alt=\"BS Eğitim\" />')",
+  "expectText('Üst başlık kurum ayarındaki logoyu kullanır', appHeader, 'institution?.logo_url')\nrejectRegex('Üst başlık kurum logosunu sabit kaynakla ezmez', appHeader, /<img\\s+src=[\"']\\.\\/bs-egitim-icon-192-v2\\.png[\"']/, 'Üst başlık logosu hâlâ sabit kaynak kullanıyor.')"
+)
 
 try{
   writeFileSync(tempPath,source,'utf8')

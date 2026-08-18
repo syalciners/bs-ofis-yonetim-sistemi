@@ -1,0 +1,64 @@
+name: Sabit Program kaynak migrasyonu v3
+
+on:
+  push:
+    branches: ['v1-ayarlar-program-ayarlari']
+    paths:
+      - '.github/workflows/program-default-migration-v3.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Branch başını güncelle
+        shell: bash
+        run: git pull --rebase origin "$GITHUB_REF_NAME"
+      - name: Sabit Program formunu kurum varsayılanına bağla
+        shell: bash
+        run: |
+          node <<'NODE'
+          const {readFileSync,writeFileSync}=require('node:fs')
+          const path='src/components/forms.tsx'
+          let source=readFileSync(path,'utf8')
+          const headPattern=/(export function ProgramForm[\s\S]{0,360}?const)\s*\{\s*data\s*,\s*refresh\s*\}\s*=\s*useAppData\(\)\s*;/
+          const unitsPattern=/const\s*\[\s*units\s*,\s*setUnits\s*\]\s*=\s*useState\(Number\(program\?\.ders_sayisi\s*\|\|\s*1\)\)\s*;/
+          const alreadyHead=/export function ProgramForm[\s\S]{0,360}?const\s*\{[^}]*\binstitution\b[^}]*\}\s*=\s*useAppData\(\)\s*;/
+          const alreadyUnits=/program\?\.ders_sayisi\s*\|\|\s*institution\?\.varsayilan_ders_birimi\s*\|\|\s*1/
+          if(!(alreadyHead.test(source)&&alreadyUnits.test(source))){
+            const heads=source.match(new RegExp(headPattern.source,'g'))||[]
+            const units=source.match(new RegExp(unitsPattern.source,'g'))||[]
+            if(heads.length!==1)throw new Error(`ProgramForm useAppData hedefi tam 1 kez bulunmalı; bulunan: ${heads.length}`)
+            if(units.length!==1)throw new Error(`ProgramForm ders birimi hedefi tam 1 kez bulunmalı; bulunan: ${units.length}`)
+            source=source.replace(headPattern,'$1{data,refresh,institution}=useAppData();')
+            source=source.replace(unitsPattern,'const[units,setUnits]=useState(Number(program?.ders_sayisi||institution?.varsayilan_ders_birimi||1));')
+            writeFileSync(path,source,'utf8')
+          }
+          NODE
+      - name: Geçici kaynak migrasyonlarını temizle
+        shell: bash
+        run: |
+          rm -f scripts/patch-program-form-default.mjs
+          rm -f scripts/patch-program-form-default-v2.mjs
+          rm -f .github/workflows/program-default-migration.yml
+          rm -f .github/workflows/program-default-migration-v2.yml
+          rm -f .github/workflows/program-default-migration-v3.yml
+      - name: Değişikliği kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Kaynak migrasyonu için değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sabit Program formunu kurum varsayılanına bağla"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

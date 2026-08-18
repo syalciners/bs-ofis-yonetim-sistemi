@@ -21,6 +21,12 @@ export const DEFAULT_KURUM_AYARLARI: KurumAyarlari = {
   logo_url: './bs-egitim-icon-512-v2.png',
 }
 
+export async function loadInstitutionBrand(): Promise<KurumAyarlari> {
+  const { data, error } = await supabase.rpc('kurum_public_bilgisi_v1')
+  if (error) throw error
+  return { ...DEFAULT_KURUM_AYARLARI, ...((data || {}) as Partial<KurumAyarlari>) }
+}
+
 export async function loadInstitutionSettings(): Promise<KurumAyarlari> {
   const { data, error } = await supabase
     .from('kurum_ayarlari')

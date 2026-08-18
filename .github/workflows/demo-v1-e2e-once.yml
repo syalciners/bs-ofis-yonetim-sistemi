@@ -1,0 +1,74 @@
+name: Demo V1 E2E Once
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - '.github/workflows/demo-v1-e2e-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://pparlcdctnivmpiofuvz.supabase.co
+      SUPABASE_KEY: sb_publishable__IYAfCCcA6DWnpQ005xJdA__vvdiDGZ
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: demo-hazirlik
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: İki ziyaretçi izolasyon testi
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          import { createClient } from '@supabase/supabase-js'
+          const url=process.env.SUPABASE_URL, key=process.env.SUPABASE_KEY
+          const client=()=>createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}})
+          const must=(ok,msg)=>{if(!ok)throw new Error(msg)}
+          const exactCount=async(c,table)=>{const r=await c.from(table).select('*',{count:'exact',head:true});if(r.error)throw r.error;return r.count??0}
+          const A=client(), B=client()
+          const aAuth=await A.auth.signInAnonymously(); if(aAuth.error)throw aAuth.error
+          const aId=aAuth.data.user.id
+          const aSession=await A.rpc('demo_oturum_baslat_v1'); if(aSession.error)throw aSession.error
+          must(await exactCount(A,'ogrenciler')===18,'A başlangıç öğrenci sayısı 18 değil')
+          must(await exactCount(A,'ogretmenler')===6,'A başlangıç öğretmen sayısı 6 değil')
+          must(await exactCount(A,'dersler')===24,'A başlangıç ders sayısı 24 değil')
+          must(await exactCount(A,'tahsilatlar')===10,'A başlangıç tahsilat sayısı 10 değil')
+          const sid=`E2E-A-${Date.now()}`
+          const add=await A.rpc('ogrenci_ekle_guvenli_v1',{p_ogrenci_id:sid,p_ad_soyad:'E2E İzole Öğrenci',p_veli_adi:null,p_veli_telefon:null,p_ogrenci_telefon:null,p_email:null,p_kayit_tarihi:new Date().toISOString().slice(0,10),p_notlar:'Demo izolasyon testi'}); if(add.error)throw add.error
+          must(await exactCount(A,'ogrenciler')===19,'A öğrenci ekleyemedi')
+          const first=await A.from('ogrenciler').select('ogrenci_id').order('ogrenci_id').limit(1).single();if(first.error)throw first.error
+          const tid=`E2E-TAH-${Date.now()}`, khid=`E2E-KH-${Date.now()}`
+          const tah=await A.rpc('tahsilat_kaydet_guvenli_v1',{p_tahsilat_id:tid,p_hareket_id:khid,p_tarih:new Date().toISOString().slice(0,10),p_ogrenci_id:first.data.ogrenci_id,p_tutar:1250,p_odeme_yontemi:'Havale',p_aciklama:'E2E izolasyon testi'});if(tah.error)throw tah.error
+          must(await exactCount(A,'tahsilatlar')===11,'A tahsilat ekleyemedi')
+          const bAuth=await B.auth.signInAnonymously(); if(bAuth.error)throw bAuth.error
+          const bId=bAuth.data.user.id
+          const bSession=await B.rpc('demo_oturum_baslat_v1'); if(bSession.error)throw bSession.error
+          must(await exactCount(B,'ogrenciler')===18,'B başlangıç öğrenci sayısı A değişikliğinden etkilendi')
+          must(await exactCount(B,'tahsilatlar')===10,'B tahsilatları A değişikliğinden etkilendi')
+          const bSeesA=await B.from('ogrenciler').select('ogrenci_id').eq('ogrenci_id',sid);if(bSeesA.error)throw bSeesA.error
+          must(bSeesA.data.length===0,'B, A kullanıcısının öğrencisini görebiliyor')
+          const bSeesTah=await B.from('tahsilatlar').select('tahsilat_id').eq('tahsilat_id',tid);if(bSeesTah.error)throw bSeesTah.error
+          must(bSeesTah.data.length===0,'B, A kullanıcısının tahsilatını görebiliyor')
+          const expA=new Date(aSession.data.bitis_zamani).getTime()-Date.now()
+          must(expA>100*60*1000 && expA<=121*60*1000,'A oturum süresi yaklaşık 2 saat değil')
+          await A.auth.signOut(); await B.auth.signOut()
+          fs.writeFileSync('.demo-v1-e2e-result.json',JSON.stringify({success:true,aId,bId,aStudent:sid,aTahsilat:tid,aKasa:khid,aCounts:{ogrenci:19,tahsilat:11},bCounts:{ogrenci:18,tahsilat:10},expiresAt:aSession.data.bitis_zamani},null,2))
+          console.log('DEMO_V1_E2E=SUCCESS',aId,bId)
+          NODE
+      - name: Sonucu kaydet
+        if: always()
+        run: |
+          if [ ! -f .demo-v1-e2e-result.json ]; then echo '{"success":false}' > .demo-v1-e2e-result.json; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .demo-v1-e2e-result.json
+          git commit -m 'Demo V1 E2E sonucu' || true
+          git push origin HEAD:demo-hazirlik

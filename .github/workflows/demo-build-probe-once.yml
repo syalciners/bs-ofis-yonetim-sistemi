@@ -70,3 +70,5 @@ jobs:
           test "$ISOLATION" = success
           test "$RULES" = success
           test "$BUILD" = success
+
+# final verification after demo header correction

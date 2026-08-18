@@ -111,11 +111,10 @@ export function CalendarPage(){
   const openWeekPdf=async()=>{if(!lessons.length){toast('Seçili programda PDF oluşturulacak ders yok.','error');return}try{await openWeeklyProgramPdf(data,lessons,monday,addDays(monday,6),filterLabel)}catch(e:any){toast(e?.message||'PDF oluşturulamadı.','error')}}
 
   return <div className="page-stack calendar-v2">
-    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line"><h1>Program</h1><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
+    <section className="page-title-row"><div className="calendar-title-copy"><span className="eyebrow">DERS PROGRAMI</span><div className="calendar-title-line calendar-title-line-with-range"><h1>Program</h1><div className="calendar-title-week-range"><b>{compactWeekRange(monday,addDays(monday,6))}</b></div><button className="primary-btn calendar-title-week-action" disabled={isPastWeek||weekBusy||weekStatusBusy||weekReady} onClick={()=>void prepareWeek()}><CalendarCheck2 size={17}/>{weekActionText}</button></div></div></section>
 
     <section className="calendar-week-toolbar" aria-label="Program hafta gezintisi">
       <button className="calendar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button>
-      <div className="calendar-week-range-compact"><b>{compactWeekRange(monday,addDays(monday,6))}</b></div>
       <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
         <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
         <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>

@@ -1,0 +1,29 @@
+name: Geçici Program üst yapı patch
+
+on:
+  push:
+    branches: ['v1-program-ust-yapi-standart']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Program üst yapısını standartlaştır
+        run: python3 scripts/_tmp_standardize_program.py
+      - name: Değişiklikleri kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add src/pages/DailyCalendarPage.tsx scripts/check-calendar-ux.mjs
+          if git diff --cached --quiet; then
+            echo "Patch zaten uygulanmış."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Program ve Takvim üst yapısını standartlaştır"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

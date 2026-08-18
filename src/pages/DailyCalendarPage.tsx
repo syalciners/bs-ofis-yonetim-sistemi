@@ -163,6 +163,7 @@ export function DailyCalendarPage(){
 
   const selectedDayIndex=Math.max(0,Math.min(6,Math.round((new Date(`${selectedDate}T12:00:00`).getTime()-new Date(`${monday}T12:00:00`).getTime())/86400000)))
   const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
+  const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const allPlaced=placeLessons(dayLessons)
   const rangeStart=allPlaced.length?Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
   const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
@@ -270,7 +271,7 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessons.length}</strong><span>ders</span></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
         <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
           <div className="daily-room-header-row">

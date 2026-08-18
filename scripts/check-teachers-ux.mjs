@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 const page = readFileSync('src/pages/TeachersPage.tsx','utf8')
 const css = readFileSync('src/ux-overrides.css','utf8')
 const stability = readFileSync('src/navigation-stability.css','utf8')
+const payments = readFileSync('src/pages/TeacherPaymentsPage.tsx','utf8')
 
 const checks = [
   ['Yöneticiler ayrı üst gruptadır', page.includes('manager-teacher-grid') && page.includes('Yöneticiler')],
@@ -10,6 +11,8 @@ const checks = [
   ['Yöneticiler isim yardımcı fonksiyonuyla belirlenir', page.includes('isManagerTeacher')],
   ['Branşlar öğretmen-branş ilişkisinden okunur', page.includes('data.ogretmenBranslari') && page.includes('data.branslar.find')],
   ['Kartlarda Verdiği Dersler gösterilir', page.includes('Verdiği Dersler')],
+  ['Öğretmen detayında Bu Ay kayıt adedi değil ders saati toplamıdır', page.includes('monthLessonHours=') && page.includes('reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)') && page.includes('yapılan ders saati')],
+  ['Öğretmen ödemelerinde dönem iş yükü ders saati toplamıdır', payments.includes('lessonHours:lessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)') && payments.includes('yapılan ders saati') && !payments.includes('lessonCount:lessons.length')],
   ['Matematik veya Math branşı Matematik Öğretmeni unvanı üretir', page.includes("includes('MATEMATİK')") && page.includes("includes('MATH')") && page.includes("return 'Matematik Öğretmeni'")],
   ['Yönetici unvanı öğretmen unvanıyla birleşir', page.includes('Yönetici - ${baseTitle}')],
   ['Yönetici kartları iki sütundur', css.includes('.manager-teacher-grid{display:grid;grid-template-columns:repeat(2')],

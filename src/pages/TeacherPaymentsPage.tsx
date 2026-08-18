@@ -26,7 +26,7 @@ export function TeacherPaymentsPage(){
     const lessons=period?data.dersler.filter(x=>x.ogretmen_id===t.ogretmen_id&&x.ders_durumu==='Yapıldı'&&(x.tarih||'')>=period.baslangic_tarihi&&(x.tarih||'')<=period.bitis_tarihi):[]
     const earned=lessons.reduce((s,x)=>s+Number(x.ogretmen_toplam_hakedis||0),0)
     const paid=period?data.ogretmenOdemeleri.filter(x=>x.ogretmen_id===t.ogretmen_id&&x.hakedis_donemi_id===period.hakedis_donemi_id&&!x.iptal_mi).reduce((s,x)=>s+Number(x.tutar||0),0):0
-    return {teacher:t,earned,paid,remaining:Math.max(earned-paid,0),lessonCount:lessons.length,branches:branchNames(t.ogretmen_id)}
+    return {teacher:t,earned,paid,remaining:Math.max(earned-paid,0),lessonHours:lessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),branches:branchNames(t.ogretmen_id)}
   }).sort((a,b)=>b.remaining-a.remaining||a.teacher.ad_soyad.localeCompare(b.teacher.ad_soyad,'tr-TR'))
   const totalEarned=rows.reduce((s,x)=>s+x.earned,0),totalPaid=rows.reduce((s,x)=>s+x.paid,0),totalRemaining=rows.reduce((s,x)=>s+x.remaining,0),dueCount=rows.filter(x=>x.remaining>0).length
   const payments=data.ogretmenOdemeleri.filter(x=>(!period||x.hakedis_donemi_id===period.hakedis_donemi_id)&&(teacherFilter==='tum'||x.ogretmen_id===teacherFilter)).sort((a,b)=>String(b.tarih||'').localeCompare(String(a.tarih||'')))
@@ -42,7 +42,7 @@ export function TeacherPaymentsPage(){
     </section>
 
     <section className="kpi-grid four compact-kpis teacher-payment-kpis">
-      <div className="kpi-card blue"><span>Dönem Hakedişi</span><strong>{money(totalEarned)}</strong><small>{rows.reduce((s,x)=>s+x.lessonCount,0)} yapılan ders</small></div>
+      <div className="kpi-card blue"><span>Dönem Hakedişi</span><strong>{money(totalEarned)}</strong><small>{rows.reduce((s,x)=>s+x.lessonHours,0)} yapılan ders saati</small></div>
       <div className="kpi-card teal"><span>Dönem Ödenen</span><strong>{money(totalPaid)}</strong><small>aktif ödeme kayıtları</small></div>
       <div className="kpi-card orange"><span>Dönem Kalan</span><strong>{money(totalRemaining)}</strong><small>ödenmesi gereken</small></div>
       <div className="kpi-card red"><span>Ödeme Bekleyen</span><strong>{dueCount}</strong><small>öğretmen</small></div>
@@ -52,7 +52,7 @@ export function TeacherPaymentsPage(){
     <section className="teacher-payment-grid">{rows.map(x=><button key={x.teacher.ogretmen_id} className={`teacher-payment-card ${teacherTone(x.teacher.ad_soyad)} ${x.remaining<=0?'paid-up':''}`} onClick={()=>setPaymentTeacher(x.teacher.ogretmen_id)}>
       <div className="teacher-payment-card-head"><div className="avatar purple">{x.teacher.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.teacher.ad_soyad}</strong><span>{x.branches.length?x.branches.join(' · '):'Branş tanımlanmamış'}</span></div>{x.remaining>0?<span className="soft-pill danger-soft">Ödeme Bekliyor</span>:<span className="soft-pill success-soft">Tamam</span>}</div>
       <div className="teacher-payment-stats"><span><small>Hakediş</small><b>{money(x.earned)}</b></span><span><small>Ödenen</small><b>{money(x.paid)}</b></span><span><small>Kalan</small><b className={x.remaining>0?'danger-text':'success-text'}>{money(x.remaining)}</b></span></div>
-      <div className="teacher-payment-card-foot"><span>{x.lessonCount} yapılan ders</span><b>{x.remaining>0?'Ödeme Yap':'Ödeme tamamlandı'}</b></div>
+      <div className="teacher-payment-card-foot"><span>{x.lessonHours} yapılan ders saati</span><b>{x.remaining>0?'Ödeme Yap':'Ödeme tamamlandı'}</b></div>
     </button>)}</section>
     {!rows.length&&<div className="calm-empty"><GraduationCap/><b>Bu filtrede öğretmen bulunamadı.</b><span>Öğretmen veya hakediş dönemi filtresini değiştirin.</span></div>}
 

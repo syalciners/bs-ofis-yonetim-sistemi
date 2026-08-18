@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "step": "success",
+  "error": null,
+  "aId": "0ded490e-65cf-4012-9639-314ab74e6c9f",
+  "bId": "77d4c233-66dc-4adc-86bb-97cbcba85ca1",
+  "aSession": {
+    "yeni": true,
+    "auth_user_id": "0ded490e-65cf-4012-9639-314ab74e6c9f",
+    "bitis_zamani": "2026-08-19T00:51:12.79146+00:00",
+    "baslangic_zamani": "2026-08-18T22:51:12.79146+00:00"
+  },
+  "aRemainingMinutes": 120,
+  "aInitial": {
+    "students": 18,
+    "teachers": 6,
+    "lessons": 24,
+    "collections": 10
+  },
+  "aStudent": "E2E-A-1787093474340",
+  "aStudentsAfter": 19,
+  "aTahsilat": "E2E-TAH-1787093475559",
+  "aKasa": "E2E-KH-1787093475559",
+  "aCollectionsAfter": 11,
+  "leadId": "b7275aab-53ed-41fa-b4bd-c90c0c892d66",
+  "bSession": {
+    "yeni": true,
+    "auth_user_id": "77d4c233-66dc-4adc-86bb-97cbcba85ca1",
+    "bitis_zamani": "2026-08-19T00:51:16.541943+00:00",
+    "baslangic_zamani": "2026-08-18T22:51:16.541943+00:00"
+  },
+  "bInitial": {
+    "students": 18,
+    "collections": 10
+  },
+  "bSeesAStudent": 0,
+  "bSeesACollection": 0
+}

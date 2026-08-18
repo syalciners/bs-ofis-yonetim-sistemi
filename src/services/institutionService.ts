@@ -8,8 +8,16 @@ export interface KurumAyarlari {
   email?: string | null
   adres?: string | null
   logo_url?: string | null
+  varsayilan_ders_birimi: number
+  takvim_baslangic_saati: string
+  takvim_bitis_saati: string
   guncellenme_zamani?: string | null
 }
+
+type KurumBilgileriInput=Pick<KurumAyarlari,'kurum_adi'|'marka_adi'|'telefon'|'email'|'adres'|'logo_url'>
+export type ProgramAyarlariInput=Pick<KurumAyarlari,'varsayilan_ders_birimi'|'takvim_baslangic_saati'|'takvim_bitis_saati'>
+
+export const SYSTEM_DERS_BIRIMI_DAKIKA=60
 
 export const DEFAULT_KURUM_AYARLARI: KurumAyarlari = {
   kurum_id: 'ANA',
@@ -19,6 +27,9 @@ export const DEFAULT_KURUM_AYARLARI: KurumAyarlari = {
   email: null,
   adres: null,
   logo_url: './bs-egitim-icon-512-v2.png',
+  varsayilan_ders_birimi: 1,
+  takvim_baslangic_saati: '08:00',
+  takvim_bitis_saati: '21:00',
 }
 
 export async function loadInstitutionBrand(): Promise<KurumAyarlari> {
@@ -36,14 +47,23 @@ export async function loadInstitutionBrand(): Promise<KurumAyarlari> {
 export async function loadInstitutionSettings(): Promise<KurumAyarlari> {
   const { data, error } = await supabase
     .from('kurum_ayarlari')
-    .select('kurum_id,kurum_adi,marka_adi,telefon,email,adres,logo_url,guncellenme_zamani')
+    .select('kurum_id,kurum_adi,marka_adi,telefon,email,adres,logo_url,varsayilan_ders_birimi,takvim_baslangic_saati,takvim_bitis_saati,guncellenme_zamani')
     .eq('kurum_id', 'ANA')
     .maybeSingle()
   if (error) throw error
-  return (data as KurumAyarlari | null) || DEFAULT_KURUM_AYARLARI
+  const row=data as Partial<KurumAyarlari>|null
+  if(!row)return DEFAULT_KURUM_AYARLARI
+  return{
+    ...DEFAULT_KURUM_AYARLARI,
+    ...row,
+    kurum_id:'ANA',
+    varsayilan_ders_birimi:Number(row.varsayilan_ders_birimi||1),
+    takvim_baslangic_saati:String(row.takvim_baslangic_saati||'08:00').slice(0,5),
+    takvim_bitis_saati:String(row.takvim_bitis_saati||'21:00').slice(0,5),
+  }
 }
 
-export async function saveInstitutionSettings(input: Omit<KurumAyarlari, 'kurum_id'|'guncellenme_zamani'>) {
+export async function saveInstitutionSettings(input: KurumBilgileriInput) {
   const { data, error } = await supabase.rpc('kurum_ayarlari_guncelle_guvenli_v1', {
     p_kurum_adi: input.kurum_adi,
     p_marka_adi: input.marka_adi,
@@ -53,6 +73,16 @@ export async function saveInstitutionSettings(input: Omit<KurumAyarlari, 'kurum_
     p_logo_url: input.logo_url || null,
   })
   if (error) throw error
+  return data
+}
+
+export async function saveProgramSettings(input:ProgramAyarlariInput){
+  const{data,error}=await supabase.rpc('program_ayarlari_guncelle_guvenli_v1',{
+    p_varsayilan_ders_birimi:Number(input.varsayilan_ders_birimi),
+    p_takvim_baslangic_saati:input.takvim_baslangic_saati,
+    p_takvim_bitis_saati:input.takvim_bitis_saati,
+  })
+  if(error)throw error
   return data
 }
 

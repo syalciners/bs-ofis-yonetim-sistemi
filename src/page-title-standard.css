@@ -1,0 +1,15 @@
+/* Ana ekran başlık hizası ve Program görünüm düğmesi standardı */
+.page-title-row{min-height:50px}
+
+.calendar-toolbar-mode-btn{
+  border-color:#ea8b15!important;
+  background:linear-gradient(135deg,#f6a51c,#f47a16)!important;
+  color:#fff!important;
+  box-shadow:0 7px 16px rgba(244,122,22,.2)!important;
+}
+.calendar-toolbar-mode-btn:hover{
+  background:linear-gradient(135deg,#f6a51c,#f47a16)!important;
+  color:#fff!important;
+  box-shadow:0 9px 20px rgba(244,122,22,.26)!important;
+  filter:saturate(1.05);
+}

@@ -11,7 +11,7 @@ const pagePath='src/pages/DailyCalendarPage.tsx'
 let page=read(pagePath)
 page=replaceRequired(page,
   "  const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))\n  const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)",
-  "  const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))\n  const weekLessons=data.dersler.filter(x=>x.tarih>=monday&&x.tarih<=addDays(monday,6)&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||'')))\n  const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)",
+  "  const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))\n  const weekLessons=data.dersler.filter(x=>typeof x.tarih==='string'&&x.tarih>=monday&&x.tarih<=addDays(monday,6)&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||'')))\n  const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)",
   'haftalık ders kümesi')
 page=replaceRequired(page,
   "  const openDayPdf=async()=>{\n    if(!dayLessons.length){toast('Seçili günde PDF oluşturulacak ders yok.','error');return}\n    setPdfBusy(true)\n    try{await openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)}",

@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Haftalık Takvim PDF geçişi
+        run: node scripts/migrate-weekly-calendar-pdf.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

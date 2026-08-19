@@ -168,6 +168,7 @@ export function DailyCalendarPage(){
 
   const selectedDayIndex=Math.max(0,Math.min(6,Math.round((new Date(`${selectedDate}T12:00:00`).getTime()-new Date(`${monday}T12:00:00`).getTime())/86400000)))
   const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
+  const weekLessons=data.dersler.filter(x=>typeof x.tarih==='string'&&x.tarih>=monday&&x.tarih<=addDays(monday,6)&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||'')))
   const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const allPlaced=placeLessons(dayLessons)
   const configuredStart=timeToMinutes(institution?.takvim_baslangic_saati)??DEFAULT_START
@@ -181,9 +182,9 @@ export function DailyCalendarPage(){
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
   const roomColumns=calendarRoomColumns(data.derslikler,dayLessons.map(x=>x.derslik_id))
   const openDayPdf=async()=>{
-    if(!dayLessons.length){toast('Seçili günde PDF oluşturulacak ders yok.','error');return}
+    if(!weekLessons.length){toast('Seçilen haftada PDF oluşturulacak ders yok.','error');return}
     setPdfBusy(true)
-    try{await openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)}
+    try{await openDailyCalendarPdf(data,weekLessons,monday,rangeStart,rangeEnd)}
     catch(error:any){toast(error?.message||'Takvim PDF’i oluşturulamadı.','error')}
     finally{setPdfBusy(false)}
   }
@@ -285,7 +286,7 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn calendar-pdf-btn daily-calendar-pdf-btn" type="button" disabled={!dayLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn calendar-pdf-btn daily-calendar-pdf-btn" type="button" disabled={!weekLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
         <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
           <div className="daily-room-header-row">

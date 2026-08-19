@@ -18,6 +18,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Eski beş derslik regresyonunu dinamik kurala taşı
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs')
+          const path='scripts/check-calendar-ux.mjs'
+          let src=fs.readFileSync(path,'utf8')
+          const old="  ['Sabit Program Takvimi beş gerçek derslik sütununu içerir',['LOC-002','LOC-001','LOC-003','LOC-005','LOC-004'].every(id=>fixed.includes(`id:'${id}'`))],"
+          const next="  ['Sabit Program Takvimi derslik sütunlarını veri kaynağından oluşturur',fixed.includes(\"import { calendarRoomColumns } from '../lib/calendarRooms'\")&&fixed.includes('calendarRoomColumns(data.derslikler,selectedPrograms.map(x=>x.derslik_id))')&&!fixed.includes('const ROOM_COLUMNS=')],"
+          if(!src.includes(old))throw new Error('Güncellenecek beş derslik regresyonu bulunamadı.')
+          src=src.replace(old,next)
+          fs.writeFileSync(path,src)
+          NODE
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

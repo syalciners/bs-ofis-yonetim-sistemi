@@ -49,10 +49,13 @@ check=replaceRequired(check,
   "const pdfService=read('src/services/weeklyProgramPdfService.ts')",
   "const pdfService=read('src/services/weeklyProgramPdfService.ts')\nconst dailyPdfService=read('src/services/dailyCalendarPdfService.ts')",
   'günlük PDF test servisi')
-check=replaceRequired(check,
-  "  ['Günlük Takvim seçili gün toplamını ders saati olarak gösterir',dailyCalendar.includes('dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&dailyCalendar.includes('<span>ders saati</span>')],",
-  "  ['Günlük Takvim seçili gün toplamını ders saati olarak gösterir',dailyCalendar.includes('dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&dailyCalendar.includes('<span>ders saati</span>')],\n  ['Günlük Takvim PDF Al butonu ders saati sayacının solundadır',dailyCalendar.includes('daily-calendar-head-actions')&&dailyCalendar.includes('daily-calendar-pdf-btn')&&dailyCalendar.indexOf('daily-calendar-pdf-btn')<dailyCalendar.indexOf('daily-lesson-count')&&dailyCalendar.includes('openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)')],\n  ['Günlük Takvim PDF seçili günün dinamik derslik ve saat aralığını kullanır',dailyPdfService.includes('calendarRoomColumns(data.derslikler')&&dailyPdfService.includes("pageOrientation:'landscape'")&&dailyPdfService.includes('SLOT_MINUTES=30')&&dailyPdfService.includes('rangeStart:number,rangeEnd:number')&&dailyPdfService.includes("download(`BS-Egitim-Gunluk-Takvim-${date}.pdf`)")],\n  ['Günlük Takvim PDF butonu mobil başlıkta kompakt kalır',dailyCalendarCss.includes('.daily-calendar-head-actions')&&dailyCalendarCss.includes('.daily-calendar-pdf-btn')],",
-  'günlük PDF regresyonları')
+const dailySummaryCheck="  ['Günlük Takvim seçili gün toplamını ders saati olarak gösterir',dailyCalendar.includes('dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&dailyCalendar.includes('<span>ders saati</span>')],"
+const dailyPdfChecks=[
+  "  ['Günlük Takvim PDF Al butonu ders saati sayacının solundadır',dailyCalendar.includes('daily-calendar-head-actions')&&dailyCalendar.includes('daily-calendar-pdf-btn')&&dailyCalendar.indexOf('daily-calendar-pdf-btn')<dailyCalendar.indexOf('daily-lesson-count')&&dailyCalendar.includes('openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)')],",
+  `  ['Günlük Takvim PDF seçili günün dinamik derslik ve saat aralığını kullanır',dailyPdfService.includes('calendarRoomColumns(data.derslikler')&&dailyPdfService.includes("pageOrientation:'landscape'")&&dailyPdfService.includes('SLOT_MINUTES=30')&&dailyPdfService.includes('rangeStart:number,rangeEnd:number')&&dailyPdfService.includes('BS-Egitim-Gunluk-Takvim-')],`,
+  "  ['Günlük Takvim PDF butonu mobil başlıkta kompakt kalır',dailyCalendarCss.includes('.daily-calendar-head-actions')&&dailyCalendarCss.includes('.daily-calendar-pdf-btn')],",
+].join('\n')
+check=replaceRequired(check,dailySummaryCheck,`${dailySummaryCheck}\n${dailyPdfChecks}`,'günlük PDF regresyonları')
 write(checkPath,check)
 
 const workflowPath='.github/workflows/ci.yml'

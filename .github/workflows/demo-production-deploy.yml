@@ -1,0 +1,217 @@
+name: Demo production deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - .demo-production-deploy-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VITE_APP_MODE: demo
+      EXPECTED_SUPABASE_URL: https://pparlcdctnivmpiofuvz.supabase.co
+      EXPECTED_PUBLISHABLE_KEY_SHA256: 34b967c41c05ead6e69e3ea922273819acf2c83e851e8d2c0329cb4c7e214679
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vercel token kontrolü
+        id: token
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN GitHub Actions secret tanımlı değil. Production deploy yapılmadı."
+            exit 1
+          fi
+
+      - name: Bağımlılıkları kur
+        id: install
+        run: npm install --no-audit --no-fund
+
+      - name: Demo izolasyon kurallarını doğrula
+        id: rules
+        run: |
+          npm run check:demo-isolation
+          npm run check:rules
+
+      - name: Vercel CLI kur
+        id: cli
+        run: npm install --global vercel@latest
+
+      - name: Vercel production ayarlarını çek
+        id: pull
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Vercel proje kimliğini doğrula
+        id: project_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const cfg = JSON.parse(fs.readFileSync('.vercel/project.json', 'utf8'))
+          if (cfg.orgId !== process.env.VERCEL_ORG_ID || cfg.projectId !== process.env.VERCEL_PROJECT_ID) {
+            console.error('GÜVENLİK ENGELİ: Vercel proje kimliği BS Eğitim Demo ile eşleşmiyor.')
+            console.error(`Beklenen projectId: ${process.env.VERCEL_PROJECT_ID}`)
+            console.error(`Bulunan projectId: ${cfg.projectId || 'yok'}`)
+            process.exit(1)
+          }
+          console.log(`Vercel proje kimliği doğrulandı: ${cfg.projectId}`)
+          NODE
+
+      - name: Demo production ortamını doğrula
+        id: env_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const crypto = require('crypto')
+          const path = '.vercel/.env.production.local'
+          if (!fs.existsSync(path)) {
+            console.error('GÜVENLİK ENGELİ: Vercel production env dosyası oluşmadı.')
+            process.exit(1)
+          }
+          const text = fs.readFileSync(path, 'utf8')
+          const parsed = {}
+          for (const raw of text.split(/\r?\n/)) {
+            const line = raw.trim()
+            if (!line || line.startsWith('#')) continue
+            const idx = line.indexOf('=')
+            if (idx < 1) continue
+            const key = line.slice(0, idx).trim()
+            let value = line.slice(idx + 1).trim()
+            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+              value = value.slice(1, -1)
+            }
+            parsed[key] = value
+          }
+          const url = parsed.VITE_SUPABASE_URL || ''
+          const publishable = parsed.VITE_SUPABASE_PUBLISHABLE_KEY || ''
+          const mode = parsed.VITE_APP_MODE || process.env.VITE_APP_MODE || ''
+          const publishableHash = crypto.createHash('sha256').update(publishable).digest('hex')
+          if (url !== process.env.EXPECTED_SUPABASE_URL) {
+            console.error('GÜVENLİK ENGELİ: Production Supabase URL doğru demo projesi değil.')
+            process.exit(1)
+          }
+          if (!publishable || publishableHash !== process.env.EXPECTED_PUBLISHABLE_KEY_SHA256) {
+            console.error('GÜVENLİK ENGELİ: Production publishable key BS Eğitim Demo anahtarıyla eşleşmiyor.')
+            process.exit(1)
+          }
+          if (mode.trim().toLowerCase() !== 'demo') {
+            console.error('GÜVENLİK ENGELİ: VITE_APP_MODE demo değil.')
+            process.exit(1)
+          }
+          console.log('Demo production ortam değişkenleri doğrulandı.')
+          NODE
+
+      - name: Production build oluştur
+        id: build
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Production build güvenlik kontrolü
+        id: artifact_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATIC_DIR=".vercel/output/static"
+          test -d "$STATIC_DIR" || { echo "::error::.vercel/output/static bulunamadı."; exit 1; }
+          grep -R -F -q "$EXPECTED_SUPABASE_URL" "$STATIC_DIR" || { echo "::error::Doğru demo Supabase URL build içinde bulunamadı."; exit 1; }
+          if grep -R -F -q "demo-placeholder.supabase.co" "$STATIC_DIR"; then
+            echo "::error::Placeholder Supabase URL production build içine sızdı."
+            exit 1
+          fi
+          if grep -R -F -q "sb_publishable_demo_placeholder" "$STATIC_DIR"; then
+            echo "::error::Placeholder publishable key production build içine sızdı."
+            exit 1
+          fi
+          INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' "$STATIC_DIR/index.html" | head -n 1)"
+          INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' "$STATIC_DIR/index.html" | head -n 1)"
+          test -n "$INDEX_JS" || { echo "::error::Production index JS bulunamadı."; exit 1; }
+          test -n "$INDEX_CSS" || { echo "::error::Production index CSS bulunamadı."; exit 1; }
+          echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
+          echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
+          echo "Production build doğrulandı: $INDEX_JS / $INDEX_CSS"
+
+      - name: BS Eğitim Demo production deploy
+        id: deploy
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Canlı alias smoke testi
+        id: smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="https://bs-egitim-demo.vercel.app"
+          MATCHED=0
+          for ATTEMPT in 1 2 3 4 5 6; do
+            INDEX="$(curl -fsSL --retry 2 --retry-delay 1 "$BASE_URL/?deploy_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
+            if printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_CSS"; then
+              MATCHED=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$MATCHED" -ne 1 ]; then
+            echo "::error::Canlı alias yeni production assetlerini göstermedi."
+            exit 1
+          fi
+          curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_JS?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_CSS?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          curl -fsSL --retry 2 "$BASE_URL/manifest.webmanifest?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          curl -fsSL --retry 2 "$BASE_URL/pwa-192x192.png?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          curl -fsSL --retry 2 "$BASE_URL/pwa-512x512.png?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          echo "Canlı BS Eğitim Demo smoke testi başarılı."
+
+      - name: Deploy sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          TOKEN_OUTCOME: ${{ steps.token.outcome }}
+          PULL_OUTCOME: ${{ steps.pull.outcome }}
+          PROJECT_GUARD_OUTCOME: ${{ steps.project_guard.outcome }}
+          ENV_GUARD_OUTCOME: ${{ steps.env_guard.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ARTIFACT_GUARD_OUTCOME: ${{ steps.artifact_guard.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .demo-production-deploy-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          token=$TOKEN_OUTCOME
+          pull=$PULL_OUTCOME
+          project_guard=$PROJECT_GUARD_OUTCOME
+          env_guard=$ENV_GUARD_OUTCOME
+          build=$BUILD_OUTCOME
+          artifact_guard=$ARTIFACT_GUARD_OUTCOME
+          deploy=$DEPLOY_OUTCOME
+          smoke=$SMOKE_OUTCOME
+          expected_index_js=${EXPECTED_INDEX_JS:-}
+          expected_index_css=${EXPECTED_INDEX_CSS:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-production-deploy-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Demo production deploy sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

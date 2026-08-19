@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js'
 import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, Plus, RefreshCw, ShieldCheck, Target, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
+import { BookAdd } from './BookAdd'
 import { isCancelled, isCoachingAssignment, loadCoachData, shortDate, studentName, type CoachData } from './data'
 import { PremiumDashboard } from './PremiumDashboard'
 import { QuickStudy } from './QuickStudy'
@@ -44,6 +45,7 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
   const requested = params.get('ogrenci') || ''
   const studentId = data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
   const quickOpen = params.get('ekle') === '1'
+  const [bookStudentId, setBookStudentId] = useState('')
   const rows = data.assignments.filter(x => !isCancelled(x.durum) && (!studentId || x.ogrenci_id === studentId))
 
   const setQuickOpen = (open: boolean) => {
@@ -53,6 +55,10 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
     setParams(next, { replace: true })
   }
 
+  const refreshAfterBook = async () => {
+    await Promise.resolve(onRefresh())
+  }
+
   return <div className="page-stack">
     <div className="plan-title-row">
       <PageTitle title="Plan ve Çalışmalar" text="Ders ödevi ve koçluk çalışması tek görev motorundan gelir."/>
@@ -60,7 +66,8 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
     </div>
     <StudentFilterStrip data={data} studentId={studentId} clearTo="/plan"/>
     {rows.length ? <section className="panel rows">{rows.map(x => <div className="row split" key={x.odev_id}><BookOpenCheck size={18}/><div><b>{x.odev_basligi || x.konu || 'Çalışma'}</b><span>{studentName(data,x.ogrenci_id)} · {isCoachingAssignment(x) ? 'Koçluk Çalışması' : 'Ders Ödevi'}</span></div><small>{x.durum}<br/>{shortDate(x.son_teslim_tarihi || x.verilis_tarihi)}</small></div>)}</section> : <Empty text={studentId ? 'Bu öğrenci için çalışma kaydı yok.' : 'Henüz çalışma kaydı yok.'}/>} 
-    {quickOpen && <QuickStudy data={data} initialStudentId={studentId} onClose={() => setQuickOpen(false)} onSaved={onRefresh}/>} 
+    {quickOpen && <QuickStudy data={data} initialStudentId={studentId} onClose={() => setQuickOpen(false)} onSaved={onRefresh} onNeedBook={id => setBookStudentId(id)}/>} 
+    {bookStudentId && <BookAdd data={data} initialStudentId={bookStudentId} onClose={() => setBookStudentId('')} onSaved={refreshAfterBook}/>} 
   </div>
 }
 

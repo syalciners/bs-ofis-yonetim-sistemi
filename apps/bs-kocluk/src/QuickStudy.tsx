@@ -42,11 +42,13 @@ export function QuickStudy({
   initialStudentId,
   onClose,
   onSaved,
+  onNeedBook,
 }: {
   data: CoachData
   initialStudentId?: string
   onClose: () => void
   onSaved: () => void | Promise<void>
+  onNeedBook?: (studentId: string) => void
 }) {
   const validInitial = initialStudentId && data.coachingProfiles.some(x => x.ogrenci_id === initialStudentId)
     ? initialStudentId
@@ -74,7 +76,7 @@ export function QuickStudy({
       .filter(x => x.ogrenci_id === studentId && x.ogrenci_kitap_id && studentBooks.some(book => book.ogrenci_kitap_id === x.ogrenci_kitap_id))
       .sort((a, b) => assignmentDate(b).localeCompare(assignmentDate(a)))[0]
     if (recent?.ogrenci_kitap_id) return recent.ogrenci_kitap_id
-    return studentBooks.length === 1 ? studentBooks[0].ogrenci_kitap_id : studentBooks[0].ogrenci_kitap_id
+    return studentBooks[0].ogrenci_kitap_id
   }, [data.assignments, studentBooks, studentId])
 
   useEffect(() => {
@@ -178,7 +180,7 @@ export function QuickStudy({
           })}</div>
         </fieldset>}
 
-        {studentId && studentBooks.length === 0 && <div className="quick-study-no-book"><BookOpen/><div><b>Aktif kitap bulunmuyor.</b><span>Bu öğrenciye bir kitap bağlandıktan sonra çalışma iki adımda verilebilir.</span></div></div>}
+        {studentId && studentBooks.length === 0 && <div className="quick-study-no-book"><BookOpen/><div><b>Aktif kitap bulunmuyor.</b><span>Kitabı şimdi bulup ekleyin; ardından bu ekran kaldığınız yerden çalışma vermeye devam eder.</span>{onNeedBook && <button type="button" className="book-add-open" onClick={() => onNeedBook(studentId)}>Kitap Bul ve Ekle</button>}</div></div>}
 
         {bookId && <>
           <div className="quick-study-types" role="group" aria-label="Çalışma türü">

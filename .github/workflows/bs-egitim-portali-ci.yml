@@ -1,0 +1,23 @@
+name: BS Eğitim Portalı build doğrulama
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/bs-egitim-portali/**'
+      - '.github/workflows/bs-egitim-portali-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/bs-egitim-portali
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build

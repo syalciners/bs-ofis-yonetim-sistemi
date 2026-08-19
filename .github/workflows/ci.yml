@@ -1,4 +1,5 @@
 name: Build doğrulama
+# PR 148: dinamik derslik yayın paketi doğrulaması.
 
 on:
   push:

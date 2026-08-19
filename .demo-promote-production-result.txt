@@ -1,0 +1,10 @@
+run_id=32294321786
+job_status=failure
+project_guard=success
+deployment_guard=success
+promote=failure
+smoke=skipped
+deployment_id=dpl_6v3YMT87yYUmYtP1CR4CX3Lh2s8C
+before_index_js=assets/index-DZCC63VP.js
+expected_index_js=assets/index-D728U7st.js
+expected_index_css=assets/index-YGJhtDGQ.css

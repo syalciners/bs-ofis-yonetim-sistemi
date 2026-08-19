@@ -1,9 +1,9 @@
-run_id=32293198291
-job_status=failure
+run_id=32293333293
+job_status=success
 project_guard=success
 build=success
-artifact_guard=failure
-deploy=skipped
-preview_url=
-expected_index_js=
-expected_index_css=
+artifact_guard=success
+deploy=success
+preview_url=https://bs-egitim-demo-e0cwoih8k-syalciners-8325s-projects.vercel.app
+expected_index_js=assets/index-D728U7st.js
+expected_index_css=assets/index-YGJhtDGQ.css

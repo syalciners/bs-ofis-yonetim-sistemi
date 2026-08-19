@@ -119,7 +119,7 @@ function LessonList({ items, emptyText }: { items: PreviewLesson[]; emptyText: s
   return <div className="portal-preview-lesson-list">{items.map(lesson => <article className="portal-preview-lesson-card" key={lesson.ders_id}>
     <div className="portal-preview-lesson-time"><strong>{formatTime(lesson.baslangic_saati)}</strong><span>{formatTime(lesson.bitis_saati)}</span></div>
     <div className="portal-preview-lesson-main">
-      <div className="portal-preview-lesson-heading"><strong>{lesson.brans_adi || 'Ders'}</strong><span>{lesson.ders_durumu || 'Planlandı'}</span></div>
+      <div className="portal-preview-lesson-heading"><strong>{lesson.brans_adi || 'Ders'}</strong><span className="portal-preview-lesson-status" data-status={lesson.ders_durumu || 'Planlandı'}>{lesson.ders_durumu || 'Planlandı'}</span></div>
       <div className="portal-preview-lesson-meta">
         <span>{lesson.ogrenci_adi && lesson.ogretmen_adi ? `${lesson.ogrenci_adi} · ${lesson.ogretmen_adi}` : lesson.ogrenci_adi || lesson.ogretmen_adi || '—'}</span>
         <span>{lesson.derslik_adi || 'Ders yeri belirtilmedi'}</span>

@@ -1,11 +1,13 @@
-import { Calculator, Check, ChevronDown, GraduationCap, Plus, Sparkles, X } from 'lucide-react'
+import { Calculator, Camera, Check, ChevronDown, GraduationCap, Plus, Sparkles, X } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { examTotalNet, isoToday, shortDate, studentName, studentProfile, type CoachData, type Exam } from './data'
+import { ExamPhotoImport } from './ExamPhotoImport'
+import type { ExamPhotoRead, ExamPhotoSection } from './examPhoto'
 import { supabase } from './supabase'
 
 type ExamType = 'LGS' | 'TYT' | 'AYT' | 'Diğer'
-type Row = { key: string; name: string; questions: number; correct: string; wrong: string }
+type Row = { key: string; name: string; questions: number; correct: string; wrong: string; confidence?: number }
 
 const preset = (type: ExamType): Row[] => {
   const rows: Array<[string, number]> = type === 'LGS'
@@ -19,11 +21,87 @@ const preset = (type: ExamType): Row[] => {
 }
 
 function normalizeType(value?: string | null): ExamType {
-  return value === 'TYT' || value === 'AYT' || value === 'LGS' ? value : 'LGS'
+  return value === 'TYT' || value === 'AYT' || value === 'LGS' || value === 'Diğer' ? value : 'LGS'
+}
+
+function photoType(value: ExamPhotoRead | null | undefined, fallback: ExamType): ExamType {
+  return value?.sinav_turu === 'LGS' || value?.sinav_turu === 'TYT' || value?.sinav_turu === 'AYT' || value?.sinav_turu === 'Diğer'
+    ? value.sinav_turu
+    : fallback
 }
 
 function numberOrNull(value: string) {
   return value.trim() === '' ? null : Number(value)
+}
+
+function integerText(value: string) {
+  const compact = value.trim()
+  return /^\d+$/.test(compact) ? compact : ''
+}
+
+function positiveInt(value: string) {
+  const compact = integerText(value)
+  const parsed = compact ? Number(compact) : 0
+  return parsed > 0 ? parsed : null
+}
+
+function norm(value: string) {
+  return value.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()
+}
+
+function sectionKey(value: string) {
+  const text = norm(value)
+  if (text.includes('edebiyat')) return 'edebiyat-sosyal-1'
+  if (text.includes('sosyal bilimler 2') || text.endsWith('sosyal 2')) return 'sosyal-2'
+  if (text.includes('inkilap')) return 'inkilap'
+  if (text.includes('ingiliz')) return 'ingilizce'
+  if (text.includes('matematik')) return 'matematik'
+  if (text.includes('fen')) return 'fen'
+  if (text.includes('din')) return 'din'
+  if (text.includes('sosyal')) return 'sosyal'
+  if (text.includes('turkce')) return 'turkce'
+  return text
+}
+
+function rowFromPhoto(section: ExamPhotoSection, index: number): Row | null {
+  const questions = positiveInt(section.soru_sayisi)
+  if (!questions || !section.bolum_adi.trim()) return null
+  return {
+    key: `ai-${index}-${section.bolum_adi}`,
+    name: section.bolum_adi.trim(),
+    questions,
+    correct: integerText(section.dogru),
+    wrong: integerText(section.yanlis),
+    confidence: section.guven,
+  }
+}
+
+function rowsFromPhoto(type: ExamType, read?: ExamPhotoRead | null): Row[] {
+  if (!read?.bolumler?.length) return preset(type)
+  const aiRows = read.bolumler.map(rowFromPhoto).filter(Boolean) as Row[]
+  if (!aiRows.length) return preset(type)
+  if (type === 'Diğer') return aiRows
+
+  const used = new Set<number>()
+  const merged = preset(type).map(base => {
+    const baseKey = sectionKey(base.name)
+    const index = aiRows.findIndex((candidate, i) => !used.has(i) && sectionKey(candidate.name) === baseKey)
+    if (index < 0) return base
+    used.add(index)
+    const candidate = aiRows[index]
+    return {
+      ...base,
+      questions: candidate.questions || base.questions,
+      correct: candidate.correct,
+      wrong: candidate.wrong,
+      confidence: candidate.confidence,
+    }
+  })
+  return merged
+}
+
+function validPhotoDate(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && value <= isoToday()
 }
 
 function friendlyError(message: string) {
@@ -58,25 +136,33 @@ function ExamCard({ data, exam }: { data: CoachData; exam: Exam }) {
   </article>
 }
 
-function ExamAdd({ data, initialStudentId, onClose, onSaved }: { data: CoachData; initialStudentId?: string; onClose: () => void; onSaved: () => void | Promise<void> }) {
+function ExamAdd({ data, initialStudentId, initialPhoto, onClose, onSaved }: {
+  data: CoachData
+  initialStudentId?: string
+  initialPhoto?: ExamPhotoRead | null
+  onClose: () => void
+  onSaved: () => void | Promise<void>
+}) {
   const validInitial = initialStudentId && data.coachingProfiles.some(x => x.ogrenci_id === initialStudentId) ? initialStudentId : ''
   const single = data.coachingProfiles.length === 1 ? data.coachingProfiles[0].ogrenci_id : ''
   const [studentId,setStudentId] = useState(validInitial || single)
-  const profileType = normalizeType(studentProfile(data, validInitial || single)?.sinav_turu)
-  const [examType,setExamType] = useState<ExamType>(profileType)
-  const [examName,setExamName] = useState('')
-  const [examDate,setExamDate] = useState(isoToday())
-  const [divisor,setDivisor] = useState(profileType === 'LGS' ? 3 : 4)
-  const [rows,setRows] = useState<Row[]>(preset(profileType))
-  const [publisher,setPublisher] = useState('')
-  const [score,setScore] = useState('')
-  const [rank,setRank] = useState('')
-  const [percentile,setPercentile] = useState('')
+  const profileExamType = normalizeType(studentProfile(data, validInitial || single)?.sinav_turu)
+  const initialType = photoType(initialPhoto, profileExamType)
+  const [examType,setExamType] = useState<ExamType>(initialType)
+  const [examName,setExamName] = useState(initialPhoto?.deneme_adi || '')
+  const [examDate,setExamDate] = useState(initialPhoto ? (validPhotoDate(initialPhoto.deneme_tarihi) ? initialPhoto.deneme_tarihi : '') : isoToday())
+  const [divisor,setDivisor] = useState(initialType === 'LGS' ? 3 : 4)
+  const [rows,setRows] = useState<Row[]>(rowsFromPhoto(initialType, initialPhoto))
+  const [publisher,setPublisher] = useState(initialPhoto?.yayinevi || '')
+  const [score,setScore] = useState(initialPhoto?.puan || '')
+  const [rank,setRank] = useState(initialPhoto?.siralama || '')
+  const [percentile,setPercentile] = useState(initialPhoto?.yuzdelik || '')
   const [notes,setNotes] = useState('')
-  const [more,setMore] = useState(false)
+  const [more,setMore] = useState(Boolean(initialPhoto?.yayinevi || initialPhoto?.puan || initialPhoto?.siralama || initialPhoto?.yuzdelik))
   const [busy,setBusy] = useState(false)
   const [error,setError] = useState<string|null>(null)
   const [saved,setSaved] = useState<string|null>(null)
+  const photoMode = Boolean(initialPhoto)
 
   const stats = useMemo(() => rows.map(row => {
     const correct = Number(row.correct || 0)
@@ -88,7 +174,8 @@ function ExamAdd({ data, initialStudentId, onClose, onSaved }: { data: CoachData
   }), [rows,divisor])
   const totalNet = Math.round(stats.reduce((sum,x) => sum + x.net,0) * 100) / 100
   const answered = stats.reduce((sum,x) => sum + x.correct + x.wrong,0)
-  const canSave = Boolean(studentId && examName.trim() && examDate && answered > 0 && !stats.some(x => x.invalid) && divisor > 0)
+  const unresolvedPhoto = photoMode && rows.some(row => row.correct.trim() === '' || row.wrong.trim() === '')
+  const canSave = Boolean(studentId && examName.trim() && examDate && answered > 0 && !stats.some(x => x.invalid) && !unresolvedPhoto && divisor > 0)
 
   const changeType = (type: ExamType) => {
     setExamType(type)
@@ -109,7 +196,7 @@ function ExamAdd({ data, initialStudentId, onClose, onSaved }: { data: CoachData
         p_deneme_adi: examName.trim(),
         p_deneme_tarihi: examDate,
         p_yayinevi: publisher.trim() || null,
-        p_veri_kaynagi: 'Manuel',
+        p_veri_kaynagi: photoMode ? 'Fotoğraf' : 'Manuel',
         p_yanlis_boleni: divisor,
         p_puan: numberOrNull(score),
         p_siralama: numberOrNull(rank),
@@ -130,26 +217,29 @@ function ExamAdd({ data, initialStudentId, onClose, onSaved }: { data: CoachData
 
   return <div className="exam-add-overlay" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose() }}>
     <section className="exam-add-sheet" role="dialog" aria-modal="true" aria-labelledby="exam-add-title">
-      <header className="exam-add-head"><div><span><Sparkles/> DENEME MERKEZİ</span><h2 id="exam-add-title">Deneme sonucu ekle</h2><p>Doğru ve yanlışı girin; boş ve neti sistem hesaplasın.</p></div><button type="button" onClick={onClose} disabled={busy} aria-label="Kapat"><X/></button></header>
+      <header className="exam-add-head"><div><span><Sparkles/> DENEME MERKEZİ</span><h2 id="exam-add-title">{photoMode ? 'AI taslağını kontrol et' : 'Deneme sonucu ekle'}</h2><p>{photoMode ? 'Fotoğraftan okunan alanları kontrol edin; yalnız sizin onayınızla kaydedilir.' : 'Doğru ve yanlışı girin; boş ve neti sistem hesaplasın.'}</p></div><button type="button" onClick={onClose} disabled={busy} aria-label="Kapat"><X/></button></header>
       <form className="exam-add-form" onSubmit={submit}>
+        {photoMode && <div className="exam-ai-review-banner"><Sparkles/><div><b>Fotoğraftan dolduruldu · güven %{initialPhoto?.genel_guven ?? 0}</b><span>Eksik veya düşük güvenli alanlar otomatik kayıt oluşturmaz; kontrol sizde kalır.</span></div></div>}
+        {photoMode && initialPhoto?.uyarilar?.length ? <div className="exam-ai-warning-list">{initialPhoto.uyarilar.map((warning,index) => <span key={`${index}-${warning}`}>• {warning}</span>)}</div> : null}
         {!validInitial && data.coachingProfiles.length > 1 && <label><span>Öğrenci</span><select value={studentId} onChange={e => { const id=e.target.value; setStudentId(id); changeType(normalizeType(studentProfile(data,id)?.sinav_turu)) }} required><option value="">Öğrenci seçin</option>{data.coachingProfiles.map(p => <option key={p.ogrenci_id} value={p.ogrenci_id}>{studentName(data,p.ogrenci_id)}</option>)}</select></label>}
         {studentId && <div className="exam-student-context"><span>Öğrenci</span><b>{studentName(data,studentId)}</b></div>}
         <div className="exam-type-chips">{(['LGS','TYT','AYT','Diğer'] as ExamType[]).map(type => <button type="button" key={type} className={examType===type?'selected':''} onClick={() => changeType(type)}>{type}</button>)}</div>
         <div className="exam-basics"><label><span>Deneme adı</span><input value={examName} onChange={e=>setExamName(e.target.value)} placeholder="Örn. Türkiye Geneli 3" required/></label><label><span>Tarih</span><input type="date" max={isoToday()} value={examDate} onChange={e=>setExamDate(e.target.value)} required/></label></div>
         <div className="exam-rule"><Calculator/><div><b>Net kuralı</b><span>{examType==='LGS'?'3 yanlış 1 doğruyu götürür.':examType==='TYT'||examType==='AYT'?'4 yanlış 1 doğruyu götürür.':'Kurum kuralına göre değiştirilebilir.'}</span></div><input aria-label="Yanlış böleni" type="number" min="0.1" step="0.1" value={divisor} onChange={e=>setDivisor(Number(e.target.value))}/></div>
-        <div className="exam-score-head"><b>Ders sonuçları</b><span>Yalnız doğru ve yanlış</span></div>
+        <div className="exam-score-head"><b>Ders sonuçları</b><span>{photoMode ? 'AI taslağı · kontrol zorunlu' : 'Yalnız doğru ve yanlış'}</span></div>
         <div className="exam-score-grid">
           <div className="exam-score-header"><span>Ders</span><span>Doğru</span><span>Yanlış</span><span>Boş</span><span>Net</span></div>
-          {rows.map((row,index) => <div className={`exam-score-row ${stats[index].invalid?'invalid':''}`} key={row.key}><div><b>{row.name}</b><small>{row.questions} soru</small></div><input aria-label={`${row.name} doğru`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.correct} onChange={e=>update(index,'correct',e.target.value)} placeholder="0"/><input aria-label={`${row.name} yanlış`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.wrong} onChange={e=>update(index,'wrong',e.target.value)} placeholder="0"/><output>{stats[index].blank}</output><output>{stats[index].net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</output></div>)}
+          {rows.map((row,index) => <div className={`exam-score-row ${stats[index].invalid?'invalid':''} ${photoMode && (row.correct==='' || row.wrong==='')?'needs-review':''}`} key={row.key}><div><b>{row.name}</b><small>{row.questions} soru{row.confidence != null ? ` · AI %${row.confidence}` : ''}</small></div><input aria-label={`${row.name} doğru`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.correct} onChange={e=>update(index,'correct',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><input aria-label={`${row.name} yanlış`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.wrong} onChange={e=>update(index,'wrong',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><output>{stats[index].blank}</output><output>{stats[index].net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</output></div>)}
         </div>
         <div className="exam-total"><span><small>İşaretlenen</small><b>{answered}</b></span><span><small>Toplam net</small><b>{totalNet.toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span></div>
         <button type="button" className="exam-more-toggle" onClick={()=>setMore(x=>!x)}>Ek bilgiler <ChevronDown className={more?'open':''}/></button>
         {more && <div className="exam-more"><label><span>Yayın / Kurum</span><input value={publisher} onChange={e=>setPublisher(e.target.value)} /></label><label><span>Puan</span><input type="number" min="0" step="0.01" value={score} onChange={e=>setScore(e.target.value)}/></label><label><span>Sıralama</span><input type="number" min="1" value={rank} onChange={e=>setRank(e.target.value)}/></label><label><span>Yüzdelik</span><input type="number" min="0" max="100" step="0.001" value={percentile} onChange={e=>setPercentile(e.target.value)}/></label><label className="wide"><span>Koç notu</span><textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)}/></label></div>}
+        {photoMode && unresolvedPhoto && <div className="exam-hint">AI'ın okuyamadığı doğru/yanlış alanları var. Kaydetmeden önce bu alanlara 0 dahil gerçek değeri girin.</div>}
         {answered===0 && <div className="exam-hint">Kaydetmek için en az bir doğru veya yanlış sonucu girin.</div>}
         {stats.some(x=>x.invalid) && <div className="exam-error">Doğru + yanlış toplamı soru sayısını aşamaz.</div>}
         {error && <div className="exam-error">{error}</div>}
         {saved && <div className="exam-success"><Check/> {saved}</div>}
-        <footer className="exam-add-actions"><button type="button" onClick={onClose} disabled={busy}>Vazgeç</button><button type="submit" className="primary" disabled={!canSave || busy || Boolean(saved)}>{busy?'Kaydediliyor…':'Sonucu Kaydet'}</button></footer>
+        <footer className="exam-add-actions"><button type="button" onClick={onClose} disabled={busy}>Vazgeç</button><button type="submit" className="primary" disabled={!canSave || busy || Boolean(saved)}>{busy?'Kaydediliyor…':photoMode?'Kontrol Ettim, Kaydet':'Sonucu Kaydet'}</button></footer>
       </form>
     </section>
   </div>
@@ -160,11 +250,18 @@ export function ExamCenter({ data, onRefresh }: { data: CoachData; onRefresh: ()
   const requested = params.get('ogrenci') || ''
   const studentId = data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
   const [open,setOpen] = useState(false)
+  const [photoOpen,setPhotoOpen] = useState(false)
+  const [photoDraft,setPhotoDraft] = useState<ExamPhotoRead|null>(null)
   const rows = data.exams.filter(x => !studentId || x.ogrenci_id === studentId).sort((a,b)=>b.deneme_tarihi.localeCompare(a.deneme_tarihi))
+
+  const openManual = () => { setPhotoOpen(false); setPhotoDraft(null); setOpen(true) }
+  const applyPhoto = (read: ExamPhotoRead) => { setPhotoOpen(false); setPhotoDraft(read); setOpen(true) }
+
   return <div className="page-stack">
-    <div className="exam-center-title"><header className="page-title"><h1>Deneme Merkezi</h1><p>Sonucu girin; net ve değişimi sistem hesaplasın.</p></header><button className="exam-add-trigger" onClick={()=>setOpen(true)}><Plus/> Deneme Sonucu Ekle</button></div>
+    <div className="exam-center-title"><header className="page-title"><h1>Deneme Merkezi</h1><p>Fotoğrafı okutun veya sonucu elle girin; net ve değişimi sistem hesaplasın.</p></header><div className="exam-center-actions"><button className="exam-photo-trigger" onClick={()=>setPhotoOpen(true)}><Camera/> Fotoğraftan Oku</button><button className="exam-add-trigger secondary" onClick={openManual}><Plus/> Elle Ekle</button></div></div>
     {studentId && <div className="student-filter-strip"><div><GraduationCap/><div><strong>{studentName(data,studentId)}</strong><span>Deneme filtresi aktif</span></div></div></div>}
     {rows.length ? <section className="exam-premium-list">{rows.map(exam => <ExamCard key={exam.deneme_id} data={data} exam={exam}/>)}</section> : <div className="empty">{studentId?'Bu öğrenci için henüz gerçek deneme sonucu yok.':'Henüz gerçek deneme sonucu yok.'}</div>}
-    {open && <ExamAdd data={data} initialStudentId={studentId} onClose={()=>setOpen(false)} onSaved={onRefresh}/>} 
+    {photoOpen && <ExamPhotoImport data={data} studentId={studentId} onClose={()=>setPhotoOpen(false)} onApply={applyPhoto} onManual={openManual}/>} 
+    {open && <ExamAdd data={data} initialStudentId={studentId} initialPhoto={photoDraft} onClose={()=>{setOpen(false);setPhotoDraft(null)}} onSaved={onRefresh}/>} 
   </div>
 }

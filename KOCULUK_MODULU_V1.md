@@ -62,6 +62,16 @@ Haftalık görevlerde mevcut `odevler` tablosunun genişletilmesi önceliklidir;
 10. BS Ofis'te gerçek kullanım testi.
 11. Yalnız bundan sonra satış/demo/genelleştirme fazı.
 
+## İlk gerçek kayıt testi — 19.08.2026
+
+- Öğrenci: Asır Yalçıner (`OGR-353498CF`)
+- Koç: Süleyman Yalçıner (`TCH-001`)
+- Durum: Aktif
+- Başlangıç: 19.08.2026
+- Sınav/hedef alanları: ilk kayıt testinde bilinçli olarak boş bırakıldı.
+- Kayıt güvenli `kocluk_profili_kaydet_guvenli_v1` RPC'si üzerinden oluşturuldu.
+- Kayıt sonrası öğrenci/koç ilişkisi ve audit kullanıcı alanları doğrulandı.
+
 ## Güvenlik kuralı
 
 Geliştirme `kocluk-v1-gelistirme` branch'inde yürütülür. `main` doğrudan değiştirilmez. Supabase tarafındaki değişiklikler mevcut tablolara zarar vermeyen eklemeli migration olarak hazırlanır ve kontrol edilmeden canlıya uygulanmaz.

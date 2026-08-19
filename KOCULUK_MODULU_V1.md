@@ -38,6 +38,16 @@ Koçun öğrencilerini tek ekrandan takip etmesi; haftalık çalışma planı, k
 
 Yeni paralel kayıt yalnız gerçekten yeni bir kavram için açılır.
 
+## Ödevler ↔ Koçluk ortak takip kuralı
+
+- `odevler` tek görev motorudur; aynı görev ikinci kez Koçluk için kopyalanmaz.
+- Aktif koçluk profili olan öğrencinin bütün ödevleri Koç Masası tarafından izlenir.
+- Ders öğretmeninin normal **Ödev Ekle** akışından verdiği ödev, öğrenci koçluk alıyorsa Koç Masasına otomatik yansır.
+- Koçun kitap üzerinden verdiği Sayfa / Test / Konu çalışması da aynı `odevler` kaynağına yazılır.
+- Koçluk ekranında varsayılan görünüm öğrencinin **tüm** çalışmalarını birlikte gösterir; gerektiğinde Ders Ödevleri ve Koçluk Çalışmaları ayrı filtrelenebilir.
+- Koçluk çalışması mevcut `ogrenci_kitap_id` / `calisma_turu` alanlarıyla ayırt edilir; yalnız kaynak etiketi için yeni tablo veya yeni kolon açılmaz.
+- Öğrenci yalnız ders alan, ders + koçluk alan veya yalnız koçluk alan olabilir. Koçluk görünürlüğünü aktif koçluk profili belirler; ders kaydı zorunlu değildir.
+
 ## Aday yeni veri alanları
 
 - `ogrenci_hedefleri`
@@ -74,4 +84,4 @@ Haftalık görevlerde mevcut `odevler` tablosunun genişletilmesi önceliklidir;
 
 ## Güvenlik kuralı
 
-Geliştirme `kocluk-v1-gelistirme` branch'inde yürütülür. `main` doğrudan değiştirilmez. Supabase tarafındaki değişiklikler mevcut tablolara zarar vermeyen eklemeli migration olarak hazırlanır ve kontrol edilmeden canlıya uygulanmaz.
+Her Koçluk geliştirmesi güncel `main` sürümünden açılan izole bir `kocluk-v1-*` branch'inde yürütülür. `main` doğrudan değiştirilmez. Supabase tarafındaki değişiklikler mevcut tablolara zarar vermeyen eklemeli migration olarak hazırlanır ve kontrol edilmeden canlıya uygulanmaz.

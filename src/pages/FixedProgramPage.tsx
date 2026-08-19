@@ -6,6 +6,7 @@ import { ProgramMoveForm } from '../components/forms'
 import { SmartProgramForm } from '../components/SmartProgramForm'
 import type { SabitProgram } from '../lib/types'
 import { fullDate, money, time, todayISO } from '../lib/format'
+import { calendarRoomColumns } from '../lib/calendarRooms'
 import { teacherTone } from '../lib/teacherTone'
 import { branchName, roomName, studentName, teacherName } from '../services/metrics'
 import { previewProgram, skipProgramDate } from '../services/officeService'
@@ -15,13 +16,6 @@ import { useToast } from '../components/Toast'
 
 const dayNames=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar']
 const dayShort=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']
-const ROOM_COLUMNS=[
-  {id:'LOC-002',label:'Yalçıner'},
-  {id:'LOC-001',label:'Başak'},
-  {id:'LOC-003',label:'Salon'},
-  {id:'LOC-005',label:'OSM'},
-  {id:'LOC-004',label:'Online'},
-] as const
 const SLOT_MINUTES=30
 const SLOT_HEIGHT=42
 const DEFAULT_START=8*60
@@ -130,7 +124,7 @@ export function FixedProgramPage(){
   const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
-  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const roomColumns=calendarRoomColumns(data.derslikler,selectedPrograms.map(x=>x.derslik_id))
   const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)
   const dragTargetAt=(clientX:number,clientY:number):ProgramDragTarget|null=>{
     const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
@@ -181,9 +175,7 @@ export function FixedProgramPage(){
     if(program.derslik_id===target.roomId&&currentTime===targetTime)return
     if(!canDragProgram(program))return
     const roomLabel=roomColumns.find(x=>x.id===target.roomId)?.label||'Derslik'
-    if(!window.confirm(`Sabit program ${targetTime} · ${roomLabel} konumuna taşınsın mı?
-
-Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; değişiklik ilgili haftada Haftayı Hazırla ile uygulanır.`))return
+    if(!window.confirm(`Sabit program ${targetTime} · ${roomLabel} konumuna taşınsın mı?\n\nSabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; değişiklik ilgili haftada Haftayı Hazırla ile uygulanır.`))return
     const nextProgram:SabitProgram={...program,haftanin_gunu:selectedDay,derslik_id:target.roomId,baslangic_saati:targetTime}
     setDragBusy(true)
     try{
@@ -229,7 +221,7 @@ Sabit program şablonu değişir. Mevcut dersler otomatik değiştirilmez; deği
       <section className="daily-calendar-card fixed-program-calendar-card">
         <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{selectedDay}</b><small className="daily-drag-help">Aktif program: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{selectedPrograms.length}</strong><span>program</span></div></header>
         <div className="daily-room-grid-scroll" aria-label="Dersliklere göre sabit program takvimi">
-          <div className="daily-room-grid fixed-program-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
+          <div className="daily-room-grid fixed-program-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
             <div className="daily-room-header-row">
               <div className="daily-time-head">Saat</div>
               {roomColumns.map(column=><div className={`daily-room-head room-${column.id.toLowerCase()}`} key={column.id} title={column.room?.mekan_adi||column.label}><strong>{column.label}</strong></div>)}

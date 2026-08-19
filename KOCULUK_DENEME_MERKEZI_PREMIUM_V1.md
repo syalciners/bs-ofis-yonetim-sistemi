@@ -57,6 +57,8 @@ Deneme başlığı:
 - veri kaynağı: Manuel / Fotoğraf / Optik / Entegrasyon
 - onay durumu
 
+Toplam doğru / yanlış / boş / net değerleri bölüm sonuçlarından türetilir; aynı veri ikinci kez saklanmaz.
+
 ### 2. Bölüm / ders sonuçları
 
 Her deneme için ders veya bölüm bazında:
@@ -67,7 +69,7 @@ Her deneme için ders veya bölüm bazında:
 - net
 - toplam soru
 
-Net hesabı kural tabanlı olmalı. V1 varsayılanı 4 yanlış 1 doğruyu götürür mantığıdır; ancak sınav türü veya kurum ayarı üzerinden değiştirilebilir olmalıdır. Sabit kod içine gömülmemelidir.
+Net hesabı kural tabanlı olmalı. Yanlış götürme böleni deneme kaydında açıkça tutulur; bu nedenle LGS, TYT, AYT veya kurum içi farklı kurallar sabit koda gömülmeden kullanılabilir.
 
 ### 3. Trend
 
@@ -171,7 +173,7 @@ AI sonucu otomatik kesin kabul edilmez. Öğrenci veya koç onayı olmadan kriti
 
 ## Veri modeli ilkesi
 
-İlk teknik tasarım iki yeni kavramla sınırlı tutulmalıdır:
+İlk teknik tasarım iki yeni kavramla sınırlı tutulmuştur:
 
 1. `kocluk_deneme_sinavlari`
 2. `kocluk_deneme_bolum_sonuclari`
@@ -184,6 +186,7 @@ Yeni tablo ancak yeni bir iş kavramı varsa açılır.
 
 - RLS zorunlu
 - anon erişimi yok
+- authenticated kullanıcı doğrudan INSERT / UPDATE yapamaz
 - yönetici yazmaları güvenli SECURITY DEFINER RPC üzerinden
 - aktif koçluk profili kontrolü
 - sayısal alanlarda negatif değer engeli
@@ -193,12 +196,30 @@ Yeni tablo ancak yeni bir iş kavramı varsa açılır.
 
 Öğrenci portalı için ayrı ve daha dar erişim politikası sonraki portal fazında tasarlanır.
 
+## Teknik uygulama durumu — 19.08.2026
+
+Tamamlananlar:
+- `20260819133000_kocluk_deneme_merkezi_v1.sql` migration oluşturuldu ve canlı BS Eğitim Supabase projesine uygulandı.
+- Deneme ana kaydı ve bölüm sonuçları tabloları kuruldu.
+- `kocluk_deneme_kaydet_guvenli_v1` ve `kocluk_deneme_bolum_kaydet_guvenli_v1` güvenli RPC'leri kuruldu.
+- Net hesabı bölüm RPC'sinde denemenin `yanlis_boleni` değerine göre hesaplanıyor.
+- Onaylı deneme için en az bir bölüm sonucu zorunlu.
+- Transaction/rollback kuru çalışma Asır Yalçıner üzerinde başarıyla geçti: 10 doğru, 4 yanlış, 6 boş / 20 soru ve 4 yanlış böleni ile Matematik neti 9,00 hesaplandı; işlem rollback edildi.
+- Rollback sonrası kuru çalışma kaydı sayısı 0 olarak doğrulandı.
+- İlk yetki kontrolünde authenticated rolünde doğrudan tablo yazma yetkisi görüldüğü için ayrıca `20260819134500_kocluk_deneme_yetki_sikilastirma_v1.sql` uygulandı.
+- Son kontrolde authenticated yalnız SELECT yapabiliyor; doğrudan INSERT / UPDATE kapalı, anon SELECT kapalı, güvenli RPC authenticated için açık ve anon için kapalı.
+
+Henüz yapılmayan ve bilinçli olarak bekletilen:
+- Kalıcı gerçek deneme kaydı. Sahte operasyon verisi yazılmadı.
+- UI ve trend ekranı. Önce tek gerçek deneme verisiyle veri çekirdeği doğrulanacak.
+- Öğrenci portalı yazma yetkisi. Daha dar, öğrenci-kimliği doğrulayan ayrı RPC fazında kurulacak.
+
 ## Test sırası
 
-1. Migration tasarla
-2. Transaction/rollback kuru çalışma
-3. Şema ve RLS kontrolü
-4. Tek gerçek öğrenci için gerçek deneme verisi
+1. Migration tasarla — tamamlandı
+2. Transaction/rollback kuru çalışma — tamamlandı
+3. Şema ve RLS kontrolü — tamamlandı
+4. Tek gerçek öğrenci için gerçek deneme verisi — sıradaki adım
 5. Okuma doğrulaması
 6. UI
 7. CI/build

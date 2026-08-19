@@ -1,0 +1,144 @@
+import { supabase } from './supabase'
+
+export interface CoachUserProfile {
+  auth_user_id: string
+  email?: string | null
+  ad_soyad: string
+  rol: string
+  aktif: boolean
+  ogretmen_id?: string | null
+}
+
+export interface CoachingProfile {
+  ogrenci_id: string
+  koc_ogretmen_id?: string | null
+  sinav_turu?: string | null
+  hedef_okul?: string | null
+  hedef_bolum?: string | null
+  hedef_puan?: number | null
+  hedef_siralama?: number | null
+  baslangic_tarihi: string
+  durum: string
+}
+
+export interface Student {
+  ogrenci_id: string
+  ad_soyad: string
+  durum?: string | null
+}
+
+export interface Assignment {
+  odev_id: string
+  ogrenci_id: string
+  ogretmen_id?: string | null
+  konu?: string | null
+  odev_basligi?: string | null
+  verilis_tarihi?: string | null
+  son_teslim_tarihi?: string | null
+  durum: string
+  oncelik?: string | null
+  ogrenci_kitap_id?: string | null
+  calisma_turu?: string | null
+  baslangic_no?: number | null
+  bitis_no?: number | null
+  calisma_detayi?: string | null
+}
+
+export interface Meeting {
+  gorusme_id: string
+  ogrenci_id: string
+  koc_ogretmen_id: string
+  gorusme_tarihi: string
+  baslangic_saati?: string | null
+  gorusme_turu?: string | null
+  durum: string
+  gundem?: string | null
+  alinan_kararlar?: string | null
+}
+
+export interface Exam {
+  deneme_id: string
+  ogrenci_id: string
+  sinav_turu: string
+  deneme_adi: string
+  deneme_tarihi: string
+  puan?: number | null
+  siralama?: number | null
+  yuzdelik?: number | null
+  onay_durumu: string
+}
+
+export interface CoachData {
+  profile: CoachUserProfile
+  coachingProfiles: CoachingProfile[]
+  students: Student[]
+  assignments: Assignment[]
+  meetings: Meeting[]
+  exams: Exam[]
+}
+
+function ensure<T>(data: T | null, error: { message?: string } | null, label: string): T {
+  if (error) throw new Error(`${label}: ${error.message || 'veri alınamadı'}`)
+  return data as T
+}
+
+export async function loadCoachData(userId: string): Promise<CoachData> {
+  const profileResult = await supabase
+    .from('kullanici_profilleri')
+    .select('auth_user_id,email,ad_soyad,rol,aktif,ogretmen_id')
+    .eq('auth_user_id', userId)
+    .maybeSingle()
+
+  const profile = ensure(profileResult.data, profileResult.error, 'Kullanıcı profili') as CoachUserProfile | null
+  if (!profile?.aktif) throw new Error('Bu kullanıcı hesabı aktif değil.')
+  if (profile.rol !== 'Yönetici') throw new Error('BS Koçluk V1 şu anda yalnız yönetici hesaplarına açıktır.')
+
+  const profilesResult = await supabase
+    .from('kocluk_ogrenci_profilleri')
+    .select('ogrenci_id,koc_ogretmen_id,sinav_turu,hedef_okul,hedef_bolum,hedef_puan,hedef_siralama,baslangic_tarihi,durum')
+    .eq('durum', 'Aktif')
+    .order('guncellenme_zamani', { ascending: false })
+
+  const coachingProfiles = ensure(profilesResult.data || [], profilesResult.error, 'Koçluk profilleri') as CoachingProfile[]
+  const studentIds = coachingProfiles.map(x => x.ogrenci_id)
+
+  if (!studentIds.length) {
+    return { profile, coachingProfiles, students: [], assignments: [], meetings: [], exams: [] }
+  }
+
+  const [studentsResult, assignmentsResult, meetingsResult, examsResult] = await Promise.all([
+    supabase.from('ogrenciler').select('ogrenci_id,ad_soyad,durum').in('ogrenci_id', studentIds).order('ad_soyad'),
+    supabase.from('odevler').select('odev_id,ogrenci_id,ogretmen_id,konu,odev_basligi,verilis_tarihi,son_teslim_tarihi,durum,oncelik,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no,calisma_detayi').in('ogrenci_id', studentIds).order('son_teslim_tarihi', { ascending: true, nullsFirst: false }),
+    supabase.from('kocluk_gorusmeleri').select('gorusme_id,ogrenci_id,koc_ogretmen_id,gorusme_tarihi,baslangic_saati,gorusme_turu,durum,gundem,alinan_kararlar').in('ogrenci_id', studentIds).order('gorusme_tarihi', { ascending: false }),
+    supabase.from('kocluk_deneme_sinavlari').select('deneme_id,ogrenci_id,sinav_turu,deneme_adi,deneme_tarihi,puan,siralama,yuzdelik,onay_durumu').in('ogrenci_id', studentIds).neq('onay_durumu', 'İptal').order('deneme_tarihi', { ascending: false }),
+  ])
+
+  return {
+    profile,
+    coachingProfiles,
+    students: ensure(studentsResult.data || [], studentsResult.error, 'Öğrenciler') as Student[],
+    assignments: ensure(assignmentsResult.data || [], assignmentsResult.error, 'Çalışmalar') as Assignment[],
+    meetings: ensure(meetingsResult.data || [], meetingsResult.error, 'Görüşmeler') as Meeting[],
+    exams: ensure(examsResult.data || [], examsResult.error, 'Denemeler') as Exam[],
+  }
+}
+
+export const isDone = (status: string) => ['Tamamlandı', 'Teslim Edildi'].includes(status)
+export const isCancelled = (status: string) => status === 'İptal'
+export const isCoachingAssignment = (item: Assignment) => Boolean(item.ogrenci_kitap_id || item.calisma_turu)
+
+export function studentName(data: CoachData, studentId: string) {
+  return data.students.find(x => x.ogrenci_id === studentId)?.ad_soyad || 'Öğrenci'
+}
+
+export function isoToday() {
+  const d = new Date()
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 10)
+}
+
+export function shortDate(value?: string | null) {
+  if (!value) return 'Tarih yok'
+  const [y, m, d] = value.slice(0, 10).split('-')
+  return `${d}.${m}.${y}`
+}

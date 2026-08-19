@@ -20,8 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Portal karşılama adı geçişi
-        run: node scripts/migrate-portal-greeting-name.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

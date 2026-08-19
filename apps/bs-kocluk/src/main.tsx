@@ -5,6 +5,7 @@ import App from './App'
 import './styles.css'
 import './premium-dashboard.css'
 import './student-360.css'
+import './quick-study.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,0 +1,73 @@
+name: Demo final tek seferlik kontrol
+
+on:
+  push:
+    branches: [demo-hazirlik]
+
+permissions:
+  contents: write
+
+jobs:
+  final-check:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: demo
+      VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Final kontrolleri çalıştır ve sonucu kaydet
+        shell: bash
+        run: |
+          set +e
+          : > /tmp/demo-final.log
+
+          npm install --no-audit --no-fund >> /tmp/demo-final.log 2>&1
+          INSTALL=$?
+
+          ISOLATION=99
+          RULES=99
+          BUILD=99
+
+          if [ "$INSTALL" -eq 0 ]; then
+            npm run check:demo-isolation >> /tmp/demo-final.log 2>&1
+            ISOLATION=$?
+          fi
+          if [ "$INSTALL" -eq 0 ] && [ "$ISOLATION" -eq 0 ]; then
+            npm run check:rules >> /tmp/demo-final.log 2>&1
+            RULES=$?
+          fi
+          if [ "$INSTALL" -eq 0 ] && [ "$ISOLATION" -eq 0 ] && [ "$RULES" -eq 0 ]; then
+            npm run build >> /tmp/demo-final.log 2>&1
+            BUILD=$?
+          fi
+
+          if [ "$INSTALL" -eq 0 ] && [ "$ISOLATION" -eq 0 ] && [ "$RULES" -eq 0 ] && [ "$BUILD" -eq 0 ]; then
+            RESULT=SUCCESS
+            EXIT_CODE=0
+          else
+            RESULT=FAIL
+            EXIT_CODE=1
+          fi
+
+          {
+            echo "RESULT=$RESULT"
+            echo "SHA=$GITHUB_SHA"
+            echo "INSTALL=$INSTALL"
+            echo "DEMO_ISOLATION=$ISOLATION"
+            echo "RULES=$RULES"
+            echo "BUILD=$BUILD"
+            echo "--- LOG TAIL ---"
+            tail -n 80 /tmp/demo-final.log
+          } > .demo-final-check-result.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-final-check-result.txt
+          git commit -m "Demo final kontrol sonucu [skip ci]" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          exit "$EXIT_CODE"

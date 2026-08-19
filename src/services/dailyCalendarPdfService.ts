@@ -77,7 +77,7 @@ export async function openDailyCalendarPdf(data:AppData,lessons:Ders[],date:stri
   const monday=mondayOf(date)
   const sunday=addDays(monday,6)
   const sorted=data.dersler
-    .filter(lesson=>lesson.tarih>=monday&&lesson.tarih<=sunday&&!CALENDAR_HIDDEN_STATUSES.has(String(lesson.ders_durumu||''))&&minutesFromTime(lesson.baslangic_saati)!=null)
+    .filter(lesson=>typeof lesson.tarih==='string'&&lesson.tarih>=monday&&lesson.tarih<=sunday&&!CALENDAR_HIDDEN_STATUSES.has(String(lesson.ders_durumu||''))&&minutesFromTime(lesson.baslangic_saati)!=null)
     .sort((a,b)=>String(a.tarih||'').localeCompare(String(b.tarih||''))||String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||''))||String(a.derslik_id||'').localeCompare(String(b.derslik_id||'')))
   if(!sorted.length)throw new Error('Seçilen haftada PDF oluşturulacak ders yok.')
 

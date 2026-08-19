@@ -28,6 +28,10 @@ import './book-search.css'
 import './settings-hub.css'
 import './institution-settings.css'
 
+// Uygulama her yeni başlangıçta Program Liste/Takvim görünümünü güncel haftadan açar.
+// Aynı uygulama oturumu içinde Liste ↔ Takvim geçişlerinde seçilen hafta korunmaya devam eder.
+sessionStorage.removeItem('bs-takvim-hafta')
+
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({
   immediate: true,

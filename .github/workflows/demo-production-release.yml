@@ -1,0 +1,164 @@
+name: BS Eğitim Demo production release
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - .demo-production-release-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DEMO_SUPABASE_URL: https://pparlcdctnivmpiofuvz.supabase.co
+      DEMO_SUPABASE_PUBLISHABLE_KEY: sb_publishable__IYAfCCcA6DWnpQ005xJdA__vvdiDGZ
+      PRODUCTION_ALIAS: https://bs-egitim-demo.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Hedef demo Vercel projesini doğrula
+        id: project_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN boş."; exit 1; }
+          STATUS="$(curl -sS -o /tmp/project.json -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          test "$STATUS" = "200" || { echo "::error::Vercel proje erişimi HTTP $STATUS."; exit 1; }
+          node <<'NODE'
+          const fs=require('fs')
+          const j=JSON.parse(fs.readFileSync('/tmp/project.json','utf8'))
+          if(j.id!==process.env.VERCEL_PROJECT_ID || j.name!=='bs-egitim-demo'){
+            console.error('GÜVENLİK ENGELİ: Hedef proje BS Eğitim Demo değil.')
+            process.exit(1)
+          }
+          console.log(`Hedef doğrulandı: ${j.name} / ${j.id}`)
+          NODE
+
+      - name: Kur, test et ve gerçek demo ayarlarıyla derle
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          VITE_APP_MODE=demo VITE_SUPABASE_URL=https://demo-placeholder.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_demo_placeholder npm run check:demo-isolation
+          npm run check:rules
+          VITE_APP_MODE=demo VITE_SUPABASE_URL="$DEMO_SUPABASE_URL" VITE_SUPABASE_PUBLISHABLE_KEY="$DEMO_SUPABASE_PUBLISHABLE_KEY" npm run build
+
+      - name: Production paket güvenliğini doğrula
+        id: artifact_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist
+          grep -R -F -q "$DEMO_SUPABASE_URL" dist || { echo "::error::Doğru demo Supabase URL bulunamadı."; exit 1; }
+          ! grep -R -F -q "demo-placeholder.supabase.co" dist || { echo "::error::Placeholder URL pakete sızdı."; exit 1; }
+          ! grep -R -F -q "https://igmtuouhdozkgwmdxlme.supabase.co" dist || { echo "::error::Ana BS Ofis Supabase URL pakete sızdı."; exit 1; }
+          if grep -R -P -q 'sb_secret_[A-Za-z0-9_-]{20,}' dist; then
+            echo "::error::Gerçek secret anahtar kalıbı production paketinde bulundu."
+            exit 1
+          fi
+          INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -n 1)"
+          INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' dist/index.html | head -n 1)"
+          test -n "$INDEX_JS" && test -n "$INDEX_CSS"
+          echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
+          echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
+          echo "Paket güvenli: $INDEX_JS / $INDEX_CSS"
+
+      - name: Deploy öncesi canlı bundleı kaydet
+        id: before
+        shell: bash
+        run: |
+          set -euo pipefail
+          HTML="$(curl -fsSL --retry 2 "$PRODUCTION_ALIAS/?before_release=$GITHUB_RUN_ID")"
+          BEFORE_JS="$(printf '%s' "$HTML" | grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' | head -n 1 || true)"
+          echo "BEFORE_INDEX_JS=$BEFORE_JS" >> "$GITHUB_ENV"
+          echo "Önceki production JS: ${BEFORE_JS:-bulunamadı}"
+
+      - name: BS Eğitim Demo production deploy
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global vercel@latest
+          rm -rf .vercel
+          mkdir -p .vercel
+          printf '%s' "{\"orgId\":\"$VERCEL_ORG_ID\",\"projectId\":\"$VERCEL_PROJECT_ID\"}" > .vercel/project.json
+          DEPLOYMENT_URL="$(vercel deploy dist --yes --prod --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID")"
+          echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> "$GITHUB_ENV"
+          echo "Production deployment: $DEPLOYMENT_URL"
+
+      - name: Canlı production doğrulaması
+        id: smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          MATCHED=0
+          for ATTEMPT in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            HTML="$(curl -fsSL --retry 2 "$PRODUCTION_ALIAS/?release_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
+            if printf '%s' "$HTML" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$HTML" | grep -F -q "$EXPECTED_INDEX_CSS"; then MATCHED=1; break; fi
+            sleep 2
+          done
+          test "$MATCHED" = "1" || { echo "::error::Production alias yeni bundleı göstermedi."; exit 1; }
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_INDEX_JS?release_check=$GITHUB_RUN_ID" -o /tmp/index.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_INDEX_CSS?release_check=$GITHUB_RUN_ID" -o /tmp/index.css
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/manifest.webmanifest?release_check=$GITHUB_RUN_ID" -o /tmp/manifest.json
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/sw.js?release_check=$GITHUB_RUN_ID" -o /tmp/sw.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/workbox-9c191d2f.js?release_check=$GITHUB_RUN_ID" -o /tmp/workbox.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/pdfmake-Cs1GMa1L.js?release_check=$GITHUB_RUN_ID" -o /tmp/pdfmake.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/vfs_fonts-DzK-djW1.js?release_check=$GITHUB_RUN_ID" -o /tmp/vfs.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-192-v2.png?release_check=$GITHUB_RUN_ID" -o /tmp/icon192.png
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-512-v2.png?release_check=$GITHUB_RUN_ID" -o /tmp/icon512.png
+          grep -F -q "$DEMO_SUPABASE_URL" /tmp/index.js || { echo "::error::Canlı JS doğru demo Supabase URL içermiyor."; exit 1; }
+          ! grep -F -q "demo-placeholder.supabase.co" /tmp/index.js || { echo "::error::Canlı JS placeholder URL içeriyor."; exit 1; }
+          ! grep -F -q "https://igmtuouhdozkgwmdxlme.supabase.co" /tmp/index.js || { echo "::error::Canlı JS ana BS Ofis Supabase URL içeriyor."; exit 1; }
+          if grep -P -q 'sb_secret_[A-Za-z0-9_-]{20,}' /tmp/index.js; then
+            echo "::error::Canlı JS gerçek secret anahtar kalıbı içeriyor."
+            exit 1
+          fi
+          for F in /tmp/index.css /tmp/manifest.json /tmp/sw.js /tmp/workbox.js /tmp/pdfmake.js /tmp/vfs.js /tmp/icon192.png /tmp/icon512.png; do test -s "$F" || { echo "::error::$F boş."; exit 1; }; done
+          echo "BS Eğitim Demo canlı smoke testi başarılı."
+
+      - name: Release sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          PROJECT_OUTCOME: ${{ steps.project_guard.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact_guard.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .demo-production-release-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          project_guard=$PROJECT_OUTCOME
+          build=$BUILD_OUTCOME
+          artifact_guard=$ARTIFACT_OUTCOME
+          deploy=$DEPLOY_OUTCOME
+          smoke=$SMOKE_OUTCOME
+          deployment_url=${DEPLOYMENT_URL:-}
+          before_index_js=${BEFORE_INDEX_JS:-}
+          expected_index_js=${EXPECTED_INDEX_JS:-}
+          expected_index_css=${EXPECTED_INDEX_CSS:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-production-release-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "BS Eğitim Demo production release sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

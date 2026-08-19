@@ -1,0 +1,23 @@
+name: BS Koçluk build doğrulama
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/bs-kocluk/**'
+      - '.github/workflows/bs-kocluk-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/bs-kocluk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build

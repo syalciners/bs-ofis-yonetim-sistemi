@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-demo:
@@ -24,3 +24,21 @@ jobs:
       - run: npm run check:demo-isolation
       - run: npm run check:rules
       - run: npm run build
+      - name: Derlenmiş demo paketini repo köküne senkronla
+        run: node scripts/sync-pages-root.mjs
+      - name: Derlenmiş demo paketini doğrula
+        run: node scripts/check-published-pages.mjs
+      - name: Derlenmiş demo paketini branch'e kaydet
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Derlenmiş demo paketi zaten güncel."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Derlenmiş demo yayın paketini güncelle [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

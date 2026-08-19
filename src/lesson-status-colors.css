@@ -20,6 +20,61 @@
   font-weight:900 !important;
 }
 
+/* Öğretmen ve öğrenci portalı da aynı ders durum renk dilini kullanır. */
+.portal-preview-lesson-status{
+  display:inline-flex!important;
+  align-items:center;
+  gap:5px;
+  font-weight:900!important;
+}
+.portal-preview-lesson-status::before{
+  content:'';
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:950;
+  line-height:1;
+}
+.portal-preview-lesson-status[data-status="Planlandı"]{
+  background:#eff6ff!important;
+  color:#1d4ed8!important;
+  border:1px solid #bfdbfe!important;
+}
+.portal-preview-lesson-status[data-status="Planlandı"]::before{
+  width:7px;
+  height:7px;
+  background:#2563eb;
+  box-shadow:0 0 0 2px rgba(37,99,235,.12);
+}
+.portal-preview-lesson-status[data-status="Yapıldı"]{
+  background:#f0fdf4!important;
+  color:#15803d!important;
+  border:1px solid #bbf7d0!important;
+}
+.portal-preview-lesson-status[data-status="Yapıldı"]::before{
+  content:'✓';
+  background:#22a06b;
+  color:#fff;
+  box-shadow:0 0 0 2px rgba(34,160,107,.12);
+}
+.portal-preview-lesson-status[data-status="İptal"],
+.portal-preview-lesson-status[data-status="Öğretmen İptali"]{
+  background:#fef2f2!important;
+  color:#b91c1c!important;
+  border:1px solid #fecaca!important;
+}
+.portal-preview-lesson-status[data-status="İptal"]::before,
+.portal-preview-lesson-status[data-status="Öğretmen İptali"]::before{
+  content:'×';
+  background:#dc4c4c;
+  color:#fff;
+  box-shadow:0 0 0 2px rgba(220,76,76,.12);
+}
+
 /* Takvim kartı: öğrenci; öğretmen • branş + durum; derslik. */
 .lesson-meta-calendar,.lesson-status-calendar{display:none}
 .calendar-v2 .lesson-card{grid-template-columns:70px minmax(0,1fr);align-items:start;padding-top:9px;padding-bottom:9px}

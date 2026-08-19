@@ -1,0 +1,186 @@
+name: Doğrulanmış demo preview production promote
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - .demo-promote-production-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERIFIED_DEPLOYMENT_ID: dpl_6v3YMT87yYUmYtP1CR4CX3Lh2s8C
+      VERIFIED_DEPLOYMENT_URL: bs-egitim-demo-e0cwoih8k-syalciners-8325s-projects.vercel.app
+      EXPECTED_INDEX_JS: assets/index-D728U7st.js
+      EXPECTED_INDEX_CSS: assets/index-YGJhtDGQ.css
+      DEMO_SUPABASE_URL: https://pparlcdctnivmpiofuvz.supabase.co
+      PRODUCTION_ALIAS: https://bs-egitim-demo.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Token ve demo proje erişimini doğrula
+        id: project_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN boş."; exit 1; }
+          STATUS="$(curl -sS -o /tmp/project.json -w '%{http_code}' \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          test "$STATUS" = "200" || { echo "::error::Demo proje erişimi HTTP $STATUS."; exit 1; }
+          node <<'NODE'
+          const fs=require('fs')
+          const j=JSON.parse(fs.readFileSync('/tmp/project.json','utf8'))
+          if(j.id!==process.env.VERCEL_PROJECT_ID || j.name!=='bs-egitim-demo'){
+            console.error('GÜVENLİK ENGELİ: Hedef proje BS Eğitim Demo değil.')
+            process.exit(1)
+          }
+          console.log(`Demo proje doğrulandı: ${j.name} / ${j.id}`)
+          NODE
+
+      - name: Promote edilecek deploymentı doğrula
+        id: deployment_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(curl -sS -o /tmp/deployment.json -w '%{http_code}' \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/$VERIFIED_DEPLOYMENT_ID?teamId=$VERCEL_ORG_ID")"
+          test "$STATUS" = "200" || { echo "::error::Deployment erişimi HTTP $STATUS."; exit 1; }
+          node <<'NODE'
+          const fs=require('fs')
+          const j=JSON.parse(fs.readFileSync('/tmp/deployment.json','utf8'))
+          const projectId=j.projectId || j.project?.id
+          if(j.id!==process.env.VERIFIED_DEPLOYMENT_ID){
+            console.error('GÜVENLİK ENGELİ: Deployment ID eşleşmiyor.')
+            process.exit(1)
+          }
+          if(j.url!==process.env.VERIFIED_DEPLOYMENT_URL){
+            console.error('GÜVENLİK ENGELİ: Deployment URL eşleşmiyor.')
+            process.exit(1)
+          }
+          if(projectId && projectId!==process.env.VERCEL_PROJECT_ID){
+            console.error('GÜVENLİK ENGELİ: Deployment başka projeye ait.')
+            process.exit(1)
+          }
+          if(!['READY','ready'].includes(j.readyState) && !['READY','ready'].includes(j.state)){
+            console.error('GÜVENLİK ENGELİ: Deployment READY değil.')
+            process.exit(1)
+          }
+          console.log(`Doğrulanmış preview deployment hazır: ${j.id}`)
+          NODE
+
+      - name: Mevcut production bundleını kaydet
+        id: before
+        shell: bash
+        run: |
+          set -euo pipefail
+          HTML="$(curl -fsSL --retry 2 --retry-delay 1 "$PRODUCTION_ALIAS/?before_promote=$GITHUB_RUN_ID")"
+          BEFORE_JS="$(printf '%s' "$HTML" | grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' | head -n 1 || true)"
+          echo "BEFORE_INDEX_JS=$BEFORE_JS" >> "$GITHUB_ENV"
+          echo "Promote öncesi production JS: ${BEFORE_JS:-bulunamadı}"
+
+      - name: Doğrulanmış previewı productiona promote et
+        id: promote
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(curl -sS -o /tmp/promote.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/promote/$VERIFIED_DEPLOYMENT_ID?teamId=$VERCEL_ORG_ID")"
+          case "$STATUS" in
+            200|201|202|204) ;;
+            *)
+              echo "::error::Vercel promote başarısız: HTTP $STATUS"
+              node -e "try{const j=require('/tmp/promote.json'); console.error(j?.error?.code||'', j?.error?.message||'')}catch{}" || true
+              exit 1
+              ;;
+          esac
+          echo "Vercel promote isteği kabul edildi: HTTP $STATUS"
+
+      - name: Canlı production smoke testi
+        id: smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          MATCHED=0
+          for ATTEMPT in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            HTML="$(curl -fsSL --retry 2 --retry-delay 1 "$PRODUCTION_ALIAS/?promote_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
+            if printf '%s' "$HTML" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$HTML" | grep -F -q "$EXPECTED_INDEX_CSS"; then
+              MATCHED=1
+              break
+            fi
+            sleep 2
+          done
+          test "$MATCHED" = "1" || { echo "::error::Production alias doğrulanmış bundleı göstermedi."; exit 1; }
+
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_INDEX_JS?promote_check=$GITHUB_RUN_ID" -o /tmp/index.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_INDEX_CSS?promote_check=$GITHUB_RUN_ID" -o /tmp/index.css
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/manifest.webmanifest?promote_check=$GITHUB_RUN_ID" -o /tmp/manifest.json
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/sw.js?promote_check=$GITHUB_RUN_ID" -o /tmp/sw.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/workbox-9c191d2f.js?promote_check=$GITHUB_RUN_ID" -o /tmp/workbox.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/pdfmake-Cs1GMa1L.js?promote_check=$GITHUB_RUN_ID" -o /tmp/pdfmake.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/vfs_fonts-DzK-djW1.js?promote_check=$GITHUB_RUN_ID" -o /tmp/vfs.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-192-v2.png?promote_check=$GITHUB_RUN_ID" -o /tmp/icon192.png
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-512-v2.png?promote_check=$GITHUB_RUN_ID" -o /tmp/icon512.png
+
+          grep -F -q "$DEMO_SUPABASE_URL" /tmp/index.js || { echo "::error::Canlı JS doğru demo Supabase URL'sini içermiyor."; exit 1; }
+          if grep -F -q "demo-placeholder.supabase.co" /tmp/index.js; then
+            echo "::error::Canlı JS placeholder Supabase URL içeriyor."
+            exit 1
+          fi
+          if grep -F -q "https://igmtuouhdozkgwmdxlme.supabase.co" /tmp/index.js; then
+            echo "::error::Canlı JS ana BS Ofis Supabase URL içeriyor."
+            exit 1
+          fi
+          if grep -F -q "sb_secret_" /tmp/index.js; then
+            echo "::error::Canlı JS secret anahtar izi içeriyor."
+            exit 1
+          fi
+          for F in /tmp/index.css /tmp/manifest.json /tmp/sw.js /tmp/workbox.js /tmp/pdfmake.js /tmp/vfs.js /tmp/icon192.png /tmp/icon512.png; do
+            test -s "$F" || { echo "::error::$F boş."; exit 1; }
+          done
+          echo "BS Eğitim Demo production smoke testi başarılı."
+
+      - name: Promote sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          PROJECT_OUTCOME: ${{ steps.project_guard.outcome }}
+          DEPLOYMENT_OUTCOME: ${{ steps.deployment_guard.outcome }}
+          PROMOTE_OUTCOME: ${{ steps.promote.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .demo-promote-production-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          project_guard=$PROJECT_OUTCOME
+          deployment_guard=$DEPLOYMENT_OUTCOME
+          promote=$PROMOTE_OUTCOME
+          smoke=$SMOKE_OUTCOME
+          deployment_id=$VERIFIED_DEPLOYMENT_ID
+          before_index_js=${BEFORE_INDEX_JS:-}
+          expected_index_js=$EXPECTED_INDEX_JS
+          expected_index_css=$EXPECTED_INDEX_CSS
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-promote-production-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Demo production promote sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

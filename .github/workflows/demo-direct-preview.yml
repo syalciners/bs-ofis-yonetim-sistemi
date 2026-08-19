@@ -1,0 +1,137 @@
+name: Demo doğrudan preview deploy
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - .demo-direct-preview-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DEMO_SUPABASE_URL: https://pparlcdctnivmpiofuvz.supabase.co
+      DEMO_SUPABASE_PUBLISHABLE_KEY: sb_publishable__IYAfCCcA6DWnpQ005xJdA__vvdiDGZ
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Token ve hedef proje REST kontrolü
+        id: project_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN boş."; exit 1; }
+          STATUS="$(curl -sS -o /tmp/vercel-project.json -w '%{http_code}' \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          test "$STATUS" = "200" || { echo "::error::Demo Vercel proje erişimi HTTP $STATUS."; exit 1; }
+          node <<'NODE'
+          const fs = require('fs')
+          const j = JSON.parse(fs.readFileSync('/tmp/vercel-project.json','utf8'))
+          if (j.id !== process.env.VERCEL_PROJECT_ID || j.name !== 'bs-egitim-demo') {
+            console.error('GÜVENLİK ENGELİ: Hedef Vercel projesi BS Eğitim Demo değil.')
+            process.exit(1)
+          }
+          console.log(`Hedef proje doğrulandı: ${j.name} / ${j.id}`)
+          NODE
+
+      - name: Bağımlılıkları kur
+        run: npm install --no-audit --no-fund
+
+      - name: Demo izolasyon ve iş kurallarını doğrula
+        env:
+          VITE_APP_MODE: demo
+          VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+        run: |
+          npm run check:demo-isolation
+          npm run check:rules
+
+      - name: Gerçek demo public ayarlarıyla dist oluştur
+        id: build
+        env:
+          VITE_APP_MODE: demo
+          VITE_SUPABASE_URL: ${{ env.DEMO_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.DEMO_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+
+      - name: Dist güvenlik kontrolü
+        id: artifact_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist || { echo "::error::dist oluşmadı."; exit 1; }
+          grep -R -F -q "$DEMO_SUPABASE_URL" dist || { echo "::error::Doğru demo Supabase URL dist içinde bulunamadı."; exit 1; }
+          if grep -R -F -q "demo-placeholder.supabase.co" dist; then
+            echo "::error::Placeholder Supabase URL dist içine sızdı."
+            exit 1
+          fi
+          if grep -R -F -q "igmtuouhdozkgwmdxlme" dist; then
+            echo "::error::Canlı BS Ofis Supabase ref'i demo dist içine sızdı."
+            exit 1
+          fi
+          INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -n 1)"
+          INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' dist/index.html | head -n 1)"
+          test -n "$INDEX_JS" || { echo "::error::Index JS bulunamadı."; exit 1; }
+          test -n "$INDEX_CSS" || { echo "::error::Index CSS bulunamadı."; exit 1; }
+          echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
+          echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
+          echo "Dist doğrulandı: $INDEX_JS / $INDEX_CSS"
+
+      - name: Vercel CLI kur
+        run: npm install --global vercel@latest
+
+      - name: Dist klasörünü preview olarak yükle
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .vercel
+          mkdir -p .vercel
+          printf '%s' "{\"orgId\":\"$VERCEL_ORG_ID\",\"projectId\":\"$VERCEL_PROJECT_ID\"}" > .vercel/project.json
+          PREVIEW_URL="$(vercel deploy dist --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID")"
+          echo "PREVIEW_URL=$PREVIEW_URL" >> "$GITHUB_ENV"
+          echo "Preview deployment oluşturuldu: $PREVIEW_URL"
+
+      - name: Preview sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          PROJECT_OUTCOME: ${{ steps.project_guard.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact_guard.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .demo-direct-preview-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          project_guard=$PROJECT_OUTCOME
+          build=$BUILD_OUTCOME
+          artifact_guard=$ARTIFACT_OUTCOME
+          deploy=$DEPLOY_OUTCOME
+          preview_url=${PREVIEW_URL:-}
+          expected_index_js=${EXPECTED_INDEX_JS:-}
+          expected_index_css=${EXPECTED_INDEX_CSS:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-direct-preview-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Demo doğrudan preview sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

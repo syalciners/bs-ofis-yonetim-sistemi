@@ -8,16 +8,48 @@ on:
       - '.github/workflows/bs-egitim-portali-ci.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/bs-egitim-portali
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Portal bağımlılıklarını kur
+        working-directory: apps/bs-egitim-portali
+        run: npm install --no-audit --no-fund
+      - name: Gerçek portal build doğrulaması
+        working-directory: apps/bs-egitim-portali
+        run: npm run build
+      - name: İzole tasarım önizlemesini derle
+        working-directory: apps/bs-egitim-portali
+        env:
+          VITE_PORTAL_DESIGN_PREVIEW: 'true'
+          VITE_BASE_PATH: '/bs-ofis-yonetim-sistemi/portal-preview/'
+        run: npm run build
+      - name: GitHub Pages önizleme paketini hazırla
+        run: |
+          rm -rf portal-preview
+          mkdir -p portal-preview
+          cp -R apps/bs-egitim-portali/dist/. portal-preview/
+      - name: Önizleme paketini PR branch'ine kaydet
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add portal-preview
+          if git diff --cached --quiet; then
+            echo "Portal önizleme paketi zaten güncel."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Portal görsel önizleme paketini güncelle [skip ci]"
+          git pull --rebase origin "${GITHUB_HEAD_REF}"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"

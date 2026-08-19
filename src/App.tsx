@@ -19,6 +19,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { SystemPage } from './pages/SystemPage'
 import { PortalPreviewPage } from './pages/PortalPreviewPage'
 import { CoachingPage } from './pages/CoachingPage'
+import { ExamCenterPage } from './pages/ExamCenterPage'
 import { LoaderCircle } from 'lucide-react'
 
 function ProtectedApp() {
@@ -39,6 +40,7 @@ function ProtectedApp() {
     <Route path="/ogretmen-odemeleri" element={<TeacherPaymentsPage/>}/>
     <Route path="/odevler" element={<AssignmentsPage/>}/>
     <Route path="/kocluk" element={<CoachingPage/>}/>
+    <Route path="/deneme-merkezi" element={<ExamCenterPage/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>
     <Route path="/ayarlar" element={<SettingsPage/>}/>

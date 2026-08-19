@@ -1,0 +1,11 @@
+run_id=32294680941
+job_status=success
+project_guard=success
+build=success
+artifact_guard=success
+deploy=success
+smoke=success
+deployment_url=https://bs-egitim-demo-m18s9u67c-syalciners-8325s-projects.vercel.app
+before_index_js=assets/index-DZCC63VP.js
+expected_index_js=assets/index-D728U7st.js
+expected_index_css=assets/index-YGJhtDGQ.css

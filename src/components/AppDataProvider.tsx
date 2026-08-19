@@ -123,6 +123,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         setProfile(null)
         setDemoExpiresAt(null)
         await supabase.auth.signOut()
+      } else if (IS_DEMO && message.includes('DEMO_KAPASITE_DOLU')) {
+        setError('Demo şu anda yoğun. Lütfen birkaç dakika sonra tekrar deneyin.')
+        setData(null)
+        setProfile(null)
+        setDemoExpiresAt(null)
+        await supabase.auth.signOut()
       } else {
         setError(message)
       }

@@ -21,6 +21,7 @@ const checks=[
   ['Öğrenci seçiminde yalnız aktif öğrenciler listelenir',preview.includes("data.ogrenciler")&&preview.includes(".filter(x => x.durum !== 'Pasif')")],
   ['Portal önizlemesi gerçek V2 kapsamına göre kaynakta var satırları kullanır',preview.includes('sourceRowExists')&&preview.includes('kaynakta_var')&&preview.includes('addDays(today, 30)')],
   ['Portal önizlemesi Bugün Program Ödevler Profil dört ekranını içerir',['Bugün','Program','Ödevler','Profil'].every(x=>preview.includes(`>${x}</span>`))],
+  ['Portal karşılama iki isimli kişilerde ilk iki adı kullanır',preview.includes('const greetingName = (name: string)')&&preview.includes("parts.length >= 3 ? parts.slice(0, 2).join(' ') : parts[0] || name")&&preview.includes('Merhaba, {greetingName(name)}')],
   ['Portal önizlemesi salt okunur kalır',preview.includes('Salt okunur')&&preview.includes('Yalnız görüntüleme')&&!preview.includes('saveLesson')&&!preview.includes('saveAssignment')&&!preview.includes('setLessonStatus')],
   ['Portal ayrıntısında yönetim alt navigasyonu gizlenir',app.includes("const portalDetail = /^\\/portal-onizleme\\/(ogretmen|ogrenci)\\/[^/]+$/.test(location.pathname)")&&app.includes('{!portalDetail&&<BottomNav/>}')],
   ['Portal seçim ekranında Menü alt navigasyonu aktif kalır',bottomNav.includes("to==='/menu'&&location.pathname.startsWith('/portal-onizleme')")],

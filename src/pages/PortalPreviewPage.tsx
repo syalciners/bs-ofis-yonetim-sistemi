@@ -55,6 +55,10 @@ interface PreviewAssignment {
 const sourceRowExists = (row: unknown) => (row as { kaynakta_var?: boolean }).kaynakta_var !== false
 const roleSlug = (role: PortalPreviewRole) => role === 'Öğretmen' ? 'ogretmen' : 'ogrenci'
 const roleCopy = (role: PortalPreviewRole) => role === 'Öğretmen' ? 'Öğretmen Portalı' : 'Öğrenci Portalı'
+const greetingName = (name: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  return parts.length >= 3 ? parts.slice(0, 2).join(' ') : parts[0] || name
+}
 
 function formatDate(value: string, long = false) {
   const date = new Date(`${value}T12:00:00+03:00`)
@@ -132,7 +136,7 @@ function LessonList({ items, emptyText }: { items: PreviewLesson[]; emptyText: s
 function TodayView({ role, name, lessons }: { role: PortalPreviewRole; name: string; lessons: PreviewLesson[] }) {
   return <>
     <section className="portal-preview-hero">
-      <div><span>{roleCopy(role)}</span><h2>Merhaba, {name.split(' ')[0]}</h2><p>{todayLong()}</p></div>
+      <div><span>{roleCopy(role)}</span><h2>Merhaba, {greetingName(name)}</h2><p>{todayLong()}</p></div>
       <div className="portal-preview-hero-icon">{role === 'Öğretmen' ? <GraduationCap size={30}/> : <BookOpenCheck size={29}/>}</div>
     </section>
     <section className="portal-preview-section">

@@ -55,6 +55,22 @@ jobs:
         id: cli
         run: npm install --global vercel@latest
 
+      - name: Vercel proje bağlantısını hazırla
+        id: link
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .vercel
+          mkdir -p .vercel
+          node <<'NODE'
+          const fs = require('fs')
+          fs.writeFileSync('.vercel/project.json', JSON.stringify({
+            orgId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID
+          }))
+          console.log('Vercel proje bağlantısı yalnız BS Eğitim Demo kimliğiyle hazırlandı.')
+          NODE
+
       - name: Vercel production ayarlarını çek
         id: pull
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"

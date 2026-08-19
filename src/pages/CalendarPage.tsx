@@ -34,7 +34,7 @@ const storedWeekOffset=()=>{
   if(!stored||!/^\d{4}-\d{2}-\d{2}$/.test(stored))return 0
   const base=new Date(`${mondayOf(todayISO())}T12:00:00`).getTime()
   const target=new Date(`${stored}T12:00:00`).getTime()
-  return Math.round((target-base)/(7*86400000))
+  return Math.max(-1,Math.min(1,Math.round((target-base)/(7*86400000))))
 }
 
 export function CalendarPage(){
@@ -75,8 +75,9 @@ export function CalendarPage(){
   const weekActionText=isPastWeek?'Geçmiş Hafta':weekBusy||weekStatusBusy?'Kontrol ediliyor…':weekReady?'Hafta Hazır':'Haftayı Hazırla'
   const filterLabel=filter.type==='all'?'Tüm Öğretmenler':filter.type==='teacher'?activeTeachers.find(x=>x.ogretmen_id===filter.id)?.ad_soyad||'Öğretmen':activeStudents.find(x=>x.ogrenci_id===filter.id)?.ad_soyad||'Öğrenci'
   const chooseFilter=(next:CalendarFilter)=>{setFilter(next);setShareOpen(false)}
-  const moveWeek=(delta:number)=>{setWeekOffset(current=>current+delta);setWeekReview(null);setShareOpen(false)}
+  const moveWeek=(delta:number)=>{setWeekOffset(current=>Math.max(-1,Math.min(1,current+delta)));setWeekReview(null);setShareOpen(false)}
   const goCurrentWeek=()=>{setWeekOffset(0);setWeekReview(null);setShareOpen(false)}
+  const weekNavLabel=weekOffset<0?'Geçen Hafta':weekOffset>0?'Gelecek Hafta':'Bu Hafta'
 
   const confirmWeekCreation=()=>{
     const currentSafety=isCurrentWeek?'\n\nBugünden önceki veya saati geçmiş dersler değiştirilmez.':''
@@ -118,9 +119,9 @@ export function CalendarPage(){
       <button className="calendar-mode-btn calendar-toolbar-mode-btn" type="button" onClick={()=>nav('/takvim/gunluk')}><CalendarDays size={16}/>Takvim</button>
       <div className="calendar-week-range-long"><b>{weekRangeLong(monday,addDays(monday,6))}</b></div>
       <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
-        <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
-        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>
-        <button type="button" aria-label="Gelecek hafta" onClick={()=>moveWeek(1)}>›</button>
+        <button type="button" aria-label="Önceki hafta" disabled={weekOffset<=-1} onClick={()=>moveWeek(-1)}>‹</button>
+        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>{weekNavLabel}</button>
+        <button type="button" aria-label="Gelecek hafta" disabled={weekOffset>=1} onClick={()=>moveWeek(1)}>›</button>
       </div>
     </section>
 

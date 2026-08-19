@@ -7,6 +7,7 @@ const dailyCalendarCss=read('src/daily-calendar.css')
 const lessonDetail=read('src/components/LessonDetail.tsx')
 const weekService=read('src/services/weekPlanningService.ts')
 const pdfService=read('src/services/weeklyProgramPdfService.ts')
+const dailyPdfService=read('src/services/dailyCalendarPdfService.ts')
 const packageJson=read('package.json')
 const manualWeekMigration=read('supabase/migrations/20260817162500_manuel_hafta_hazirlama_v6.sql')
 const conflictMigration=read('supabase/migrations/20260816001719_haftalik_program_tek_seferlik_cakisma_duzeltme.sql')
@@ -47,6 +48,9 @@ const checks=[
   ['Manuel Haftayı Hazırla aksiyonu Program başlığının sağındadır',calendar.includes('calendar-title-line')&&calendar.includes('calendar-title-week-action')&&calendar.includes("'Haftayı Hazırla'")&&calendar.indexOf('calendar-title-week-action')<calendar.indexOf('calendar-week-toolbar')&&dailyCalendar.indexOf('calendar-title-week-action')<dailyCalendar.indexOf('calendar-week-toolbar')],
   ['Program Liste özeti kayıt adedi yerine ders saati toplamını gösterir',calendar.includes('visibleLessonHours=visibleLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&calendar.includes('sabit program ders saati')&&calendar.includes('ders saati</span></header>')],
   ['Günlük Takvim seçili gün toplamını ders saati olarak gösterir',dailyCalendar.includes('dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&dailyCalendar.includes('<span>ders saati</span>')],
+  ['Günlük Takvim PDF Al butonu ders saati sayacının solundadır',dailyCalendar.includes('daily-calendar-head-actions')&&dailyCalendar.includes('daily-calendar-pdf-btn')&&dailyCalendar.indexOf('daily-calendar-pdf-btn')<dailyCalendar.indexOf('daily-lesson-count')&&dailyCalendar.includes('openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)')],
+  ['Günlük Takvim PDF seçili günün dinamik derslik ve saat aralığını kullanır',dailyPdfService.includes('calendarRoomColumns(data.derslikler')&&dailyPdfService.includes("pageOrientation:'landscape'")&&dailyPdfService.includes('SLOT_MINUTES=30')&&dailyPdfService.includes('rangeStart:number,rangeEnd:number')&&dailyPdfService.includes('BS-Egitim-Gunluk-Takvim-')],
+  ['Günlük Takvim PDF butonu mobil başlıkta kompakt kalır',dailyCalendarCss.includes('.daily-calendar-head-actions')&&dailyCalendarCss.includes('.daily-calendar-pdf-btn')],
   ['Ana sayfa günlük program özetleri ders saati kullanır',overview.includes('todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)')&&overview.includes('plannedLessonHours=')&&overview.includes('Bugünkü Ders Saati')&&overview.includes('ders saati</span>')],
   ['Program Gönder Ders Ekle ile aynı komut satırındadır',calendar.includes('calendar-command-bar')&&calendar.includes('calendar-share-btn')&&calendar.includes('Program Gönder')],
   ['Program Gönder yalnız tek kişi ve görünür ders varken aktiftir',calendar.includes('disabled={!shareTarget||!visibleLessons.length}')],

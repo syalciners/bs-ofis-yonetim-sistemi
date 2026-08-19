@@ -1,4 +1,4 @@
-import { CalendarCheck2, Check, List, Plus, X } from 'lucide-react'
+import { CalendarCheck2, Check, FileDown, List, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -12,6 +12,7 @@ import { addDays, mondayOf, shortDate, todayISO, weekRangeLong } from '../lib/fo
 import { calendarRoomColumns } from '../lib/calendarRooms'
 import { teacherTone } from '../lib/teacherTone'
 import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
+import { openDailyCalendarPdf } from '../services/dailyCalendarPdfService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
 import { createWeek, getWeekCreationStatus, reviewWeekPlanning, type WeekCreationStatus } from '../services/weekPlanningService'
 
@@ -114,7 +115,7 @@ export function DailyCalendarPage(){
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<WeekStatusState|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
-  const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false)
+  const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false);const[pdfBusy,setPdfBusy]=useState(false)
   const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const weekOffset=Math.round((new Date(`${monday}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
@@ -179,6 +180,13 @@ export function DailyCalendarPage(){
   const teacherName=(id?:string|null)=>data.ogretmenler.find(x=>x.ogretmen_id===id)?.ad_soyad||'Öğretmen'
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
   const roomColumns=calendarRoomColumns(data.derslikler,dayLessons.map(x=>x.derslik_id))
+  const openDayPdf=async()=>{
+    if(!dayLessons.length){toast('Seçili günde PDF oluşturulacak ders yok.','error');return}
+    setPdfBusy(true)
+    try{await openDailyCalendarPdf(data,dayLessons,selectedDate,rangeStart,rangeEnd)}
+    catch(error:any){toast(error?.message||'Takvim PDF’i oluşturulamadı.','error')}
+    finally{setPdfBusy(false)}
+  }
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
   const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{
@@ -277,7 +285,7 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn daily-calendar-pdf-btn" type="button" disabled={!dayLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
         <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
           <div className="daily-room-header-row">

@@ -1,0 +1,3 @@
+BS Eğitim Demo production deploy tetikleyicisi
+Tarih: 2026-08-19T21:47:00+03:00
+Hedef: yalnız prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1

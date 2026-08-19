@@ -1,0 +1,12 @@
+run_id=32293650958
+job_status=failure
+project_guard=success
+rules=success
+build=success
+artifact_guard=failure
+deploy=skipped
+smoke=skipped
+deployment_url=
+before_index_js=
+expected_index_js=
+expected_index_css=

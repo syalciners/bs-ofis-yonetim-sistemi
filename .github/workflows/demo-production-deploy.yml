@@ -44,6 +44,9 @@ jobs:
 
       - name: Demo izolasyon kurallarını doğrula
         id: rules
+        env:
+          VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
         run: |
           npm run check:demo-isolation
           npm run check:rules

@@ -26,6 +26,7 @@ body{color:var(--brand-navy)}
 .login-logo{width:190px;height:128px;border-radius:0;object-fit:contain;background:transparent;box-shadow:none;filter:drop-shadow(0 12px 20px rgba(11,31,58,.10))}
 .login-card h1{color:var(--brand-navy);margin-top:12px}
 .login-security{color:#738196}
+.demo-data-warning{display:flex;align-items:flex-start;gap:8px;margin:-8px 0 16px;padding:10px 11px;border:1px solid #F1D6A8;border-radius:12px;background:#FFF9ED;color:#7C5311;font-size:11px;line-height:1.45;text-align:left}.demo-data-warning svg{flex:0 0 auto;margin-top:1px}
 
 .primary-btn{border-color:var(--brand-blue);background:var(--brand-blue);box-shadow:0 8px 20px rgba(22,139,255,.22)}
 .text-btn{color:var(--brand-blue)}

@@ -9,6 +9,7 @@ import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
 import { addDays, mondayOf, shortDate, todayISO, weekRangeLong } from '../lib/format'
+import { calendarRoomColumns } from '../lib/calendarRooms'
 import { teacherTone } from '../lib/teacherTone'
 import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
@@ -23,13 +24,6 @@ const days=[
   {short:'Cmt',long:'Cumartesi'},
   {short:'Paz',long:'Pazar'},
 ]
-const ROOM_COLUMNS=[
-  {id:'LOC-002',label:'Yalçıner'},
-  {id:'LOC-001',label:'Başak'},
-  {id:'LOC-003',label:'Salon'},
-  {id:'LOC-005',label:'OSM'},
-  {id:'LOC-004',label:'Online'},
-] as const
 
 const SLOT_MINUTES=30
 const SLOT_HEIGHT=42
@@ -174,7 +168,7 @@ export function DailyCalendarPage(){
   const studentName=(id?:string|null)=>data.ogrenciler.find(x=>x.ogrenci_id===id)?.ad_soyad||'Öğrenci'
   const teacherName=(id?:string|null)=>data.ogretmenler.find(x=>x.ogretmen_id===id)?.ad_soyad||'Öğretmen'
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
-  const roomColumns=ROOM_COLUMNS.map(column=>({...column,room:data.derslikler.find(x=>x.derslik_id===column.id)}))
+  const roomColumns=calendarRoomColumns(data.derslikler,dayLessons.map(x=>x.derslik_id))
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
   const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{
@@ -275,7 +269,7 @@ export function DailyCalendarPage(){
     <section className="daily-calendar-card">
       <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
-        <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
+        <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
           <div className="daily-room-header-row">
             <div className="daily-time-head">Saat</div>
             {roomColumns.map(column=><div className={`daily-room-head room-${column.id.toLowerCase()}`} key={column.id} title={column.room?.mekan_adi||column.label}><strong>{column.label}</strong></div>)}

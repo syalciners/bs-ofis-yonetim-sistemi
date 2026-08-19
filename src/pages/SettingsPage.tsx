@@ -20,6 +20,7 @@ import { EducationDefinitionsPanel } from '../components/EducationDefinitionsPan
 import { FinancialDefinitionsPanel } from '../components/FinancialDefinitionsPanel'
 import { InstitutionSettingsPanel } from '../components/InstitutionSettingsPanel'
 import { ProfileSettingsForm } from '../components/ProfileSettingsForm'
+import { ProgramSettingsPanel } from '../components/ProgramSettingsPanel'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import type { KullaniciProfili, Ogretmen } from '../lib/types'
@@ -116,7 +117,7 @@ export function SettingsPage(){
   }
 
   const selectedInfo=info?infoContent[info]:null
-  const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':'Yönetim ayarı'
+  const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':info==='program'?'Program varsayılanları':'Yönetim ayarı'
 
   return <div className="page-stack settings-hub-page">
     <section className="page-title-row"><div><span className="eyebrow">AYARLAR</span><h1>Ayarlar</h1></div></section>
@@ -155,7 +156,7 @@ export function SettingsPage(){
     </section>
 
     <Sheet open={editing} title="Profili Düzenle" subtitle="Kendi iletişim bilgileriniz" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
-    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kurum'?<InstitutionSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:<div className="settings-info-sheet">
+    <Sheet open={Boolean(selectedInfo)} title={selectedInfo?.title||'Ayarlar'} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>{selectedInfo&&(info==='kurum'?<InstitutionSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:info==='kullanicilar'?<UserManagementPanel currentUserId={user?.id||''} teachers={data?.ogretmenler||[]} onUpdated={refresh}/>:info==='egitim'?<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>:info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:info==='program'?<ProgramSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:<div className="settings-info-sheet">
       <p>{selectedInfo.body}</p>
       <div className="settings-info-rows">{selectedInfo.rows.map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
       <div className="settings-info-note"><BookOpenCheck size={17}/><span>Bu ekranda henüz veri değiştirilmez; yalnız mevcut yapı ve sıradaki güvenli yönetim alanı gösterilir.</span></div>

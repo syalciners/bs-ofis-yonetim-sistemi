@@ -3,11 +3,12 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import { prepareExamPhoto, readExamPhoto, type ExamPhotoRead } from './examPhoto'
 import { studentName, studentProfile, type CoachData } from './data'
 
-export function ExamPhotoImport({ data, studentId, onClose, onApply }: {
+export function ExamPhotoImport({ data, studentId, onClose, onApply, onManual }: {
   data: CoachData
   studentId?: string
   onClose: () => void
   onApply: (read: ExamPhotoRead) => void
+  onManual: () => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState('')
@@ -89,7 +90,7 @@ export function ExamPhotoImport({ data, studentId, onClose, onApply }: {
 
       <footer className="exam-photo-actions">
         <button type="button" onClick={onClose} disabled={busy}>Vazgeç</button>
-        {error && <button type="button" onClick={() => onApply({ sinav_turu:'Belirsiz', deneme_adi:'', deneme_tarihi:'', yayinevi:'', puan:'', siralama:'', yuzdelik:'', genel_guven:0, bolumler:[], uyarilar:[] })}>Elle Ekle</button>}
+        {error && <button type="button" onClick={onManual}>Elle Ekle</button>}
         <button type="button" className="primary" disabled={!reading || busy} onClick={() => reading && onApply(reading)}>Kontrol Et</button>
       </footer>
     </section>

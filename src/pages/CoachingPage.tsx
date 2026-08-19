@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenCheck, CalendarDays, ChevronRight, MessageSquareText, Target, UserPlus, UsersRound } from 'lucide-react'
+import { AlertTriangle, BookOpenCheck, CalendarDays, ChevronRight, MessageSquareText, Target, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -10,6 +10,9 @@ import { Sheet } from '../components/Sheet'
 import { addDays, compactWeekRange, mondayOf, shortDate, time, todayISO } from '../lib/format'
 import { loadCoachingMeetings, loadCoachingProfiles, type KoclukGorusmesi, type KoclukOgrenciProfili } from '../services/coachingService'
 import { activeStudents, overdueAssignments, studentName, teacherName } from '../services/metrics'
+
+type WeeklySourceFilter = 'tumu' | 'ders' | 'kocluk'
+const isCoachingAssignment = (item: { ogrenci_kitap_id?: string | null; calisma_turu?: string | null }) => Boolean(item.ogrenci_kitap_id || item.calisma_turu)
 
 export function CoachingPage() {
   const { data } = useAppData()
@@ -26,6 +29,7 @@ export function CoachingPage() {
   const [editingMeeting, setEditingMeeting] = useState<KoclukGorusmesi | null>(null)
   const [newBook, setNewBook] = useState(false)
   const [newStudy, setNewStudy] = useState(false)
+  const [weeklySourceFilter, setWeeklySourceFilter] = useState<WeeklySourceFilter>('tumu')
 
   const refreshProfiles = useCallback(async () => {
     setProfilesLoading(true)
@@ -82,11 +86,19 @@ export function CoachingPage() {
       })
       .sort((a, b) => String(a.son_teslim_tarihi || a.verilis_tarihi || '9999').localeCompare(String(b.son_teslim_tarihi || b.verilis_tarihi || '9999')))
     const weeklyDone = weeklyAssignments.filter(x => ['Tamamlandı', 'Teslim Edildi'].includes(x.durum)).length
+    const weeklyCoachingCount = weeklyAssignments.filter(isCoachingAssignment).length
+    const weeklyCourseCount = weeklyAssignments.length - weeklyCoachingCount
 
-    return { active, coachingProfiles, overdue, openAssignments, attention, unassigned, todayMeetings, upcomingMeetings, weekStart, weekEnd, weeklyAssignments, weeklyDone }
+    return { active, coachingProfiles, overdue, openAssignments, attention, unassigned, todayMeetings, upcomingMeetings, weekStart, weekEnd, weeklyAssignments, weeklyDone, weeklyCoachingCount, weeklyCourseCount }
   }, [data, profiles, meetings])
 
   if (!data || !summary) return null
+
+  const visibleWeeklyAssignments = summary.weeklyAssignments.filter(item => {
+    if (weeklySourceFilter === 'tumu') return true
+    if (weeklySourceFilter === 'kocluk') return isCoachingAssignment(item)
+    return !isCoachingAssignment(item)
+  })
 
   return <div className="page-stack coaching-v1">
     <section className="page-title-row">
@@ -111,25 +123,31 @@ export function CoachingPage() {
 
     <section>
       <div className="section-heading">
-        <div><h2>Bu Haftanın Planı</h2><span>{compactWeekRange(summary.weekStart, summary.weekEnd)} · koçluk öğrencilerinin çalışma akışı</span></div>
+        <div><h2>Bu Haftanın Planı</h2><span>{compactWeekRange(summary.weekStart, summary.weekEnd)} · ders ödevleri ve koçluk çalışmaları tek yerde</span></div>
         <div className="form-actions"><button className="text-btn" type="button" onClick={() => setNewBook(true)}>Kitap Ekle</button><button className="text-btn" type="button" onClick={() => setNewStudy(true)}>Çalışma Ekle</button></div>
       </div>
-      {summary.weeklyAssignments.length ? <div className="student-grid">
-        {summary.weeklyAssignments.slice(0, 8).map(item => {
+      {summary.weeklyAssignments.length > 0 && <div className="form-actions">
+        <button type="button" className={weeklySourceFilter === 'tumu' ? 'primary-btn' : 'secondary-btn'} onClick={() => setWeeklySourceFilter('tumu')}>Tümü · {summary.weeklyAssignments.length}</button>
+        <button type="button" className={weeklySourceFilter === 'ders' ? 'primary-btn' : 'secondary-btn'} onClick={() => setWeeklySourceFilter('ders')}>Ders Ödevleri · {summary.weeklyCourseCount}</button>
+        <button type="button" className={weeklySourceFilter === 'kocluk' ? 'primary-btn' : 'secondary-btn'} onClick={() => setWeeklySourceFilter('kocluk')}>Koçluk Çalışmaları · {summary.weeklyCoachingCount}</button>
+      </div>}
+      {visibleWeeklyAssignments.length ? <div className="student-grid">
+        {visibleWeeklyAssignments.slice(0, 8).map(item => {
           const done = ['Tamamlandı', 'Teslim Edildi'].includes(item.durum)
           const due = item.son_teslim_tarihi || item.verilis_tarihi
+          const source = isCoachingAssignment(item) ? 'Koçluk Çalışması' : 'Ders Ödevi'
           return <button key={item.odev_id} className="student-card student-outline-card" onClick={() => nav('/odevler')}>
             <div className="student-top">
               <div className="avatar student-list-avatar"><BookOpenCheck size={18}/></div>
               <div className="student-name"><strong>{item.odev_basligi || item.konu || 'Çalışma'}</strong><span>{studentName(data, item.ogrenci_id)}</span></div>
               <span className="soft-pill">{done ? 'Tamamlandı' : item.durum}</span>
             </div>
-            <div className="student-meta"><span><b>{teacherName(data, item.ogretmen_id)}</b> tarafından</span><span>{item.oncelik || 'Normal'} öncelik</span></div>
+            <div className="student-meta"><span><b>{teacherName(data, item.ogretmen_id)}</b> tarafından</span><span>{source} · {item.oncelik || 'Normal'}</span></div>
             <div className="student-balance"><span>{done ? 'Tamamlanma' : 'Son Tarih'}</span><b>{due ? shortDate(due) : 'Tarih yok'}</b></div>
           </button>
         })}
-      </div> : <div className="calm-empty"><BookOpenCheck/><b>Bu hafta için çalışma planı henüz boş.</b><span>Öğrencinin kitabını bir kez tanımlayın; sonra sadece kitap ve sayfa/test aralığı seçilir.</span><button className="secondary-btn" type="button" onClick={() => setNewStudy(true)}>İlk Çalışmayı Ekle</button></div>}
-      {summary.weeklyAssignments.length > 0 && <div className="form-hint">Bu hafta {summary.weeklyDone}/{summary.weeklyAssignments.length} çalışma tamamlandı. Kitaplı çalışmalar da mevcut Ödevler altyapısında izlenir.</div>}
+      </div> : summary.weeklyAssignments.length > 0 ? <div className="calm-empty"><BookOpenCheck/><b>Bu filtrede çalışma yok.</b><span>Koç Masası varsayılan olarak öğrencinin tüm ders ödevlerini ve koçluk çalışmalarını birlikte izler.</span></div> : <div className="calm-empty"><BookOpenCheck/><b>Bu hafta için çalışma planı henüz boş.</b><span>Ders öğretmeninin verdiği ödevler de öğrenci koçluk alıyorsa burada otomatik görünür.</span><button className="secondary-btn" type="button" onClick={() => setNewStudy(true)}>İlk Çalışmayı Ekle</button></div>}
+      {summary.weeklyAssignments.length > 0 && <div className="form-hint">Bu hafta {summary.weeklyDone}/{summary.weeklyAssignments.length} çalışma tamamlandı · {summary.weeklyCourseCount} ders ödevi · {summary.weeklyCoachingCount} koçluk çalışması. Tek kayıt Ödevler altyapısında tutulur.</div>}
     </section>
 
     <section>
@@ -167,14 +185,14 @@ export function CoachingPage() {
     </section>
 
     <section>
-      <div className="section-heading"><div><h2>Öncelikli Öğrenciler</h2><span>koçluk öğrencilerinin mevcut görevlerine göre</span></div></div>
+      <div className="section-heading"><div><h2>Öncelikli Öğrenciler</h2><span>koçluk öğrencilerinin tüm mevcut görevlerine göre</span></div></div>
       {summary.attention.length ? <div className="attention-grid">
         {summary.attention.slice(0, 8).map(item => <button key={item.ogrenci_id} onClick={() => nav('/odevler')}>
           <span className="attention-icon"><AlertTriangle/></span>
           <span><b>{item.name}</b><small>{item.count} geciken çalışma</small></span>
           <ChevronRight size={17}/>
         </button>)}
-      </div> : <div className="all-good"><Target/><span><b>Şu anda takip bekleyen gecikmiş çalışma yok.</b><small>Deneme ve gelişim sinyalleri ilerleyen adımlarda bu alana eklenecek.</small></span></div>}
+      </div> : <div className="all-good"><Target/><span><b>Şu anda takip bekleyen gecikmiş çalışma yok.</b><small>Ders ödevi ve koçluk çalışması aynı takip motorunda izlenir.</small></span></div>}
     </section>
 
     <section>

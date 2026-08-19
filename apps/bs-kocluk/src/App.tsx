@@ -2,7 +2,7 @@ import type { Session } from '@supabase/supabase-js'
 import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, RefreshCw, ShieldCheck, Target, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
-import { isCancelled, isCoachingAssignment, shortDate, studentName, type CoachData } from './data'
+import { isCancelled, isCoachingAssignment, loadCoachData, shortDate, studentName, type CoachData } from './data'
 import { PremiumDashboard } from './PremiumDashboard'
 import { supabase } from './supabase'
 

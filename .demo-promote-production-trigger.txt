@@ -1,0 +1,4 @@
+BS Eğitim Demo production promote
+Tarih: 2026-08-19T22:58:00+03:00
+Deployment: dpl_6v3YMT87yYUmYtP1CR4CX3Lh2s8C
+Hedef: yalnız bs-egitim-demo production

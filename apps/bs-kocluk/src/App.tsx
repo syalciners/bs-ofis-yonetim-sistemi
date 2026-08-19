@@ -1,9 +1,10 @@
 import type { Session } from '@supabase/supabase-js'
-import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, RefreshCw, ShieldCheck, Target, UsersRound } from 'lucide-react'
+import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, Plus, RefreshCw, ShieldCheck, Target, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
 import { isCancelled, isCoachingAssignment, loadCoachData, shortDate, studentName, type CoachData } from './data'
 import { PremiumDashboard } from './PremiumDashboard'
+import { QuickStudy } from './QuickStudy'
 import { StudentDetail, StudentDirectory } from './Student360'
 import { supabase } from './supabase'
 
@@ -38,12 +39,28 @@ function StudentFilterStrip({ data, studentId, clearTo }: { data: CoachData; stu
   </div>
 }
 
-function Plan({ data }: { data: CoachData }) {
-  const studentId = useStudentFilter(data)
+function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
+  const [params, setParams] = useSearchParams()
+  const requested = params.get('ogrenci') || ''
+  const studentId = data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
+  const quickOpen = params.get('ekle') === '1'
   const rows = data.assignments.filter(x => !isCancelled(x.durum) && (!studentId || x.ogrenci_id === studentId))
-  return <div className="page-stack"><PageTitle title="Plan ve Çalışmalar" text="Ders ödevi ve koçluk çalışması tek görev motorundan gelir."/>
+
+  const setQuickOpen = (open: boolean) => {
+    const next = new URLSearchParams(params)
+    if (open) next.set('ekle', '1')
+    else next.delete('ekle')
+    setParams(next, { replace: true })
+  }
+
+  return <div className="page-stack">
+    <div className="plan-title-row">
+      <PageTitle title="Plan ve Çalışmalar" text="Ders ödevi ve koçluk çalışması tek görev motorundan gelir."/>
+      <button type="button" className="quick-study-trigger" onClick={() => setQuickOpen(true)}><Plus/> Çalışma Ekle</button>
+    </div>
     <StudentFilterStrip data={data} studentId={studentId} clearTo="/plan"/>
     {rows.length ? <section className="panel rows">{rows.map(x => <div className="row split" key={x.odev_id}><BookOpenCheck size={18}/><div><b>{x.odev_basligi || x.konu || 'Çalışma'}</b><span>{studentName(data,x.ogrenci_id)} · {isCoachingAssignment(x) ? 'Koçluk Çalışması' : 'Ders Ödevi'}</span></div><small>{x.durum}<br/>{shortDate(x.son_teslim_tarihi || x.verilis_tarihi)}</small></div>)}</section> : <Empty text={studentId ? 'Bu öğrenci için çalışma kaydı yok.' : 'Henüz çalışma kaydı yok.'}/>} 
+    {quickOpen && <QuickStudy data={data} initialStudentId={studentId} onClose={() => setQuickOpen(false)} onSaved={onRefresh}/>} 
   </div>
 }
 
@@ -68,7 +85,7 @@ function Meetings({ data }: { data: CoachData }) {
 function Shell({ data, onRefresh, onSignOut }: { data: CoachData; onRefresh: () => void; onSignOut: () => void }) {
   const nav = [{to:'/',label:'Koç Masası',Icon:Target},{to:'/ogrenciler',label:'Öğrenciler',Icon:UsersRound},{to:'/plan',label:'Plan',Icon:BookOpenCheck},{to:'/denemeler',label:'Denemeler',Icon:GraduationCap},{to:'/gorusmeler',label:'Görüşmeler',Icon:CalendarDays}]
   return <div className="app-shell"><header className="topbar"><div className="brand"><div className="brand-mark small">BS</div><div><b>BS Koçluk</b><span>Premium öğrenci takip</span></div></div><div className="actions"><button aria-label="Verileri yenile" onClick={onRefresh}><RefreshCw size={17}/></button><strong>{data.profile.ad_soyad}</strong><button aria-label="Çıkış yap" onClick={onSignOut}><LogOut size={17}/></button></div></header>
-    <main className="container"><Routes><Route path="/" element={<PremiumDashboard data={data}/>}/><Route path="/ogrenciler" element={<StudentDirectory data={data}/>}/><Route path="/ogrenciler/:studentId" element={<StudentDetail data={data}/>}/><Route path="/plan" element={<Plan data={data}/>}/><Route path="/denemeler" element={<Exams data={data}/>}/><Route path="/gorusmeler" element={<Meetings data={data}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main>
+    <main className="container"><Routes><Route path="/" element={<PremiumDashboard data={data}/>}/><Route path="/ogrenciler" element={<StudentDirectory data={data}/>}/><Route path="/ogrenciler/:studentId" element={<StudentDetail data={data}/>}/><Route path="/plan" element={<Plan data={data} onRefresh={onRefresh}/>}/><Route path="/denemeler" element={<Exams data={data}/>}/><Route path="/gorusmeler" element={<Meetings data={data}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main>
     <nav className="bottom-nav" aria-label="Ana menü">{nav.map(({to,label,Icon}) => <NavLink key={to} to={to} end={to==='/' } className={({isActive})=>isActive?'active':''}><Icon size={19}/><span>{label}</span></NavLink>)}</nav>
   </div>
 }

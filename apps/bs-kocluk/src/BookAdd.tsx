@@ -1,5 +1,6 @@
 import { BookOpen, Check, Globe2, LoaderCircle, Plus, Search, Sparkles, X } from 'lucide-react'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { interpretBookQuery, type BookAiIntent } from './bookAi'
 import { studentName, type CatalogBook, type CoachData } from './data'
 import { supabase } from './supabase'
 
@@ -14,7 +15,6 @@ type ExternalBook = {
 }
 
 const cleanIsbn = (value?: string | null) => String(value || '').replace(/[^0-9Xx]/g, '').toUpperCase()
-const normalize = (value?: string | null) => String(value || '').trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ')
 
 function smartQuery(value: string) {
   const replacements: Array<[RegExp, string]> = [
@@ -53,6 +53,20 @@ async function searchLocalBooks(query: string): Promise<CatalogBook[]> {
   const { data, error } = await request
   if (error) throw error
   return (data || []) as CatalogBook[]
+}
+
+function mergeLocalBooks(groups: CatalogBook[][]) {
+  const seen = new Set<string>()
+  const merged: CatalogBook[] = []
+  for (const group of groups) {
+    for (const book of group) {
+      if (seen.has(book.kitap_id)) continue
+      seen.add(book.kitap_id)
+      merged.push(book)
+      if (merged.length >= 12) return merged
+    }
+  }
+  return merged
 }
 
 async function searchExternalBooks(query: string): Promise<ExternalBook[]> {
@@ -126,22 +140,72 @@ export function BookAdd({
   const [loadingLocal, setLoadingLocal] = useState(true)
   const [loadingExternal, setLoadingExternal] = useState(false)
   const [externalError, setExternalError] = useState<string | null>(null)
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiIntent, setAiIntent] = useState<BookAiIntent | null>(null)
+  const [aiSourceQuery, setAiSourceQuery] = useState('')
   const [manual, setManual] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
+  const fallbackExpanded = useMemo(() => smartQuery(query), [query])
+  const currentAiIntent = aiIntent && aiSourceQuery === query.trim() ? aiIntent : null
+  const effectiveQuery = currentAiIntent?.arama_metni || fallbackExpanded
+
+  useEffect(() => {
+    const q = query.trim()
+    if (manual || q.length < 3 || aiAvailable === false) {
+      setAiLoading(false)
+      if (q.length < 3 || manual) {
+        setAiIntent(null)
+        setAiSourceQuery('')
+      }
+      return
+    }
+
+    let live = true
+    const timer = window.setTimeout(() => {
+      setAiLoading(true)
+      void interpretBookQuery(q)
+        .then(result => {
+          if (!live) return
+          if (result.aktif && result.yorum) {
+            setAiAvailable(true)
+            setAiIntent(result.yorum)
+            setAiSourceQuery(q)
+            return
+          }
+          setAiIntent(null)
+          setAiSourceQuery(q)
+          if (result.durum === 'yapilandirma_gerekli') setAiAvailable(false)
+        })
+        .catch(() => {
+          if (!live) return
+          setAiIntent(null)
+          setAiSourceQuery(q)
+        })
+        .finally(() => { if (live) setAiLoading(false) })
+    }, 850)
+
+    return () => { live = false; window.clearTimeout(timer) }
+  }, [query, manual, aiAvailable])
+
   useEffect(() => {
     let live = true
     setLoadingLocal(true)
     const timer = window.setTimeout(() => {
-      void searchLocalBooks(query)
-        .then(rows => { if (live) setLocal(rows) })
+      const raw = query.trim()
+      const searches = raw && effectiveQuery && raw !== effectiveQuery
+        ? [searchLocalBooks(effectiveQuery), searchLocalBooks(raw)]
+        : [searchLocalBooks(effectiveQuery)]
+      void Promise.all(searches)
+        .then(groups => { if (live) setLocal(mergeLocalBooks(groups)) })
         .catch(err => { if (live) setError(friendlyError(err?.message || String(err))) })
         .finally(() => { if (live) setLoadingLocal(false) })
     }, query.trim() ? 220 : 0)
     return () => { live = false; window.clearTimeout(timer) }
-  }, [query])
+  }, [query, effectiveQuery])
 
   useEffect(() => {
     const q = query.trim()
@@ -151,21 +215,29 @@ export function BookAdd({
       setLoadingExternal(false)
       return
     }
+
     let live = true
+    const aiResolved = Boolean(currentAiIntent) || aiAvailable === false
+    const delay = aiResolved ? 220 : 1200
     const timer = window.setTimeout(() => {
       setLoadingExternal(true)
       setExternalError(null)
-      void searchExternalBooks(q)
+      void searchExternalBooks(effectiveQuery || q)
         .then(rows => { if (live) setExternal(rows) })
         .catch(err => { if (live) { setExternal([]); setExternalError(err?.message || String(err)) } })
         .finally(() => { if (live) setLoadingExternal(false) })
-    }, 650)
+    }, delay)
+
     return () => { live = false; window.clearTimeout(timer) }
-  }, [query, manual])
+  }, [query, manual, effectiveQuery, currentAiIntent, aiAvailable])
 
   const selectedLocal = local.find(x => x.kitap_id === selectedLocalId) || null
   const selectedExternal = external.find(x => x.kaynak_id === selectedExternalId) || null
-  const expanded = useMemo(() => smartQuery(query), [query])
+  const aiTags = currentAiIntent
+    ? [currentAiIntent.sinif, currentAiIntent.ders, currentAiIntent.yayinevi, currentAiIntent.seri, currentAiIntent.kitap_turu, currentAiIntent.renk_ipucu]
+      .filter(Boolean)
+      .slice(0, 5)
+    : []
 
   const addSelected = async () => {
     if (!studentId || (!selectedLocal && !selectedExternal)) return
@@ -220,7 +292,7 @@ export function BookAdd({
   return <div className="quick-study-overlay book-add-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose() }}>
     <section className="quick-study-sheet book-add-sheet" role="dialog" aria-modal="true" aria-labelledby="book-add-title">
       <header className="quick-study-head">
-        <div><span><Sparkles/> AKILLI KİTAP BUL</span><h2 id="book-add-title">Kitap ekle</h2><p>Adını bildiğiniz kadar yazın. Sistem önce kurum kataloğunu, sonra dış kataloğu tarar.</p></div>
+        <div><span><Sparkles/> {aiAvailable === true ? 'YAPAY ZEKÂ İLE KİTAP BUL' : 'AKILLI KİTAP BUL'}</span><h2 id="book-add-title">Kitap ekle</h2><p>Adını bildiğiniz kadar yazın. Sistem arama niyetini yorumlar, sonra kurum ve dış katalogları tarar.</p></div>
         <button type="button" onClick={onClose} disabled={busy} aria-label="Kapat"><X/></button>
       </header>
 
@@ -228,8 +300,13 @@ export function BookAdd({
       {studentId && <div className="quick-study-student"><span>Öğrenci</span><strong>{studentName(data, studentId)}</strong></div>}
 
       {!manual ? <>
-        <label className="book-add-search"><Search/><input autoFocus value={query} onChange={event => { setQuery(event.target.value); setSelectedLocalId(''); setSelectedExternalId('') }} placeholder="Örn. fenomen 6 mat a veya ISBN" autoComplete="off"/></label>
-        {query.trim() && expanded !== query.trim() && <div className="book-add-smart-hint"><Sparkles/><span>Akıllı arama <b>{expanded}</b> olarak genişletildi.</span></div>}
+        <label className="book-add-search"><Search/><input autoFocus value={query} onChange={event => { setQuery(event.target.value); setSelectedLocalId(''); setSelectedExternalId('') }} placeholder="Örn. fenomen 6 matematik kırmızı kapak veya ISBN" autoComplete="off"/></label>
+
+        {aiLoading && <div className="book-add-ai-pending"><LoaderCircle className="spin"/><span>Arama ifadesi yorumlanıyor…</span></div>}
+        {currentAiIntent ? <div className="book-add-ai-hint">
+          <span className="book-add-ai-badge"><Sparkles/> AI</span>
+          <div><span>Arama niyeti</span><b>{currentAiIntent.arama_metni}</b>{aiTags.length > 0 && <small>{aiTags.join(' · ')}</small>}</div>
+        </div> : query.trim() && fallbackExpanded !== query.trim() ? <div className="book-add-smart-hint"><Sparkles/><span>Akıllı arama <b>{fallbackExpanded}</b> olarak genişletildi.</span></div> : null}
 
         <section className="book-add-section">
           <div className="book-add-section-head"><span>Kurum kataloğu</span>{loadingLocal && <LoaderCircle className="spin"/>}</div>
@@ -239,7 +316,7 @@ export function BookAdd({
         {query.trim().length >= 3 && <section className="book-add-section external">
           <div className="book-add-section-head"><span><Globe2/> Dış katalog</span>{loadingExternal && <LoaderCircle className="spin"/>}</div>
           {externalError ? <div className="book-add-empty"><Globe2/><span>Dış arama şu anda tamamlanamadı. Kurum kataloğu kullanılmaya devam edebilir.</span></div> : !loadingExternal && external.length === 0 ? <div className="book-add-empty"><Search/><span>Dış katalogda eşleşme bulunamadı.</span></div> : <div className="book-add-results">{external.map(book => <button type="button" key={book.kaynak_id} className={selectedExternalId === book.kaynak_id ? 'selected' : ''} onClick={() => { setSelectedExternalId(book.kaynak_id); setSelectedLocalId('') }}><span className="book-add-cover">{book.kapak_url ? <img src={book.kapak_url} alt="" loading="lazy"/> : <BookOpen/>}</span><span className="book-add-copy"><b>{book.kitap_adi}</b><small>{[book.yayinevi, book.yayin_yili, book.isbn ? `ISBN ${book.isbn}` : null].filter(Boolean).join(' · ') || 'Dış katalog kaydı'}</small></span>{selectedExternalId === book.kaynak_id && <Check/>}</button>)}</div>}
-          <small className="book-add-note">Baskıya göre sayfa numarası değişebildiği için dış kaynaktaki sayfa sayısı otomatik kesin bilgi olarak kaydedilmez.</small>
+          <small className="book-add-note">AI yalnız arama niyetini yorumlar. Kitap adı, yayınevi ve ISBN gibi bilgiler gerçek katalog kaydıyla doğrulanmadan kesin veri kabul edilmez. Baskıya göre değişebilen sayfa sayısı dış kaynaktan otomatik kaydedilmez.</small>
         </section>}
 
         {error && <div className="quick-study-error">{error}</div>}

@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Takvim yayın uyumluluğunu uygula
+        run: node scripts/migrate-dynamic-room-publication.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

@@ -1,5 +1,4 @@
 name: Build doğrulama
-# Dinamik derslik Takvimi kaynak migrasyonu bu branch'te CI başlangıcında çalışır.
 
 on:
   push:
@@ -17,8 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Derslik sütunlarını dinamikleştir
-        run: node scripts/migrate-dynamic-room-columns.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

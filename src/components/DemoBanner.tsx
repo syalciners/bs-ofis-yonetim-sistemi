@@ -44,6 +44,13 @@ export function DemoBanner() {
   if (!isDemo) return null
 
   const update = (key: keyof LeadForm, value: string) => setForm(current => ({ ...current, [key]: value }))
+  const notifyLead = (talepId: string) => {
+    void supabase.functions.invoke('demo-teklif-bildir', { body: { talep_id: talepId } })
+      .then(({ error: notifyError }) => {
+        if (notifyError) console.warn('Teklif kaydedildi; e-posta bildirimi gönderilemedi:', notifyError.message)
+      })
+      .catch((notifyError: unknown) => console.warn('Teklif kaydedildi; e-posta bildirimi gönderilemedi:', notifyError))
+  }
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
@@ -51,7 +58,7 @@ export function DemoBanner() {
     try {
       const studentCount = form.ogrenci_sayisi.trim() ? Number(form.ogrenci_sayisi) : null
       const teacherCount = form.ogretmen_sayisi.trim() ? Number(form.ogretmen_sayisi) : null
-      const { error: rpcError } = await supabase.rpc('demo_teklif_talebi_olustur_v1', {
+      const { data: talepId, error: rpcError } = await supabase.rpc('demo_teklif_talebi_olustur_v1', {
         p_ad_soyad: form.ad_soyad.trim(),
         p_kurum_adi: form.kurum_adi.trim(),
         p_telefon: form.telefon.trim(),
@@ -60,6 +67,7 @@ export function DemoBanner() {
         p_notlar: form.notlar.trim() || null,
       })
       if (rpcError) throw rpcError
+      if (typeof talepId === 'string' && talepId) notifyLead(talepId)
       setDone(true)
       setForm(emptyForm)
     } catch (e: any) {
@@ -85,6 +93,7 @@ export function DemoBanner() {
             <label><span>Telefon</span><input required inputMode="tel" maxLength={30} placeholder="05xx xxx xx xx" value={form.telefon} onChange={e => update('telefon', e.target.value)} /></label>
             <div className="demo-lead-grid"><label><span>Öğrenci Sayısı</span><input type="number" min="1" max="5000" value={form.ogrenci_sayisi} onChange={e => update('ogrenci_sayisi', e.target.value)} /></label><label><span>Öğretmen Sayısı</span><input type="number" min="1" max="500" value={form.ogretmen_sayisi} onChange={e => update('ogretmen_sayisi', e.target.value)} /></label></div>
             <label><span>Kısa Not <small>(opsiyonel)</small></span><textarea maxLength={500} rows={3} value={form.notlar} onChange={e => update('notlar', e.target.value)} /></label>
+            <p className="demo-lead-privacy-note">Bu formdaki iletişim bilgileri yalnızca teklif talebinize dönüş yapmak için kaydedilir.</p>
             {error && <div className="demo-lead-error">{error}</div>}
             <button className="primary-btn demo-submit-btn" type="submit" disabled={busy}><Send size={17}/>{busy ? 'Gönderiliyor…' : 'Teklif Talebini Gönder'}</button>
           </form>

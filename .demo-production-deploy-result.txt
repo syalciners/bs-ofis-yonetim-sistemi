@@ -1,0 +1,12 @@
+run_id=32290534009
+job_status=failure
+token=failure
+pull=skipped
+project_guard=skipped
+env_guard=skipped
+build=skipped
+artifact_guard=skipped
+deploy=skipped
+smoke=skipped
+expected_index_js=
+expected_index_css=

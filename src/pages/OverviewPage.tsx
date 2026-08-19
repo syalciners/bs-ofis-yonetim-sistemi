@@ -7,6 +7,7 @@ import { LessonForm, StudentForm } from '../components/forms'
 import { CollectionQuickForm } from '../components/CollectionQuickForm'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
+import { APP_MODE } from '../lib/supabase'
 import type { Ders } from '../lib/types'
 import { fullDate, money } from '../lib/format'
 import { monthCollections, overdueAssignments, studentDebt, studentName, todayLessons, totalOpenDebt, totalTeacherBalance, zoomProblems } from '../services/metrics'
@@ -15,6 +16,7 @@ export function OverviewPage() {
   const {data}=useAppData();const nav=useNavigate();const[modal,setModal]=useState<'collection'|'student'|'lesson'|null>(null);const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null)
   const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),recentCollections:data.tahsilatlar.filter(x=>!x.iptal_mi).slice(0,3),debt:totalOpenDebt(data),debtors:data.ogrenciler.filter(x=>x.durum!=='Pasif'&&studentDebt(data,x.ogrenci_id)>0).length,teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
   if(!data||!metrics)return null
+  const isDemo=APP_MODE==='demo'
   const todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const plannedLessonHours=metrics.today.filter(x=>x.ders_durumu==='Planlandı').reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const attention=[
@@ -25,6 +27,15 @@ export function OverviewPage() {
   ].filter(x=>x.show)
   return <div className="page-stack">
     <section className="page-title-row"><div><span className="eyebrow">YÖNETİM ÖZETİ</span><h1>Bugün</h1></div></section>
+
+    {isDemo&&<section className="demo-discovery" aria-label="Önerilen demo rotası">
+      <div className="demo-discovery-copy"><span>ÖNERİLEN DEMO ROTASI</span><h2>Demoyu 3 adımda keşfedin</h2><p>Örnek veriler üzerinden günlük yönetim akışının en güçlü üç bölümünü deneyin.</p></div>
+      <div className="demo-discovery-actions">
+        <button type="button" onClick={()=>nav('/ogrenciler')}><span className="demo-discovery-step">1</span><span><b>Öğrenci ve bakiye</b><small>Öğrenci kartı, açık bakiye ve tahsilat geçmişi</small></span><UserPlus/></button>
+        <button type="button" onClick={()=>nav('/takvim')}><span className="demo-discovery-step">2</span><span><b>Takvim ve ders</b><small>Haftalık program, ders sonucu ve günlük akış</small></span><CalendarCheck2/></button>
+        <button type="button" onClick={()=>nav('/finans')}><span className="demo-discovery-step">3</span><span><b>Finans ve rapor</b><small>Tahsilat, gider ve öğretmen hakediş özetleri</small></span><Banknote/></button>
+      </div>
+    </section>}
 
     <section className="kpi-grid four">
       <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Ders Saati</span><strong>{todayLessonHours}</strong><small>{plannedLessonHours} planlandı</small></button>

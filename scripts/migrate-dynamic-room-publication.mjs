@@ -60,6 +60,15 @@ const replaceOnce=(source,from,to,label)=>{
 }
 
 {
+  const path='src/pages/SettingsPage.tsx'
+  let src=readFileSync(path,'utf8')
+  src=replaceOnce(src,"import { ProfileSettingsForm } from '../components/ProfileSettingsForm'","import { ProfileSettingsForm } from '../components/ProfileSettingsForm'\nimport { ProgramSettingsPanel } from '../components/ProgramSettingsPanel'",'Program Ayarları panel importu')
+  src=replaceOnce(src,"const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':'Yönetim ayarı'","const sheetSubtitle=info==='kurum'?'Kurum bilgileri':info==='kullanicilar'?'Yönetim kullanıcıları':info==='egitim'?'Eğitim tanımları':info==='finans'?'Finans tanımları':info==='program'?'Program varsayılanları':'Yönetim ayarı'",'Program Ayarları Sheet alt başlığı')
+  src=replaceOnce(src,"info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:<div className=\"settings-info-sheet\">","info==='finans'?<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>:info==='program'?<ProgramSettingsPanel settings={institution||DEFAULT_KURUM_AYARLARI} onUpdated={refresh}/>:<div className=\"settings-info-sheet\">",'Program Ayarları panel bağlantısı')
+  writeFileSync(path,src)
+}
+
+{
   const path='scripts/check-daily-room-calendar.mjs'
   let src=readFileSync(path,'utf8')
   const old="  ['Ders Ekle formu takvimden gelen dersliği varsayılan seçer',form.includes('defaultRoomId?:string')&&form.includes(\"lesson?.derslik_id||defaultRoomId||''\")],"

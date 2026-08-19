@@ -1,5 +1,7 @@
+import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, unlinkSync } from 'node:fs'
 
+const WORKING_FORM_COMMIT='ebde84a6ed5d1c01e9adb5a6d81527863346f1c3'
 const replaceOnce=(source,from,to,label)=>{
   const count=source.split(from).length-1
   if(count!==1)throw new Error(`${label}: beklenen 1 eşleşme yerine ${count} eşleşme bulundu.`)
@@ -16,46 +18,12 @@ const replaceOnce=(source,from,to,label)=>{
 }
 
 {
-  const path='scripts/check-cancelled-calendar.mjs'
-  let src=readFileSync(path,'utf8')
-  const old="if(!premium.includes(\"!CANCELLED_STATUSES.has(String(x.ders_durumu||''))\")) failures.push('Ders Ekle formu iptal edilen dersleri yerel uygunluk hesabından dışlamıyor.')"
-  const next="if(!premium.includes('validateAndSaveLesson')) failures.push('Ders Ekle formu merkezi ders doğrulama servisini kullanmıyor.')"
-  src=replaceOnce(src,old,next,'Eski yerel uygunluk iptal kuralı')
-  writeFileSync(path,src)
-}
-
-{
   const path='src/components/PremiumLessonForm.tsx'
-  let src=readFileSync(path,'utf8')
-  src=replaceOnce(src,
-`  initialDate,
-  initialTime,
-  studentPreset,`,
-`  initialDate,
-  initialTime,
-  defaultDate,
-  defaultStartTime,
-  defaultRoomId,
-  lockDateTime = false,
-  studentPreset,`,'PremiumLessonForm parametreleri')
-  src=replaceOnce(src,
-`  initialDate?: string
-  initialTime?: string
-  studentPreset?: StudentPreset`,
-`  initialDate?: string
-  initialTime?: string
-  defaultDate?: string
-  defaultStartTime?: string
-  defaultRoomId?: string
-  lockDateTime?: boolean
-  studentPreset?: StudentPreset`,'PremiumLessonForm prop tipleri')
-  src=replaceOnce(src,"  const [date, setDate] = useState(lesson?.tarih || initialDate || today)","  const [date, setDate] = useState(lesson?.tarih || initialDate || defaultDate || today)",'Takvim tarihi varsayılanı')
-  src=replaceOnce(src,"  const [time, setTime] = useState(fmtTime(lesson?.baslangic_saati) || initialTime || '09:00')","  const [time, setTime] = useState(fmtTime(lesson?.baslangic_saati) || initialTime || defaultStartTime || '09:00')",'Takvim saati varsayılanı')
-  src=replaceOnce(src,"  const [roomId, setRoomId] = useState(lesson?.derslik_id || '')","  const [roomId, setRoomId] = useState(lesson?.derslik_id || defaultRoomId || '')",'Takvim dersliği varsayılanı')
-  src=replaceOnce(src,"      if (only.derslik_id && !isOnlineLesson) setRoomId(only.derslik_id)","      if (only.derslik_id && !isOnlineLesson && !defaultRoomId) setRoomId(only.derslik_id)",'Takvim dersliğini sabit program başlangıcından koruma')
-  src=replaceOnce(src,"  }, [studentId, studentAssignments, lesson?.ders_id, isOnlineLesson])","  }, [studentId, studentAssignments, lesson?.ders_id, isOnlineLesson, defaultRoomId])",'Takvim dersliği effect bağımlılığı')
-  src=replaceOnce(src,'<input type="date" value={date} onChange={event => setDate(event.target.value)} required />','<input type="date" value={date} onChange={event => setDate(event.target.value)} disabled={lockDateTime} required />','Takvim tarihi kilidi')
-  src=replaceOnce(src,'<div className="premium-input-icon"><Clock3 size={15}/><input type="time" value={time} onChange={event => setTime(event.target.value)} required /></div>','<div className="premium-input-icon"><Clock3 size={15}/><input type="time" value={time} onChange={event => setTime(event.target.value)} disabled={lockDateTime} required /></div>','Takvim saati kilidi')
+  let src=execFileSync('git',['show',`${WORKING_FORM_COMMIT}:${path}`],{encoding:'utf8'})
+  src=replaceOnce(src,"  const{data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)","  const{data,refresh,institution}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)",'Kurum program ayarı erişimi')
+  src=replaceOnce(src,"  const[units,setUnits]=useState(Number(lesson?.ders_sayisi||1))","  const[units,setUnits]=useState(Number(lesson?.ders_sayisi || institution?.varsayilan_ders_birimi || 1))",'Yeni ders varsayılan ders birimi')
+  src=replaceOnce(src,"    if(program){setStudentPrice(String(program.ogrenci_birim_ucreti??''));setTeacherPrice(String(program.ogretmen_birim_hakedisi??''))}\n    else{setStudentPrice('');setTeacherPrice('')}\n  },[data,lesson,student,teacher,branch])","    if(program){setStudentPrice(String(program.ogrenci_birim_ucreti??''));setTeacherPrice(String(program.ogretmen_birim_hakedisi??''));setUnits(Number(program.ders_sayisi||institution?.varsayilan_ders_birimi||1))}\n    else{setStudentPrice('');setTeacherPrice('');setUnits(Number(institution?.varsayilan_ders_birimi||1))}\n  },[data,lesson,student,teacher,branch,institution?.varsayilan_ders_birimi])",'Sabit program ders birimi önceliği')
+  src=replaceOnce(src,"  const proposedEnd=proposedStart==null?null:proposedStart+Math.max(units,1)*60","  const proposedEnd=proposedStart==null?null:proposedStart+Math.max(1, Number(units || 1)) * 60",'60 dakikalık ders birimi standardı')
   writeFileSync(path,src)
 }
 
@@ -69,21 +37,12 @@ const replaceOnce=(source,from,to,label)=>{
 }
 
 {
-  const path='scripts/check-daily-room-calendar.mjs'
-  let src=readFileSync(path,'utf8')
-  const old="  ['Ders Ekle formu takvimden gelen dersliği varsayılan seçer',form.includes('defaultRoomId?:string')&&form.includes(\"lesson?.derslik_id||defaultRoomId||''\")],"
-  const next=`  ['Ders Ekle formu takvimden gelen dersliği varsayılan seçer',form.includes('defaultRoomId?: string')&&form.includes("lesson?.derslik_id || defaultRoomId || ''")],\n  ['Takvimden gelen tarih ve saat formda kilitlenir',form.includes('defaultDate?: string')&&form.includes('defaultStartTime?: string')&&form.includes('lockDateTime?: boolean')&&(form.match(/disabled=\\{lockDateTime\\}/g)||[]).length>=2],\n  ['Takvimden gelen derslik sabit program başlangıcı tarafından ezilmez',form.includes('!isOnlineLesson && !defaultRoomId')&&form.includes('isOnlineLesson, defaultRoomId')],`
-  src=replaceOnce(src,old,next,'Takvimden Ders Ekle regresyonu')
-  writeFileSync(path,src)
-}
-
-{
   const path='.github/workflows/ci.yml'
   let src=readFileSync(path,'utf8')
-  const block="      - name: Takvim yayın uyumluluğunu uygula\n        run: node scripts/migrate-dynamic-room-publication.mjs\n"
+  const block="      - name: Takvim yayın uyumluluğunu uygula\n        run: |\n          git fetch --depth=1 origin ebde84a6ed5d1c01e9adb5a6d81527863346f1c3\n          node scripts/migrate-dynamic-room-publication.mjs\n"
   src=replaceOnce(src,block,'','Geçici CI migrasyon adımı')
   writeFileSync(path,src)
 }
 
 unlinkSync('scripts/migrate-dynamic-room-publication.mjs')
-console.log('Takvim yayın uyumluluğu uygulandı; geçici migrasyon dosyası temizlendi.')
+console.log('Çalışan ders formu ve dinamik Takvim yayın uyumluluğu uygulandı; geçici migrasyon temizlendi.')

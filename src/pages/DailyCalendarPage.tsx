@@ -105,7 +105,12 @@ function StatusIndicator({status}:{status?:string|null}){
 export function DailyCalendarPage(){
   const{data,refresh,institution}=useAppData();const{toast}=useToast();const nav=useNavigate()
   const baseMonday=mondayOf(todayISO())
-  const[monday,setMonday]=useState(()=>{const stored=sessionStorage.getItem('bs-takvim-hafta');return stored&&/^\d{4}-\d{2}-\d{2}$/.test(stored)?stored:baseMonday})
+  const[monday,setMonday]=useState(()=>{
+    const stored=sessionStorage.getItem('bs-takvim-hafta')
+    if(!stored||!/^\d{4}-\d{2}-\d{2}$/.test(stored))return baseMonday
+    const storedOffset=Math.round((new Date(`${stored}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
+    return addDays(baseMonday,Math.max(-1,Math.min(1,storedOffset))*7)
+  })
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<WeekStatusState|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
@@ -113,8 +118,13 @@ export function DailyCalendarPage(){
   const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const weekOffset=Math.round((new Date(`${monday}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
-  const moveWeek=(delta:number)=>{setMonday(current=>addDays(current,delta*7));setWeekReview(null)}
+  const moveWeek=(delta:number)=>{
+    const nextOffset=Math.max(-1,Math.min(1,weekOffset+delta))
+    setMonday(addDays(baseMonday,nextOffset*7))
+    setWeekReview(null)
+  }
   const goCurrentWeek=()=>{setMonday(baseMonday);setWeekReview(null)}
+  const weekNavLabel=weekOffset<0?'Geçen Hafta':weekOffset>0?'Gelecek Hafta':'Bu Hafta'
   const readWeekStatus=useCallback(async():Promise<WeekStatusState>=>({monday,status:await getWeekCreationStatus(monday)}),[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
@@ -256,9 +266,9 @@ export function DailyCalendarPage(){
       <button className="calendar-mode-btn calendar-toolbar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
       <div className="calendar-week-range-long"><b>{weekRangeLong(monday,addDays(monday,6))}</b></div>
       <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
-        <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
-        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>
-        <button type="button" aria-label="Gelecek hafta" onClick={()=>moveWeek(1)}>›</button>
+        <button type="button" aria-label="Önceki hafta" disabled={weekOffset<=-1} onClick={()=>moveWeek(-1)}>‹</button>
+        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>{weekNavLabel}</button>
+        <button type="button" aria-label="Gelecek hafta" disabled={weekOffset>=1} onClick={()=>moveWeek(1)}>›</button>
       </div>
     </section>
 

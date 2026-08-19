@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Takvim PDF buton stil geçişi
+        run: node scripts/migrate-daily-pdf-button-style.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

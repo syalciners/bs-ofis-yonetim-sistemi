@@ -24,6 +24,7 @@ import './premium-typography.css'
 import './page-title-standard.css'
 import './portal-preview.css'
 import './brand-palette.css'
+import './demo-discovery.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

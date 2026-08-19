@@ -78,8 +78,9 @@ Deno.serve(async (req: Request) => {
       .eq('auth_user_id', authData.user.id)
       .maybeSingle()
 
-    if (profileError || !profile || profile.rol !== 'Yönetici' || !profile.aktif) {
-      return json({ error: 'Bu işlem için yönetici yetkisi gerekir.' }, 403)
+    const allowed = Boolean(profile?.aktif && ['Yönetici', 'Koç'].includes(String(profile?.rol || '')))
+    if (profileError || !profile || !allowed) {
+      return json({ error: 'Bu işlem için aktif Yönetici veya Koç hesabı gerekir.' }, 403)
     }
 
     const body = await req.json().catch(() => ({})) as { query?: unknown }

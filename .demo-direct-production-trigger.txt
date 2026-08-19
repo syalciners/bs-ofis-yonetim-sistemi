@@ -1,4 +1,4 @@
 BS Eğitim Demo doğrudan production deploy
-Tarih: 2026-08-19T22:43:00+03:00
+Tarih: 2026-08-19T22:48:00+03:00
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
-Ön koşul: preview doğrulandı, production asset smoke testi zorunlu.
+Ön koşul: preview doğrulandı, secret kontrolü yanlış pozitif düzeltilmiş durumda.

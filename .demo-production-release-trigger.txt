@@ -1,0 +1,4 @@
+BS Eğitim Demo production release
+Tarih: 2026-08-19T23:10:00+03:00
+Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+Güvenlik: doğru demo Supabase + gerçek secret regex kontrolü + canlı smoke testi.

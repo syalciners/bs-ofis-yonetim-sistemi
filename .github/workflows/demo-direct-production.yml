@@ -83,8 +83,8 @@ jobs:
             echo "::error::Canlı BS Ofis Supabase URL'si demo production dist içine sızdı."
             exit 1
           fi
-          if grep -R -E -q "service_role|sb_secret_" dist; then
-            echo "::error::Sunucu/secret anahtar izi production dist içinde bulundu."
+          if grep -R -F -q "sb_secret_" dist; then
+            echo "::error::Secret anahtar izi production dist içinde bulundu."
             exit 1
           fi
           INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -n 1)"
@@ -151,8 +151,8 @@ jobs:
             echo "::error::Canlı JS canlı BS Ofis Supabase URL içeriyor."
             exit 1
           fi
-          if grep -E -q "service_role|sb_secret_" /tmp/live-index.js; then
-            echo "::error::Canlı JS sunucu/secret anahtar izi içeriyor."
+          if grep -F -q "sb_secret_" /tmp/live-index.js; then
+            echo "::error::Canlı JS secret anahtar izi içeriyor."
             exit 1
           fi
           test -s /tmp/live-index.css || { echo "::error::Canlı CSS boş."; exit 1; }

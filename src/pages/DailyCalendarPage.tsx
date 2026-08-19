@@ -285,7 +285,7 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn daily-calendar-pdf-btn" type="button" disabled={!dayLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn calendar-pdf-btn daily-calendar-pdf-btn" type="button" disabled={!dayLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
         <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
           <div className="daily-room-header-row">

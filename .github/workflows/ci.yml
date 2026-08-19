@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Portal ders durum renkleri geçişi
+        run: node scripts/migrate-portal-lesson-status-colors.mjs
       - name: Kritik iş kuralları
         run: npm run check:rules
       - name: Takvim UX kuralları

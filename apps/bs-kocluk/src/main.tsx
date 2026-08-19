@@ -8,6 +8,7 @@ import './student-360.css'
 import './quick-study.css'
 import './book-add.css'
 import './book-ai.css'
+import './student-pulse.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

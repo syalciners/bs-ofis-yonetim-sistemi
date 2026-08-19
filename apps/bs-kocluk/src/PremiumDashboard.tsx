@@ -2,6 +2,7 @@ import { AlertTriangle, ArrowRight, BookOpenCheck, CalendarDays, CheckCircle2, C
 import { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import { isCancelled, isDone, isoToday, shortDate, studentName, type Assignment, type CoachData, type Meeting } from './data'
+import { buildAllStudentPulses } from './studentPulse'
 
 type FocusItem =
   | { type: 'overdue' | 'today-assignment'; assignment: Assignment }
@@ -20,16 +21,9 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
       .filter(x => x.gorusme_tarihi > today && x.durum !== 'İptal')
       .sort((a, b) => a.gorusme_tarihi.localeCompare(b.gorusme_tarihi))
 
-    const attention = new Map<string, Assignment[]>()
-    overdue.forEach(item => {
-      const current = attention.get(item.ogrenci_id) || []
-      current.push(item)
-      attention.set(item.ogrenci_id, current)
-    })
-
-    const attentionStudents = [...attention.entries()].sort((a, b) => b[1].length - a[1].length)
-    const attentionIds = new Set(attentionStudents.map(([id]) => id))
-    const healthyCount = Math.max(0, data.coachingProfiles.length - attentionIds.size)
+    const pulses = buildAllStudentPulses(data)
+    const attentionStudents = pulses.filter(x => x.level !== 'clear')
+    const healthyCount = pulses.filter(x => x.level === 'clear').length
 
     const focusItems: FocusItem[] = [
       ...overdue.map(assignment => ({ type: 'overdue' as const, assignment })),
@@ -52,19 +46,20 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
   }, [data])
 
   const nextMeeting = summary.todayMeetings[0] || summary.upcomingMeetings[0]
+  const hasAttention = summary.attentionStudents.length > 0 || summary.focusCount > 0
 
   return <div className="premium-dashboard page-stack">
     <header className="premium-hero">
       <div>
         <span className="premium-eyebrow"><Sparkles size={14}/> KOÇ MASASI</span>
         <h1>Bugün neye odaklanmalısınız?</h1>
-        <p>Sistem normal akışı geri planda tutar; yalnız karar veya takip gerektiren işleri öne çıkarır.</p>
+        <p>Sistem normal akışı geri planda tutar; plan, deneme ve görüşme verilerinden açıklanabilir takip sinyalleri üretir.</p>
       </div>
-      <div className={`focus-state ${summary.focusCount > 0 ? 'needs-attention' : 'all-clear'}`}>
-        {summary.focusCount > 0 ? <AlertTriangle/> : <CheckCircle2/>}
+      <div className={`focus-state ${hasAttention ? 'needs-attention' : 'all-clear'}`}>
+        {hasAttention ? <AlertTriangle/> : <CheckCircle2/>}
         <div>
-          <strong>{summary.focusCount > 0 ? `${summary.focusCount} öncelikli iş` : 'Her şey yolunda'}</strong>
-          <span>{summary.focusCount > 0 ? 'Önce bunları tamamlayın.' : 'Şu anda acil takip gerekmiyor.'}</span>
+          <strong>{summary.attentionStudents.length > 0 ? `${summary.attentionStudents.length} öğrenci dikkat istiyor` : summary.focusCount > 0 ? `${summary.focusCount} öncelikli iş` : 'Her şey yolunda'}</strong>
+          <span>{summary.attentionStudents.length > 0 ? 'Nedenlerini aşağıda görün.' : summary.focusCount > 0 ? 'Önce günlük akışı tamamlayın.' : 'Şu anda acil takip gerekmiyor.'}</span>
         </div>
       </div>
     </header>
@@ -90,7 +85,7 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
         {summary.focusItems.map((item, index) => {
           if (item.type === 'today-meeting') {
             const meeting = item.meeting
-            return <NavLink to="/gorusmeler" className="priority-item" key={`meeting-${meeting.gorusme_id}`}>
+            return <NavLink to={`/gorusmeler?ogrenci=${encodeURIComponent(meeting.ogrenci_id)}`} className="priority-item" key={`meeting-${meeting.gorusme_id}`}>
               <span className="priority-number">{index + 1}</span>
               <span className="priority-icon meeting"><CalendarDays/></span>
               <span className="priority-copy"><b>{studentName(data, meeting.ogrenci_id)}</b><small>{meeting.baslangic_saati ? `${meeting.baslangic_saati.slice(0, 5)} · ` : ''}{meeting.gundem || 'Bugünkü koçluk görüşmesi'}</small></span>
@@ -98,7 +93,7 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
             </NavLink>
           }
           const assignment = item.assignment
-          return <NavLink to="/plan" className="priority-item" key={`assignment-${assignment.odev_id}`}>
+          return <NavLink to={`/plan?ogrenci=${encodeURIComponent(assignment.ogrenci_id)}`} className="priority-item" key={`assignment-${assignment.odev_id}`}>
             <span className="priority-number">{index + 1}</span>
             <span className={`priority-icon ${item.type === 'overdue' ? 'overdue' : 'study'}`}><BookOpenCheck/></span>
             <span className="priority-copy"><b>{studentName(data, assignment.ogrenci_id)}</b><small>{assignment.odev_basligi || assignment.konu || 'Çalışma'} · {item.type === 'overdue' ? 'Gecikti' : 'Bugün teslim'}</small></span>
@@ -110,21 +105,28 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
 
     <section className="premium-panel">
       <div className="premium-section-head">
-        <div><span>İSTİSNA TAKİBİ</span><h2>Dikkat gereken öğrenciler</h2></div>
+        <div><span>ÖĞRENCİ NABZI</span><h2>Neden dikkat gerekiyor?</h2></div>
         <span className="quiet-count">{summary.attentionStudents.length} öğrenci</span>
       </div>
       {summary.attentionStudents.length ? <div className="attention-grid">
-        {summary.attentionStudents.slice(0, 6).map(([studentId, assignments]) => <NavLink to="/plan" className="attention-card" key={studentId}>
-          <div className="attention-avatar">{studentName(data, studentId).slice(0, 2).toLocaleUpperCase('tr-TR')}</div>
-          <div><b>{studentName(data, studentId)}</b><span>{assignments.length} geciken çalışma</span><small>Planı kontrol et</small></div>
-          <ArrowRight/>
-        </NavLink>)}
-      </div> : <div className="premium-empty-success compact"><CheckCircle2/><div><b>Dikkat gerektiren öğrenci yok.</b><span>Geciken çalışma oluşursa öğrenci otomatik olarak bu alana gelir.</span></div></div>}
+        {summary.attentionStudents.slice(0, 6).map(pulse => {
+          const firstSignal = pulse.signals.find(x => x.severity !== 'positive') || pulse.signals[0]
+          return <NavLink to={`/ogrenciler/${encodeURIComponent(pulse.studentId)}`} className="attention-card" key={pulse.studentId}>
+            <div className="attention-avatar">{studentName(data, pulse.studentId).slice(0, 2).toLocaleUpperCase('tr-TR')}</div>
+            <div>
+              <b>{studentName(data, pulse.studentId)}</b>
+              <span className={`pulse-level-chip ${pulse.level}`}>{pulse.label}</span>
+              <small className="pulse-card-reason">{firstSignal?.title || pulse.headline}</small>
+            </div>
+            <ArrowRight/>
+          </NavLink>
+        })}
+      </div> : <div className="premium-empty-success compact"><CheckCircle2/><div><b>Dikkat gerektiren öğrenci yok.</b><span>Plan, deneme veya görüşme akışında anlamlı bir sapma oluşursa sistem nedenini burada gösterecek.</span></div></div>}
     </section>
 
     <section className="healthy-strip">
       <div className="healthy-icon"><UsersRound/></div>
-      <div><b>{summary.healthyCount} öğrenci normal akışta</b><span>Her şey yolunda olan öğrencileri ana ekranı kalabalıklaştırmamak için geri planda tutuyoruz.</span></div>
+      <div><b>{summary.healthyCount} öğrenci normal akışta</b><span>Kritik sinyal görünmeyen öğrencileri ana ekranı kalabalıklaştırmamak için geri planda tutuyoruz.</span></div>
       <NavLink to="/ogrenciler">Öğrenciler <ArrowRight size={14}/></NavLink>
     </section>
   </div>

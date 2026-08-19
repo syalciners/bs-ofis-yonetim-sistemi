@@ -127,7 +127,8 @@ export async function loadCoachData(userId: string): Promise<CoachData> {
 
   const profile = ensure(profileResult.data, profileResult.error, 'Kullanıcı profili') as CoachUserProfile | null
   if (!profile?.aktif) throw new Error('Bu kullanıcı hesabı aktif değil.')
-  if (profile.rol !== 'Yönetici') throw new Error('BS Koçluk V1 şu anda yalnız yönetici hesaplarına açıktır.')
+  if (!['Yönetici', 'Koç'].includes(profile.rol)) throw new Error('BS Koçluk yalnız Yönetici veya Koç hesaplarına açıktır.')
+  if (profile.rol === 'Koç' && !profile.ogretmen_id) throw new Error('Koç hesabı için personel eşleştirmesi eksik.')
 
   const profilesResult = await supabase
     .from('kocluk_ogrenci_profilleri')

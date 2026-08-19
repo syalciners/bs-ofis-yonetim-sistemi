@@ -11,6 +11,7 @@ import './book-ai.css'
 import './student-pulse.css'
 import './premium-readability.css'
 import './weekly-plan.css'
+import './exam-center-premium.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

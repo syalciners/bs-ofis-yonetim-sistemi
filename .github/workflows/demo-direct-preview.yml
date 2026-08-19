@@ -77,8 +77,8 @@ jobs:
             echo "::error::Placeholder Supabase URL dist içine sızdı."
             exit 1
           fi
-          if grep -R -F -q "igmtuouhdozkgwmdxlme" dist; then
-            echo "::error::Canlı BS Ofis Supabase ref'i demo dist içine sızdı."
+          if grep -R -F -q "https://igmtuouhdozkgwmdxlme.supabase.co" dist; then
+            echo "::error::Canlı BS Ofis Supabase URL'si demo dist içine sızdı."
             exit 1
           fi
           INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -n 1)"

@@ -1,0 +1,1 @@
+Takvim PDF Al butonu Liste görünümündeki calendar-pdf-btn stilini kullanacak. Geçici dosya; PR doğrulaması öncesi kaldırılacak.

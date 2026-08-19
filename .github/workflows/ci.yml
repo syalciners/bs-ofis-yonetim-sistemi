@@ -1,4 +1,5 @@
 name: Build doğrulama
+# Dinamik derslik Takvimi kaynak migrasyonu bu branch'te CI başlangıcında çalışır.
 
 on:
   push:

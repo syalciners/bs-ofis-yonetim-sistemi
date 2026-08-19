@@ -31,6 +31,7 @@ function assignmentDate(item: Assignment) {
 
 function friendlyError(message: string) {
   const text = message.toLocaleLowerCase('tr-TR')
+  if (text.includes('erişim') || text.includes('yetki')) return 'Bu öğrenci için işlem yetkiniz bulunmuyor.'
   if (text.includes('geçmiş') || text.includes('past')) return 'Teslim tarihi geçmişte olamaz.'
   if (text.includes('aktif') && text.includes('koçluk')) return 'Öğrencinin aktif koçluk profili bulunamadı.'
   if (text.includes('kitap')) return 'Seçilen kitap öğrenciye bağlı değil veya artık aktif değil.'
@@ -128,7 +129,7 @@ export function QuickStudy({
 
     setBusy(true)
     try {
-      const { data: result, error: rpcError } = await supabase.rpc('kocluk_calisma_kaydet_guvenli_v1', {
+      const { data: result, error: rpcError } = await supabase.rpc('kocluk_calisma_kaydet_erisimli_v1', {
         p_ogrenci_id: studentId,
         p_ogrenci_kitap_id: bookId,
         p_calisma_turu: type,

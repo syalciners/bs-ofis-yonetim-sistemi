@@ -24,6 +24,7 @@ import './premium-typography.css'
 import './page-title-standard.css'
 import './portal-preview.css'
 import './exam-center.css'
+import './book-search.css'
 import './settings-hub.css'
 import './institution-settings.css'
 

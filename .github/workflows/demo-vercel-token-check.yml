@@ -1,0 +1,78 @@
+name: Demo Vercel token erişim kontrolü
+
+on:
+  push:
+    branches: [demo-hazirlik]
+    paths:
+      - .demo-vercel-token-check-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  check-token:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Demo proje REST erişimini kontrol et
+        id: project_api
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN boş."; exit 1; }
+          STATUS="$(curl -sS -o /tmp/vercel-project.json -w '%{http_code}' \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          echo "Vercel demo proje API HTTP durumu: $STATUS"
+          echo "PROJECT_HTTP=$STATUS" >> "$GITHUB_ENV"
+          if [ "$STATUS" != "200" ]; then
+            node <<'NODE'
+          const fs = require('fs')
+          try {
+            const j = JSON.parse(fs.readFileSync('/tmp/vercel-project.json','utf8'))
+            console.error('Vercel API hata kodu:', j?.error?.code || 'bilinmiyor')
+            console.error('Vercel API hata mesajı:', j?.error?.message || 'bilinmiyor')
+          } catch {
+            console.error('Vercel API yanıtı ayrıştırılamadı.')
+          }
+          NODE
+            exit 1
+          fi
+          node <<'NODE'
+          const fs = require('fs')
+          const j = JSON.parse(fs.readFileSync('/tmp/vercel-project.json','utf8'))
+          if (j.id !== process.env.VERCEL_PROJECT_ID || j.name !== 'bs-egitim-demo') {
+            console.error('GÜVENLİK ENGELİ: Token farklı bir Vercel projesine erişiyor.')
+            process.exit(1)
+          }
+          console.log(`Doğru demo proje erişimi doğrulandı: ${j.name} / ${j.id}`)
+          NODE
+
+      - name: Sonucu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          API_OUTCOME: ${{ steps.project_api.outcome }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .demo-vercel-token-check-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          project_api=$API_OUTCOME
+          project_http=${PROJECT_HTTP:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-vercel-token-check-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Demo Vercel token kontrol sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

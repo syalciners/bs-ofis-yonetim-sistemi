@@ -1,0 +1,1 @@
+Program Liste görünümü hafta gezintisi: Geçen Hafta / Bu Hafta / Gelecek Hafta. Geçici doğrulama notudur; merge öncesi kaldırılacaktır.

@@ -28,6 +28,7 @@ export function DemoBanner() {
   const { demoExpiresAt } = useAppData()
   const [now, setNow] = useState(Date.now())
   const [open, setOpen] = useState(false)
+  const [privacyOpen, setPrivacyOpen] = useState(false)
   const [form, setForm] = useState<LeadForm>(emptyForm)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
@@ -75,7 +76,7 @@ export function DemoBanner() {
     } finally { setBusy(false) }
   }
 
-  const close = () => { setOpen(false); setDone(false); setError(null) }
+  const close = () => { setOpen(false); setPrivacyOpen(false); setDone(false); setError(null) }
 
   return <>
     <div className="demo-banner" role="status">
@@ -93,11 +94,27 @@ export function DemoBanner() {
             <label><span>Telefon</span><input required inputMode="tel" maxLength={30} placeholder="05xx xxx xx xx" value={form.telefon} onChange={e => update('telefon', e.target.value)} /></label>
             <div className="demo-lead-grid"><label><span>Öğrenci Sayısı</span><input type="number" min="1" max="5000" value={form.ogrenci_sayisi} onChange={e => update('ogrenci_sayisi', e.target.value)} /></label><label><span>Öğretmen Sayısı</span><input type="number" min="1" max="500" value={form.ogretmen_sayisi} onChange={e => update('ogretmen_sayisi', e.target.value)} /></label></div>
             <label><span>Kısa Not <small>(opsiyonel)</small></span><textarea maxLength={500} rows={3} value={form.notlar} onChange={e => update('notlar', e.target.value)} /></label>
-            <p className="demo-lead-privacy-note">Bu formdaki iletişim bilgileri yalnızca teklif talebinize dönüş yapmak için kaydedilir.</p>
+            <p className="demo-lead-privacy-note">Bu formdaki iletişim bilgileri yalnızca teklif talebinize dönüş yapmak için kaydedilir. <button type="button" className="demo-privacy-link" onClick={() => setPrivacyOpen(true)}>Aydınlatma Metni</button></p>
             {error && <div className="demo-lead-error">{error}</div>}
             <button className="primary-btn demo-submit-btn" type="submit" disabled={busy}><Send size={17}/>{busy ? 'Gönderiliyor…' : 'Teklif Talebini Gönder'}</button>
           </form>
         </>}
+      </section>
+    </div>}
+    {privacyOpen && <div className="demo-modal-backdrop demo-privacy-backdrop" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setPrivacyOpen(false) }}>
+      <section className="demo-lead-modal demo-privacy-modal" role="dialog" aria-modal="true" aria-labelledby="demo-privacy-title">
+        <button className="demo-modal-close" type="button" onClick={() => setPrivacyOpen(false)} aria-label="Kapat"><X size={19}/></button>
+        <div className="demo-lead-heading"><span>KİŞİSEL VERİLER</span><h2 id="demo-privacy-title">Teklif Talebi Aydınlatma Metni</h2></div>
+        <div className="demo-privacy-copy">
+          <p><strong>Veri sorumlusu:</strong> Süleyman Yalçıner<br/><strong>İletişim:</strong> bsofisyonetim@gmail.com</p>
+          <p><strong>İşlenen bilgiler:</strong> Ad soyad, kurum adı, telefon, öğrenci ve öğretmen sayısı, isteğe bağlı not ile talebin geldiği kampanya/kaynak bilgileri.</p>
+          <p><strong>İşleme amacı:</strong> Teklif talebinize dönüş yapmak, ürün hakkında bilgi vermek, olası sözleşme sürecini yürütmek ve tanıtım kanallarının etkinliğini ölçmek.</p>
+          <p><strong>Toplama yöntemi ve hukuki sebep:</strong> Bilgiler bu elektronik form aracılığıyla doğrudan sizden alınır; talebinize dönüş ve olası sözleşme kurulmasıyla doğrudan ilgili işlemler ile veri sorumlusunun ölçüm ve güvenlik konusundaki meşru menfaatleri kapsamında işlenir.</p>
+          <p><strong>Aktarım:</strong> Veriler yalnızca talebin yanıtlanması ve teknik hizmetlerin sağlanması amacıyla kullanılan barındırma ve e-posta hizmet sağlayıcılarıyla, hizmetin gerektirdiği ölçüde paylaşılabilir. Bu teknik hizmetlerin bir kısmı yurt dışı altyapı kullanabilir.</p>
+          <p><strong>Saklama:</strong> Teklif süreci devam ettiği müddetçe saklanır; süreç “Kaybedildi” olarak kapatıldıktan sonra 180 günü aşan kayıtlar otomatik olarak silinir.</p>
+          <p><strong>Haklarınız:</strong> 6698 sayılı Kanunun 11. maddesindeki haklarınıza ilişkin taleplerinizi bsofisyonetim@gmail.com adresine iletebilirsiniz.</p>
+        </div>
+        <button className="primary-btn demo-privacy-close" type="button" onClick={() => setPrivacyOpen(false)}>Kapat</button>
       </section>
     </div>}
   </>

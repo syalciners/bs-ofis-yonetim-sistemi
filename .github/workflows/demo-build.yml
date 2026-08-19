@@ -15,6 +15,9 @@ jobs:
       VITE_APP_MODE: demo
       VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,9 +39,24 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "Derlenmiş demo paketi zaten güncel."
-            exit 0
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Derlenmiş demo yayın paketini güncelle [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Derlenmiş demo yayın paketini güncelle [skip ci]"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Vercel CLI kur
+        if: env.VERCEL_TOKEN != ''
+        run: npm install --global vercel@latest
+      - name: Vercel production ayarlarını çek
+        if: env.VERCEL_TOKEN != ''
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Vercel production build
+        if: env.VERCEL_TOKEN != ''
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+      - name: BS Eğitim Demo production deploy
+        if: env.VERCEL_TOKEN != ''
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+      - name: Vercel token bilgisi
+        if: env.VERCEL_TOKEN == ''
+        run: echo "VERCEL_TOKEN GitHub Actions secret tanımlı olmadığı için Vercel deploy adımı atlandı. Build ve yayın paketi doğrulaması tamamlandı."

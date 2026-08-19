@@ -9,6 +9,7 @@ const header=read('src/components/AppHeader.tsx')
 const bottomNav=read('src/components/BottomNav.tsx')
 const layout=read('src/program-week-layout.css')
 const css=read('src/portal-preview.css')
+const statusCss=read('src/lesson-status-colors.css')
 const main=read('src/main.tsx')
 
 const checks=[
@@ -24,6 +25,7 @@ const checks=[
   ['Portal ayrıntısında yönetim alt navigasyonu gizlenir',app.includes("const portalDetail = /^\\/portal-onizleme\\/(ogretmen|ogrenci)\\/[^/]+$/.test(location.pathname)")&&app.includes('{!portalDetail&&<BottomNav/>}')],
   ['Portal seçim ekranında Menü alt navigasyonu aktif kalır',bottomNav.includes("to==='/menu'&&location.pathname.startsWith('/portal-onizleme')")],
   ['Portal routeu headerda Portal Önizlemesi olarak tanımlıdır',header.includes("pathname.startsWith('/portal-onizleme')")&&header.includes("'PORTAL ÖNİZLEMESİ'")],
+  ['Öğretmen ve öğrenci portalı ders durumları ortak renk standardını kullanır',preview.includes('className="portal-preview-lesson-status"')&&preview.includes('data-status={lesson.ders_durumu')&&statusCss.includes('portal-preview-lesson-status[data-status="Planlandı"]')&&statusCss.includes('portal-preview-lesson-status[data-status="Yapıldı"]')&&statusCss.includes('portal-preview-lesson-status[data-status="İptal"]')&&statusCss.includes("content:'✓'")&&statusCss.includes("content:'×'")],
   ['Takvim Liste düğmesinden sonraki alan tarih ve Bu Hafta için eşit iki sütundur',layout.includes('grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)')&&layout.includes('.calendar-week-range-long')&&layout.includes('width:100%')&&layout.includes('grid-template-columns:26px minmax(0,1fr) 26px')],
   ['Eşit hafta yerleşimi mobilde de korunur',layout.includes('grid-template-columns:80px minmax(0,1fr) minmax(0,1fr)')&&layout.includes('grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)')],
   ['Yeni Program ve portal stilleri production girişinden yüklenir',main.includes("import './program-week-layout.css'")&&main.includes("import './portal-preview.css'")&&css.includes('.manager-mode-nav')&&css.includes('.portal-preview-shell')],

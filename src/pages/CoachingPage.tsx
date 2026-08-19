@@ -1,10 +1,12 @@
-import { AlertTriangle, BookOpenCheck, ChevronRight, Target, UserPlus, UsersRound } from 'lucide-react'
+import { AlertTriangle, BookOpenCheck, CalendarDays, ChevronRight, MessageSquareText, Target, UserPlus, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { CoachingMeetingForm } from '../components/CoachingMeetingForm'
 import { CoachingProfileForm } from '../components/CoachingProfileForm'
 import { Sheet } from '../components/Sheet'
-import { loadCoachingProfiles, type KoclukOgrenciProfili } from '../services/coachingService'
+import { shortDate, time, todayISO } from '../lib/format'
+import { loadCoachingMeetings, loadCoachingProfiles, type KoclukGorusmesi, type KoclukOgrenciProfili } from '../services/coachingService'
 import { activeStudents, overdueAssignments, studentName, teacherName } from '../services/metrics'
 
 export function CoachingPage() {
@@ -13,8 +15,13 @@ export function CoachingPage() {
   const [profiles, setProfiles] = useState<KoclukOgrenciProfili[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
   const [profilesError, setProfilesError] = useState<string | null>(null)
+  const [meetings, setMeetings] = useState<KoclukGorusmesi[]>([])
+  const [meetingsLoading, setMeetingsLoading] = useState(true)
+  const [meetingsError, setMeetingsError] = useState<string | null>(null)
   const [newProfile, setNewProfile] = useState(false)
   const [editing, setEditing] = useState<KoclukOgrenciProfili | null>(null)
+  const [newMeeting, setNewMeeting] = useState(false)
+  const [editingMeeting, setEditingMeeting] = useState<KoclukGorusmesi | null>(null)
 
   const refreshProfiles = useCallback(async () => {
     setProfilesLoading(true)
@@ -28,7 +35,19 @@ export function CoachingPage() {
     }
   }, [])
 
-  useEffect(() => { void refreshProfiles() }, [refreshProfiles])
+  const refreshMeetings = useCallback(async () => {
+    setMeetingsLoading(true)
+    try {
+      setMeetings(await loadCoachingMeetings())
+      setMeetingsError(null)
+    } catch (err: any) {
+      setMeetingsError(err?.message || String(err))
+    } finally {
+      setMeetingsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { void refreshProfiles(); void refreshMeetings() }, [refreshProfiles, refreshMeetings])
 
   const summary = useMemo(() => {
     if (!data) return null
@@ -43,24 +62,29 @@ export function CoachingPage() {
       .map(([ogrenci_id, count]) => ({ ogrenci_id, count, name: studentName(data, ogrenci_id) }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr-TR'))
     const unassigned = coachingProfiles.filter(x => !x.koc_ogretmen_id).length
+    const today = todayISO()
+    const todayMeetings = meetings.filter(x => x.gorusme_tarihi === today && x.durum !== 'İptal')
+    const upcomingMeetings = meetings
+      .filter(x => x.gorusme_tarihi >= today && ['Planlandı', 'Ertelendi'].includes(x.durum))
+      .sort((a, b) => `${a.gorusme_tarihi} ${a.baslangic_saati || ''}`.localeCompare(`${b.gorusme_tarihi} ${b.baslangic_saati || ''}`))
 
-    return { active, coachingProfiles, overdue, openAssignments, attention, unassigned }
-  }, [data, profiles])
+    return { active, coachingProfiles, overdue, openAssignments, attention, unassigned, todayMeetings, upcomingMeetings }
+  }, [data, profiles, meetings])
 
   if (!data || !summary) return null
 
   return <div className="page-stack coaching-v1">
     <section className="page-title-row">
       <div><span className="eyebrow">KOÇLUK MODÜLÜ</span><h1>Koç Masası</h1></div>
-      <button className="primary-btn" onClick={() => setNewProfile(true)}><UserPlus size={17}/>Koçluk Öğrencisi Ekle</button>
+      <button className="primary-btn" onClick={() => setNewMeeting(true)}><MessageSquareText size={17}/>Görüşme Ekle</button>
     </section>
 
     <section className="kpi-grid four">
       <button className="kpi-card teal" onClick={() => nav('/ogrenciler')}>
-        <div className="kpi-icon"><UsersRound/></div><span>Aktif Öğrenci</span><strong>{summary.active.length}</strong><small>BS Eğitim toplamı</small>
+        <div className="kpi-icon"><UsersRound/></div><span>Koçluk Öğrencisi</span><strong>{summary.coachingProfiles.length}</strong><small>aktif takipte</small>
       </button>
       <div className="kpi-card blue">
-        <div className="kpi-icon"><Target/></div><span>Koçluk Öğrencisi</span><strong>{summary.coachingProfiles.length}</strong><small>aktif koçluk profili</small>
+        <div className="kpi-icon"><CalendarDays/></div><span>Bugünkü Görüşme</span><strong>{summary.todayMeetings.length}</strong><small>bugün planlanan</small>
       </div>
       <div className="kpi-card orange">
         <div className="kpi-icon"><UsersRound/></div><span>Koç Atanmamış</span><strong>{summary.unassigned}</strong><small>atama bekleyen öğrenci</small>
@@ -68,6 +92,21 @@ export function CoachingPage() {
       <button className="kpi-card red" onClick={() => nav('/odevler')}>
         <div className="kpi-icon"><AlertTriangle/></div><span>Geciken Çalışma</span><strong>{summary.overdue.length}</strong><small>koçluk öğrencilerinde</small>
       </button>
+    </section>
+
+    <section>
+      <div className="section-heading"><div><h2>Yaklaşan Görüşmeler</h2><span>koçluk takvimindeki sıradaki görüşmeler</span></div><button className="text-btn" onClick={() => setNewMeeting(true)}>Yeni Görüşme</button></div>
+      {meetingsLoading ? <div className="calm-empty"><CalendarDays/><b>Görüşmeler yükleniyor…</b></div> : meetingsError ? <div className="calm-empty"><AlertTriangle/><b>Görüşmeler açılamadı.</b><span>{meetingsError}</span></div> : summary.upcomingMeetings.length ? <div className="student-grid">
+        {summary.upcomingMeetings.slice(0, 8).map(meeting => <button key={meeting.gorusme_id} className="student-card student-outline-card" onClick={() => setEditingMeeting(meeting)}>
+          <div className="student-top">
+            <div className="avatar student-list-avatar"><MessageSquareText size={18}/></div>
+            <div className="student-name"><strong>{studentName(data, meeting.ogrenci_id)}</strong><span>{meeting.gundem || 'Gündem henüz girilmedi'}</span></div>
+            <span className="soft-pill">{meeting.durum}</span>
+          </div>
+          <div className="student-meta"><span><b>{teacherName(data, meeting.koc_ogretmen_id)}</b> koç</span><span>{meeting.gorusme_turu || 'Görüşme'}</span></div>
+          <div className="student-balance"><span>Tarih</span><b>{shortDate(meeting.gorusme_tarihi)} · {time(meeting.baslangic_saati)}</b></div>
+        </button>)}
+      </div> : <div className="calm-empty"><CalendarDays/><b>Planlanmış koçluk görüşmesi yok.</b><span>İlk görüşmeyi “Görüşme Ekle” ile planlayabilirsiniz.</span></div>}
     </section>
 
     <section>
@@ -86,7 +125,7 @@ export function CoachingPage() {
             <div className="student-balance"><span>Hedef</span><b>{target}</b></div>
           </button>
         })}
-      </div> : <div className="calm-empty"><Target/><b>Henüz koçluk öğrencisi tanımlanmadı.</b><span>İlk öğrenciyi “Koçluk Öğrencisi Ekle” ile tanımlayın.</span></div>}
+      </div> : <div className="calm-empty"><Target/><b>Henüz koçluk öğrencisi tanımlanmadı.</b><span>İlk öğrenciyi “Yeni Profil” ile tanımlayın.</span></div>}
     </section>
 
     <section>
@@ -97,7 +136,7 @@ export function CoachingPage() {
           <span><b>{item.name}</b><small>{item.count} geciken çalışma</small></span>
           <ChevronRight size={17}/>
         </button>)}
-      </div> : <div className="all-good"><Target/><span><b>Şu anda takip bekleyen gecikmiş çalışma yok.</b><small>Görüşme ve deneme sinyalleri sonraki aşamada bu alana eklenecek.</small></span></div>}
+      </div> : <div className="all-good"><Target/><span><b>Şu anda takip bekleyen gecikmiş çalışma yok.</b><small>Deneme ve gelişim sinyalleri ilerleyen adımlarda bu alana eklenecek.</small></span></div>}
     </section>
 
     <section>
@@ -105,7 +144,7 @@ export function CoachingPage() {
       <div className="quick-actions">
         <button type="button" onClick={() => setNewProfile(true)}><span className="quick-icon teal"><Target/></span><b>Öğrenci Hedefi</b><small>hedef okul / bölüm / sınav</small></button>
         <button type="button" disabled><span className="quick-icon blue"><BookOpenCheck/></span><b>Haftalık Plan</b><small>sıradaki geliştirme</small></button>
-        <button type="button" disabled><span className="quick-icon orange"><UsersRound/></span><b>Koçluk Görüşmesi</b><small>sonraki aşama</small></button>
+        <button type="button" onClick={() => setNewMeeting(true)}><span className="quick-icon orange"><MessageSquareText/></span><b>Koçluk Görüşmesi</b><small>planla · not al · kararları kaydet</small></button>
         <button type="button" disabled><span className="quick-icon green"><Target/></span><b>Deneme Merkezi</b><small>sonraki aşama</small></button>
       </div>
     </section>
@@ -115,6 +154,15 @@ export function CoachingPage() {
         profile={editing}
         onCancel={() => { setNewProfile(false); setEditing(null) }}
         onDone={async () => { await refreshProfiles(); setNewProfile(false); setEditing(null) }}
+      />
+    </Sheet>
+
+    <Sheet open={newMeeting || !!editingMeeting} title={editingMeeting ? studentName(data, editingMeeting.ogrenci_id) : 'Koçluk Görüşmesi Ekle'} subtitle={editingMeeting ? 'Görüşme notları, kararlar ve sonraki takip' : 'Koçluk görüşmesini planlayın.'} onClose={() => { setNewMeeting(false); setEditingMeeting(null) }}>
+      <CoachingMeetingForm
+        meeting={editingMeeting}
+        profiles={profiles}
+        onCancel={() => { setNewMeeting(false); setEditingMeeting(null) }}
+        onDone={async () => { await refreshMeetings(); setNewMeeting(false); setEditingMeeting(null) }}
       />
     </Sheet>
   </div>

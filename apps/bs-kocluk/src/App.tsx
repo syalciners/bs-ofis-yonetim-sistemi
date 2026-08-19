@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js'
-import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, Plus, RefreshCw, ShieldCheck, Target, UsersRound } from 'lucide-react'
+import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, Plus, RefreshCw, ShieldCheck, Sparkles, Target, UsersRound } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
 import { BookAdd } from './BookAdd'
@@ -9,6 +9,7 @@ import { QuickStudy } from './QuickStudy'
 import { StudentDetailWithPulse } from './StudentDetailWithPulse'
 import { StudentDirectory } from './Student360'
 import { supabase } from './supabase'
+import { WeeklyPlan } from './WeeklyPlan'
 
 function Login({ error, onLogin }: { error: string | null; onLogin: () => void }) {
   return <main className="login-screen"><section className="login-card">
@@ -46,6 +47,7 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
   const requested = params.get('ogrenci') || ''
   const studentId = data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
   const quickOpen = params.get('ekle') === '1'
+  const [weeklyOpen, setWeeklyOpen] = useState(false)
   const [bookStudentId, setBookStudentId] = useState('')
   const rows = data.assignments.filter(x => !isCancelled(x.durum) && (!studentId || x.ogrenci_id === studentId))
 
@@ -56,6 +58,14 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
     setParams(next, { replace: true })
   }
 
+  const openQuickForStudent = (id: string) => {
+    setWeeklyOpen(false)
+    const next = new URLSearchParams(params)
+    next.set('ogrenci', id)
+    next.set('ekle', '1')
+    setParams(next, { replace: true })
+  }
+
   const refreshAfterBook = async () => {
     await Promise.resolve(onRefresh())
   }
@@ -63,10 +73,14 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
   return <div className="page-stack">
     <div className="plan-title-row">
       <PageTitle title="Plan ve Çalışmalar" text="Ders ödevi ve koçluk çalışması tek görev motorundan gelir."/>
-      <button type="button" className="quick-study-trigger" onClick={() => setQuickOpen(true)}><Plus/> Çalışma Ekle</button>
+      <div className="plan-title-actions">
+        <button type="button" className="weekly-plan-trigger" onClick={() => setWeeklyOpen(true)}><Sparkles/> Haftayı Hazırla</button>
+        <button type="button" className="quick-study-trigger secondary" onClick={() => setQuickOpen(true)}><Plus/> Çalışma Ekle</button>
+      </div>
     </div>
     <StudentFilterStrip data={data} studentId={studentId} clearTo="/plan"/>
     {rows.length ? <section className="panel rows">{rows.map(x => <div className="row split" key={x.odev_id}><BookOpenCheck size={18}/><div><b>{x.odev_basligi || x.konu || 'Çalışma'}</b><span>{studentName(data,x.ogrenci_id)} · {isCoachingAssignment(x) ? 'Koçluk Çalışması' : 'Ders Ödevi'}</span></div><small>{x.durum}<br/>{shortDate(x.son_teslim_tarihi || x.verilis_tarihi)}</small></div>)}</section> : <Empty text={studentId ? 'Bu öğrenci için çalışma kaydı yok.' : 'Henüz çalışma kaydı yok.'}/>} 
+    {weeklyOpen && <WeeklyPlan data={data} initialStudentId={studentId} onClose={() => setWeeklyOpen(false)} onSaved={onRefresh} onOpenQuickStudy={openQuickForStudent}/>} 
     {quickOpen && <QuickStudy data={data} initialStudentId={studentId} onClose={() => setQuickOpen(false)} onSaved={onRefresh} onNeedBook={id => setBookStudentId(id)}/>} 
     {bookStudentId && <BookAdd data={data} initialStudentId={bookStudentId} onClose={() => setBookStudentId('')} onSaved={refreshAfterBook}/>} 
   </div>

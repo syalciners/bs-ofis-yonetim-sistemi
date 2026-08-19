@@ -100,7 +100,7 @@ export function StudentBookForm({
           <div><strong>{book.kitap_adi}</strong><small>{[book.yayinevi, book.ders, book.sinav_turu].filter(Boolean).join(' · ') || 'Katalog kitabı'}</small></div>
           {selectedBookId === book.kitap_id && <span className="soft-pill">Seçildi</span>}
         </button>) : <div className="calm-empty"><Search/><b>Katalogda eşleşen kitap bulunamadı.</b><span>Kitabı bir kez ekleyin; sonraki öğrenciler aramadan seçebilir.</span></div>}
-      </div>
+      </div>}
       <div className="form-actions">
         <button type="button" className="secondary-btn" onClick={onCancel}>Vazgeç</button>
         <button type="button" className="secondary-btn" onClick={() => setNewBook(true)}><Plus size={16}/>Katalogda Yok</button>

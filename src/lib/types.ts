@@ -135,6 +135,11 @@ export interface Odev {
   ogretmen_notu?: string | null
   puan?: string | null
   tamamlanma_tarihi?: string | null
+  ogrenci_kitap_id?: Id | null
+  calisma_turu?: 'Sayfa' | 'Test' | 'Konu' | null
+  baslangic_no?: number | null
+  bitis_no?: number | null
+  calisma_detayi?: string | null
 }
 
 export interface KullaniciProfili {

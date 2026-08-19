@@ -31,6 +31,29 @@ export interface KoclukGorusmesi {
   guncellenme_zamani?: string | null
 }
 
+export interface KitapKatalogKaydi {
+  kitap_id: string
+  kitap_adi: string
+  yayinevi?: string | null
+  isbn?: string | null
+  ders?: string | null
+  sinav_turu?: string | null
+  baski?: string | null
+  toplam_sayfa?: number | null
+  kapak_url?: string | null
+  durum: 'Onaylı' | 'Taslak' | 'Pasif'
+}
+
+export interface OgrenciKitabi {
+  ogrenci_kitap_id: string
+  ogrenci_id: string
+  kitap_id: string
+  durum: 'Aktif' | 'Tamamlandı' | 'Bırakıldı'
+  eklenme_tarihi: string
+  notlar?: string | null
+  kitap?: KitapKatalogKaydi | null
+}
+
 export async function loadCoachingProfiles(): Promise<KoclukOgrenciProfili[]> {
   const { data, error } = await supabase
     .from('kocluk_ogrenci_profilleri')
@@ -110,4 +133,88 @@ export async function saveCoachingMeeting(input: {
 
   if (error) throw error
   return data as { basarili: boolean; gorusme_id: string; ogrenci_id: string; yeni: boolean; durum: string }
+}
+
+export async function loadBookCatalog(): Promise<KitapKatalogKaydi[]> {
+  const { data, error } = await supabase
+    .from('kitap_katalogu')
+    .select('*')
+    .eq('durum', 'Onaylı')
+    .order('kitap_adi', { ascending: true })
+  if (error) throw error
+  return (data || []) as KitapKatalogKaydi[]
+}
+
+export async function saveCatalogBook(input: {
+  kitap_id?: string | null
+  kitap_adi: string
+  yayinevi?: string | null
+  isbn?: string | null
+  ders?: string | null
+  sinav_turu?: string | null
+  baski?: string | null
+  toplam_sayfa?: number | null
+  kapak_url?: string | null
+}) {
+  const { data, error } = await supabase.rpc('kitap_katalogu_kaydet_guvenli_v1', {
+    p_kitap_id: input.kitap_id || null,
+    p_kitap_adi: input.kitap_adi,
+    p_yayinevi: input.yayinevi || null,
+    p_isbn: input.isbn || null,
+    p_ders: input.ders || null,
+    p_sinav_turu: input.sinav_turu || null,
+    p_baski: input.baski || null,
+    p_toplam_sayfa: input.toplam_sayfa ?? null,
+    p_kapak_url: input.kapak_url || null,
+  })
+  if (error) throw error
+  return data as { basarili: boolean; kitap_id: string; yeni: boolean }
+}
+
+export async function loadStudentBooks(studentId?: string | null): Promise<OgrenciKitabi[]> {
+  let query = supabase
+    .from('ogrenci_kitaplari')
+    .select('*, kitap:kitap_katalogu(*)')
+    .eq('durum', 'Aktif')
+    .order('eklenme_tarihi', { ascending: false })
+  if (studentId) query = query.eq('ogrenci_id', studentId)
+  const { data, error } = await query
+  if (error) throw error
+  return (data || []) as OgrenciKitabi[]
+}
+
+export async function assignBookToStudent(input: { ogrenci_id: string; kitap_id: string; notlar?: string | null }) {
+  const { data, error } = await supabase.rpc('ogrenci_kitabi_kaydet_guvenli_v1', {
+    p_ogrenci_id: input.ogrenci_id,
+    p_kitap_id: input.kitap_id,
+    p_notlar: input.notlar || null,
+  })
+  if (error) throw error
+  return data as { basarili: boolean; ogrenci_kitap_id: string; yeni: boolean }
+}
+
+export async function saveCoachingStudy(input: {
+  ogrenci_id: string
+  ogrenci_kitap_id: string
+  calisma_turu: 'Sayfa' | 'Test' | 'Konu'
+  baslangic_no?: number | null
+  bitis_no?: number | null
+  calisma_detayi?: string | null
+  son_teslim_tarihi?: string | null
+  oncelik?: string | null
+  aciklama?: string | null
+}) {
+  const { data, error } = await supabase.rpc('kocluk_calisma_kaydet_guvenli_v1', {
+    p_ogrenci_id: input.ogrenci_id,
+    p_ogrenci_kitap_id: input.ogrenci_kitap_id,
+    p_calisma_turu: input.calisma_turu,
+    p_baslangic_no: input.baslangic_no ?? null,
+    p_bitis_no: input.bitis_no ?? null,
+    p_calisma_detayi: input.calisma_detayi || null,
+    p_son_teslim_tarihi: input.son_teslim_tarihi || null,
+    p_oncelik: input.oncelik || 'Normal',
+    p_aciklama: input.aciklama || null,
+  })
+  if (error) throw error
+  return data as { basarili: boolean; odev_id: string; baslik: string }
 }

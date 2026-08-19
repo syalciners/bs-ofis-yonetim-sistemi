@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { CoachingMeetingForm } from '../components/CoachingMeetingForm'
 import { CoachingProfileForm } from '../components/CoachingProfileForm'
+import { CoachingStudyForm } from '../components/CoachingStudyForm'
+import { StudentBookForm } from '../components/StudentBookForm'
 import { Sheet } from '../components/Sheet'
 import { addDays, compactWeekRange, mondayOf, shortDate, time, todayISO } from '../lib/format'
 import { loadCoachingMeetings, loadCoachingProfiles, type KoclukGorusmesi, type KoclukOgrenciProfili } from '../services/coachingService'
@@ -22,6 +24,8 @@ export function CoachingPage() {
   const [editing, setEditing] = useState<KoclukOgrenciProfili | null>(null)
   const [newMeeting, setNewMeeting] = useState(false)
   const [editingMeeting, setEditingMeeting] = useState<KoclukGorusmesi | null>(null)
+  const [newBook, setNewBook] = useState(false)
+  const [newStudy, setNewStudy] = useState(false)
 
   const refreshProfiles = useCallback(async () => {
     setProfilesLoading(true)
@@ -106,7 +110,10 @@ export function CoachingPage() {
     </section>
 
     <section>
-      <div className="section-heading"><div><h2>Bu Haftanın Planı</h2><span>{compactWeekRange(summary.weekStart, summary.weekEnd)} · koçluk öğrencilerinin çalışma akışı</span></div><button className="text-btn" onClick={() => nav('/odevler?yeni=1')}>Çalışma Ekle</button></div>
+      <div className="section-heading">
+        <div><h2>Bu Haftanın Planı</h2><span>{compactWeekRange(summary.weekStart, summary.weekEnd)} · koçluk öğrencilerinin çalışma akışı</span></div>
+        <div className="form-actions"><button className="text-btn" type="button" onClick={() => setNewBook(true)}>Kitap Ekle</button><button className="text-btn" type="button" onClick={() => setNewStudy(true)}>Çalışma Ekle</button></div>
+      </div>
       {summary.weeklyAssignments.length ? <div className="student-grid">
         {summary.weeklyAssignments.slice(0, 8).map(item => {
           const done = ['Tamamlandı', 'Teslim Edildi'].includes(item.durum)
@@ -121,8 +128,8 @@ export function CoachingPage() {
             <div className="student-balance"><span>{done ? 'Tamamlanma' : 'Son Tarih'}</span><b>{due ? shortDate(due) : 'Tarih yok'}</b></div>
           </button>
         })}
-      </div> : <div className="calm-empty"><BookOpenCheck/><b>Bu hafta için çalışma planı henüz boş.</b><span>Mevcut Ödevler altyapısı kullanılır; ikinci bir görev sistemi oluşturulmaz.</span><button className="secondary-btn" type="button" onClick={() => nav('/odevler?yeni=1')}>İlk Çalışmayı Ekle</button></div>}
-      {summary.weeklyAssignments.length > 0 && <div className="form-hint">Bu hafta {summary.weeklyDone}/{summary.weeklyAssignments.length} çalışma tamamlandı. Tüm çalışmalar Ödevler ekranından yönetilir.</div>}
+      </div> : <div className="calm-empty"><BookOpenCheck/><b>Bu hafta için çalışma planı henüz boş.</b><span>Öğrencinin kitabını bir kez tanımlayın; sonra sadece kitap ve sayfa/test aralığı seçilir.</span><button className="secondary-btn" type="button" onClick={() => setNewStudy(true)}>İlk Çalışmayı Ekle</button></div>}
+      {summary.weeklyAssignments.length > 0 && <div className="form-hint">Bu hafta {summary.weeklyDone}/{summary.weeklyAssignments.length} çalışma tamamlandı. Kitaplı çalışmalar da mevcut Ödevler altyapısında izlenir.</div>}
     </section>
 
     <section>
@@ -171,10 +178,10 @@ export function CoachingPage() {
     </section>
 
     <section>
-      <div className="section-heading"><div><h2>Koçluk Çekirdeği</h2><span>V1 geliştirme sırası</span></div></div>
+      <div className="section-heading"><div><h2>Koçluk Çekirdeği</h2><span>koçun tekrar veri yazmasını azaltan kısa yollar</span></div></div>
       <div className="quick-actions">
         <button type="button" onClick={() => setNewProfile(true)}><span className="quick-icon teal"><Target/></span><b>Öğrenci Hedefi</b><small>hedef okul / bölüm / sınav</small></button>
-        <button type="button" onClick={() => nav('/odevler?yeni=1')}><span className="quick-icon blue"><BookOpenCheck/></span><b>Haftalık Plan</b><small>çalışmaları mevcut Ödevler altyapısıyla yönet</small></button>
+        <button type="button" onClick={() => setNewBook(true)}><span className="quick-icon blue"><BookOpenCheck/></span><b>Kitaplar</b><small>katalogdan ara · öğrenciye bir kez ekle</small></button>
         <button type="button" onClick={() => setNewMeeting(true)}><span className="quick-icon orange"><MessageSquareText/></span><b>Koçluk Görüşmesi</b><small>planla · not al · kararları kaydet</small></button>
         <button type="button" disabled><span className="quick-icon green"><Target/></span><b>Deneme Merkezi</b><small>sonraki aşama</small></button>
       </div>
@@ -194,6 +201,19 @@ export function CoachingPage() {
         profiles={profiles}
         onCancel={() => { setNewMeeting(false); setEditingMeeting(null) }}
         onDone={async () => { await refreshMeetings(); setNewMeeting(false); setEditingMeeting(null) }}
+      />
+    </Sheet>
+
+    <Sheet open={newBook} title="Öğrenci Kitapları" subtitle="Kitabı katalogdan arayın; yalnızca bir kez öğrenciye ekleyin." onClose={() => setNewBook(false)}>
+      <StudentBookForm profiles={profiles} onCancel={() => setNewBook(false)} onDone={() => setNewBook(false)}/>
+    </Sheet>
+
+    <Sheet open={newStudy} title="Hızlı Çalışma Ekle" subtitle="Öğrencinin kitabını seçin; koç yalnızca sayfa, test veya konuyu belirlesin." onClose={() => setNewStudy(false)}>
+      <CoachingStudyForm
+        profiles={profiles}
+        onNeedBook={() => { setNewStudy(false); setNewBook(true) }}
+        onCancel={() => setNewStudy(false)}
+        onDone={() => setNewStudy(false)}
       />
     </Sheet>
   </div>

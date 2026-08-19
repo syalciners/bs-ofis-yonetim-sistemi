@@ -2,7 +2,7 @@ import type { Derslik } from './types'
 
 // Takvim başlıkları derslik adından türetilir; ID yalnız mevcut operasyonel sütun sırasını korur.
 const LEGACY_ROOM_ORDER=['LOC-002','LOC-001','LOC-003','LOC-005','LOC-004'] as const
-const legacyOrder=new Map<string,number>(LEGACY_ROOM_ORDER.map((id,index)=>[id,index]))
+const legacyOrder=new Map<string,number>(LEGACY_ROOM_ORDER.map((id,index)=>[id,index] as [string,number]))
 
 const normalize=(value:string)=>value.trim().replace(/\s+/g,' ')
 

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
 import { loadInstitutionBrand, loadInstitutionSettings, type KurumAyarlari } from '../services/institutionService'
+import { loadUnreadNotificationCount } from '../services/notificationService'
 
 interface AppCtx {
   session: Session | null
@@ -14,7 +15,9 @@ interface AppCtx {
   loading: boolean
   refreshing: boolean
   error: string | null
+  unreadNotifications: number
   refresh: () => Promise<void>
+  refreshNotifications: () => Promise<void>
   signIn: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -52,16 +55,31 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
   const timer = useRef<number | null>(null)
+
+  const refreshNotifications = useCallback(async () => {
+    if (!session?.user) {
+      setUnreadNotifications(0)
+      return
+    }
+    try {
+      const next = await loadUnreadNotificationCount()
+      setUnreadNotifications(next)
+    } catch {
+      setUnreadNotifications(0)
+    }
+  }, [session?.user?.id])
 
   const refresh = useCallback(async () => {
     if (!session?.user) return
     setRefreshing(true)
     try {
-      const [nextData, nextProfile, nextInstitution] = await Promise.all([
+      const [nextData, nextProfile, nextInstitution, nextUnread] = await Promise.all([
         loadAppData(),
         loadProfile(session.user.id),
         loadInstitutionSettings(),
+        loadUnreadNotificationCount().catch(() => 0),
       ])
       if (!nextProfile?.aktif) {
         const redirected = await redirectToPortalIfEligible(session)
@@ -71,6 +89,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setData(nextData)
       setProfile(nextProfile as KullaniciProfili)
       setInstitution(nextInstitution)
+      setUnreadNotifications(nextUnread)
       setError(null)
     } catch (e: any) {
       setError(e?.message || String(e))
@@ -81,7 +100,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     let mounted = true
     void loadInstitutionBrand().then(next => { if (mounted) setInstitution(next) }).catch(() => undefined)
     void supabase.auth.getSession().then(({ data }) => { if (mounted) { setSession(data.session); if (!data.session) setLoading(false) } })
-    const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setLoading(!next); if (!next) { setData(null); setProfile(null) } })
+    const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setLoading(!next); if (!next) { setData(null); setProfile(null); setUnreadNotifications(0) } })
     return () => { mounted = false; auth.subscription.unsubscribe() }
   }, [])
 
@@ -102,7 +121,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [])
   const signOut = useCallback(async () => { await supabase.auth.signOut() }, [])
 
-  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, institution, data, loading, refreshing, error, refresh, signIn, signOut }), [session, profile, institution, data, loading, refreshing, error, refresh, signIn, signOut])
+  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, institution, data, loading, refreshing, error, unreadNotifications, refresh, refreshNotifications, signIn, signOut }), [session, profile, institution, data, loading, refreshing, error, unreadNotifications, refresh, refreshNotifications, signIn, signOut])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

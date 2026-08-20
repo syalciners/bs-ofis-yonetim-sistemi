@@ -1,3 +1,3 @@
-target_main_commit=82639f03023e24f1ffb9d271741d8fa8e92eaa73
+target_main_commit=90573d6a730e1135ab9bae29219d4d9e9a616c13
 reason=Portal Bildirim Merkezi V1 production yayını
-attempt=4
+attempt=5

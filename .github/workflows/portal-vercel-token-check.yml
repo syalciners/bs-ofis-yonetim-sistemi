@@ -1,0 +1,79 @@
+name: Portal Vercel token erişim kontrolü
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .portal-vercel-token-check-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  check-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      PORTAL_PROJECT_ID: prj_WTCzIweta6c9XIpQT8pKGC9xBPrB
+      DEMO_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Token varlık kontrolü
+        id: token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN tanımlı değil."; exit 1; }
+
+      - name: Vercel API erişimlerini ölç
+        id: access
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUTH="Authorization: Bearer $VERCEL_TOKEN"
+          USER_HTTP="$(curl -sS -o /dev/null -w '%{http_code}' -H "$AUTH" 'https://api.vercel.com/v2/user')"
+          TEAM_HTTP="$(curl -sS -o /dev/null -w '%{http_code}' -H "$AUTH" "https://api.vercel.com/v2/teams/$VERCEL_ORG_ID")"
+          PORTAL_HTTP="$(curl -sS -o /dev/null -w '%{http_code}' -H "$AUTH" "https://api.vercel.com/v9/projects/$PORTAL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          DEMO_HTTP="$(curl -sS -o /dev/null -w '%{http_code}' -H "$AUTH" "https://api.vercel.com/v9/projects/$DEMO_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          echo "user_http=$USER_HTTP" >> "$GITHUB_OUTPUT"
+          echo "team_http=$TEAM_HTTP" >> "$GITHUB_OUTPUT"
+          echo "portal_http=$PORTAL_HTTP" >> "$GITHUB_OUTPUT"
+          echo "demo_http=$DEMO_HTTP" >> "$GITHUB_OUTPUT"
+          echo "Vercel erişim durumları ölçüldü; yanıt gövdeleri kaydedilmedi."
+
+      - name: Erişim sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          TOKEN_OUTCOME: ${{ steps.token.outcome }}
+          ACCESS_OUTCOME: ${{ steps.access.outcome }}
+          USER_HTTP: ${{ steps.access.outputs.user_http }}
+          TEAM_HTTP: ${{ steps.access.outputs.team_http }}
+          PORTAL_HTTP: ${{ steps.access.outputs.portal_http }}
+          DEMO_HTTP: ${{ steps.access.outputs.demo_http }}
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .portal-vercel-token-check-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          token=$TOKEN_OUTCOME
+          access=$ACCESS_OUTCOME
+          user_http=${USER_HTTP:-}
+          team_http=${TEAM_HTTP:-}
+          portal_http=${PORTAL_HTTP:-}
+          demo_http=${DEMO_HTTP:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .portal-vercel-token-check-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Portal Vercel token erişim sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

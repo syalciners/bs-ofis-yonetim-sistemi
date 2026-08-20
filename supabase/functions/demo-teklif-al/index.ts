@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const DEMO_VERIFY_URL = "https://pparlcdctnivmpiofuvz.supabase.co/functions/v1/demo-teklif-dogrula";
+const DEMO_PUBLISHABLE_KEY = "sb_publishable__IYAfCCcA6DWnpQ005xJdA__vvdiDGZ";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -32,6 +33,7 @@ Deno.serve(async (req: Request) => {
       method: "POST",
       headers: {
         "Authorization": authorization,
+        "apikey": DEMO_PUBLISHABLE_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ talep_id: talepId }),

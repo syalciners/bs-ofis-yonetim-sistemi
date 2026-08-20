@@ -1,4 +1,4 @@
-import { BookOpenCheck, ClipboardCheck, FileBarChart, GraduationCap, HeartPulse, Repeat2, Settings, Target } from 'lucide-react'
+import { Bell, BookOpenCheck, ClipboardCheck, FileBarChart, GraduationCap, HeartPulse, Repeat2, Settings, Target } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { ManagerModeNav } from '../components/ManagerModeNav'
@@ -13,6 +13,7 @@ export function MorePage(){
     {to:'/odevler',Icon:BookOpenCheck,title:'Ödevler',text:'Bekleyen ve tamamlanan ödevler'},
     {to:'/kocluk',Icon:Target,title:'Koçluk',text:'Öğrenci hedefi, plan ve görüşme takibi'},
     {to:'/deneme-merkezi',Icon:ClipboardCheck,title:'Deneme Merkezi',text:'Net değişimi, ders analizi ve koçluk sinyalleri'},
+    ...(isManager?[{to:'/bildirimler',Icon:Bell,title:'Bildirimler',text:'Satış, operasyon ve sistem uyarıları'}]:[]),
     {to:'/raporlar',Icon:FileBarChart,title:'Raporlar',text:'Öğrenci, öğretmen ve kurum özetleri'},
     {to:'/ayarlar',Icon:Settings,title:'Ayarlar',text:'Kullanıcı ve uygulama tercihleri'},
     {to:'/sistem',Icon:HeartPulse,title:'Sistem Durumu',text:'Veri ve program sağlık kontrolü'},

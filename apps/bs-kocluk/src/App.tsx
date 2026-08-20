@@ -5,6 +5,7 @@ import { Navigate, NavLink, Route, Routes, useSearchParams } from 'react-router-
 import { BookAdd } from './BookAdd'
 import { isCancelled, isCoachingAssignment, loadCoachData, shortDate, studentName, type CoachData } from './data'
 import { ExamCenter } from './ExamCenter'
+import { MeetingCenter } from './MeetingCenter'
 import { PremiumDashboard } from './PremiumDashboard'
 import { QuickStudy } from './QuickStudy'
 import { StudentDetailWithPulse } from './StudentDetailWithPulse'
@@ -28,12 +29,6 @@ function PageTitle({ title, text }: { title: string; text: string }) {
 }
 
 function Empty({ text }: { text: string }) { return <div className="empty">{text}</div> }
-
-function useStudentFilter(data: CoachData) {
-  const [params] = useSearchParams()
-  const requested = params.get('ogrenci') || ''
-  return data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
-}
 
 function StudentFilterStrip({ data, studentId, clearTo }: { data: CoachData; studentId: string; clearTo: string }) {
   if (!studentId) return null
@@ -87,19 +82,10 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
   </div>
 }
 
-function Meetings({ data }: { data: CoachData }) {
-  const studentId = useStudentFilter(data)
-  const rows = data.meetings.filter(x => x.durum !== 'İptal' && (!studentId || x.ogrenci_id === studentId))
-  return <div className="page-stack"><PageTitle title="Koçluk Görüşmeleri" text="Görüşme hazırlığı ve kararlar burada toplanır."/>
-    <StudentFilterStrip data={data} studentId={studentId} clearTo="/gorusmeler"/>
-    {rows.length ? <section className="panel rows">{rows.map(x => <div className="row split" key={x.gorusme_id}><CalendarDays size={18}/><div><b>{studentName(data,x.ogrenci_id)}</b><span>{x.gundem || x.gorusme_turu || 'Koçluk görüşmesi'}</span></div><small>{x.durum}<br/>{shortDate(x.gorusme_tarihi)}</small></div>)}</section> : <Empty text={studentId ? 'Bu öğrenci için görüşme kaydı yok.' : 'Görüşme kaydı yok.'}/>} 
-  </div>
-}
-
 function Shell({ data, onRefresh, onSignOut }: { data: CoachData; onRefresh: () => void; onSignOut: () => void }) {
   const nav = [{to:'/',label:'Koç Masası',Icon:Target},{to:'/ogrenciler',label:'Öğrenciler',Icon:UsersRound},{to:'/plan',label:'Plan',Icon:BookOpenCheck},{to:'/denemeler',label:'Denemeler',Icon:GraduationCap},{to:'/gorusmeler',label:'Görüşmeler',Icon:CalendarDays}]
   return <div className="app-shell"><header className="topbar"><div className="brand"><div className="brand-mark small">BS</div><div><b>BS Koçluk</b><span>Premium öğrenci takip</span></div></div><div className="actions"><button aria-label="Verileri yenile" onClick={onRefresh}><RefreshCw size={17}/></button><strong>{data.profile.ad_soyad}</strong><button aria-label="Çıkış yap" onClick={onSignOut}><LogOut size={17}/></button></div></header>
-    <main className="container"><Routes><Route path="/" element={<PremiumDashboard data={data}/>}/><Route path="/ogrenciler" element={<StudentDirectory data={data}/>}/><Route path="/ogrenciler/:studentId" element={<StudentDetailWithPulse data={data}/>}/><Route path="/plan" element={<Plan data={data} onRefresh={onRefresh}/>}/><Route path="/denemeler" element={<ExamCenter data={data} onRefresh={onRefresh}/>}/><Route path="/gorusmeler" element={<Meetings data={data}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main>
+    <main className="container"><Routes><Route path="/" element={<PremiumDashboard data={data}/>}/><Route path="/ogrenciler" element={<StudentDirectory data={data}/>}/><Route path="/ogrenciler/:studentId" element={<StudentDetailWithPulse data={data}/>}/><Route path="/plan" element={<Plan data={data} onRefresh={onRefresh}/>}/><Route path="/denemeler" element={<ExamCenter data={data} onRefresh={onRefresh}/>}/><Route path="/gorusmeler" element={<MeetingCenter data={data}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main>
     <nav className="bottom-nav" aria-label="Ana menü">{nav.map(({to,label,Icon}) => <NavLink key={to} to={to} end={to==='/' } className={({isActive})=>isActive?'active':''}><Icon size={19}/><span>{label}</span></NavLink>)}</nav>
   </div>
 }

@@ -53,7 +53,9 @@ export interface Meeting {
   gorusme_turu?: string | null
   durum: string
   gundem?: string | null
+  gorusme_notu?: string | null
   alinan_kararlar?: string | null
+  sonraki_gorusme_tarihi?: string | null
 }
 
 export interface Exam {
@@ -156,7 +158,7 @@ export async function loadCoachData(userId: string): Promise<CoachData> {
   const [studentsResult, assignmentsResult, meetingsResult, examsResult, studentBooksResult] = await Promise.all([
     supabase.from('ogrenciler').select('ogrenci_id,ad_soyad,durum').in('ogrenci_id', studentIds).order('ad_soyad'),
     supabase.from('odevler').select('odev_id,ogrenci_id,ogretmen_id,konu,odev_basligi,verilis_tarihi,son_teslim_tarihi,durum,oncelik,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no,calisma_detayi').in('ogrenci_id', studentIds).order('son_teslim_tarihi', { ascending: true, nullsFirst: false }),
-    supabase.from('kocluk_gorusmeleri').select('gorusme_id,ogrenci_id,koc_ogretmen_id,gorusme_tarihi,baslangic_saati,gorusme_turu,durum,gundem,alinan_kararlar').in('ogrenci_id', studentIds).order('gorusme_tarihi', { ascending: false }),
+    supabase.from('kocluk_gorusmeleri').select('gorusme_id,ogrenci_id,koc_ogretmen_id,gorusme_tarihi,baslangic_saati,gorusme_turu,durum,gundem,gorusme_notu,alinan_kararlar,sonraki_gorusme_tarihi').in('ogrenci_id', studentIds).order('gorusme_tarihi', { ascending: false }),
     supabase.from('kocluk_deneme_sinavlari').select('deneme_id,ogrenci_id,sinav_turu,deneme_adi,deneme_tarihi,puan,siralama,yuzdelik,onay_durumu').in('ogrenci_id', studentIds).neq('onay_durumu', 'İptal').order('deneme_tarihi', { ascending: false }),
     supabase.from('ogrenci_kitaplari').select('ogrenci_kitap_id,ogrenci_id,kitap_id,durum,eklenme_tarihi').in('ogrenci_id', studentIds).eq('durum', 'Aktif').order('eklenme_tarihi', { ascending: false, nullsFirst: false }),
   ])

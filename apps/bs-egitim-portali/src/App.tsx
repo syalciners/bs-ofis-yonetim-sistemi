@@ -2,10 +2,11 @@ import type { Session } from '@supabase/supabase-js'
 import {
   BookOpenCheck,
   CalendarDays,
+  CalendarRange,
   Check,
   CheckCircle2,
+  ChevronRight,
   Clock3,
-  GraduationCap,
   LogOut,
   RefreshCw,
   ShieldCheck,
@@ -15,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabase'
 
-type Tab = 'bugun' | 'program' | 'odevler' | 'profil'
+type Tab = 'bugun' | 'hafta' | 'program' | 'odevler' | 'profil'
 
 type PortalProfile = {
   rol: 'Öğrenci' | 'Öğretmen'
@@ -84,6 +85,11 @@ function trDate(value?: string | null, long = false) {
     : { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
 }
 
+function addDays(iso: string, days: number) {
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days, 12)).toISOString().slice(0, 10)
+}
+
 function time(value?: string | null) {
   return value ? value.slice(0, 5) : '—'
 }
@@ -98,6 +104,10 @@ function assignmentDetail(item: Assignment) {
     return `${item.kitap_adi} · ${item.calisma_turu} ${range}`
   }
   return item.aciklama || item.odev_aciklamasi || item.ogretmen_adi || ''
+}
+
+function isDone(status: string) {
+  return ['Tamamlandı', 'Teslim Edildi'].includes(status)
 }
 
 function friendlyError(message: string) {
@@ -157,12 +167,12 @@ function LessonList({ lessons, role }: { lessons: Lesson[]; role: PortalProfile[
   </article>)}</div>
 }
 
-function StudentTodayView({ data, busyId, onComplete }: { data: PortalData; busyId: string; onComplete: (id: string) => void }) {
+function StudentTodayView({ data, busyId, onComplete, onWeek }: { data: PortalData; busyId: string; onComplete: (id: string) => void; onWeek: () => void }) {
   const today = data.studentToday!
   const groups = ['Geciken', 'Bugün', 'Yaklaşan'] as const
   return <div className="page-stack">
-    <section className="today-hero">
-      <div><span className="eyebrow">BUGÜN · {trDate(today.tarih, true).toLocaleUpperCase('tr-TR')}</span><h1>Merhaba, {data.profile.ad_soyad.split(' ')[0]}.</h1><p>Önce tamamlanması gerekenleri gösteriyoruz; geri kalan bilgi gerektiği yerde hazır.</p></div>
+    <section className="today-hero student-today-premium">
+      <div><span className="eyebrow">BUGÜN · {trDate(today.tarih, true).toLocaleUpperCase('tr-TR')}</span><h1>Merhaba, {data.profile.ad_soyad.split(' ')[0]}.</h1><p>Önce tamamlanması gerekenleri gösteriyoruz; geri kalan bilgi gerektiği yerde hazır.</p><button className="week-link" onClick={onWeek}><CalendarRange /> Haftayı Gör <ChevronRight /></button></div>
       <div className="today-summary">
         <span className={today.ozet.geciken ? 'danger' : ''}><b>{today.ozet.geciken}</b><small>Geciken</small></span>
         <span><b>{today.ozet.bugun}</b><small>Bugün</small></span>
@@ -192,6 +202,43 @@ function StudentTodayView({ data, busyId, onComplete }: { data: PortalData; busy
       <div className="section-head"><div><span>DERSLER</span><h2>Bugünkü program</h2></div><small>{today.dersler.length} ders</small></div>
       <LessonList lessons={today.dersler} role="Öğrenci" />
     </section>
+  </div>
+}
+
+function StudentWeekView({ data, busyId, onComplete, onToday }: { data: PortalData; busyId: string; onComplete: (id: string) => void; onToday: () => void }) {
+  const start = data.studentToday?.tarih || new Date().toISOString().slice(0, 10)
+  const end = addDays(start, 6)
+  const rows = data.assignments
+    .filter(item => item.durum !== 'İptal' && Boolean(item.son_teslim_tarihi && item.son_teslim_tarihi >= start && item.son_teslim_tarihi <= end))
+    .sort((a, b) => String(a.son_teslim_tarihi || '').localeCompare(String(b.son_teslim_tarihi || '')))
+  const completed = rows.filter(item => isDone(item.durum)).length
+  const percent = rows.length ? Math.round((completed / rows.length) * 100) : 0
+  const days = Array.from({ length: 7 }, (_, index) => addDays(start, index))
+
+  return <div className="page-stack student-week-page">
+    <section className="student-week-hero">
+      <div className="student-week-copy"><span className="eyebrow">BU HAFTA · {trDate(start)} – {trDate(end)}</span><h1>Haftanın planı hazır.</h1><p>Bugün ne yapacağını düşünmene gerek yok. Planı gün gün tamamla; kalanları sistem takip etsin.</p><button onClick={onToday}>Bugüne dön</button></div>
+      <div className="student-week-progress"><div className="progress-ring"><b>%{percent}</b><span>Tamamlandı</span></div><div><strong>{completed}/{rows.length}</strong><span>çalışma tamamlandı</span></div></div>
+    </section>
+
+    {!rows.length ? <div className="empty success"><CheckCircle2 /><b>Bu hafta için çalışma yok.</b><span>Koçunuz yeni bir plan yayınladığında burada gün gün görünecek.</span></div> : <section className="student-week-board">
+      {days.map(date => {
+        const dayRows = rows.filter(item => item.son_teslim_tarihi === date)
+        return <article className={`student-week-day ${date === start ? 'today' : ''}`} key={date}>
+          <header><div><span>{trDate(date, true)}</span><b>{date === start ? 'Bugün' : trDate(date)}</b></div><em>{dayRows.filter(item => isDone(item.durum)).length}/{dayRows.length}</em></header>
+          <div className="student-week-items">
+            {dayRows.length ? dayRows.map(item => {
+              const completedItem = isDone(item.durum)
+              return <div className={`student-week-item ${completedItem ? 'done' : ''}`} key={item.odev_id}>
+                <div className="week-item-icon">{completedItem ? <CheckCircle2 /> : <BookOpenCheck />}</div>
+                <div><b>{assignmentTitle(item)}</b><span>{assignmentDetail(item)}</span><small>{completedItem ? 'Tamamlandı' : 'Planlı çalışma'}</small></div>
+                {!completedItem && <button disabled={busyId === item.odev_id} onClick={() => onComplete(item.odev_id)}><Check /> {busyId === item.odev_id ? 'Kaydediliyor…' : 'Tamamladım'}</button>}
+              </div>
+            }) : <div className="student-week-rest"><CheckCircle2 /><span>Planlı çalışma yok</span></div>}
+          </div>
+        </article>
+      })}
+    </section>}
   </div>
 }
 
@@ -264,7 +311,8 @@ function Shell({ data, onRefresh, onSignOut }: { data: PortalData; onRefresh: ()
     <header className="topbar"><div className="brand"><div className="brand-mark small">BS</div><div><b>BS Eğitim</b><span>Portal</span></div></div><div className="top-actions"><span>{data.profile.rol}</span><button onClick={onRefresh} aria-label="Yenile"><RefreshCw /></button></div></header>
     <main className="container">
       {message && <div className="toast"><CheckCircle2 />{message}</div>}
-      {tab === 'bugun' && (data.profile.rol === 'Öğrenci' ? <StudentTodayView data={data} busyId={busyId} onComplete={id => void complete(id)} /> : <TeacherTodayView data={data} />)}
+      {tab === 'bugun' && (data.profile.rol === 'Öğrenci' ? <StudentTodayView data={data} busyId={busyId} onComplete={id => void complete(id)} onWeek={() => setTab('hafta')} /> : <TeacherTodayView data={data} />)}
+      {tab === 'hafta' && data.profile.rol === 'Öğrenci' && <StudentWeekView data={data} busyId={busyId} onComplete={id => void complete(id)} onToday={() => setTab('bugun')} />}
       {tab === 'program' && <Program data={data} />}
       {tab === 'odevler' && <Assignments data={data} />}
       {tab === 'profil' && <Profile data={data} onSignOut={onSignOut} />}

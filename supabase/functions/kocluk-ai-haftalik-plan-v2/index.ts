@@ -132,7 +132,7 @@ Deno.serve(async (req: Request) => {
 
     const [assignmentsResult, booksResult, meetingsResult, examsResult] = await Promise.all([
       client.from('odevler')
-        .select('odev_id,ogrenci_id,odev_basligi,verilis_tarihi,son_teslim_tarihi,durum,tamamlanma_tarihi,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no')
+        .select('odev_id,ogrenci_id,verilis_tarihi,son_teslim_tarihi,durum,tamamlanma_tarihi,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no')
         .eq('ogrenci_id', studentId)
         .order('verilis_tarihi', { ascending: false }),
       client.from('ogrenci_kitaplari')
@@ -146,7 +146,7 @@ Deno.serve(async (req: Request) => {
         .order('gorusme_tarihi', { ascending: false })
         .limit(3),
       client.from('kocluk_deneme_sinavlari')
-        .select('deneme_id,sinav_turu,deneme_adi,deneme_tarihi,onay_durumu')
+        .select('deneme_id,sinav_turu,deneme_tarihi,onay_durumu')
         .eq('ogrenci_id', studentId)
         .neq('onay_durumu', 'İptal')
         .order('deneme_tarihi', { ascending: false })
@@ -270,18 +270,21 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Görüşme kararının metni OpenAI'a gönderilmez; yalnız karar kaydının varlığı plan bağlamına eklenir.
     const meetingContext = (meetingsResult.data || [])
       .filter((item: any) => compact(item.alinan_kararlar))
       .slice(0, 2)
       .map((item: any) => ({ tarih: compact(item.gorusme_tarihi), karar_var: true }))
 
-    const planId = `AIP-${today.replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
-    const openThisWindow = assignments.filter((item: any) => {
+    const openLoad = new Map<string, number>()
+    for (const item of assignments as any[]) {
       const due = compact(item.son_teslim_tarihi)
-      return !done(item.durum) && !cancelled(item.durum) && due && due >= today && due <= planEnd
-    }).map((item: any) => ({ tarih: item.son_teslim_tarihi, baslik: clampText(item.odev_basligi, 120) }))
+      if (!done(item.durum) && !cancelled(item.durum) && due && due >= today && due <= planEnd) {
+        openLoad.set(due, (openLoad.get(due) || 0) + 1)
+      }
+    }
+    const openThisWindow = [...openLoad.entries()].map(([tarih, adet]) => ({ tarih, adet }))
 
+    const planId = `AIP-${today.replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
     let aiPlan = fallbackPlan(candidates, allowedDates, Math.min(maxNew, candidates.length), holdReason)
     let aiActive = false
     let model = ''
@@ -308,7 +311,7 @@ Deno.serve(async (req: Request) => {
                   'Bir eğitim koçunun haftalık çalışma planı yardımcısısın.',
                   'Yalnız verilen ADAY kimliklerinden çalışma seçebilirsin. Yeni kitap, ders, konu, sayfa, test veya çalışma aralığı UYDURMA.',
                   'Adayın başlangıç ve bitiş aralığını değiştirme. Yalnız izinli tarihlerden birini seç.',
-                  'Mevcut açık çalışmaları dikkate al ve aynı güne gereksiz yığılma yapma.',
+                  'Mevcut açık çalışmaları yalnız gün başına adet olarak görürsün; aynı güne gereksiz yığılma yapma.',
                   'Deneme verisini yalnız öncelik sinyali olarak kullan; neden-sonuç iddiası kurma.',
                   'Görüşme kararı içeriği paylaşılmaz; yalnız yakın zamanda karar kaydı bulunduğunu bağlam olarak kullan.',
                   'Öğrencinin gerçek son 21 günlük tamamlama kapasitesini aşma. Daha az görev seçmek serbesttir.',
@@ -329,7 +332,7 @@ Deno.serve(async (req: Request) => {
                     haftalik_hedef_ust_sinir: Math.min(maxNew, candidates.length),
                     son_7_gun_tamamlama_yuzdesi: weekCompletion,
                   },
-                  mevcut_acik_plan: openThisWindow,
+                  mevcut_acik_yuk: openThisWindow,
                   adaylar: safeCandidates,
                   denemeler: examContext,
                   son_gorusmeler: meetingContext,

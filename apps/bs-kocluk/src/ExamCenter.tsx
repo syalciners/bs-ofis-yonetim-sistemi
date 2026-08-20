@@ -83,7 +83,7 @@ function rowsFromPhoto(type: ExamType, read?: ExamPhotoRead | null): Row[] {
   if (type === 'Diğer') return aiRows
 
   const used = new Set<number>()
-  const merged = preset(type).map(base => {
+  return preset(type).map(base => {
     const baseKey = sectionKey(base.name)
     const index = aiRows.findIndex((candidate, i) => !used.has(i) && sectionKey(candidate.name) === baseKey)
     if (index < 0) return base
@@ -97,7 +97,6 @@ function rowsFromPhoto(type: ExamType, read?: ExamPhotoRead | null): Row[] {
       confidence: candidate.confidence,
     }
   })
-  return merged
 }
 
 function validPhotoDate(value: string) {
@@ -159,6 +158,7 @@ function ExamAdd({ data, initialStudentId, initialPhoto, onClose, onSaved }: {
   const [percentile,setPercentile] = useState(initialPhoto?.yuzdelik || '')
   const [notes,setNotes] = useState('')
   const [more,setMore] = useState(Boolean(initialPhoto?.yayinevi || initialPhoto?.puan || initialPhoto?.siralama || initialPhoto?.yuzdelik))
+  const [detailsOpen,setDetailsOpen] = useState(false)
   const [busy,setBusy] = useState(false)
   const [error,setError] = useState<string|null>(null)
   const [saved,setSaved] = useState<string|null>(null)
@@ -176,6 +176,19 @@ function ExamAdd({ data, initialStudentId, initialPhoto, onClose, onSaved }: {
   const answered = stats.reduce((sum,x) => sum + x.correct + x.wrong,0)
   const unresolvedPhoto = photoMode && rows.some(row => row.correct.trim() === '' || row.wrong.trim() === '')
   const canSave = Boolean(studentId && examName.trim() && examDate && answered > 0 && !stats.some(x => x.invalid) && !unresolvedPhoto && divisor > 0)
+  const quickPhoto = Boolean(
+    photoMode &&
+    initialPhoto &&
+    initialPhoto.sinav_turu !== 'Diğer' &&
+    initialPhoto.sinav_turu !== 'Belirsiz' &&
+    initialPhoto.genel_guven >= 90 &&
+    initialPhoto.uyarilar.length === 0 &&
+    examName.trim() &&
+    validPhotoDate(examDate) &&
+    rows.length === preset(initialType).length &&
+    rows.every((row,index) => row.correct.trim() !== '' && row.wrong.trim() !== '' && (row.confidence ?? 0) >= 85 && !stats[index].invalid)
+  )
+  const showQuick = quickPhoto && !detailsOpen
 
   const changeType = (type: ExamType) => {
     setExamType(type)
@@ -217,29 +230,56 @@ function ExamAdd({ data, initialStudentId, initialPhoto, onClose, onSaved }: {
 
   return <div className="exam-add-overlay" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose() }}>
     <section className="exam-add-sheet" role="dialog" aria-modal="true" aria-labelledby="exam-add-title">
-      <header className="exam-add-head"><div><span><Sparkles/> DENEME MERKEZİ</span><h2 id="exam-add-title">{photoMode ? 'AI taslağını kontrol et' : 'Deneme sonucu ekle'}</h2><p>{photoMode ? 'Fotoğraftan okunan alanları kontrol edin; yalnız sizin onayınızla kaydedilir.' : 'Doğru ve yanlışı girin; boş ve neti sistem hesaplasın.'}</p></div><button type="button" onClick={onClose} disabled={busy} aria-label="Kapat"><X/></button></header>
+      <header className="exam-add-head"><div><span><Sparkles/> DENEME MERKEZİ</span><h2 id="exam-add-title">{showQuick ? 'Sonucu kontrol et' : photoMode ? 'AI taslağını kontrol et' : 'Deneme sonucu ekle'}</h2><p>{showQuick ? 'AI sonucu yüksek güvenle okudu. Değişiklik yoksa tek dokunuşla kaydedin.' : photoMode ? 'Fotoğraftan okunan alanları kontrol edin; yalnız sizin onayınızla kaydedilir.' : 'Doğru ve yanlışı girin; boş ve neti sistem hesaplasın.'}</p></div><button type="button" onClick={onClose} disabled={busy} aria-label="Kapat"><X/></button></header>
       <form className="exam-add-form" onSubmit={submit}>
-        {photoMode && <div className="exam-ai-review-banner"><Sparkles/><div><b>Fotoğraftan dolduruldu · güven %{initialPhoto?.genel_guven ?? 0}</b><span>Eksik veya düşük güvenli alanlar otomatik kayıt oluşturmaz; kontrol sizde kalır.</span></div></div>}
-        {photoMode && initialPhoto?.uyarilar?.length ? <div className="exam-ai-warning-list">{initialPhoto.uyarilar.map((warning,index) => <span key={`${index}-${warning}`}>• {warning}</span>)}</div> : null}
-        {!validInitial && data.coachingProfiles.length > 1 && <label><span>Öğrenci</span><select value={studentId} onChange={e => { const id=e.target.value; setStudentId(id); changeType(normalizeType(studentProfile(data,id)?.sinav_turu)) }} required><option value="">Öğrenci seçin</option>{data.coachingProfiles.map(p => <option key={p.ogrenci_id} value={p.ogrenci_id}>{studentName(data,p.ogrenci_id)}</option>)}</select></label>}
+        {!validInitial && data.coachingProfiles.length > 1 && <label><span>Öğrenci</span><select value={studentId} onChange={e => { const id=e.target.value; setStudentId(id); if (!photoMode) changeType(normalizeType(studentProfile(data,id)?.sinav_turu)) }} required><option value="">Öğrenci seçin</option>{data.coachingProfiles.map(p => <option key={p.ogrenci_id} value={p.ogrenci_id}>{studentName(data,p.ogrenci_id)}</option>)}</select></label>}
         {studentId && <div className="exam-student-context"><span>Öğrenci</span><b>{studentName(data,studentId)}</b></div>}
-        <div className="exam-type-chips">{(['LGS','TYT','AYT','Diğer'] as ExamType[]).map(type => <button type="button" key={type} className={examType===type?'selected':''} onClick={() => changeType(type)}>{type}</button>)}</div>
-        <div className="exam-basics"><label><span>Deneme adı</span><input value={examName} onChange={e=>setExamName(e.target.value)} placeholder="Örn. Türkiye Geneli 3" required/></label><label><span>Tarih</span><input type="date" max={isoToday()} value={examDate} onChange={e=>setExamDate(e.target.value)} required/></label></div>
-        <div className="exam-rule"><Calculator/><div><b>Net kuralı</b><span>{examType==='LGS'?'3 yanlış 1 doğruyu götürür.':examType==='TYT'||examType==='AYT'?'4 yanlış 1 doğruyu götürür.':'Kurum kuralına göre değiştirilebilir.'}</span></div><input aria-label="Yanlış böleni" type="number" min="0.1" step="0.1" value={divisor} onChange={e=>setDivisor(Number(e.target.value))}/></div>
-        <div className="exam-score-head"><b>Ders sonuçları</b><span>{photoMode ? 'AI taslağı · kontrol zorunlu' : 'Yalnız doğru ve yanlış'}</span></div>
-        <div className="exam-score-grid">
-          <div className="exam-score-header"><span>Ders</span><span>Doğru</span><span>Yanlış</span><span>Boş</span><span>Net</span></div>
-          {rows.map((row,index) => <div className={`exam-score-row ${stats[index].invalid?'invalid':''} ${photoMode && (row.correct==='' || row.wrong==='')?'needs-review':''}`} key={row.key}><div><b>{row.name}</b><small>{row.questions} soru{row.confidence != null ? ` · AI %${row.confidence}` : ''}</small></div><input aria-label={`${row.name} doğru`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.correct} onChange={e=>update(index,'correct',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><input aria-label={`${row.name} yanlış`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.wrong} onChange={e=>update(index,'wrong',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><output>{stats[index].blank}</output><output>{stats[index].net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</output></div>)}
-        </div>
-        <div className="exam-total"><span><small>İşaretlenen</small><b>{answered}</b></span><span><small>Toplam net</small><b>{totalNet.toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span></div>
-        <button type="button" className="exam-more-toggle" onClick={()=>setMore(x=>!x)}>Ek bilgiler <ChevronDown className={more?'open':''}/></button>
-        {more && <div className="exam-more"><label><span>Yayın / Kurum</span><input value={publisher} onChange={e=>setPublisher(e.target.value)} /></label><label><span>Puan</span><input type="number" min="0" step="0.01" value={score} onChange={e=>setScore(e.target.value)}/></label><label><span>Sıralama</span><input type="number" min="1" value={rank} onChange={e=>setRank(e.target.value)}/></label><label><span>Yüzdelik</span><input type="number" min="0" max="100" step="0.001" value={percentile} onChange={e=>setPercentile(e.target.value)}/></label><label className="wide"><span>Koç notu</span><textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)}/></label></div>}
-        {photoMode && unresolvedPhoto && <div className="exam-hint">AI'ın okuyamadığı doğru/yanlış alanları var. Kaydetmeden önce bu alanlara 0 dahil gerçek değeri girin.</div>}
-        {answered===0 && <div className="exam-hint">Kaydetmek için en az bir doğru veya yanlış sonucu girin.</div>}
-        {stats.some(x=>x.invalid) && <div className="exam-error">Doğru + yanlış toplamı soru sayısını aşamaz.</div>}
-        {error && <div className="exam-error">{error}</div>}
-        {saved && <div className="exam-success"><Check/> {saved}</div>}
-        <footer className="exam-add-actions"><button type="button" onClick={onClose} disabled={busy}>Vazgeç</button><button type="submit" className="primary" disabled={!canSave || busy || Boolean(saved)}>{busy?'Kaydediliyor…':photoMode?'Kontrol Ettim, Kaydet':'Sonucu Kaydet'}</button></footer>
+
+        {showQuick ? <>
+          <div className="exam-quick-confirm">
+            <div className="exam-quick-confirm-head"><Check/><div><b>Sonuç tutarlı görünüyor · AI güven %{initialPhoto?.genel_guven ?? 0}</b><span>Koç yalnızca öğrenci, deneme adı, tarih ve toplamları gözden geçirir. Ayrıntıya ihtiyaç yoksa doğrudan kaydedebilir.</span></div></div>
+            <div className="exam-quick-meta">
+              <span><small>Deneme</small><b>{examName}</b></span>
+              <span><small>Tür</small><b>{examType}</b></span>
+              <span><small>Tarih</small><b>{examDate}</b></span>
+            </div>
+            <div className="exam-quick-results">{rows.map((row,index) => <div className="exam-quick-row" key={row.key}>
+              <div><b>{row.name}</b><small>{row.questions} soru · AI %{row.confidence ?? initialPhoto?.genel_guven ?? 0}</small></div>
+              <span className="exam-quick-value"><small>D</small><b>{stats[index].correct}</b></span>
+              <span className="exam-quick-value"><small>Y</small><b>{stats[index].wrong}</b></span>
+              <span className="exam-quick-value"><small>B</small><b>{stats[index].blank}</b></span>
+              <span className="exam-quick-value net"><small>Net</small><b>{stats[index].net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span>
+            </div>)}</div>
+            <div className="exam-quick-total">
+              {score.trim() && <span className="score"><small>Puan</small><b>{Number(score).toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span>}
+              <span><small>Toplam net</small><b>{totalNet.toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span>
+            </div>
+            <div className="exam-quick-note">Fotoğraf doğrudan kayıt oluşturmaz. “Doğru, Kaydet” dediğinizde mevcut güvenli deneme kayıt akışı çalışır.</div>
+          </div>
+          {error && <div className="exam-error">{error}</div>}
+          {saved && <div className="exam-success"><Check/> {saved}</div>}
+          <footer className="exam-quick-actions"><button type="button" onClick={()=>setDetailsOpen(true)} disabled={busy}>Düzelt</button><button type="submit" className="primary" disabled={!canSave || busy || Boolean(saved)}>{busy?'Kaydediliyor…':'Doğru, Kaydet'}</button></footer>
+        </> : <>
+          {photoMode && <div className="exam-ai-review-banner"><Sparkles/><div><b>Fotoğraftan dolduruldu · güven %{initialPhoto?.genel_guven ?? 0}</b><span>Eksik veya düşük güvenli alanlar otomatik kayıt oluşturmaz; kontrol sizde kalır.</span></div></div>}
+          {photoMode && initialPhoto?.uyarilar?.length ? <div className="exam-ai-warning-list">{initialPhoto.uyarilar.map((warning,index) => <span key={`${index}-${warning}`}>• {warning}</span>)}</div> : null}
+          <div className="exam-type-chips">{(['LGS','TYT','AYT','Diğer'] as ExamType[]).map(type => <button type="button" key={type} className={examType===type?'selected':''} onClick={() => changeType(type)}>{type}</button>)}</div>
+          <div className="exam-basics"><label><span>Deneme adı</span><input value={examName} onChange={e=>setExamName(e.target.value)} placeholder="Örn. Türkiye Geneli 3" required/></label><label><span>Tarih</span><input type="date" max={isoToday()} value={examDate} onChange={e=>setExamDate(e.target.value)} required/></label></div>
+          <div className="exam-rule"><Calculator/><div><b>Net kuralı</b><span>{examType==='LGS'?'3 yanlış 1 doğruyu götürür.':examType==='TYT'||examType==='AYT'?'4 yanlış 1 doğruyu götürür.':'Kurum kuralına göre değiştirilebilir.'}</span></div><input aria-label="Yanlış böleni" type="number" min="0.1" step="0.1" value={divisor} onChange={e=>setDivisor(Number(e.target.value))}/></div>
+          <div className="exam-score-head"><b>Ders sonuçları</b><span>{photoMode ? 'AI taslağı · yalnız şüpheli alanları düzeltin' : 'Yalnız doğru ve yanlış'}</span></div>
+          <div className="exam-score-grid">
+            <div className="exam-score-header"><span>Ders</span><span>Doğru</span><span>Yanlış</span><span>Boş</span><span>Net</span></div>
+            {rows.map((row,index) => <div className={`exam-score-row ${stats[index].invalid?'invalid':''} ${photoMode && (row.correct==='' || row.wrong==='')?'needs-review':''}`} key={row.key}><div><b>{row.name}</b><small>{row.questions} soru{row.confidence != null ? ` · AI %${row.confidence}` : ''}</small></div><input aria-label={`${row.name} doğru`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.correct} onChange={e=>update(index,'correct',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><input aria-label={`${row.name} yanlış`} type="number" min="0" max={row.questions} inputMode="numeric" value={row.wrong} onChange={e=>update(index,'wrong',e.target.value)} placeholder={photoMode?'Kontrol':'0'}/><output>{stats[index].blank}</output><output>{stats[index].net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</output></div>)}
+          </div>
+          <div className="exam-total"><span><small>İşaretlenen</small><b>{answered}</b></span><span><small>Toplam net</small><b>{totalNet.toLocaleString('tr-TR',{maximumFractionDigits:2})}</b></span></div>
+          <button type="button" className="exam-more-toggle" onClick={()=>setMore(x=>!x)}>Ek bilgiler <ChevronDown className={more?'open':''}/></button>
+          {more && <div className="exam-more"><label><span>Yayın / Kurum</span><input value={publisher} onChange={e=>setPublisher(e.target.value)} /></label><label><span>Puan</span><input type="number" min="0" step="0.01" value={score} onChange={e=>setScore(e.target.value)}/></label><label><span>Sıralama</span><input type="number" min="1" value={rank} onChange={e=>setRank(e.target.value)}/></label><label><span>Yüzdelik</span><input type="number" min="0" max="100" step="0.001" value={percentile} onChange={e=>setPercentile(e.target.value)}/></label><label className="wide"><span>Koç notu</span><textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)}/></label></div>}
+          {photoMode && unresolvedPhoto && <div className="exam-hint">AI'ın okuyamadığı doğru/yanlış alanları var. Kaydetmeden önce bu alanlara 0 dahil gerçek değeri girin.</div>}
+          {answered===0 && <div className="exam-hint">Kaydetmek için en az bir doğru veya yanlış sonucu girin.</div>}
+          {stats.some(x=>x.invalid) && <div className="exam-error">Doğru + yanlış toplamı soru sayısını aşamaz.</div>}
+          {error && <div className="exam-error">{error}</div>}
+          {saved && <div className="exam-success"><Check/> {saved}</div>}
+          <footer className="exam-add-actions"><button type="button" onClick={onClose} disabled={busy}>Vazgeç</button><button type="submit" className="primary" disabled={!canSave || busy || Boolean(saved)}>{busy?'Kaydediliyor…':photoMode?'Kontrol Ettim, Kaydet':'Sonucu Kaydet'}</button></footer>
+        </>}
       </form>
     </section>
   </div>

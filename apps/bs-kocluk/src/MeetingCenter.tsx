@@ -204,11 +204,11 @@ function BriefSheet({ data, meeting, onClose, onActionMeeting }: { data: CoachDa
 
 function MeetingCard({ data, meeting, canPrepare, onPrepare, onAction }: { data: CoachData; meeting: Meeting; canPrepare: boolean; onPrepare: () => void; onAction: () => void }) {
   const action = actionForMeeting(data, meeting.gorusme_id)
-  const canCreateAction = meeting.durum === 'Tamamlandı' && Boolean(meeting.alinan_kararlar?.trim())
+  const canCreateAction = meeting.durum === 'Yapıldı' && Boolean(meeting.alinan_kararlar?.trim())
   return <article className="meeting-card">
     <div className="meeting-card-date"><CalendarDays/><b>{shortDate(meeting.gorusme_tarihi)}</b><span>{timeText(meeting.baslangic_saati)}</span></div>
     <div className="meeting-card-copy"><div><strong>{studentName(data, meeting.ogrenci_id)}</strong><span>{meeting.gorusme_turu || 'Koçluk görüşmesi'}</span></div><h3>{meetingTitle(meeting)}</h3>{meeting.alinan_kararlar?.trim() && <p><b>Son karar:</b> {meeting.alinan_kararlar}</p>}</div>
-    <div className="meeting-card-side"><span className={`meeting-status ${meeting.durum === 'Tamamlandı' ? 'done' : ''}`}>{meeting.durum}</span>{canPrepare && <button type="button" onClick={onPrepare}><Sparkles/> Hazırlığı Aç</button>}{canCreateAction && (action ? <NavLink className="meeting-action-done" to={`/plan?ogrenci=${encodeURIComponent(meeting.ogrenci_id)}`}><CheckCircle2/> Planda</NavLink> : <button type="button" className="meeting-action-create" onClick={onAction}><ListTodo/> Plana Aktar</button>)}</div>
+    <div className="meeting-card-side"><span className={`meeting-status ${meeting.durum === 'Yapıldı' ? 'done' : ''}`}>{meeting.durum}</span>{canPrepare && <button type="button" onClick={onPrepare}><Sparkles/> Hazırlığı Aç</button>}{canCreateAction && (action ? <NavLink className="meeting-action-done" to={`/plan?ogrenci=${encodeURIComponent(meeting.ogrenci_id)}`}><CheckCircle2/> Planda</NavLink> : <button type="button" className="meeting-action-create" onClick={onAction}><ListTodo/> Plana Aktar</button>)}</div>
   </article>
 }
 
@@ -223,10 +223,10 @@ export function MeetingCenter({ data, onRefresh }: { data: CoachData; onRefresh:
   const rows = data.meetings
     .filter(item => item.durum !== 'İptal' && (!studentId || item.ogrenci_id === studentId))
   const upcoming = rows
-    .filter(item => item.gorusme_tarihi >= today && item.durum !== 'Tamamlandı')
+    .filter(item => item.gorusme_tarihi >= today && item.durum !== 'Yapıldı')
     .sort((a, b) => a.gorusme_tarihi.localeCompare(b.gorusme_tarihi) || String(a.baslangic_saati || '').localeCompare(String(b.baslangic_saati || '')))
   const history = rows
-    .filter(item => item.gorusme_tarihi < today || item.durum === 'Tamamlandı')
+    .filter(item => item.gorusme_tarihi < today || item.durum === 'Yapıldı')
     .sort((a, b) => b.gorusme_tarihi.localeCompare(a.gorusme_tarihi))
   const next = upcoming[0] || null
 
@@ -248,7 +248,7 @@ export function MeetingCenter({ data, onRefresh }: { data: CoachData; onRefresh:
 
     {upcoming.length > 1 && <section className="meeting-section"><div className="meeting-section-head"><div><span>YAKLAŞAN</span><h2>Sonraki görüşmeler</h2></div><small>{upcoming.length - 1} görüşme</small></div><div className="meeting-list">{upcoming.slice(1).map(meeting => <MeetingCard key={meeting.gorusme_id} data={data} meeting={meeting} canPrepare onPrepare={() => setSelected(meeting)} onAction={() => openAction(meeting)}/>)}</div></section>}
 
-    <section className="meeting-section"><div className="meeting-section-head"><div><span>GEÇMİŞ</span><h2>Görüşme geçmişi</h2></div><small>{history.length} kayıt</small></div>{history.length ? <div className="meeting-list">{history.map(meeting => <MeetingCard key={meeting.gorusme_id} data={data} meeting={meeting} canPrepare={false} onPrepare={() => undefined} onAction={() => openAction(meeting)}/>)}</div> : <div className="empty">{studentId ? 'Bu öğrenci için tamamlanmış görüşme yok.' : 'Tamamlanmış görüşme kaydı yok.'}</div>}</section>
+    <section className="meeting-section"><div className="meeting-section-head"><div><span>GEÇMİŞ</span><h2>Görüşme geçmişi</h2></div><small>{history.length} kayıt</small></div>{history.length ? <div className="meeting-list">{history.map(meeting => <MeetingCard key={meeting.gorusme_id} data={data} meeting={meeting} canPrepare={false} onPrepare={() => undefined} onAction={() => openAction(meeting)}/>)}</div> : <div className="empty">{studentId ? 'Bu öğrenci için yapılmış görüşme yok.' : 'Yapılmış görüşme kaydı yok.'}</div>}</section>
 
     {selected && <BriefSheet data={data} meeting={selected} onClose={() => setSelected(null)} onActionMeeting={openAction}/>} 
     {actionMeeting && <ActionSheet data={data} meeting={actionMeeting} onClose={() => setActionMeeting(null)} onSaved={onRefresh}/>} 

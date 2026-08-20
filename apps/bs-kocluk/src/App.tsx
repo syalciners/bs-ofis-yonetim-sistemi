@@ -14,7 +14,7 @@ import { supabase } from './supabase'
 import { WeeklyPlan } from './WeeklyPlan'
 
 function BrandLogo({ small = false }: { small?: boolean }) {
-  return <img className={small ? 'brand-logo small' : 'brand-logo'} src="./bs-egitim-icon-512-v2.png" alt="BS Eğitim" />
+  return <img className={small ? 'brand-logo small' : 'brand-logo'} src="./bs-kocluk-ai-logo.svg" alt="BS Koçluk AI" />
 }
 
 function Login({ error, onLogin }: { error: string | null; onLogin: () => void }) {
@@ -38,8 +38,7 @@ function StudentFilterStrip({ data, studentId, clearTo }: { data: CoachData; stu
   if (!studentId) return null
   return <div className="student-filter-strip">
     <div><UsersRound/><div><strong>{studentName(data, studentId)}</strong><span>Öğrenci filtresi aktif</span></div></div>
-    <div><NavLink to={`/ogrenciler/${encodeURIComponent(studentId)}`}>360’a dön</NavLink><NavLink to={clearTo}>Tümünü göster</NavLink></div>
-  </div>
+    <div><NavLink to={`/ogrenciler/${encodeURIComponent(studentId)}`}>360’a dön</NavLink><NavLink to={clearTo}>Tümünü göster</NavLink></div></div>
 }
 
 function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {

@@ -1,5 +1,5 @@
-run_id=32417126151
-job_status=failure
+run_id=32417761512
+job_status=success
 token=success
 source_guard=success
 portal_build=success
@@ -8,6 +8,6 @@ artifact_guard=success
 project_access=success
 cli=success
 deploy=success
-smoke=failure
+smoke=success
 expected_index_js=assets/index-D7Lmb661.js
 expected_index_css=assets/index-BdB8KqRX.css

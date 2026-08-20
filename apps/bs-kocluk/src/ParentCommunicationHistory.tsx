@@ -32,15 +32,16 @@ export function ParentCommunicationHistory({ studentId, refreshKey = 0 }: { stud
 
   useEffect(() => {
     let live = true
-    setLoading(true)
-    setError(false)
-    void supabase
-      .from('kocluk_veli_iletisimleri')
-      .select('iletisim_id,ogrenci_id,kanal,durum,icerik,kaynak,iletisim_zamani')
-      .eq('ogrenci_id', studentId)
-      .order('iletisim_zamani', { ascending: false })
-      .limit(12)
-      .then(({ data, error: queryError }) => {
+    const load = async () => {
+      setLoading(true)
+      setError(false)
+      try {
+        const { data, error: queryError } = await supabase
+          .from('kocluk_veli_iletisimleri')
+          .select('iletisim_id,ogrenci_id,kanal,durum,icerik,kaynak,iletisim_zamani')
+          .eq('ogrenci_id', studentId)
+          .order('iletisim_zamani', { ascending: false })
+          .limit(12)
         if (!live) return
         if (queryError) {
           setError(true)
@@ -48,8 +49,15 @@ export function ParentCommunicationHistory({ studentId, refreshKey = 0 }: { stud
           return
         }
         setRows((data || []) as Communication[])
-      })
-      .finally(() => { if (live) setLoading(false) })
+      } catch {
+        if (!live) return
+        setError(true)
+        setRows([])
+      } finally {
+        if (live) setLoading(false)
+      }
+    }
+    void load()
     return () => { live = false }
   }, [studentId, refreshKey])
 

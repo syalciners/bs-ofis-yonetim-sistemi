@@ -1,0 +1,2 @@
+target_main_commit=54325de9ae7bc7552fb4f583623083cb4f656af9
+reason=Portal Bildirim Merkezi V1 production yayını

@@ -18,6 +18,7 @@ import './exam-quick-confirm.css'
 import './meeting-center.css'
 import './meeting-action.css'
 import './parent-summary.css'
+import './coach-assistant.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

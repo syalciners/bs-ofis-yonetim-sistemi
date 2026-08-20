@@ -43,9 +43,14 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
   const requested = params.get('ogrenci') || ''
   const studentId = data.coachingProfiles.some(x => x.ogrenci_id === requested) ? requested : ''
   const quickOpen = params.get('ekle') === '1'
-  const [weeklyOpen, setWeeklyOpen] = useState(false)
+  const weeklyRequested = params.get('hafta') === '1'
+  const [weeklyOpen, setWeeklyOpen] = useState(weeklyRequested)
   const [bookStudentId, setBookStudentId] = useState('')
   const rows = data.assignments.filter(x => !isCancelled(x.durum) && (!studentId || x.ogrenci_id === studentId))
+
+  useEffect(() => {
+    if (weeklyRequested) setWeeklyOpen(true)
+  }, [weeklyRequested])
 
   const setQuickOpen = (open: boolean) => {
     const next = new URLSearchParams(params)
@@ -54,11 +59,20 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
     setParams(next, { replace: true })
   }
 
+  const closeWeekly = () => {
+    setWeeklyOpen(false)
+    if (!weeklyRequested) return
+    const next = new URLSearchParams(params)
+    next.delete('hafta')
+    setParams(next, { replace: true })
+  }
+
   const openQuickForStudent = (id: string) => {
     setWeeklyOpen(false)
     const next = new URLSearchParams(params)
     next.set('ogrenci', id)
     next.set('ekle', '1')
+    next.delete('hafta')
     setParams(next, { replace: true })
   }
 
@@ -76,7 +90,7 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
     </div>
     <StudentFilterStrip data={data} studentId={studentId} clearTo="/plan"/>
     {rows.length ? <section className="panel rows">{rows.map(x => <div className="row split" key={x.odev_id}><BookOpenCheck size={18}/><div><b>{x.odev_basligi || x.konu || 'Çalışma'}</b><span>{studentName(data,x.ogrenci_id)} · {x.kaynak_gorusme_id ? 'Görüşme Kararı' : isCoachingAssignment(x) ? 'Koçluk Çalışması' : 'Ders Ödevi'}</span></div><small>{x.durum}<br/>{shortDate(x.son_teslim_tarihi || x.verilis_tarihi)}</small></div>)}</section> : <Empty text={studentId ? 'Bu öğrenci için çalışma kaydı yok.' : 'Henüz çalışma kaydı yok.'}/>} 
-    {weeklyOpen && <WeeklyPlan data={data} initialStudentId={studentId} onClose={() => setWeeklyOpen(false)} onSaved={onRefresh} onOpenQuickStudy={openQuickForStudent}/>} 
+    {weeklyOpen && <WeeklyPlan data={data} initialStudentId={studentId} onClose={closeWeekly} onSaved={onRefresh} onOpenQuickStudy={openQuickForStudent}/>} 
     {quickOpen && <QuickStudy data={data} initialStudentId={studentId} onClose={() => setQuickOpen(false)} onSaved={onRefresh} onNeedBook={id => setBookStudentId(id)}/>} 
     {bookStudentId && <BookAdd data={data} initialStudentId={bookStudentId} onClose={() => setBookStudentId('')} onSaved={refreshAfterBook}/>} 
   </div>

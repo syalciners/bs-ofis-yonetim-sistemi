@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowRight, BookOpenCheck, CalendarDays, CheckCircle2, Clock3, Sparkles, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
+import { CoachAssistantPanel } from './CoachAssistantPanel'
 import { isCancelled, isDone, isoToday, shortDate, studentName, type Assignment, type CoachData, type Meeting } from './data'
 import { buildAllStudentPulses } from './studentPulse'
 
@@ -75,6 +76,8 @@ export function PremiumDashboard({ data }: { data: CoachData }) {
         <CalendarDays/><div><span>Sıradaki Görüşme</span><strong>{nextMeeting ? shortDate(nextMeeting.gorusme_tarihi) : '—'}</strong></div><ArrowRight/>
       </NavLink>
     </section>
+
+    <CoachAssistantPanel data={data}/>
 
     <section className="premium-panel priority-panel">
       <div className="premium-section-head">

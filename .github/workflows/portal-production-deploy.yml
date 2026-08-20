@@ -8,7 +8,7 @@ on:
       - .portal-production-deploy-trigger.txt
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy-production:
@@ -29,6 +29,7 @@ jobs:
           node-version: 22
 
       - name: Vercel token kontrolü
+        id: token
         shell: bash
         run: |
           set -euo pipefail
@@ -38,6 +39,7 @@ jobs:
           fi
 
       - name: Portal Supabase bağlantısını doğrula
+        id: source_guard
         shell: bash
         run: |
           set -euo pipefail
@@ -64,15 +66,18 @@ jobs:
           NODE
 
       - name: Portal bağımlılıklarını kur ve build doğrula
+        id: portal_build
         working-directory: apps/bs-egitim-portali
         run: |
           npm install --no-audit --no-fund
           npm run build
 
       - name: Vercel CLI kur
+        id: cli
         run: npm install --global vercel@latest
 
       - name: Vercel portal proje bağlantısını hazırla
+        id: link
         working-directory: apps/bs-egitim-portali
         shell: bash
         run: |
@@ -88,10 +93,12 @@ jobs:
           NODE
 
       - name: Portal production ayarlarını çek
+        id: pull
         working-directory: apps/bs-egitim-portali
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Vercel proje kimliğini doğrula
+        id: project_guard
         working-directory: apps/bs-egitim-portali
         shell: bash
         run: |
@@ -107,10 +114,12 @@ jobs:
           NODE
 
       - name: Portal production build oluştur
+        id: build
         working-directory: apps/bs-egitim-portali
         run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Production build güvenlik kontrolü
+        id: artifact_guard
         working-directory: apps/bs-egitim-portali
         shell: bash
         run: |
@@ -132,9 +141,11 @@ jobs:
           echo "Portal production build doğrulandı: $INDEX_JS / $INDEX_CSS"
 
       - name: BS Eğitim Portalı production deploy
+        id: deploy
         run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --token="$VERCEL_TOKEN"
 
       - name: Canlı portal smoke testi
+        id: smoke
         shell: bash
         run: |
           set -euo pipefail
@@ -156,3 +167,49 @@ jobs:
           printf '%s' "$JS" | grep -F -q "bildirimlerim_v1" || { echo "::error::Canlı portal JS içinde Bildirim Merkezi bulunamadı."; exit 1; }
           curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_CSS?deploy_check=$GITHUB_RUN_ID" >/dev/null
           echo "Canlı BS Eğitim Portalı smoke testi başarılı."
+
+      - name: Deploy sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          TOKEN_OUTCOME: ${{ steps.token.outcome }}
+          SOURCE_GUARD_OUTCOME: ${{ steps.source_guard.outcome }}
+          PORTAL_BUILD_OUTCOME: ${{ steps.portal_build.outcome }}
+          CLI_OUTCOME: ${{ steps.cli.outcome }}
+          LINK_OUTCOME: ${{ steps.link.outcome }}
+          PULL_OUTCOME: ${{ steps.pull.outcome }}
+          PROJECT_GUARD_OUTCOME: ${{ steps.project_guard.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ARTIFACT_GUARD_OUTCOME: ${{ steps.artifact_guard.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .portal-production-deploy-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          job_status=$JOB_STATUS
+          token=$TOKEN_OUTCOME
+          source_guard=$SOURCE_GUARD_OUTCOME
+          portal_build=$PORTAL_BUILD_OUTCOME
+          cli=$CLI_OUTCOME
+          link=$LINK_OUTCOME
+          pull=$PULL_OUTCOME
+          project_guard=$PROJECT_GUARD_OUTCOME
+          build=$BUILD_OUTCOME
+          artifact_guard=$ARTIFACT_GUARD_OUTCOME
+          deploy=$DEPLOY_OUTCOME
+          smoke=$SMOKE_OUTCOME
+          expected_index_js=${EXPECTED_INDEX_JS:-}
+          expected_index_css=${EXPECTED_INDEX_CSS:-}
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .portal-production-deploy-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Portal production deploy sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

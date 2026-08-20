@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js'
 import { BookOpenCheck, CalendarDays, GraduationCap, LogOut, Plus, RefreshCw, ShieldCheck, Sparkles, Target, UsersRound } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
 import { BookAdd } from './BookAdd'
 import { isCancelled, isCoachingAssignment, loadCoachData, shortDate, studentName, type CoachData } from './data'
@@ -13,9 +13,13 @@ import { StudentDirectory } from './Student360'
 import { supabase } from './supabase'
 import { WeeklyPlan } from './WeeklyPlan'
 
+function BrandLogo({ small = false }: { small?: boolean }) {
+  return <img className={small ? 'brand-logo small' : 'brand-logo'} src="./bs-egitim-icon-512-v2.png" alt="BS Eğitim" />
+}
+
 function Login({ error, onLogin }: { error: string | null; onLogin: () => void }) {
   return <main className="login-screen"><section className="login-card">
-    <div className="brand-mark">BS</div><span className="eyebrow">BS KOÇLUK</span>
+    <BrandLogo/><span className="eyebrow">BS KOÇLUK</span>
     <h1>Öğrenciyi sistem takip etsin.<br/>Koç insana odaklansın.</h1>
     <p>Plan, ödev, deneme ve görüşmeler BS Eğitim ile aynı güvenli veri çekirdeğini kullanır.</p>
     <button className="primary-button" onClick={onLogin}>Google ile Giriş Yap</button>
@@ -98,19 +102,102 @@ function Plan({ data, onRefresh }: { data: CoachData; onRefresh: () => void }) {
 
 function Shell({ data, onRefresh, onSignOut }: { data: CoachData; onRefresh: () => void; onSignOut: () => void }) {
   const nav = [{to:'/',label:'Koç Masası',Icon:Target},{to:'/ogrenciler',label:'Öğrenciler',Icon:UsersRound},{to:'/plan',label:'Plan',Icon:BookOpenCheck},{to:'/denemeler',label:'Denemeler',Icon:GraduationCap},{to:'/gorusmeler',label:'Görüşmeler',Icon:CalendarDays}]
-  return <div className="app-shell"><header className="topbar"><div className="brand"><div className="brand-mark small">BS</div><div><b>BS Koçluk</b><span>Premium öğrenci takip</span></div></div><div className="actions"><button aria-label="Verileri yenile" onClick={onRefresh}><RefreshCw size={17}/></button><strong>{data.profile.ad_soyad}</strong><button aria-label="Çıkış yap" onClick={onSignOut}><LogOut size={17}/></button></div></header>
+  return <div className="app-shell"><header className="topbar"><div className="brand"><BrandLogo small/><div><b>BS Koçluk</b><span>Premium öğrenci takip</span></div></div><div className="actions"><button aria-label="Verileri yenile" onClick={onRefresh}><RefreshCw size={17}/></button><strong>{data.profile.ad_soyad}</strong><button aria-label="Çıkış yap" onClick={onSignOut}><LogOut size={17}/></button></div></header>
     <main className="container"><Routes><Route path="/" element={<PremiumDashboard data={data}/>}/><Route path="/ogrenciler" element={<StudentDirectory data={data}/>}/><Route path="/ogrenciler/:studentId" element={<StudentDetailWithPulse data={data}/>}/><Route path="/plan" element={<Plan data={data} onRefresh={onRefresh}/>}/><Route path="/denemeler" element={<ExamCenter data={data} onRefresh={onRefresh}/>}/><Route path="/gorusmeler" element={<MeetingCenter data={data} onRefresh={onRefresh}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main>
     <nav className="bottom-nav" aria-label="Ana menü">{nav.map(({to,label,Icon}) => <NavLink key={to} to={to} end={to==='/' } className={({isActive})=>isActive?'active':''}><Icon size={19}/><span>{label}</span></NavLink>)}</nav>
   </div>
 }
 
+function readableLoadError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+    return 'Verilere ulaşılamadı. Bağlantıyı kontrol edip yeniden deneyin.'
+  }
+  return raw
+}
+
 export default function App() {
-  const [session,setSession]=useState<Session|null>(null), [data,setData]=useState<CoachData|null>(null), [loading,setLoading]=useState(true), [error,setError]=useState<string|null>(null)
-  const refresh=useCallback(async(s?:Session|null)=>{ const current=s??session; if(!current?.user)return; try{setData(await loadCoachData(current.user.id));setError(null)}catch(e:any){setData(null);setError(e?.message||String(e))}finally{setLoading(false)} },[session])
-  useEffect(()=>{let live=true; void supabase.auth.getSession().then(({data:a})=>{if(!live)return;setSession(a.session);if(a.session)void refresh(a.session);else setLoading(false)});const {data:l}=supabase.auth.onAuthStateChange((_e,n)=>{if(!live)return;setSession(n);if(n)void refresh(n);else{setData(null);setLoading(false)}});return()=>{live=false;l.subscription.unsubscribe()}},[refresh])
-  const login=async()=>{setError(null);const redirectTo=`${window.location.origin}${window.location.pathname}`;const {error:e}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(e)setError(e.message)}
-  if(loading)return <main className="boot"><div className="brand-mark">BS</div><b>BS Koçluk hazırlanıyor…</b></main>
-  if(!session)return <Login error={error} onLogin={()=>void login()}/>
-  if(!data)return <main className="boot"><div className="brand-mark">BS</div><b>BS Koçluk açılamadı</b><span>{error}</span><button className="primary-button" onClick={()=>void supabase.auth.signOut()}>Farklı hesapla giriş</button></main>
-  return <Shell data={data} onRefresh={()=>void refresh()} onSignOut={()=>void supabase.auth.signOut()}/>
+  const [session, setSession] = useState<Session|null>(null)
+  const [data, setData] = useState<CoachData|null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string|null>(null)
+  const sessionRef = useRef<Session|null>(null)
+  const lastLoadedTokenRef = useRef<string|null>(null)
+  const requestRef = useRef(0)
+
+  const refresh = useCallback(async(nextSession?: Session|null, force = false) => {
+    const current = nextSession === undefined ? sessionRef.current : nextSession
+    if (!current?.user) {
+      setData(null)
+      setLoading(false)
+      return
+    }
+    const requestId = ++requestRef.current
+    if (force) setLoading(true)
+    try {
+      const nextData = await loadCoachData(current.user.id)
+      if (requestId !== requestRef.current) return
+      setData(nextData)
+      setError(null)
+    } catch (e) {
+      if (requestId !== requestRef.current) return
+      console.error('BS Koçluk veri yükleme hatası', e)
+      setData(null)
+      setError(readableLoadError(e))
+    } finally {
+      if (requestId === requestRef.current) setLoading(false)
+    }
+  }, [])
+
+  const applySession = useCallback((next: Session|null) => {
+    sessionRef.current = next
+    setSession(next)
+    if (!next) {
+      requestRef.current += 1
+      lastLoadedTokenRef.current = null
+      setData(null)
+      setError(null)
+      setLoading(false)
+      return
+    }
+    if (lastLoadedTokenRef.current === next.access_token) return
+    lastLoadedTokenRef.current = next.access_token
+    setLoading(true)
+    void refresh(next)
+  }, [refresh])
+
+  useEffect(() => {
+    let live = true
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, next) => {
+      if (!live) return
+      applySession(next)
+    })
+    void supabase.auth.getSession().then(({ data: authData, error: authError }) => {
+      if (!live) return
+      if (authError) {
+        setError('Oturum doğrulanamadı. Lütfen tekrar giriş yapın.')
+        setLoading(false)
+        return
+      }
+      applySession(authData.session)
+    })
+    return () => {
+      live = false
+      listener.subscription.unsubscribe()
+    }
+  }, [applySession])
+
+  const login = async() => {
+    setError(null)
+    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    const { error: loginError } = await supabase.auth.signInWithOAuth({ provider:'google', options:{ redirectTo } })
+    if (loginError) setError(loginError.message)
+  }
+
+  const retry = () => void refresh(undefined, true)
+
+  if (loading) return <main className="boot"><BrandLogo/><b>BS Koçluk hazırlanıyor…</b></main>
+  if (!session) return <Login error={error} onLogin={() => void login()}/>
+  if (!data) return <main className="boot"><BrandLogo/><b>BS Koçluk açılamadı</b><span>{error}</span><div className="boot-actions"><button className="primary-button" onClick={retry}>Yeniden Dene</button><button className="secondary-button" onClick={() => void supabase.auth.signOut()}>Farklı hesapla giriş</button></div></main>
+  return <Shell data={data} onRefresh={() => void refresh(undefined, true)} onSignOut={() => void supabase.auth.signOut()}/>
 }

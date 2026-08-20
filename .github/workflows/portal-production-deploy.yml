@@ -95,7 +95,7 @@ jobs:
       - name: Portal production ayarlarını çek
         id: pull
         working-directory: apps/bs-egitim-portali
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --yes --environment=production --scope="$VERCEL_ORG_ID" --token="$VERCEL_TOKEN"
 
       - name: Vercel proje kimliğini doğrula
         id: project_guard
@@ -116,7 +116,7 @@ jobs:
       - name: Portal production build oluştur
         id: build
         working-directory: apps/bs-egitim-portali
-        run: vercel build --prod --token="$VERCEL_TOKEN"
+        run: vercel build --prod --scope="$VERCEL_ORG_ID" --token="$VERCEL_TOKEN"
 
       - name: Production build güvenlik kontrolü
         id: artifact_guard
@@ -142,7 +142,7 @@ jobs:
 
       - name: BS Eğitim Portalı production deploy
         id: deploy
-        run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --token="$VERCEL_TOKEN"
+        run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --scope="$VERCEL_ORG_ID" --token="$VERCEL_TOKEN"
 
       - name: Canlı portal smoke testi
         id: smoke

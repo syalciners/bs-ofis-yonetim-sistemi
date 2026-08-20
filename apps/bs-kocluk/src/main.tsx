@@ -15,6 +15,7 @@ import './exam-center-premium.css'
 import './exam-photo.css'
 import './exam-quick-confirm.css'
 import './meeting-center.css'
+import './meeting-action.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

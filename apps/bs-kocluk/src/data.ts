@@ -19,6 +19,8 @@ export interface CoachingProfile {
   hedef_siralama?: number | null
   baslangic_tarihi: string
   durum: string
+  haftalik_calisma_yogunlugu?: 'Hafif' | 'Normal' | 'Yoğun' | null
+  pazar_calisma?: boolean | null
 }
 
 export interface Student {
@@ -43,6 +45,8 @@ export interface Assignment {
   bitis_no?: number | null
   calisma_detayi?: string | null
   kaynak_gorusme_id?: string | null
+  haftalik_plan_id?: string | null
+  plan_kaynagi?: string | null
 }
 
 export interface Meeting {
@@ -135,7 +139,7 @@ export async function loadCoachData(userId: string): Promise<CoachData> {
 
   const profilesResult = await supabase
     .from('kocluk_ogrenci_profilleri')
-    .select('ogrenci_id,koc_ogretmen_id,sinav_turu,hedef_okul,hedef_bolum,hedef_puan,hedef_siralama,baslangic_tarihi,durum')
+    .select('ogrenci_id,koc_ogretmen_id,sinav_turu,hedef_okul,hedef_bolum,hedef_puan,hedef_siralama,baslangic_tarihi,durum,haftalik_calisma_yogunlugu,pazar_calisma')
     .eq('durum', 'Aktif')
     .order('guncellenme_zamani', { ascending: false })
 
@@ -158,7 +162,7 @@ export async function loadCoachData(userId: string): Promise<CoachData> {
 
   const [studentsResult, assignmentsResult, meetingsResult, examsResult, studentBooksResult] = await Promise.all([
     supabase.from('ogrenciler').select('ogrenci_id,ad_soyad,durum').in('ogrenci_id', studentIds).order('ad_soyad'),
-    supabase.from('odevler').select('odev_id,ogrenci_id,ogretmen_id,konu,odev_basligi,verilis_tarihi,son_teslim_tarihi,durum,oncelik,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no,calisma_detayi,kaynak_gorusme_id').in('ogrenci_id', studentIds).order('son_teslim_tarihi', { ascending: true, nullsFirst: false }),
+    supabase.from('odevler').select('odev_id,ogrenci_id,ogretmen_id,konu,odev_basligi,verilis_tarihi,son_teslim_tarihi,durum,oncelik,ogrenci_kitap_id,calisma_turu,baslangic_no,bitis_no,calisma_detayi,kaynak_gorusme_id,haftalik_plan_id,plan_kaynagi').in('ogrenci_id', studentIds).order('son_teslim_tarihi', { ascending: true, nullsFirst: false }),
     supabase.from('kocluk_gorusmeleri').select('gorusme_id,ogrenci_id,koc_ogretmen_id,gorusme_tarihi,baslangic_saati,gorusme_turu,durum,gundem,gorusme_notu,alinan_kararlar,sonraki_gorusme_tarihi').in('ogrenci_id', studentIds).order('gorusme_tarihi', { ascending: false }),
     supabase.from('kocluk_deneme_sinavlari').select('deneme_id,ogrenci_id,sinav_turu,deneme_adi,deneme_tarihi,puan,siralama,yuzdelik,onay_durumu').in('ogrenci_id', studentIds).neq('onay_durumu', 'İptal').order('deneme_tarihi', { ascending: false }),
     supabase.from('ogrenci_kitaplari').select('ogrenci_kitap_id,ogrenci_id,kitap_id,durum,eklenme_tarihi').in('ogrenci_id', studentIds).eq('durum', 'Aktif').order('eklenme_tarihi', { ascending: false, nullsFirst: false }),

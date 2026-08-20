@@ -1,19 +1,33 @@
-import { AlertTriangle, BookOpenCheck, CalendarRange, Check, Sparkles, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { isCoachingAssignment, shortDate, studentName, type CoachData } from './data'
+import { AlertTriangle, BookOpenCheck, CalendarRange, Check, RefreshCw, Sparkles, Target, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { requestAiWeeklyPlan, type AiWeeklyPlanItem, type AiWeeklyPlanResponse, type WeeklyIntensity } from './aiWeeklyPlan'
+import { isCancelled, isDone, shortDate, studentName, type CoachData } from './data'
 import { buildStudentPulse } from './studentPulse'
 import { supabase } from './supabase'
-import { buildWeeklyPlanDraft, type WeeklyPlanSuggestion } from './weeklyPlan'
 
-type SuggestionEdit = Pick<WeeklyPlanSuggestion, 'startNo' | 'endNo' | 'dueDate'>
+type ItemEdit = { startNo: number; endNo: number; dueDate: string }
+
+function addDays(iso: string, days: number) {
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days, 12)).toISOString().slice(0, 10)
+}
+
+function dayLabel(iso: string) {
+  return new Intl.DateTimeFormat('tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })
+    .format(new Date(`${iso}T12:00:00`))
+}
 
 function friendlyError(message: string) {
   const text = message.toLocaleLowerCase('tr-TR')
   if (text.includes('erişim') || text.includes('yetki')) return 'Bu öğrenci için işlem yetkiniz bulunmuyor.'
-  if (text.includes('kitap')) return 'Seçilen kitap artık aktif değil. Öğrenci kitaplarını kontrol edin.'
-  if (text.includes('geçmiş')) return 'Teslim tarihi geçmişte olamaz.'
-  if (text.includes('aralığı')) return 'Çalışma aralığını kontrol edin.'
-  return 'Plan kaydedilemedi. Lütfen tekrar deneyin.'
+  if (text.includes('kitap')) return 'Plan içindeki kitaplardan biri artık aktif değil. Öğrenci kitaplarını kontrol edin.'
+  if (text.includes('aralığı') || text.includes('sayfasını')) return 'Çalışma aralığını kontrol edin.'
+  if (text.includes('teslim') || text.includes('tarih')) return 'Çalışma tarihini kontrol edin.'
+  return 'Plan işlemi tamamlanamadı. Lütfen tekrar deneyin.'
+}
+
+function itemEdit(item: AiWeeklyPlanItem, edits: Record<string, ItemEdit>): ItemEdit {
+  return edits[item.id] || { startNo: item.baslangic_no, endNo: item.bitis_no, dueDate: item.son_teslim_tarihi }
 }
 
 export function WeeklyPlan({
@@ -29,131 +43,236 @@ export function WeeklyPlan({
   onSaved: () => void | Promise<void>
   onOpenQuickStudy: (studentId: string) => void
 }) {
-  const validInitial = initialStudentId && data.coachingProfiles.some(x => x.ogrenci_id === initialStudentId)
-    ? initialStudentId
-    : ''
+  const validInitial = initialStudentId && data.coachingProfiles.some(x => x.ogrenci_id === initialStudentId) ? initialStudentId : ''
   const singleStudent = data.coachingProfiles.length === 1 ? data.coachingProfiles[0].ogrenci_id : ''
   const [studentId, setStudentId] = useState(validInitial || singleStudent)
-  const [edits, setEdits] = useState<Record<string, SuggestionEdit>>({})
-  const [busyId, setBusyId] = useState('')
+  const [response, setResponse] = useState<AiWeeklyPlanResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [settingBusy, setSettingBusy] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [edits, setEdits] = useState<Record<string, ItemEdit>>({})
+  const [excluded, setExcluded] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const draft = useMemo(
-    () => studentId ? buildWeeklyPlanDraft(data, studentId) : null,
-    [data, studentId],
-  )
-  const pulse = useMemo(
-    () => studentId ? buildStudentPulse(data, studentId) : null,
-    [data, studentId],
-  )
+  const profile = data.coachingProfiles.find(item => item.ogrenci_id === studentId)
+  const pulse = useMemo(() => studentId ? buildStudentPulse(data, studentId) : null, [data, studentId])
+  const plan = response?.plan || null
 
-  const editFor = (item: WeeklyPlanSuggestion): SuggestionEdit => edits[item.id] || {
-    startNo: item.startNo,
-    endNo: item.endNo,
-    dueDate: item.dueDate,
-  }
+  const currentAssignments = useMemo(() => {
+    if (!studentId || !plan) return []
+    return data.assignments.filter(item =>
+      item.ogrenci_id === studentId
+      && !isDone(item.durum)
+      && !isCancelled(item.durum)
+      && Boolean(item.son_teslim_tarihi && item.son_teslim_tarihi >= plan.baslangic && item.son_teslim_tarihi <= plan.bitis),
+    )
+  }, [data.assignments, studentId, plan])
 
-  const updateEdit = (item: WeeklyPlanSuggestion, patch: Partial<SuggestionEdit>) => {
-    setEdits(current => ({ ...current, [item.id]: { ...editFor(item), ...patch } }))
-  }
-
-  const approve = async (item: WeeklyPlanSuggestion) => {
-    if (busyId) return
-    const edit = editFor(item)
+  const generate = async (mode: 'hazirla' | 'denge' = 'hazirla') => {
+    if (!studentId || loading || saving) return
+    setLoading(true)
     setError(null)
     setSuccess(null)
-
-    if (!Number.isFinite(edit.startNo) || !Number.isFinite(edit.endNo) || edit.startNo < 1 || edit.endNo < edit.startNo) {
-      return setError('Başlangıç ve bitiş aralığını kontrol edin.')
-    }
-    if (item.maxNo != null && item.type === 'Sayfa' && edit.endNo > item.maxNo) {
-      return setError(`Bu kitapta kayıtlı son sayfa ${item.maxNo}. Bitiş değerini kontrol edin.`)
-    }
-    if (!draft || edit.dueDate < draft.today) return setError('Teslim tarihi geçmişte olamaz.')
-
-    setBusyId(item.id)
+    setEditing(false)
+    setEdits({})
+    setExcluded(new Set())
     try {
-      const { data: result, error: rpcError } = await supabase.rpc('kocluk_haftalik_plan_onayla_v1', {
-        p_ogrenci_id: item.studentId,
-        p_ogrenci_kitap_id: item.studentBookId,
-        p_calisma_turu: item.type,
-        p_baslangic_no: edit.startNo,
-        p_bitis_no: edit.endNo,
-        p_calisma_detayi: null,
-        p_son_teslim_tarihi: edit.dueDate,
-        p_oncelik: 'Normal',
-        p_aciklama: null,
+      setResponse(await requestAiWeeklyPlan(studentId, mode))
+    } catch (err: any) {
+      setResponse(null)
+      setError(friendlyError(err?.message || String(err)))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (studentId) void generate('hazirla')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentId])
+
+  const updateEdit = (item: AiWeeklyPlanItem, patch: Partial<ItemEdit>) => {
+    setEdits(current => ({ ...current, [item.id]: { ...itemEdit(item, current), ...patch } }))
+  }
+
+  const toggleExcluded = (id: string) => {
+    setExcluded(current => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const saveSettings = async (intensity: WeeklyIntensity, sundayWork: boolean) => {
+    if (!studentId || settingBusy) return
+    setSettingBusy(true)
+    setError(null)
+    try {
+      const { error: rpcError } = await supabase.rpc('kocluk_haftalik_plan_ayari_kaydet_v2', {
+        p_ogrenci_id: studentId,
+        p_yogunluk: intensity,
+        p_pazar_calisma: sundayWork,
       })
       if (rpcError) throw rpcError
-      const response = result as { baslik?: string; tekrar?: boolean } | null
-      setSuccess(response?.tekrar ? 'Bu çalışma zaten açık planda vardı; ikinci kayıt oluşturulmadı.' : (response?.baslik || 'Çalışma plana eklendi.'))
       await onSaved()
+      await generate('hazirla')
     } catch (err: any) {
       setError(friendlyError(err?.message || String(err)))
     } finally {
-      setBusyId('')
+      setSettingBusy(false)
     }
   }
 
-  return <div className="weekly-plan-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !busyId) onClose() }}>
-    <section className="weekly-plan-sheet" role="dialog" aria-modal="true" aria-labelledby="weekly-plan-title">
-      <header className="weekly-plan-head">
-        <div><span><Sparkles/> AKILLI HAFTALIK PLAN</span><h2 id="weekly-plan-title">Haftayı hazırla</h2><p>Mevcut yükü korur, yalnız yeterli gerçek geçmiş varsa devam çalışması önerir.</p></div>
-        <button type="button" onClick={onClose} disabled={Boolean(busyId)} aria-label="Kapat"><X/></button>
+  const approveAll = async () => {
+    if (!studentId || !plan || saving) return
+    const items = plan.maddeler.filter(item => !excluded.has(item.id))
+    if (!items.length) return setError('Onaylanacak yeni çalışma bulunmuyor.')
+
+    const payload = items.map(item => {
+      const edit = itemEdit(item, edits)
+      if (!Number.isFinite(edit.startNo) || !Number.isFinite(edit.endNo) || edit.startNo < 1 || edit.endNo < edit.startNo) {
+        throw new Error('Çalışma aralığı geçersiz.')
+      }
+      if (item.max_no != null && item.calisma_turu === 'Sayfa' && edit.endNo > item.max_no) {
+        throw new Error(`Bu kitapta kayıtlı son sayfa ${item.max_no}.`)
+      }
+      if (edit.dueDate < plan.baslangic || edit.dueDate > plan.bitis) throw new Error('Tarih plan haftasının dışında.')
+      return {
+        ogrenci_kitap_id: item.ogrenci_kitap_id,
+        calisma_turu: item.calisma_turu,
+        baslangic_no: edit.startNo,
+        bitis_no: edit.endNo,
+        son_teslim_tarihi: edit.dueDate,
+        gerekce: item.gerekce,
+      }
+    })
+
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { data: result, error: rpcError } = await supabase.rpc('kocluk_ai_haftalik_plan_onayla_v2', {
+        p_ogrenci_id: studentId,
+        p_plan_id: plan.plan_id,
+        p_maddeler: payload,
+      })
+      if (rpcError) throw rpcError
+      const rows = (result as { maddeler?: Array<{ tekrar?: boolean }> } | null)?.maddeler || []
+      const newCount = rows.filter(row => !row.tekrar).length
+      const repeatCount = rows.length - newCount
+      setSuccess(repeatCount ? `${newCount} yeni çalışma öğrenci planına gönderildi. ${repeatCount} mevcut çalışma tekrar oluşturulmadı.` : `${newCount} çalışma öğrenci planına gönderildi.`)
+      await onSaved()
+      window.setTimeout(onClose, 1100)
+    } catch (err: any) {
+      setError(friendlyError(err?.message || String(err)))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const days = plan ? Array.from({ length: 7 }, (_, index) => addDays(plan.baslangic, index)) : []
+  const visibleAiItems = plan?.maddeler.filter(item => !excluded.has(item.id)) || []
+
+  return <div className="weekly-plan-overlay ai-weekly-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !saving) onClose() }}>
+    <section className="weekly-plan-sheet ai-weekly-sheet" role="dialog" aria-modal="true" aria-labelledby="weekly-plan-title">
+      <header className="weekly-plan-head ai-weekly-head">
+        <div><span><Sparkles/> AI HAFTALIK PLAN · PREMIUM</span><h2 id="weekly-plan-title">Haftayı sistem hazırlasın</h2><p>AI yalnız gerçek kitap, çalışma geçmişi, deneme ve görüşme verisini kullanır; koç onaylamadan hiçbir görev yayınlanmaz.</p></div>
+        <button type="button" onClick={onClose} disabled={saving} aria-label="Kapat"><X/></button>
       </header>
 
-      <div className="weekly-plan-body">
-        {!validInitial && data.coachingProfiles.length > 1 && <label className="weekly-plan-student-select">
+      <div className="weekly-plan-body ai-weekly-body">
+        {!validInitial && data.coachingProfiles.length > 1 && <label className="weekly-plan-student-select ai-student-select">
           <span>Öğrenci</span>
-          <select value={studentId} onChange={event => { setStudentId(event.target.value); setEdits({}); setError(null); setSuccess(null) }}>
+          <select value={studentId} onChange={event => { setStudentId(event.target.value); setResponse(null); setError(null); setSuccess(null) }}>
             <option value="">Öğrenci seçin</option>
-            {data.coachingProfiles.map(profile => <option key={profile.ogrenci_id} value={profile.ogrenci_id}>{studentName(data, profile.ogrenci_id)}</option>)}
+            {data.coachingProfiles.map(item => <option key={item.ogrenci_id} value={item.ogrenci_id}>{studentName(data, item.ogrenci_id)}</option>)}
           </select>
         </label>}
 
-        {studentId && draft && pulse && <>
-          <section className="weekly-plan-summary">
-            <div><span>Öğrenci</span><b>{studentName(data, studentId)}</b></div>
-            <div><span>Plan sonu</span><b>{shortDate(draft.planEnd)}</b></div>
-            <div><span>Açık iş</span><b>{draft.openAssignments.length}</b></div>
-            <div className={`pulse-${pulse.level}`}><span>Öğrenci Nabzı</span><b>{pulse.label}</b></div>
+        {!studentId && <div className="weekly-plan-empty choose"><CalendarRange/><b>Plan hazırlanacak öğrenciyi seçin.</b><span>AI yalnız seçilen öğrencinin erişilebilir gerçek kayıtlarını kullanır.</span></div>}
+
+        {studentId && loading && <div className="ai-weekly-loading"><Sparkles/><div><b>Hafta hazırlanıyor…</b><span>Mevcut yük, çalışma ritmi, kitap ilerlemesi ve son performans sinyalleri birlikte değerlendiriliyor.</span></div></div>}
+
+        {studentId && plan && !loading && <>
+          <section className="ai-weekly-hero">
+            <div className="ai-weekly-hero-copy">
+              <div className="ai-weekly-badges"><span className={response?.aktif ? 'ai-live' : 'ai-safe'}><Sparkles/> {response?.aktif ? 'AI planı' : 'Güvenli plan'}</span><span>{shortDate(plan.baslangic)} – {shortDate(plan.bitis)}</span><span>{plan.yogunluk}</span></div>
+              <h3>{plan.baslik}</h3>
+              <p>{plan.ozet}</p>
+              {plan.odaklar.length > 0 && <div className="ai-weekly-focus">{plan.odaklar.map(item => <span key={item}><Target/> {item}</span>)}</div>}
+            </div>
+            <div className="ai-weekly-scorecard">
+              <div><small>Son 7 gün</small><b>{plan.son_7_gun_tamamlama_yuzdesi == null ? '—' : `%${plan.son_7_gun_tamamlama_yuzdesi}`}</b><span>Tamamlama</span></div>
+              <div className={plan.geciken ? 'attention' : ''}><small>Geciken</small><b>{plan.geciken}</b><span>Çalışma</span></div>
+              <div><small>Yeni plan</small><b>{visibleAiItems.length}</b><span>Çalışma</span></div>
+            </div>
           </section>
 
-          {draft.holdNewWork && <div className="weekly-plan-hold"><AlertTriangle/><div><b>Yeni yük önermiyorum.</b><span>{draft.holdReason}</span></div></div>}
-
-          <section className="weekly-plan-section">
-            <div className="weekly-plan-section-title"><div><span>MEVCUT PLAN</span><h3>Önce korunacak çalışmalar</h3></div><small>{draft.openAssignments.length} açık kayıt</small></div>
-            {draft.openAssignments.length ? <div className="weekly-plan-existing">{draft.openAssignments.map(item => <article key={item.odev_id}>
-              <BookOpenCheck/><div><b>{item.odev_basligi || item.konu || 'Çalışma'}</b><span>{isCoachingAssignment(item) ? 'Koçluk çalışması' : 'Ders ödevi'}</span></div><small>{item.durum}<br/>{shortDate(item.son_teslim_tarihi || item.verilis_tarihi)}</small>
-            </article>)}</div> : <div className="weekly-plan-empty"><Check/><b>Açık çalışma yok.</b><span>Yeni plan önerileri aşağıda hazırlanabilir.</span></div>}
+          <section className="ai-weekly-toolbar">
+            <div className="ai-weekly-student"><BookOpenCheck/><div><b>{studentName(data, studentId)}</b><span>{pulse?.label || 'Öğrenci Nabzı'} · {currentAssignments.length} mevcut açık çalışma</span></div></div>
+            <div className="ai-weekly-toolbar-actions">
+              <button type="button" onClick={() => setSettingsOpen(value => !value)}>Plan Ayarı</button>
+              <button type="button" onClick={() => void generate('denge')} disabled={loading || saving}><RefreshCw/> AI ile Dengele</button>
+              {visibleAiItems.length > 0 && <button type="button" onClick={() => setEditing(value => !value)}>{editing ? 'Düzenlemeyi Bitir' : 'Düzenle'}</button>}
+            </div>
           </section>
 
-          {!draft.holdNewWork && <section className="weekly-plan-section">
-            <div className="weekly-plan-section-title"><div><span>SİSTEM ÖNERİLERİ</span><h3>Geçmiş ritme göre devam</h3></div><small>{draft.suggestions.length} öneri</small></div>
-            {draft.suggestions.length ? <div className="weekly-plan-suggestions">{draft.suggestions.map(item => {
-              const edit = editFor(item)
-              const busy = busyId === item.id
-              return <article className="weekly-plan-suggestion" key={item.id}>
-                <div className="weekly-plan-suggestion-top"><div className="weekly-plan-book-icon"><CalendarRange/></div><div><b>{item.bookName}</b><span>{item.bookMeta}</span></div><em>{item.type}</em></div>
-                <p><Sparkles/> {item.reason}</p>
-                <div className="weekly-plan-edit-grid">
-                  <label><span>Başlangıç</span><input type="number" min="1" value={edit.startNo} onChange={event => updateEdit(item, { startNo: Number(event.target.value) })}/></label>
-                  <label><span>Bitiş</span><input type="number" min={edit.startNo || 1} max={item.maxNo || undefined} value={edit.endNo} onChange={event => updateEdit(item, { endNo: Number(event.target.value) })}/></label>
-                  <label><span>Son teslim</span><input type="date" min={draft.today} value={edit.dueDate} onChange={event => updateEdit(item, { dueDate: event.target.value })}/></label>
-                  <button type="button" onClick={() => void approve(item)} disabled={Boolean(busyId)}><Check/> {busy ? 'Ekleniyor…' : 'Plana Ekle'}</button>
-                </div>
-              </article>
-            })}</div> : <div className="weekly-plan-empty"><Sparkles/><b>Otomatik aralık için yeterli geçmiş yok.</b><span>Sistem rastgele sayfa veya test üretmez. İlk gerçek çalışma aralığını koç belirledikten sonra sonraki haftalarda ritmi devam ettirebilir.</span><button type="button" onClick={() => onOpenQuickStudy(studentId)}>İlk Çalışmayı Belirle</button></div>}
+          {settingsOpen && <section className="ai-weekly-settings">
+            <div><b>Çalışma yoğunluğu</b><span>Bir kez seçilir; AI öğrencinin gerçek ritmiyle birlikte kullanır.</span></div>
+            <div className="ai-setting-chips">{(['Hafif', 'Normal', 'Yoğun'] as WeeklyIntensity[]).map(value => <button key={value} type="button" className={(profile?.haftalik_calisma_yogunlugu || 'Normal') === value ? 'selected' : ''} disabled={settingBusy} onClick={() => void saveSettings(value, profile?.pazar_calisma !== false)}>{value}</button>)}</div>
+            <label className="ai-sunday-toggle"><input type="checkbox" checked={profile?.pazar_calisma !== false} disabled={settingBusy} onChange={event => void saveSettings((profile?.haftalik_calisma_yogunlugu || 'Normal') as WeeklyIntensity, event.target.checked)}/><span>Pazar günü çalışma planlanabilir</span></label>
           </section>}
 
+          {response?.durum === 'mevcut_plani_koru' && <div className="weekly-plan-hold ai-plan-hold"><AlertTriangle/><div><b>Yeni yük eklenmedi.</b><span>{plan.ozet}</span></div></div>}
+
+          {response?.durum === 'ilk_calisma_gerekli' && <div className="weekly-plan-empty ai-first-study"><Sparkles/><b>AI ilk sayfayı uydurmaz.</b><span>Bu öğrencinin kitaplarında güvenli devam aralığı çıkaracak kadar gerçek tamamlanmış çalışma yok. İlk aralığı bir kez belirlediğinizde sonraki haftalar otomatikleşir.</span><button type="button" onClick={() => onOpenQuickStudy(studentId)}>İlk Çalışmayı Belirle</button></div>}
+
+          <section className="ai-weekly-board">
+            {days.map(date => {
+              const existing = currentAssignments.filter(item => item.son_teslim_tarihi === date)
+              const aiItems = visibleAiItems.filter(item => itemEdit(item, edits).dueDate === date)
+              return <article className={`ai-day-card ${existing.length || aiItems.length ? 'has-work' : ''}`} key={date}>
+                <header><span>{dayLabel(date)}</span><b>{existing.length + aiItems.length}</b></header>
+                <div className="ai-day-items">
+                  {existing.map(item => <div className="ai-day-item existing" key={item.odev_id}><span>MEVCUT</span><b>{item.odev_basligi || item.konu || 'Çalışma'}</b><small>{item.durum}</small></div>)}
+                  {aiItems.map(item => {
+                    const edit = itemEdit(item, edits)
+                    return <div className="ai-day-item suggested" key={item.id}>
+                      <span><Sparkles/> AI ÖNERİSİ</span>
+                      <b>{item.kitap_adi}</b>
+                      <small>{item.ders || item.kitap_meta} · {item.calisma_turu} {edit.startNo}–{edit.endNo}</small>
+                      <p>{item.gerekce}</p>
+                      {editing && <div className="ai-item-edit">
+                        <label><span>Başlangıç</span><input type="number" min="1" value={edit.startNo} onChange={event => updateEdit(item, { startNo: Number(event.target.value) })}/></label>
+                        <label><span>Bitiş</span><input type="number" min={edit.startNo || 1} max={item.max_no || undefined} value={edit.endNo} onChange={event => updateEdit(item, { endNo: Number(event.target.value) })}/></label>
+                        <label><span>Gün</span><input type="date" min={plan.baslangic} max={plan.bitis} value={edit.dueDate} onChange={event => updateEdit(item, { dueDate: event.target.value })}/></label>
+                        <button type="button" onClick={() => toggleExcluded(item.id)}>Bu çalışmayı çıkar</button>
+                      </div>}
+                    </div>
+                  })}
+                  {!existing.length && !aiItems.length && <div className="ai-day-rest">Planlı çalışma yok</div>}
+                </div>
+              </article>
+            })}
+          </section>
+
+          {excluded.size > 0 && editing && <div className="ai-excluded-note"><Check/> {excluded.size} çalışma plandan çıkarıldı. <button type="button" onClick={() => setExcluded(new Set())}>Geri al</button></div>}
+          {plan.uyarilar.length > 0 && <div className="ai-weekly-warnings">{plan.uyarilar.map(item => <span key={item}><AlertTriangle/> {item}</span>)}</div>}
           {error && <div className="weekly-plan-error">{error}</div>}
           {success && <div className="weekly-plan-success"><Check/> {success}</div>}
-          <div className="weekly-plan-safety"><Sparkles/><span>Öneriler gerçek kayıt değildir. Yalnız <b>Plana Ekle</b> dediğiniz çalışma kaydedilir; aynı açık çalışma ikinci kez oluşturulmaz.</span></div>
-        </>}
 
-        {!studentId && <div className="weekly-plan-empty choose"><CalendarRange/><b>Plan hazırlanacak öğrenciyi seçin.</b><span>Sistem yalnız o öğrencinin gerçek çalışma geçmişini kullanır.</span></div>}
+          <div className="ai-weekly-safety"><Sparkles/><span>AI yalnız taslak hazırlar. <b>Onayla ve Öğrenciye Gönder</b> denmeden veritabanına yeni çalışma yazılmaz. Öğrenci adı/e-postası OpenAI'a gönderilmez.</span></div>
+        </>}
       </div>
+
+      {studentId && plan && !loading && <footer className="ai-weekly-footer">
+        <button type="button" onClick={onClose} disabled={saving}>Vazgeç</button>
+        <button type="button" className="primary" onClick={() => void approveAll()} disabled={saving || visibleAiItems.length === 0}>{saving ? 'Gönderiliyor…' : `Onayla ve Öğrenciye Gönder${visibleAiItems.length ? ` · ${visibleAiItems.length}` : ''}`}</button>
+      </footer>}
     </section>
   </div>
 }

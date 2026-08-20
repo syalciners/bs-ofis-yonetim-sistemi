@@ -145,7 +145,7 @@ jobs:
           MATCHED=0
           for ATTEMPT in 1 2 3 4 5 6 7 8; do
             INDEX="$(curl -fsSL --retry 2 --retry-delay 1 "$BASE_URL/?deploy_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
-            if printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_CSS"; then
+            if [[ "$INDEX" == *"$EXPECTED_INDEX_JS"* && "$INDEX" == *"$EXPECTED_INDEX_CSS"* ]]; then
               MATCHED=1
               break
             fi
@@ -156,7 +156,10 @@ jobs:
             exit 1
           fi
           JS="$(curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_JS?deploy_check=$GITHUB_RUN_ID")"
-          printf '%s' "$JS" | grep -F -q "bildirimlerim_v1" || { echo "::error::Canlı portal JS içinde Bildirim Merkezi bulunamadı."; exit 1; }
+          if [[ "$JS" != *"bildirimlerim_v1"* ]]; then
+            echo "::error::Canlı portal JS içinde Bildirim Merkezi bulunamadı."
+            exit 1
+          fi
           curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_CSS?deploy_check=$GITHUB_RUN_ID" >/dev/null
           echo "Canlı BS Eğitim Portalı smoke testi başarılı."
 

@@ -48,13 +48,24 @@ function friendlyError(message: string) {
   return 'Veli özeti hazırlanamadı. Lütfen tekrar deneyin.'
 }
 
-export function ParentSummary({ studentId, studentName, onClose }: { studentId: string; studentName: string; onClose: () => void }) {
+export function ParentSummary({
+  studentId,
+  studentName,
+  onClose,
+  onLogged,
+}: {
+  studentId: string
+  studentName: string
+  onClose: () => void
+  onLogged?: () => void
+}) {
   const [parentName, setParentName] = useState('')
   const [parentPhone, setParentPhone] = useState('')
   const [facts, setFacts] = useState<ParentFacts | null>(null)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [historyWarning, setHistoryWarning] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const phone = useMemo(() => whatsappNumber(parentPhone), [parentPhone])
@@ -62,6 +73,7 @@ export function ParentSummary({ studentId, studentName, onClose }: { studentId: 
   const prepare = async (knownParentName?: string) => {
     setLoading(true)
     setError(null)
+    setHistoryWarning(null)
     setCopied(false)
     try {
       let name = knownParentName ?? parentName
@@ -94,12 +106,29 @@ export function ParentSummary({ studentId, studentName, onClose }: { studentId: 
 
   useEffect(() => { void prepare() }, [studentId])
 
+  const logCommunication = async (channel: 'Kopyalama' | 'WhatsApp') => {
+    if (!message.trim()) return
+    setHistoryWarning(null)
+    try {
+      const { data, error: logError } = await supabase.rpc('kocluk_veli_iletisim_kaydet_v1', {
+        p_ogrenci_id: studentId,
+        p_kanal: channel,
+        p_icerik: message.trim(),
+      })
+      if (logError || !data?.basarili) throw logError || new Error('Kayıt oluşturulamadı.')
+      onLogged?.()
+    } catch {
+      setHistoryWarning('İşlem tamamlandı ancak iletişim geçmişi şu anda güncellenemedi.')
+    }
+  }
+
   const copy = async () => {
     if (!message.trim()) return
     try {
       await navigator.clipboard.writeText(message)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1800)
+      void logCommunication('Kopyalama')
     } catch {
       setError('Mesaj panoya kopyalanamadı. Metni seçip kopyalayabilirsiniz.')
     }
@@ -108,6 +137,7 @@ export function ParentSummary({ studentId, studentName, onClose }: { studentId: 
   const openWhatsApp = () => {
     if (!phone || !message.trim()) return
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+    void logCommunication('WhatsApp')
   }
 
   return <div className="parent-summary-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !loading) onClose() }}>
@@ -136,6 +166,7 @@ export function ParentSummary({ studentId, studentName, onClose }: { studentId: 
           <button type="button" className="parent-summary-whatsapp" onClick={openWhatsApp} disabled={!phone || !message.trim()}><Send/>{phone ? 'WhatsApp’ta Aç' : 'Veli telefonu kayıtlı değil'}</button>
         </div>
 
+        {historyWarning && <div className="parent-summary-history-warning"><ShieldCheck/><span>{historyWarning}</span></div>}
         <div className="parent-summary-safety"><ShieldCheck/><span>Mesaj otomatik gönderilmez. Koç kontrol etmeden hiçbir veliye ulaşmaz; AI öğrenci adı, veli adı, telefon veya öğrenci kimliğini görmez.</span></div>
       </div>}
     </section>

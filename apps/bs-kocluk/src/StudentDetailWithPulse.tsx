@@ -13,10 +13,8 @@ export function StudentDetailWithPulse({ data }: { data: CoachData }) {
   const name = studentName(data, studentId)
 
   return <div className="student-pulse-route">
-    <div className="student-detail-assistant-row">
-      <StudentPulsePanel pulse={pulse}/>
-      <ParentSummaryButton onClick={() => setParentSummaryOpen(true)}/>
-    </div>
+    <StudentPulsePanel pulse={pulse}/>
+    <div className="student-detail-assistant-row"><ParentSummaryButton onClick={() => setParentSummaryOpen(true)}/></div>
     <StudentDetail data={data}/>
     {parentSummaryOpen && <ParentSummary studentId={studentId} studentName={name} onClose={() => setParentSummaryOpen(false)}/>} 
   </div>

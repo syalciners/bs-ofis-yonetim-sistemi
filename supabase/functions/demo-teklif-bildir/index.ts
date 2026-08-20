@@ -20,6 +20,11 @@ const esc = (value: unknown) => String(value ?? "")
   .replaceAll("'", "&#039;");
 
 const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+const cleanLine = (value: unknown, fallback = "—") => {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  return text || fallback;
+};
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
@@ -101,16 +106,79 @@ Deno.serve(async (req: Request) => {
       .eq("bildirim_durumu", "Gönderiliyor");
   };
 
+  const d = lead as Record<string, unknown>;
+
+  const whatsappToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN") || "";
+  const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID") || "";
+  const whatsappRecipient = onlyDigits(Deno.env.get("WHATSAPP_ALICI_TELEFON") || "");
+  const whatsappTemplate = Deno.env.get("WHATSAPP_TEMPLATE_ADI") || "bs_egitim_demo_teklif";
+  const whatsappTemplateLanguage = Deno.env.get("WHATSAPP_TEMPLATE_DIL") || "tr";
+  const whatsappGraphVersion = Deno.env.get("WHATSAPP_GRAPH_VERSION") || "v25.0";
+  const whatsappConfigured = Boolean(whatsappToken && whatsappPhoneNumberId && whatsappRecipient.length >= 10);
+
+  const whatsappText = [
+    `Ad Soyad: ${cleanLine(d.ad_soyad)}`,
+    `Kurum: ${cleanLine(d.kurum_adi)}`,
+    `Telefon: ${cleanLine(d.telefon)}`,
+    `Öğrenci: ${cleanLine(d.ogrenci_sayisi)}`,
+    `Öğretmen: ${cleanLine(d.ogretmen_sayisi)}`,
+    `Kaynak: ${cleanLine(d.utm_source, "doğrudan")} / ${cleanLine(d.utm_campaign)}`,
+    `Not: ${cleanLine(d.notlar)}`,
+  ].join("\n").slice(0, 950);
+
+  let whatsappError = "";
+  if (whatsappConfigured) {
+    try {
+      const response = await fetch(`https://graph.facebook.com/${whatsappGraphVersion}/${whatsappPhoneNumberId}/messages`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${whatsappToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: whatsappRecipient,
+          type: "template",
+          template: {
+            name: whatsappTemplate,
+            language: { code: whatsappTemplateLanguage },
+            components: [
+              {
+                type: "body",
+                parameters: [{ type: "text", text: whatsappText }],
+              },
+            ],
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const marked = await mark(true);
+        if (marked.error) {
+          return json({ saved: true, notified: true, channel: "whatsapp", warning: "WhatsApp bildirimi gönderildi ancak durum kaydı güncellenemedi." }, 200);
+        }
+        return json({ saved: true, notified: true, channel: "whatsapp" });
+      }
+
+      const detail = (await response.text()).slice(0, 400);
+      whatsappError = `WhatsApp ${response.status}: ${detail}`;
+    } catch (error) {
+      whatsappError = `WhatsApp bağlantı hatası: ${error instanceof Error ? error.message : String(error)}`;
+    }
+  } else {
+    whatsappError = "WhatsApp bildirimi henüz yapılandırılmadı.";
+  }
+
   const resendKey = Deno.env.get("RESEND_API_KEY");
   const recipient = Deno.env.get("DEMO_TEKLIF_ALICI_EMAIL") || "bsofisyonetim@gmail.com";
   const sender = Deno.env.get("DEMO_TEKLIF_GONDEREN_EMAIL") || "BS Eğitim Demo <onboarding@resend.dev>";
   if (!resendKey) {
-    const message = "E-posta bildirimi henüz yapılandırılmadı.";
+    const message = `${whatsappError} E-posta yedeği de yapılandırılmadı.`;
     await mark(false, message);
-    return json({ saved: true, notified: false, error: message }, 503);
+    return json({ saved: true, notified: false, error: "Bildirim kanalları kullanılamıyor." }, 503);
   }
 
-  const d = lead as Record<string, unknown>;
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#0B1F3A">
       <h2 style="margin-bottom:4px">Yeni BS Eğitim Yönetimi teklif talebi</h2>
@@ -125,6 +193,7 @@ Deno.serve(async (req: Request) => {
         <tr><td style="padding:8px;vertical-align:top"><b>Not</b></td><td style="padding:8px">${esc(d.notlar || "—")}</td></tr>
       </table>
       <p style="font-size:12px;color:#748094">Talep ID: ${esc(d.talep_id)}</p>
+      <p style="font-size:12px;color:#9a3412">WhatsApp yedeğe düştü: ${esc(whatsappError)}</p>
     </div>`;
 
   try {
@@ -141,17 +210,22 @@ Deno.serve(async (req: Request) => {
         html,
       }),
     });
+
     if (!response.ok) {
       const detail = (await response.text()).slice(0, 400);
-      await mark(false, `Resend ${response.status}: ${detail}`);
-      return json({ saved: true, notified: false, error: "E-posta gönderilemedi." }, 502);
+      const message = `${whatsappError} | Resend ${response.status}: ${detail}`;
+      await mark(false, message);
+      return json({ saved: true, notified: false, error: "WhatsApp ve e-posta bildirimi gönderilemedi." }, 502);
     }
+
     const marked = await mark(true);
-    if (marked.error) return json({ saved: true, notified: true, warning: "Bildirim gönderildi ancak durum kaydı güncellenemedi." }, 200);
-    return json({ saved: true, notified: true });
+    if (marked.error) {
+      return json({ saved: true, notified: true, channel: "email", fallback: true, warning: "E-posta yedeği gönderildi ancak durum kaydı güncellenemedi." }, 200);
+    }
+    return json({ saved: true, notified: true, channel: "email", fallback: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await mark(false, message);
-    return json({ saved: true, notified: false, error: "E-posta gönderilemedi." }, 502);
+    const emailError = error instanceof Error ? error.message : String(error);
+    await mark(false, `${whatsappError} | E-posta bağlantı hatası: ${emailError}`);
+    return json({ saved: true, notified: false, error: "WhatsApp ve e-posta bildirimi gönderilemedi." }, 502);
   }
 });

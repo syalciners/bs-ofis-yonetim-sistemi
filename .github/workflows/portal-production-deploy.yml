@@ -1,0 +1,158 @@
+name: Portal production deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .portal-production-deploy-trigger.txt
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_WTCzIweta6c9XIpQT8pKGC9xBPrB
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      EXPECTED_SUPABASE_URL: https://igmtuouhdozkgwmdxlme.supabase.co
+      EXPECTED_PUBLISHABLE_KEY_SHA256: e3566d5568f13248e849e49bb28cfc5b92cba825b96bec80f94392cc5b66d213
+      PORTAL_DIR: apps/bs-egitim-portali
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vercel token kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN GitHub Actions secret tanımlı değil. Portal production deploy yapılmadı."
+            exit 1
+          fi
+
+      - name: Portal Supabase bağlantısını doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const crypto = require('crypto')
+          const text = fs.readFileSync('apps/bs-egitim-portali/src/supabase.ts', 'utf8')
+          const url = text.match(/SUPABASE_URL\s*=\s*['"]([^'"]+)['"]/)?.[1] || ''
+          const key = text.match(/SUPABASE_KEY\s*=\s*['"]([^'"]+)['"]/)?.[1] || ''
+          const keyHash = crypto.createHash('sha256').update(key).digest('hex')
+          if (url !== process.env.EXPECTED_SUPABASE_URL) {
+            console.error('GÜVENLİK ENGELİ: Portal ana Supabase projesine bağlı değil.')
+            process.exit(1)
+          }
+          if (!key || keyHash !== process.env.EXPECTED_PUBLISHABLE_KEY_SHA256) {
+            console.error('GÜVENLİK ENGELİ: Portal publishable key beklenen ana proje anahtarıyla eşleşmiyor.')
+            process.exit(1)
+          }
+          if (text.includes('pparlcdctnivmpiofuvz')) {
+            console.error('GÜVENLİK ENGELİ: Demo Supabase ref portal kaynağında bulundu.')
+            process.exit(1)
+          }
+          console.log('Portal ana Supabase bağlantısı doğrulandı.')
+          NODE
+
+      - name: Portal bağımlılıklarını kur ve build doğrula
+        working-directory: apps/bs-egitim-portali
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Vercel CLI kur
+        run: npm install --global vercel@latest
+
+      - name: Vercel portal proje bağlantısını hazırla
+        working-directory: apps/bs-egitim-portali
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .vercel
+          mkdir -p .vercel
+          node <<'NODE'
+          const fs = require('fs')
+          fs.writeFileSync('.vercel/project.json', JSON.stringify({
+            orgId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID
+          }))
+          NODE
+
+      - name: Portal production ayarlarını çek
+        working-directory: apps/bs-egitim-portali
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Vercel proje kimliğini doğrula
+        working-directory: apps/bs-egitim-portali
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const cfg = JSON.parse(fs.readFileSync('.vercel/project.json', 'utf8'))
+          if (cfg.orgId !== process.env.VERCEL_ORG_ID || cfg.projectId !== process.env.VERCEL_PROJECT_ID) {
+            console.error('GÜVENLİK ENGELİ: Vercel proje kimliği BS Eğitim Portalı ile eşleşmiyor.')
+            process.exit(1)
+          }
+          console.log(`Portal Vercel proje kimliği doğrulandı: ${cfg.projectId}`)
+          NODE
+
+      - name: Portal production build oluştur
+        working-directory: apps/bs-egitim-portali
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Production build güvenlik kontrolü
+        working-directory: apps/bs-egitim-portali
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATIC_DIR=".vercel/output/static"
+          test -d "$STATIC_DIR" || { echo "::error::.vercel/output/static bulunamadı."; exit 1; }
+          grep -R -F -q "$EXPECTED_SUPABASE_URL" "$STATIC_DIR" || { echo "::error::Ana Supabase URL production build içinde bulunamadı."; exit 1; }
+          if grep -R -F -q "pparlcdctnivmpiofuvz" "$STATIC_DIR"; then
+            echo "::error::Demo Supabase ref production portal build içine sızdı."
+            exit 1
+          fi
+          grep -R -F -q "bildirimlerim_v1" "$STATIC_DIR" || { echo "::error::Bildirim Merkezi kodu production build içinde bulunamadı."; exit 1; }
+          INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' "$STATIC_DIR/index.html" | head -n 1)"
+          INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' "$STATIC_DIR/index.html" | head -n 1)"
+          test -n "$INDEX_JS" || { echo "::error::Portal production index JS bulunamadı."; exit 1; }
+          test -n "$INDEX_CSS" || { echo "::error::Portal production index CSS bulunamadı."; exit 1; }
+          echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
+          echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
+          echo "Portal production build doğrulandı: $INDEX_JS / $INDEX_CSS"
+
+      - name: BS Eğitim Portalı production deploy
+        run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Canlı portal smoke testi
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="https://bs-egitim-portali.vercel.app"
+          MATCHED=0
+          for ATTEMPT in 1 2 3 4 5 6; do
+            INDEX="$(curl -fsSL --retry 2 --retry-delay 1 "$BASE_URL/?deploy_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
+            if printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_CSS"; then
+              MATCHED=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$MATCHED" -ne 1 ]; then
+            echo "::error::Canlı portal alias yeni production assetlerini göstermedi."
+            exit 1
+          fi
+          JS="$(curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_JS?deploy_check=$GITHUB_RUN_ID")"
+          printf '%s' "$JS" | grep -F -q "bildirimlerim_v1" || { echo "::error::Canlı portal JS içinde Bildirim Merkezi bulunamadı."; exit 1; }
+          curl -fsSL --retry 2 "$BASE_URL/$EXPECTED_INDEX_CSS?deploy_check=$GITHUB_RUN_ID" >/dev/null
+          echo "Canlı BS Eğitim Portalı smoke testi başarılı."

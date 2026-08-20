@@ -1,3 +1,3 @@
-target_main_commit=24fb82d6e56e30452c6a4f53c7cad63d8ec96ab5
-reason=Portal Bildirim Merkezi V1 production yayını
-attempt=7
+target_main_commit=77d099f046bbcd934fa5c1e32e0b7c9607cab3cd
+reason=Portal Bildirim Merkezi V1 production yayını ve smoke doğrulaması
+attempt=8

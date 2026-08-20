@@ -75,7 +75,9 @@ function fallbackPlan(candidates: Candidate[], allowedDates: string[], maxNew: n
   }))
   return {
     baslik: reason ? 'Önce mevcut planı dengele' : 'Bu haftanın güvenli çalışma planı',
-    ozet: reason || (picks.length ? 'Gerçek çalışma geçmişindeki ritim korunarak yeni çalışmalar günlere dengeli dağıtıldı.' : 'Otomatik plan için yeterli gerçek çalışma geçmişi bulunmuyor.'),
+    ozet: reason || (picks.length
+      ? 'Gerçek çalışma geçmişindeki ritim korunarak yeni çalışmalar günlere dengeli dağıtıldı.'
+      : 'Otomatik plan için yeterli gerçek çalışma geçmişi bulunmuyor.'),
     odaklar: [],
     secimler: reason ? [] : picks,
     uyarilar: reason ? ['Yeni yük eklenmedi.'] : [],
@@ -174,7 +176,10 @@ Deno.serve(async (req: Request) => {
     })
     const doneRecent = dueRecent.filter((item: any) => done(item.durum))
     const weekCompletion = dueRecent.length ? Math.round((doneRecent.length / dueRecent.length) * 100) : null
-    const overdue = assignments.filter((item: any) => compact(item.son_teslim_tarihi) && item.son_teslim_tarihi < today && !done(item.durum) && !cancelled(item.durum))
+    const overdue = assignments.filter((item: any) => compact(item.son_teslim_tarihi)
+      && item.son_teslim_tarihi < today
+      && !done(item.durum)
+      && !cancelled(item.durum))
 
     const completed21Start = addDays(today, -20)
     const completedLast21 = assignments.filter((item: any) => {
@@ -198,7 +203,9 @@ Deno.serve(async (req: Request) => {
 
     if (!holdReason) {
       for (const link of studentBooks as any[]) {
-        const openForBook = assignments.some((item: any) => item.ogrenci_kitap_id === link.ogrenci_kitap_id && !done(item.durum) && !cancelled(item.durum))
+        const openForBook = assignments.some((item: any) => item.ogrenci_kitap_id === link.ogrenci_kitap_id
+          && !done(item.durum)
+          && !cancelled(item.durum))
         if (openForBook) continue
 
         const history = assignments
@@ -207,14 +214,17 @@ Deno.serve(async (req: Request) => {
             && ['Sayfa', 'Test'].includes(compact(item.calisma_turu))
             && Number(item.baslangic_no) > 0
             && Number(item.bitis_no) >= Number(item.baslangic_no))
-          .sort((a: any, b: any) => compact(b.tamamlanma_tarihi || b.son_teslim_tarihi || b.verilis_tarihi).localeCompare(compact(a.tamamlanma_tarihi || a.son_teslim_tarihi || a.verilis_tarihi)))
+          .sort((a: any, b: any) => compact(b.tamamlanma_tarihi || b.son_teslim_tarihi || b.verilis_tarihi)
+            .localeCompare(compact(a.tamamlanma_tarihi || a.son_teslim_tarihi || a.verilis_tarihi)))
         const last = history[0]
         if (!last) continue
 
         const book = catalog.find((item: any) => item.kitap_id === link.kitap_id)
         if (!book) continue
         const type = compact(last.calisma_turu) as 'Sayfa' | 'Test'
-        const spans = history.slice(0, 3).map((item: any) => Number(item.bitis_no) - Number(item.baslangic_no) + 1).filter((value: number) => value > 0)
+        const spans = history.slice(0, 3)
+          .map((item: any) => Number(item.bitis_no) - Number(item.baslangic_no) + 1)
+          .filter((value: number) => value > 0)
         const baseSpan = Math.max(1, Math.round(spans.reduce((sum: number, value: number) => sum + value, 0) / Math.max(spans.length, 1)))
         const adjustedSpan = Math.max(1, Math.round(baseSpan * factor))
         let start = Number(last.bitis_no) + 1
@@ -260,10 +270,11 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Görüşme kararının metni OpenAI'a gönderilmez; yalnız karar kaydının varlığı plan bağlamına eklenir.
     const meetingContext = (meetingsResult.data || [])
       .filter((item: any) => compact(item.alinan_kararlar))
       .slice(0, 2)
-      .map((item: any) => ({ tarih: compact(item.gorusme_tarihi), karar: clampText(item.alinan_kararlar, 280) }))
+      .map((item: any) => ({ tarih: compact(item.gorusme_tarihi), karar_var: true }))
 
     const planId = `AIP-${today.replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
     const openThisWindow = assignments.filter((item: any) => {
@@ -278,7 +289,9 @@ Deno.serve(async (req: Request) => {
     const openAiKey = Deno.env.get('OPENAI_API_KEY') || ''
     if (openAiKey && !holdReason && candidates.length && allowedDates.length) {
       model = Deno.env.get('OPENAI_WEEKLY_PLAN_MODEL') || 'gpt-5.6-luna'
-      const safeCandidates = candidates.map(({ id, bookName, bookMeta, subject, type, startNo, endNo, history }) => ({ id, kitap: bookName, meta: bookMeta, ders: subject, tur: type, baslangic: startNo, bitis: endNo, gecmis: history }))
+      const safeCandidates = candidates.map(({ id, bookName, bookMeta, subject, type, startNo, endNo, history }) => ({
+        id, kitap: bookName, meta: bookMeta, ders: subject, tur: type, baslangic: startNo, bitis: endNo, gecmis: history,
+      }))
       const response = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${openAiKey}`, 'Content-Type': 'application/json' },
@@ -297,7 +310,7 @@ Deno.serve(async (req: Request) => {
                   'Adayın başlangıç ve bitiş aralığını değiştirme. Yalnız izinli tarihlerden birini seç.',
                   'Mevcut açık çalışmaları dikkate al ve aynı güne gereksiz yığılma yapma.',
                   'Deneme verisini yalnız öncelik sinyali olarak kullan; neden-sonuç iddiası kurma.',
-                  'Görüşme kararını planın bağlamı olarak kullan; aday listesinde olmayan yeni görev üretme.',
+                  'Görüşme kararı içeriği paylaşılmaz; yalnız yakın zamanda karar kaydı bulunduğunu bağlam olarak kullan.',
                   'Öğrencinin gerçek son 21 günlük tamamlama kapasitesini aşma. Daha az görev seçmek serbesttir.',
                   'Çıktı kısa, uygulanabilir ve Türkçe olsun. Kişisel veri isteme veya üretme.',
                 ].join(' '),
@@ -311,11 +324,15 @@ Deno.serve(async (req: Request) => {
                   mod: mode,
                   donem: { baslangic: today, bitis: planEnd, izinli_tarihler: allowedDates },
                   ayar: { yogunluk: intensity, pazar_calisma: sundayWork },
-                  kapasite: { son_21_gun_tamamlanan: completedLast21.length, haftalik_hedef_ust_sinir: Math.min(maxNew, candidates.length), son_7_gun_tamamlama_yuzdesi: weekCompletion },
+                  kapasite: {
+                    son_21_gun_tamamlanan: completedLast21.length,
+                    haftalik_hedef_ust_sinir: Math.min(maxNew, candidates.length),
+                    son_7_gun_tamamlama_yuzdesi: weekCompletion,
+                  },
                   mevcut_acik_plan: openThisWindow,
                   adaylar: safeCandidates,
                   denemeler: examContext,
-                  son_gorusme_kararlari: meetingContext,
+                  son_gorusmeler: meetingContext,
                 }),
               }],
             },
@@ -336,8 +353,13 @@ Deno.serve(async (req: Request) => {
                     type: 'array',
                     maxItems: 12,
                     items: {
-                      type: 'object', additionalProperties: false,
-                      properties: { aday_id: { type: 'string' }, tarih: { type: 'string' }, gerekce: { type: 'string' } },
+                      type: 'object',
+                      additionalProperties: false,
+                      properties: {
+                        aday_id: { type: 'string' },
+                        tarih: { type: 'string' },
+                        gerekce: { type: 'string' },
+                      },
                       required: ['aday_id', 'tarih', 'gerekce'],
                     },
                   },
@@ -361,14 +383,25 @@ Deno.serve(async (req: Request) => {
             const validSelections = (Array.isArray(parsed.secimler) ? parsed.secimler : [])
               .filter(item => candidates.some(candidate => candidate.id === compact(item.aday_id)))
               .filter(item => allowedDates.includes(compact(item.tarih)))
-              .filter(item => !seen.has(compact(item.aday_id)) && seen.add(compact(item.aday_id)))
+              .filter(item => {
+                const id = compact(item.aday_id)
+                if (seen.has(id)) return false
+                seen.add(id)
+                return true
+              })
               .slice(0, Math.min(maxNew, 12))
             aiPlan = {
               baslik: clampText(parsed.baslik, 120) || 'Bu haftanın çalışma planı',
               ozet: clampText(parsed.ozet, 420) || 'Plan gerçek çalışma geçmişine göre hazırlandı.',
-              odaklar: (Array.isArray(parsed.odaklar) ? parsed.odaklar : []).map(item => clampText(item, 90)).filter(Boolean).slice(0, 3),
-              secimler: validSelections.map(item => ({ aday_id: compact(item.aday_id), tarih: compact(item.tarih), gerekce: clampText(item.gerekce, 220) })),
-              uyarilar: (Array.isArray(parsed.uyarilar) ? parsed.uyarilar : []).map(item => clampText(item, 160)).filter(Boolean).slice(0, 5),
+              odaklar: (Array.isArray(parsed.odaklar) ? parsed.odaklar : [])
+                .map(item => clampText(item, 90)).filter(Boolean).slice(0, 3),
+              secimler: validSelections.map(item => ({
+                aday_id: compact(item.aday_id),
+                tarih: compact(item.tarih),
+                gerekce: clampText(item.gerekce, 220),
+              })),
+              uyarilar: (Array.isArray(parsed.uyarilar) ? parsed.uyarilar : [])
+                .map(item => clampText(item, 160)).filter(Boolean).slice(0, 5),
             }
             aiActive = true
           } catch (error) {
@@ -402,7 +435,11 @@ Deno.serve(async (req: Request) => {
       basarili: true,
       aktif: aiActive,
       model: aiActive ? model : null,
-      durum: holdReason ? 'mevcut_plani_koru' : candidates.length ? (aiActive ? 'ai_hazir' : 'guvenli_yedek') : 'ilk_calisma_gerekli',
+      durum: holdReason
+        ? 'mevcut_plani_koru'
+        : candidates.length
+          ? (aiActive ? 'ai_hazir' : 'guvenli_yedek')
+          : 'ilk_calisma_gerekli',
       plan: {
         plan_id: planId,
         baslangic: today,

@@ -18,7 +18,7 @@ jobs:
       VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
       VERCEL_SCOPE: syalciners-8325s-projects
       VERCEL_PROJECT_ID: prj_WTCzIweta6c9XIpQT8pKGC9xBPrB
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_PORTAL_TOKEN }}
       EXPECTED_SUPABASE_URL: https://igmtuouhdozkgwmdxlme.supabase.co
       EXPECTED_PUBLISHABLE_KEY_SHA256: e3566d5568f13248e849e49bb28cfc5b92cba825b96bec80f94392cc5b66d213
       PORTAL_DIR: apps/bs-egitim-portali
@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${VERCEL_TOKEN:-}" ]; then
-            echo "::error::VERCEL_TOKEN GitHub Actions secret tanımlı değil. Portal production deploy yapılmadı."
+            echo "::error::VERCEL_PORTAL_TOKEN GitHub Actions secret tanımlı değil. Portal production deploy yapılmadı."
             exit 1
           fi
 

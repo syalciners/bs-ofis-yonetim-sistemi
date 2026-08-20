@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Vercel token kontrolü
+      - name: Vercel portal token kontrolü
         id: token
         shell: bash
         run: |
@@ -72,18 +72,17 @@ jobs:
           npm install --no-audit --no-fund
           npm run build
 
-      - name: Vercel CLI kur
-        id: cli
-        run: npm install --global vercel@latest
-
-      - name: Vercel portal proje bağlantısını hazırla
-        id: link
+      - name: Prebuilt Vercel paketini hazırla
+        id: prebuilt
         working-directory: apps/bs-egitim-portali
         shell: bash
         run: |
           set -euo pipefail
+          test -d dist || { echo "::error::Portal dist klasörü bulunamadı."; exit 1; }
           rm -rf .vercel
-          mkdir -p .vercel
+          mkdir -p .vercel/output/static
+          cp -R dist/. .vercel/output/static/
+          printf '%s\n' '{"version":3}' > .vercel/output/config.json
           node <<'NODE'
           const fs = require('fs')
           fs.writeFileSync('.vercel/project.json', JSON.stringify({
@@ -92,57 +91,50 @@ jobs:
           }))
           NODE
 
-      - name: Portal production ayarlarını çek
-        id: pull
-        working-directory: apps/bs-egitim-portali
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-
-      - name: Vercel proje kimliğini doğrula
-        id: project_guard
-        working-directory: apps/bs-egitim-portali
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs')
-          const cfg = JSON.parse(fs.readFileSync('.vercel/project.json', 'utf8'))
-          if (cfg.orgId !== process.env.VERCEL_ORG_ID || cfg.projectId !== process.env.VERCEL_PROJECT_ID) {
-            console.error('GÜVENLİK ENGELİ: Vercel proje kimliği BS Eğitim Portalı ile eşleşmiyor.')
-            process.exit(1)
-          }
-          console.log(`Portal Vercel proje kimliği doğrulandı: ${cfg.projectId}`)
-          NODE
-
-      - name: Portal production build oluştur
-        id: build
-        working-directory: apps/bs-egitim-portali
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-
-      - name: Production build güvenlik kontrolü
+      - name: Prebuilt paket güvenlik kontrolü
         id: artifact_guard
         working-directory: apps/bs-egitim-portali
         shell: bash
         run: |
           set -euo pipefail
           STATIC_DIR=".vercel/output/static"
-          test -d "$STATIC_DIR" || { echo "::error::.vercel/output/static bulunamadı."; exit 1; }
-          grep -R -F -q "$EXPECTED_SUPABASE_URL" "$STATIC_DIR" || { echo "::error::Ana Supabase URL production build içinde bulunamadı."; exit 1; }
+          test -f ".vercel/output/config.json" || { echo "::error::Build Output config.json bulunamadı."; exit 1; }
+          test -f "$STATIC_DIR/index.html" || { echo "::error::Portal production index.html bulunamadı."; exit 1; }
+          grep -R -F -q "$EXPECTED_SUPABASE_URL" "$STATIC_DIR" || { echo "::error::Ana Supabase URL production paketinde bulunamadı."; exit 1; }
           if grep -R -F -q "pparlcdctnivmpiofuvz" "$STATIC_DIR"; then
-            echo "::error::Demo Supabase ref production portal build içine sızdı."
+            echo "::error::Demo Supabase ref production portal paketine sızdı."
             exit 1
           fi
-          grep -R -F -q "bildirimlerim_v1" "$STATIC_DIR" || { echo "::error::Bildirim Merkezi kodu production build içinde bulunamadı."; exit 1; }
+          grep -R -F -q "bildirimlerim_v1" "$STATIC_DIR" || { echo "::error::Bildirim Merkezi kodu production paketinde bulunamadı."; exit 1; }
           INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' "$STATIC_DIR/index.html" | head -n 1)"
           INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' "$STATIC_DIR/index.html" | head -n 1)"
           test -n "$INDEX_JS" || { echo "::error::Portal production index JS bulunamadı."; exit 1; }
           test -n "$INDEX_CSS" || { echo "::error::Portal production index CSS bulunamadı."; exit 1; }
           echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
           echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
-          echo "Portal production build doğrulandı: $INDEX_JS / $INDEX_CSS"
+          echo "Prebuilt portal paketi doğrulandı: $INDEX_JS / $INDEX_CSS"
+
+      - name: Portal token proje erişimini doğrula
+        id: project_access
+        shell: bash
+        run: |
+          set -euo pipefail
+          HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::VERCEL_PORTAL_TOKEN portal projesine erişemiyor (HTTP $HTTP_CODE). Deploy yapılmadı."
+            exit 1
+          fi
+          echo "Portal proje erişimi doğrulandı."
+
+      - name: Vercel CLI kur
+        id: cli
+        run: npm install --global vercel@latest
 
       - name: BS Eğitim Portalı production deploy
         id: deploy
-        run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --token="$VERCEL_TOKEN"
+        run: vercel deploy --cwd "$PORTAL_DIR" --prebuilt --prod --yes --token="$VERCEL_TOKEN"
 
       - name: Canlı portal smoke testi
         id: smoke
@@ -151,7 +143,7 @@ jobs:
           set -euo pipefail
           BASE_URL="https://bs-egitim-portali.vercel.app"
           MATCHED=0
-          for ATTEMPT in 1 2 3 4 5 6; do
+          for ATTEMPT in 1 2 3 4 5 6 7 8; do
             INDEX="$(curl -fsSL --retry 2 --retry-delay 1 "$BASE_URL/?deploy_check=${GITHUB_RUN_ID}-${ATTEMPT}")"
             if printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_JS" && printf '%s' "$INDEX" | grep -F -q "$EXPECTED_INDEX_CSS"; then
               MATCHED=1
@@ -176,12 +168,10 @@ jobs:
           TOKEN_OUTCOME: ${{ steps.token.outcome }}
           SOURCE_GUARD_OUTCOME: ${{ steps.source_guard.outcome }}
           PORTAL_BUILD_OUTCOME: ${{ steps.portal_build.outcome }}
-          CLI_OUTCOME: ${{ steps.cli.outcome }}
-          LINK_OUTCOME: ${{ steps.link.outcome }}
-          PULL_OUTCOME: ${{ steps.pull.outcome }}
-          PROJECT_GUARD_OUTCOME: ${{ steps.project_guard.outcome }}
-          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          PREBUILT_OUTCOME: ${{ steps.prebuilt.outcome }}
           ARTIFACT_GUARD_OUTCOME: ${{ steps.artifact_guard.outcome }}
+          PROJECT_ACCESS_OUTCOME: ${{ steps.project_access.outcome }}
+          CLI_OUTCOME: ${{ steps.cli.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
         run: |
@@ -195,12 +185,10 @@ jobs:
           token=$TOKEN_OUTCOME
           source_guard=$SOURCE_GUARD_OUTCOME
           portal_build=$PORTAL_BUILD_OUTCOME
-          cli=$CLI_OUTCOME
-          link=$LINK_OUTCOME
-          pull=$PULL_OUTCOME
-          project_guard=$PROJECT_GUARD_OUTCOME
-          build=$BUILD_OUTCOME
+          prebuilt=$PREBUILT_OUTCOME
           artifact_guard=$ARTIFACT_GUARD_OUTCOME
+          project_access=$PROJECT_ACCESS_OUTCOME
+          cli=$CLI_OUTCOME
           deploy=$DEPLOY_OUTCOME
           smoke=$SMOKE_OUTCOME
           expected_index_js=${EXPECTED_INDEX_JS:-}

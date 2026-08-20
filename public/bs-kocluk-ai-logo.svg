@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BS Koçluk AI">
+  <defs>
+    <radialGradient id="orb" cx="50%" cy="42%" r="62%">
+      <stop offset="0%" stop-color="#18d7ff"/>
+      <stop offset="45%" stop-color="#0a8cff"/>
+      <stop offset="100%" stop-color="#03459c"/>
+    </radialGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <image href="./bs-egitim-icon-512-v2.png" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
+  <circle cx="256" cy="256" r="92" fill="#00b9ff" opacity=".20" filter="url(#soft)">
+    <animate attributeName="opacity" values=".12;.32;.12" dur="2.6s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="86;101;86" dur="2.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="256" cy="256" r="72" fill="url(#orb)" stroke="#7cf2ff" stroke-width="7" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="58" fill="none" stroke="#baf8ff" stroke-width="2" opacity=".58"/>
+  <g stroke="#8df5ff" stroke-width="4" stroke-linecap="round" opacity=".92">
+    <path d="M256 184v-18m0 180v-18M184 256h-18m180 0h-18"/>
+    <path d="M205 205l-13-13m115 115 13 13m-115-13-13 13m115-115 13-13"/>
+  </g>
+  <g fill="#d9fbff">
+    <circle cx="256" cy="162" r="5"/><circle cx="256" cy="350" r="5"/><circle cx="162" cy="256" r="5"/><circle cx="350" cy="256" r="5"/>
+    <circle cx="189" cy="189" r="4"/><circle cx="323" cy="323" r="4"/><circle cx="189" cy="323" r="4"/><circle cx="323" cy="189" r="4"/>
+  </g>
+  <text x="256" y="279" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="68" font-weight="900" letter-spacing="-4" fill="#fff" stroke="#dffbff" stroke-width="1.2">AI</text>
+</svg>

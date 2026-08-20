@@ -1,6 +1,5 @@
 .notifications-page{gap:14px}
-.notifications-title-row{align-items:flex-start}
-.notifications-subtitle{max-width:560px}
+.notifications-title-row{align-items:flex-end}
 .notifications-refresh{min-height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 12px;display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:900;cursor:pointer}
 .notifications-refresh:disabled{opacity:.55;cursor:not-allowed}
 .notifications-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -54,7 +53,6 @@
 
 @media (max-width:640px){
   .notifications-title-row{align-items:flex-end}
-  .notifications-title-row .notifications-subtitle{display:none}
   .notifications-refresh span{display:none}
   .notifications-refresh{width:40px;padding:0;justify-content:center}
   .notifications-summary{gap:8px}

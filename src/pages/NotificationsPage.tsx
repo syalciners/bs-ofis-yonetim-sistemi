@@ -96,7 +96,6 @@ export function NotificationsPage() {
       <div>
         <span className="eyebrow">İLETİŞİM MERKEZİ</span>
         <h1>Bildirimler</h1>
-        <p className="notifications-subtitle">Satış, operasyon, finans ve sistem bildirimlerini tek ekrandan takip edin.</p>
       </div>
       <button className="notifications-refresh" type="button" onClick={() => void load(true)} disabled={refreshing}>
         <RefreshCw size={17} className={refreshing ? 'spin' : ''}/>

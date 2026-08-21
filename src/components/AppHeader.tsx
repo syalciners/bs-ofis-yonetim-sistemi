@@ -1,26 +1,30 @@
 import { Bell, Cloud, RefreshCw, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { productProfile, t } from '../lib/productProfile'
 import { APP_MODE } from '../lib/supabase'
 import { useAppData } from './AppDataProvider'
+
+const upper=(value:string)=>value.toLocaleUpperCase('tr-TR')
 
 const pageSection=(pathname:string)=>{
   if(pathname==='/')return 'YÖNETİM ÖZETİ'
   if(pathname.startsWith('/takvim'))return 'DERS PROGRAMI'
   if(pathname.startsWith('/portal-onizleme'))return 'PORTAL ÖNİZLEMESİ'
   const labels:Record<string,string>={
-    '/ogrenciler':'ÖĞRENCİ YÖNETİMİ',
+    '/ogrenciler':`${upper(t.student)} YÖNETİMİ`,
     '/finans':'FİNANS',
     '/menu':'DİĞER İŞLEMLER',
     '/ogretmenler':'PERSONEL',
-    '/ogretmen-odemeleri':'ÖĞRETMEN YÖNETİMİ',
-    '/odevler':'ÖDEV TAKİBİ',
+    '/ogretmen-odemeleri':`${upper(t.teacher)} YÖNETİMİ`,
+    '/gruplar':'GRUP YÖNETİMİ',
+    '/odevler':'ÇALIŞMA TAKİBİ',
     '/raporlar':'RAPORLAR',
     '/sabit-program':'PROGRAM ŞABLONLARI',
     '/bildirimler':'BİLDİRİM MERKEZİ',
     '/ayarlar':'AYARLAR',
     '/sistem':'SİSTEM',
   }
-  return labels[pathname]||'BS EĞİTİM'
+  return labels[pathname]||upper(productProfile.brandShort)
 }
 
 export function AppHeader() {
@@ -35,8 +39,8 @@ export function AppHeader() {
     <div className="app-header">
       <div className="app-header-main">
         <button className="brand" type="button" onClick={() => nav('/')}>
-          <img src="./bs-logo.svg" alt="BS Eğitim" />
-          <span><strong>BS Eğitim</strong><small>Yönetimi</small></span>
+          <img src="./bs-logo.svg" alt={productProfile.brandShort} />
+          <span><strong>{productProfile.brandShort}</strong><small>{productProfile.brandSuffix}</small></span>
         </button>
         <div className="header-actions">
           <span className="cloud-chip"><Cloud size={13}/> {isDemo?'DEMO':'Bulut'}</span>

@@ -7,6 +7,7 @@ import { LessonForm, StudentForm } from '../components/forms'
 import { CollectionQuickForm } from '../components/CollectionQuickForm'
 import { LessonCard } from '../components/LessonCard'
 import { LessonDetail } from '../components/LessonDetail'
+import { featureEnabled, t } from '../lib/productProfile'
 import { APP_MODE } from '../lib/supabase'
 import type { Ders } from '../lib/types'
 import { fullDate, money } from '../lib/format'
@@ -17,12 +18,13 @@ export function OverviewPage() {
   const metrics=useMemo(()=>data?{today:todayLessons(data),collections:monthCollections(data),recentCollections:data.tahsilatlar.filter(x=>!x.iptal_mi).slice(0,3),debt:totalOpenDebt(data),debtors:data.ogrenciler.filter(x=>x.durum!=='Pasif'&&studentDebt(data,x.ogrenci_id)>0).length,teacher:totalTeacherBalance(data),assign:overdueAssignments(data),zoom:zoomProblems(data)}:null,[data])
   if(!data||!metrics)return null
   const isDemo=APP_MODE==='demo'
+  const assignmentsEnabled=featureEnabled('assignments')
   const todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const plannedLessonHours=metrics.today.filter(x=>x.ders_durumu==='Planlandı').reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const attention=[
     {show:plannedLessonHours>0,icon:CalendarCheck2,title:`${plannedLessonHours} planlı ders saati`,text:'Bugün sonuç bekleyen dersler',go:()=>nav('/takvim')},
-    {show:metrics.debtors>0,icon:WalletCards,title:`${metrics.debtors} öğrencide açık bakiye`,text:`${money(metrics.debt)} tahsilat bekliyor`,go:()=>nav('/ogrenciler?filtre=borclu')},
-    {show:metrics.assign.length>0,icon:ReceiptText,title:`${metrics.assign.length} geciken ödev`,text:'Son teslim tarihi geçmiş kayıtlar',go:()=>nav('/odevler')},
+    {show:metrics.debtors>0,icon:WalletCards,title:`${metrics.debtors} ${t.studentLower}de açık bakiye`,text:`${money(metrics.debt)} tahsilat bekliyor`,go:()=>nav('/ogrenciler?filtre=borclu')},
+    {show:assignmentsEnabled&&metrics.assign.length>0,icon:ReceiptText,title:`${metrics.assign.length} geciken ödev`,text:'Son teslim tarihi geçmiş kayıtlar',go:()=>nav('/odevler')},
     {show:metrics.zoom.length>0,icon:AlertCircle,title:`${metrics.zoom.length} Zoom uyarısı`,text:'Kontrol edilmesi gereken online ders',go:()=>nav('/sistem')},
   ].filter(x=>x.show)
   return <div className="page-stack">
@@ -31,24 +33,24 @@ export function OverviewPage() {
     {isDemo&&<section className="demo-discovery" aria-label="Önerilen demo rotası">
       <div className="demo-discovery-copy"><span>ÖNERİLEN DEMO ROTASI</span><h2>Demoyu 3 adımda keşfedin</h2><p>Örnek veriler üzerinden günlük yönetim akışının en güçlü üç bölümünü deneyin.</p></div>
       <div className="demo-discovery-actions">
-        <button type="button" onClick={()=>nav('/ogrenciler')}><span className="demo-discovery-step">1</span><span><b>Öğrenci ve bakiye</b><small>Öğrenci kartı, açık bakiye ve tahsilat geçmişi</small></span><UserPlus/></button>
+        <button type="button" onClick={()=>nav('/ogrenciler')}><span className="demo-discovery-step">1</span><span><b>{t.student} ve bakiye</b><small>{t.student} kartı, açık bakiye ve tahsilat geçmişi</small></span><UserPlus/></button>
         <button type="button" onClick={()=>nav('/takvim')}><span className="demo-discovery-step">2</span><span><b>Takvim ve ders</b><small>Haftalık program, ders sonucu ve günlük akış</small></span><CalendarCheck2/></button>
-        <button type="button" onClick={()=>nav('/finans')}><span className="demo-discovery-step">3</span><span><b>Finans ve rapor</b><small>Tahsilat, gider ve öğretmen hakediş özetleri</small></span><Banknote/></button>
+        <button type="button" onClick={()=>nav('/finans')}><span className="demo-discovery-step">3</span><span><b>Finans ve rapor</b><small>Tahsilat, gider ve {t.teacherLower} hakediş özetleri</small></span><Banknote/></button>
       </div>
     </section>}
 
     <section className="kpi-grid four">
       <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Ders Saati</span><strong>{todayLessonHours}</strong><small>{plannedLessonHours} planlandı</small></button>
       <button className="kpi-card blue" onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="kpi-icon"><Banknote/></div><span>Bu Ay Tahsilat</span><strong>{money(metrics.collections)}</strong><small>gerçek nakit girişi</small></button>
-      <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>öğrenci bakiyeleri</small></button>
-      <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>Öğretmen Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
+      <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>{t.studentLower} bakiyeleri</small></button>
+      <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>{t.teacher} Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
     </section>
 
     <section><div className="section-heading"><div><h2>Hızlı İşlemler</h2><span>tek dokunuş</span></div></div><div className="quick-actions">
-      <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>öğrenci ödemesi</small></button>
+      <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>{t.studentLower} ödemesi</small></button>
       <button onClick={()=>setModal('lesson')}><span className="quick-icon blue"><CalendarPlus/></span><b>Ders Ekle</b><small>yeni ders kaydı</small></button>
-      <button onClick={()=>setModal('student')}><span className="quick-icon orange"><UserPlus/></span><b>Öğrenci Ekle</b><small>yeni kayıt</small></button>
-      <button onClick={()=>nav('/odevler?yeni=1')}><span className="quick-icon green"><ReceiptText/></span><b>Ödev Ekle</b><small>öğrenci ödevi</small></button>
+      <button onClick={()=>setModal('student')}><span className="quick-icon orange"><UserPlus/></span><b>{t.student} Ekle</b><small>yeni kayıt</small></button>
+      {assignmentsEnabled&&<button onClick={()=>nav('/odevler?yeni=1')}><span className="quick-icon green"><ReceiptText/></span><b>Ödev Ekle</b><small>{t.studentLower} ödevi</small></button>}
     </div></section>
 
     <section><div className="section-heading"><div><h2>Son Tahsilatlar</h2><span>son {metrics.recentCollections.length} kayıt</span></div><button className="text-btn" onClick={()=>nav('/finans?tab=tahsilatlar')}>Tümünü Gör</button></div><div className="finance-list">{metrics.recentCollections.length?metrics.recentCollections.map(x=><button className="finance-card income" key={x.tahsilat_id} onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="finance-icon"><Banknote/></div><div><strong>{studentName(data,x.ogrenci_id)}</strong><small>{fullDate(x.tarih)} · {x.odeme_yontemi||'—'}</small></div><b>{money(x.tutar)}</b></button>):<div className="calm-empty"><Banknote/><b>Henüz aktif tahsilat yok.</b><span>İlk tahsilatı “Tahsilat Al” ile kaydedebilirsin.</span></div>}</div></section>
@@ -57,8 +59,8 @@ export function OverviewPage() {
 
     <section><div className="section-heading"><div><h2>Dikkat Gerektirenler</h2><span>yalnız gerekenler</span></div></div>{attention.length?<div className="attention-grid">{attention.map((x,i)=><button key={i} onClick={x.go}><span className="attention-icon"><x.icon/></span><span><b>{x.title}</b><small>{x.text}</small></span></button>)}</div>:<div className="all-good"><CalendarCheck2/><span><b>Kontrol bekleyen kritik iş yok.</b><small>Günlük akış normal görünüyor.</small></span></div>}</section>
 
-    <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle="Öğrenciyi seç; güncel bakiye otomatik gösterilir." onClose={()=>setModal(null)}><CollectionQuickForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
-    <Sheet open={modal==='student'} title="Yeni Öğrenci" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setModal(null)}><StudentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
+    <Sheet open={modal==='collection'} title="Tahsilat Al" subtitle={`${t.student} seç; güncel bakiye otomatik gösterilir.`} onClose={()=>setModal(null)}><CollectionQuickForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
+    <Sheet open={modal==='student'} title={`Yeni ${t.student}`} subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setModal(null)}><StudentForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={modal==='lesson'} title="Ders Ekle" subtitle="Uygunluk kaydetmeden önce otomatik kontrol edilir." onClose={()=>setModal(null)}><LessonForm onDone={()=>setModal(null)} onCancel={()=>setModal(null)}/></Sheet>
     <Sheet open={!!selected&&!editLesson} title="Ders Detayı" subtitle="Ders sonucu ve hızlı işlemler" onClose={()=>setSelected(null)}>{selected&&<LessonDetail lesson={selected} onDone={()=>setSelected(null)} onEdit={()=>{setEditLesson(selected);setSelected(null)}}/>}</Sheet>
     <Sheet open={!!editLesson} title="Dersi Düzenle" subtitle="Tarih, saat ve ders bilgileri" onClose={()=>setEditLesson(null)}>{editLesson&&<LessonForm lesson={editLesson} onDone={()=>setEditLesson(null)} onCancel={()=>setEditLesson(null)}/>}</Sheet>

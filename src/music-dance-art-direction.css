@@ -1,0 +1,381 @@
+/*
+  BS Eğitim ürün ailesi — Müzik & Dans sanatsal alt kimliği
+  ---------------------------------------------------------
+  Ana marka renkleri korunur: BS lacivert + BS mavi.
+  Mor, mercan ve sıcak altın yalnız sanat/ritim vurgusudur.
+  Bu dosya yalnız muzik-dans / muzik / dans profillerinde etkinleşir.
+*/
+
+html[data-product-profile="muzik-dans"],
+html[data-product-profile="muzik"],
+html[data-product-profile="dans"]{
+  --art-violet:#7657D9;
+  --art-violet-soft:#F2EDFF;
+  --art-coral:#E66A72;
+  --art-coral-soft:#FFF0F1;
+  --art-gold:#C9963E;
+  --art-gold-soft:#FFF8E8;
+  --art-rose:#C65187;
+  --art-rose-soft:#FCEEF5;
+  --art-ink:#0B1F3A;
+  --art-paper:#FBFCFF;
+  --art-line:rgba(11,31,58,.10);
+  --art-shadow:0 16px 44px rgba(11,31,58,.09);
+}
+
+html[data-product-profile="muzik-dans"] body,
+html[data-product-profile="muzik"] body,
+html[data-product-profile="dans"] body{
+  background:
+    radial-gradient(circle at 8% 8%,rgba(118,87,217,.075),transparent 24%),
+    radial-gradient(circle at 92% 18%,rgba(22,139,255,.085),transparent 24%),
+    radial-gradient(circle at 78% 88%,rgba(201,150,62,.055),transparent 22%),
+    linear-gradient(180deg,#F9FBFF 0%,#F6F8FC 48%,#F8FAFD 100%);
+}
+
+/* Uygulamaya nota çizgisi gibi davranan çok hafif ritim katmanı. */
+html[data-product-profile="muzik-dans"] .app-shell,
+html[data-product-profile="muzik"] .app-shell,
+html[data-product-profile="dans"] .app-shell{
+  position:relative;
+  isolation:isolate;
+}
+html[data-product-profile="muzik-dans"] .app-shell::before,
+html[data-product-profile="muzik"] .app-shell::before,
+html[data-product-profile="dans"] .app-shell::before{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  pointer-events:none;
+  width:440px;
+  height:210px;
+  right:-120px;
+  top:132px;
+  opacity:.42;
+  border-radius:48%;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 18px,rgba(11,31,58,.045) 18px 19px),
+    radial-gradient(ellipse at center,rgba(118,87,217,.08),transparent 67%);
+  transform:rotate(-8deg);
+  mask-image:linear-gradient(90deg,transparent,#000 28%,#000 75%,transparent);
+}
+
+/* Marka başlığı: BS ailesi kalır; alt ürün daha rafine görünür. */
+html[data-product-profile="muzik-dans"] .app-header,
+html[data-product-profile="muzik"] .app-header,
+html[data-product-profile="dans"] .app-header{
+  border-color:rgba(11,31,58,.105);
+  box-shadow:0 14px 38px rgba(11,31,58,.085);
+  overflow:hidden;
+  position:relative;
+}
+html[data-product-profile="muzik-dans"] .app-header::after,
+html[data-product-profile="muzik"] .app-header::after,
+html[data-product-profile="dans"] .app-header::after{
+  content:"";
+  position:absolute;
+  right:-30px;
+  top:-58px;
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(118,87,217,.10),rgba(22,139,255,.035) 46%,transparent 72%);
+  pointer-events:none;
+}
+html[data-product-profile="muzik-dans"] .brand strong,
+html[data-product-profile="muzik"] .brand strong,
+html[data-product-profile="dans"] .brand strong{
+  letter-spacing:-.025em;
+}
+html[data-product-profile="muzik-dans"] .brand small,
+html[data-product-profile="muzik"] .brand small,
+html[data-product-profile="dans"] .brand small{
+  color:var(--brand-blue);
+  letter-spacing:.20em;
+}
+
+/* Başlıklar — editoryal, sanatsal ama iş uygulaması ciddiyetinde. */
+html[data-product-profile="muzik-dans"] .page-title-row h1,
+html[data-product-profile="muzik"] .page-title-row h1,
+html[data-product-profile="dans"] .page-title-row h1{
+  color:var(--art-ink);
+  font-weight:780;
+  letter-spacing:-.048em;
+  text-wrap:balance;
+}
+html[data-product-profile="muzik-dans"] .page-title-row,
+html[data-product-profile="muzik"] .page-title-row,
+html[data-product-profile="dans"] .page-title-row{
+  position:relative;
+  padding-left:13px;
+}
+html[data-product-profile="muzik-dans"] .page-title-row::before,
+html[data-product-profile="muzik"] .page-title-row::before,
+html[data-product-profile="dans"] .page-title-row::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:4px;
+  bottom:5px;
+  width:3px;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--brand-blue),var(--art-violet),var(--art-gold));
+}
+
+/* KPI kartlarında dört ayrı sanat ritmi; renk bilgi hiyerarşisini bozmaz. */
+html[data-product-profile="muzik-dans"] .kpi-card,
+html[data-product-profile="muzik"] .kpi-card,
+html[data-product-profile="dans"] .kpi-card{
+  border-color:rgba(11,31,58,.095);
+  box-shadow:0 8px 26px rgba(11,31,58,.05);
+  background:linear-gradient(145deg,#FFF 0%,#FCFDFF 72%,#F8FAFE 100%);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+html[data-product-profile="muzik-dans"] button.kpi-card:hover,
+html[data-product-profile="muzik"] button.kpi-card:hover,
+html[data-product-profile="dans"] button.kpi-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(22,139,255,.24);
+  box-shadow:var(--art-shadow);
+}
+html[data-product-profile="muzik-dans"] .kpi-card::after,
+html[data-product-profile="muzik"] .kpi-card::after,
+html[data-product-profile="dans"] .kpi-card::after{
+  content:"";
+  position:absolute;
+  right:-24px;
+  bottom:-34px;
+  width:104px;
+  height:104px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(22,139,255,.065),transparent 69%);
+  pointer-events:none;
+}
+html[data-product-profile="muzik-dans"] .kpi-card.teal::before,
+html[data-product-profile="muzik"] .kpi-card.teal::before,
+html[data-product-profile="dans"] .kpi-card.teal::before{background:linear-gradient(90deg,#2F9C95,#48BDB4)}
+html[data-product-profile="muzik-dans"] .kpi-card.blue::before,
+html[data-product-profile="muzik"] .kpi-card.blue::before,
+html[data-product-profile="dans"] .kpi-card.blue::before{background:linear-gradient(90deg,var(--brand-blue),#5CB4FF)}
+html[data-product-profile="muzik-dans"] .kpi-card.orange::before,
+html[data-product-profile="muzik"] .kpi-card.orange::before,
+html[data-product-profile="dans"] .kpi-card.orange::before{background:linear-gradient(90deg,var(--art-gold),#E9B65C)}
+html[data-product-profile="muzik-dans"] .kpi-card.red::before,
+html[data-product-profile="muzik"] .kpi-card.red::before,
+html[data-product-profile="dans"] .kpi-card.red::before{background:linear-gradient(90deg,var(--art-coral),var(--art-rose))}
+
+/* Hızlı işlemler, listeler ve bilgi kartları: daha galeri hissi veren yüzeyler. */
+html[data-product-profile="muzik-dans"] .quick-actions>button,
+html[data-product-profile="muzik-dans"] .list-card,
+html[data-product-profile="muzik-dans"] .attention-grid button,
+html[data-product-profile="muzik-dans"] .all-good,
+html[data-product-profile="muzik-dans"] .student-outline-card,
+html[data-product-profile="muzik-dans"] .teacher-profile-card,
+html[data-product-profile="muzik"] .quick-actions>button,
+html[data-product-profile="muzik"] .list-card,
+html[data-product-profile="muzik"] .attention-grid button,
+html[data-product-profile="muzik"] .all-good,
+html[data-product-profile="muzik"] .student-outline-card,
+html[data-product-profile="muzik"] .teacher-profile-card,
+html[data-product-profile="dans"] .quick-actions>button,
+html[data-product-profile="dans"] .list-card,
+html[data-product-profile="dans"] .attention-grid button,
+html[data-product-profile="dans"] .all-good,
+html[data-product-profile="dans"] .student-outline-card,
+html[data-product-profile="dans"] .teacher-profile-card{
+  border-color:rgba(11,31,58,.095);
+  box-shadow:0 8px 24px rgba(11,31,58,.045);
+}
+html[data-product-profile="muzik-dans"] .quick-actions>button,
+html[data-product-profile="muzik"] .quick-actions>button,
+html[data-product-profile="dans"] .quick-actions>button{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(155deg,#FFF 0%,#FBFCFF 100%);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+html[data-product-profile="muzik-dans"] .quick-actions>button::after,
+html[data-product-profile="muzik"] .quick-actions>button::after,
+html[data-product-profile="dans"] .quick-actions>button::after{
+  content:"";
+  position:absolute;
+  width:70px;
+  height:70px;
+  right:-35px;
+  top:-35px;
+  border-radius:50%;
+  background:rgba(118,87,217,.055);
+}
+html[data-product-profile="muzik-dans"] .quick-actions>button:hover,
+html[data-product-profile="muzik"] .quick-actions>button:hover,
+html[data-product-profile="dans"] .quick-actions>button:hover{
+  transform:translateY(-2px);
+  border-color:rgba(118,87,217,.20);
+  box-shadow:0 14px 34px rgba(11,31,58,.08);
+}
+
+/* Sanatsal vurgu ikonları. BS mavisi baskın, ikincil tonlar ritim verir. */
+html[data-product-profile="muzik-dans"] .quick-icon.orange,
+html[data-product-profile="muzik"] .quick-icon.orange,
+html[data-product-profile="dans"] .quick-icon.orange{background:var(--art-gold-soft);color:var(--art-gold)}
+html[data-product-profile="muzik-dans"] .quick-icon.green,
+html[data-product-profile="muzik"] .quick-icon.green,
+html[data-product-profile="dans"] .quick-icon.green{background:var(--art-violet-soft);color:var(--art-violet)}
+html[data-product-profile="muzik-dans"] .attention-icon,
+html[data-product-profile="muzik"] .attention-icon,
+html[data-product-profile="dans"] .attention-icon{background:var(--art-gold-soft);color:var(--art-gold)}
+
+/* Ders/program kartlarında ritmik sol şerit. */
+html[data-product-profile="muzik-dans"] .lesson-card,
+html[data-product-profile="muzik"] .lesson-card,
+html[data-product-profile="dans"] .lesson-card{
+  position:relative;
+  padding-left:17px;
+  transition:background .15s ease,transform .15s ease;
+}
+html[data-product-profile="muzik-dans"] .lesson-card::before,
+html[data-product-profile="muzik"] .lesson-card::before,
+html[data-product-profile="dans"] .lesson-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:9px;
+  bottom:9px;
+  width:3px;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--brand-blue),var(--art-violet));
+  opacity:.65;
+}
+html[data-product-profile="muzik-dans"] .lesson-card:hover,
+html[data-product-profile="muzik"] .lesson-card:hover,
+html[data-product-profile="dans"] .lesson-card:hover{
+  background:#FBFCFF;
+}
+
+/* Alt navigasyon: tablet/telefon için yüzen, zarif kontrol yüzeyi. */
+html[data-product-profile="muzik-dans"] .bottom-nav,
+html[data-product-profile="muzik"] .bottom-nav,
+html[data-product-profile="dans"] .bottom-nav{
+  border-color:rgba(11,31,58,.11);
+  background:rgba(255,255,255,.94);
+  box-shadow:0 20px 54px rgba(11,31,58,.15);
+}
+html[data-product-profile="muzik-dans"] .bottom-nav a,
+html[data-product-profile="muzik"] .bottom-nav a,
+html[data-product-profile="dans"] .bottom-nav a{
+  transition:background .15s ease,color .15s ease,transform .15s ease;
+}
+html[data-product-profile="muzik-dans"] .bottom-nav a.active,
+html[data-product-profile="muzik"] .bottom-nav a.active,
+html[data-product-profile="dans"] .bottom-nav a.active{
+  color:var(--brand-blue);
+  background:linear-gradient(145deg,#EDF7FF 0%,#F4F0FF 100%);
+  box-shadow:inset 0 0 0 1px rgba(22,139,255,.08);
+}
+
+/* Form ve sheet'ler: konser afişi değil; yüksek okunabilirlikli premium çalışma yüzeyi. */
+html[data-product-profile="muzik-dans"] .sheet-panel,
+html[data-product-profile="muzik"] .sheet-panel,
+html[data-product-profile="dans"] .sheet-panel{
+  box-shadow:0 -26px 74px rgba(11,31,58,.24);
+}
+html[data-product-profile="muzik-dans"] .sheet-header,
+html[data-product-profile="muzik"] .sheet-header,
+html[data-product-profile="dans"] .sheet-header{
+  border-bottom-color:rgba(11,31,58,.09);
+}
+html[data-product-profile="muzik-dans"] .form-grid input:focus,
+html[data-product-profile="muzik-dans"] .form-grid select:focus,
+html[data-product-profile="muzik-dans"] .form-grid textarea:focus,
+html[data-product-profile="muzik"] .form-grid input:focus,
+html[data-product-profile="muzik"] .form-grid select:focus,
+html[data-product-profile="muzik"] .form-grid textarea:focus,
+html[data-product-profile="dans"] .form-grid input:focus,
+html[data-product-profile="dans"] .form-grid select:focus,
+html[data-product-profile="dans"] .form-grid textarea:focus{
+  border-color:rgba(22,139,255,.62);
+  box-shadow:0 0 0 3px rgba(22,139,255,.10),0 8px 24px rgba(118,87,217,.045);
+}
+
+/* Giriş ekranında marka değişmeden sahne/perde hissi veren soyut ışık. */
+html[data-product-profile="muzik-dans"] .login-page,
+html[data-product-profile="muzik"] .login-page,
+html[data-product-profile="dans"] .login-page{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 12%,rgba(118,87,217,.13),transparent 26%),
+    radial-gradient(circle at 82% 14%,rgba(22,139,255,.14),transparent 28%),
+    radial-gradient(circle at 50% 100%,rgba(201,150,62,.075),transparent 32%),
+    linear-gradient(180deg,#FBFCFF,#F5F8FC);
+}
+html[data-product-profile="muzik-dans"] .login-page::before,
+html[data-product-profile="muzik"] .login-page::before,
+html[data-product-profile="dans"] .login-page::before{
+  content:"";
+  position:absolute;
+  width:620px;
+  height:280px;
+  left:50%;
+  top:10%;
+  transform:translateX(-50%) rotate(-6deg);
+  opacity:.40;
+  pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent 0 22px,rgba(11,31,58,.05) 22px 23px);
+  mask-image:radial-gradient(ellipse,#000,transparent 68%);
+}
+html[data-product-profile="muzik-dans"] .login-card,
+html[data-product-profile="muzik"] .login-card,
+html[data-product-profile="dans"] .login-card{
+  position:relative;
+  border-color:rgba(11,31,58,.11);
+  box-shadow:0 30px 90px rgba(11,31,58,.15);
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(22px);
+}
+
+/* Gruplar: sahne topluluğu hissi veren zarif vurgu. */
+html[data-product-profile="muzik-dans"] .group-card,
+html[data-product-profile="muzik"] .group-card,
+html[data-product-profile="dans"] .group-card{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(118,87,217,.14);
+  background:linear-gradient(145deg,#FFF 0%,#FCFBFF 100%);
+}
+html[data-product-profile="muzik-dans"] .group-card::after,
+html[data-product-profile="muzik"] .group-card::after,
+html[data-product-profile="dans"] .group-card::after{
+  content:"";
+  position:absolute;
+  width:90px;
+  height:90px;
+  right:-44px;
+  bottom:-44px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(198,81,135,.10),transparent 68%);
+  pointer-events:none;
+}
+
+/* Hareket hassasiyeti olan kullanıcılar için animasyonları kapat. */
+@media (prefers-reduced-motion:reduce){
+  html[data-product-profile="muzik-dans"] *,
+  html[data-product-profile="muzik"] *,
+  html[data-product-profile="dans"] *{
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
+
+@media (max-width:720px){
+  html[data-product-profile="muzik-dans"] .app-shell::before,
+  html[data-product-profile="muzik"] .app-shell::before,
+  html[data-product-profile="dans"] .app-shell::before{
+    width:300px;height:160px;right:-120px;top:118px;opacity:.28;
+  }
+  html[data-product-profile="muzik-dans"] .page-title-row,
+  html[data-product-profile="muzik"] .page-title-row,
+  html[data-product-profile="dans"] .page-title-row{padding-left:10px}
+}

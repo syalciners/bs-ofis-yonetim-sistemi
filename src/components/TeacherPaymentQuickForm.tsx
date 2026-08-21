@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { money, todayISO } from '../lib/format'
+import { t } from '../lib/productProfile'
 import { saveTeacherPayment } from '../services/officeService'
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
@@ -41,7 +42,7 @@ export function TeacherPaymentQuickForm({ teacherId, onDone, onCancel }: { teach
         aciklama: String(f.get('aciklama') || '') || null,
       })
       await refresh()
-      toast('Öğretmen ödemesi kaydedildi.')
+      toast(`${t.teacher} ödemesi kaydedildi.`)
       onDone()
     } catch (err: any) {
       toast(err.message || String(err), 'error')
@@ -49,7 +50,7 @@ export function TeacherPaymentQuickForm({ teacherId, onDone, onCancel }: { teach
       setBusy(false)
     }
   }}>
-    <label>Öğretmen<select name="ogretmen_id" value={teacher} onChange={e => setTeacher(e.target.value)} required><option value="">Seçin</option>{data.ogretmenler.filter(x => x.durum !== 'Pasif').map(x => <option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
+    <label>{t.teacher}<select name="ogretmen_id" value={teacher} onChange={e => setTeacher(e.target.value)} required><option value="">Seçin</option>{data.ogretmenler.filter(x => x.durum !== 'Pasif').map(x => <option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
     <label>Hakediş Dönemi<select name="hakedis_donemi_id" value={period} onChange={e => setPeriod(e.target.value)} required><option value="">Seçin</option>{availablePeriods.map(x => <option key={x.hakedis_donemi_id} value={x.hakedis_donemi_id}>{x.donem_adi}</option>)}</select></label>
     {teacher && period && <div className="wide form-summary">Dönem hakedişi <b>{money(earned)}</b> · Ödenen <b>{money(paid)}</b> · Kalan <b>{money(remaining)}</b>{period === currentPeriod?.hakedis_donemi_id ? ' · Güncel dönem otomatik seçildi' : ''}</div>}
     <label>Tutar<input name="tutar" type="number" min="0.01" step="0.01" inputMode="decimal" defaultValue={remaining || ''} key={`${teacher}-${period}-${remaining}`} required /></label>

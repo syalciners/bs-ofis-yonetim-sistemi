@@ -1,0 +1,33 @@
+name: Müzik Dans Build Doğrulama
+
+on:
+  push:
+    branches: [muzik-dans-demo-v1]
+  pull_request:
+    branches: [demo-hazirlik]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: demo
+      VITE_PRODUCT_PROFILE: muzik-dans
+      VITE_SUPABASE_URL: https://demo-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Bağımlılıkları kur
+        run: npm install --no-audit --no-fund
+      - name: Demo izolasyonunu kontrol et
+        run: npm run check:demo-isolation
+      - name: Müzik dans ürün güvenlik kontrolleri
+        run: node scripts/check-muzik-dans-profile.mjs
+      - name: TypeScript ve Vite build
+        run: npm run build

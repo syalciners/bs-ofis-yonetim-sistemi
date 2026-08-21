@@ -6,6 +6,7 @@ import { Sheet } from '../components/Sheet'
 import { TeacherSectionNav } from '../components/TeacherSectionNav'
 import { TeacherForm } from '../components/forms'
 import { TeacherPaymentQuickForm } from '../components/TeacherPaymentQuickForm'
+import { t } from '../lib/productProfile'
 import type { Ogretmen } from '../lib/types'
 import { firstOfMonth, money, normalizePhone, shortDate, time } from '../lib/format'
 import { isManagerTeacher, teacherTone } from '../lib/teacherTone'
@@ -19,32 +20,28 @@ export function TeachersPage(){
     .filter(x=>x.ogretmen_id===teacherId&&x.aktif!==false)
     .map(x=>data.branslar.find(b=>b.brans_id===x.brans_id&&b.aktif!==false)?.brans_adi)
     .filter((x):x is string=>Boolean(x))
-  const teachingTitle=(branches:string[])=>{
-    const normalized=branches.map(x=>x.toLocaleUpperCase('tr-TR'))
-    if(normalized.some(x=>x.includes('MATEMATİK')||x.includes('MATH')))return 'Matematik Öğretmeni'
-    return branches[0]?`${branches[0]} Öğretmeni`:'Öğretmen'
-  }
+  const teachingTitle=(branches:string[])=>branches[0]?`${branches[0]} ${t.teacher}`:t.teacher
   const managerRank=(name:string)=>name.trim().toLocaleUpperCase('tr-TR')==='BAŞAK ATİLLA'?0:1
   const managers=rows.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>managerRank(a.ad_soyad)-managerRank(b.ad_soyad))
   const teachers=rows.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
 
   const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle;return <button className={`teacher-profile-card ${teacherTone(x.ad_soyad)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>setSelected(x)}>
     <div className="teacher-profile-head"><div className="avatar purple">{x.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
-    <div className="teacher-branches"><span>Verdiği Dersler</span><b>{branches.length?branches.join(' · '):'Branş tanımlanmamış'}</b></div>
+    <div className="teacher-branches"><span>Verdiği Dersler</span><b>{branches.length?branches.join(' · '):`${t.branch} tanımlanmamış`}</b></div>
     <div className="teacher-card-footer"><span>{next?<><b>{shortDate(next.tarih)} {time(next.baslangic_saati)}</b> sıradaki ders</>:<>Sıradaki ders yok</>}</span><span>Güncel kalan <b className={balance>0?'danger-text':''}>{money(Math.max(balance,0))}</b></span></div>
   </button>}
 
   return <div className="page-stack teachers-v2">
-    <section className="page-title-row"><div><span className="eyebrow">PERSONEL</span><h1>Öğretmenler</h1></div><button className="primary-btn" onClick={()=>setNewTeacher(true)}><Plus size={17}/>Öğretmen Ekle</button></section>
+    <section className="page-title-row"><div><span className="eyebrow">PERSONEL</span><h1>{t.teachers}</h1></div><button className="primary-btn" onClick={()=>setNewTeacher(true)}><Plus size={17}/>{t.teacher} Ekle</button></section>
     <TeacherSectionNav active="teachers"/>
-    <div className="search-filter-bar"><div className="search-box"><Search size={17}/><input placeholder="Öğretmen ara…" value={q} onChange={e=>setQ(e.target.value)}/></div></div>
+    <div className="search-filter-bar"><div className="search-box"><Search size={17}/><input placeholder={`${t.teacher} ara…`} value={q} onChange={e=>setQ(e.target.value)}/></div></div>
 
     {!!managers.length&&<section className="teacher-group"><div className="teacher-group-heading"><div><span className="eyebrow">YÖNETİM</span><h2>Yöneticiler</h2></div><span>{managers.length} kişi</span></div><div className="manager-teacher-grid">{managers.map(x=>teacherCard(x,true))}</div></section>}
-    {!!teachers.length&&<section className="teacher-group"><div className="teacher-group-heading"><div><span className="eyebrow">EĞİTİM KADROSU</span><h2>Öğretmenler</h2></div><span>{teachers.length} kişi</span></div><div className="standard-teacher-grid">{teachers.map(x=>teacherCard(x,false))}</div></section>}
-    {!rows.length&&<div className="calm-empty"><GraduationCap/><b>Öğretmen bulunamadı.</b><span>Arama metnini değiştir veya yeni öğretmen ekle.</span></div>}
+    {!!teachers.length&&<section className="teacher-group"><div className="teacher-group-heading"><div><span className="eyebrow">EĞİTİM KADROSU</span><h2>{t.teachers}</h2></div><span>{teachers.length} kişi</span></div><div className="standard-teacher-grid">{teachers.map(x=>teacherCard(x,false))}</div></section>}
+    {!rows.length&&<div className="calm-empty"><GraduationCap/><b>{t.teacher} bulunamadı.</b><span>Arama metnini değiştir veya yeni {t.teacherLower} ekle.</span></div>}
 
-    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerTeacher(selected.ad_soyad),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
-      <section className={`profile-detail-hero ${teacherTone(selected.ad_soyad)}`}><div className="profile-detail-avatar">{selected.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
+    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||t.teacher} subtitle={`${t.teacher} profili`} onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerTeacher(selected.ad_soyad),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
+      <section className={`profile-detail-hero ${teacherTone(selected.ad_soyad)}`}><div className="profile-detail-avatar">{selected.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>{t.branch} tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
 
       {(phone||selected.email)&&<section className="profile-contact-strip" aria-label="İletişim">
         {phone&&<a className="profile-contact-btn phone" href={`tel:+${normalizePhone(phone)}`}><Phone size={17}/><span>Ara</span></a>}
@@ -58,13 +55,13 @@ export function TeachersPage(){
         <button className="detail-action-card primary" onClick={()=>setPayment(selected.ogretmen_id)}><span className="detail-action-icon teal"><WalletCards/></span><span><b>Ödeme Yap</b><small>Hakediş ödemesi</small></span></button>
         <button className="detail-action-card" onClick={()=>{nav(`/takvim?ogretmen=${encodeURIComponent(selected.ogretmen_id)}`);setSelected(null)}}><span className="detail-action-icon blue"><CalendarDays/></span><span><b>Takvim</b><small>Haftalık programı aç</small></span></button>
         <button className="detail-action-card" onClick={()=>{nav(`/ogretmen-odemeleri?ogretmen=${encodeURIComponent(selected.ogretmen_id)}`);setSelected(null)}}><span className="detail-action-icon purple"><WalletCards/></span><span><b>Ödemeler</b><small>Ödeme geçmişi</small></span></button>
-        <button className="detail-action-card" onClick={()=>{setEdit(selected);setSelected(null)}}><span className="detail-action-icon orange"><Edit3/></span><span><b>Kaydı Düzenle</b><small>Profil ve branşlar</small></span></button>
+        <button className="detail-action-card" onClick={()=>{setEdit(selected);setSelected(null)}}><span className="detail-action-icon orange"><Edit3/></span><span><b>Kaydı Düzenle</b><small>Profil ve {t.branch.toLocaleLowerCase('tr-TR')}</small></span></button>
       </section>
 
       <section className="detail-section visual-history-section"><div className="section-heading compact"><div><h3>Son Dersler</h3><span>{recent.length} kayıt</span></div></div>{recent.length?<div className="detail-history-list">{recent.map(x=><div className="detail-history-card" key={x.ders_id}><div><span>{shortDate(x.tarih)} · {time(x.baslangic_saati)}</span><strong>{studentName(data,x.ogrenci_id)}</strong></div><span className={`history-status ${x.ders_durumu==='Yapıldı'?'done':x.ders_durumu==='Planlandı'?'planned':'other'}`}>{x.ders_durumu}</span></div>)}</div>:<p className="muted">Ders kaydı yok.</p>}</section>
     </div>})()}</Sheet>
-    <Sheet open={!!payment} title="Öğretmen Ödemesi" subtitle={payment?data.ogretmenler.find(x=>x.ogretmen_id===payment)?.ad_soyad:''} onClose={()=>setPayment(null)}>{payment&&<TeacherPaymentQuickForm teacherId={payment} onDone={()=>setPayment(null)} onCancel={()=>setPayment(null)}/>}</Sheet>
-    <Sheet open={!!edit} title="Öğretmeni Düzenle" subtitle="İletişim, branş ve durum" onClose={()=>setEdit(null)}>{edit&&<TeacherForm teacher={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
-    <Sheet open={newTeacher} title="Yeni Öğretmen" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setNewTeacher(false)}><TeacherForm onDone={()=>setNewTeacher(false)} onCancel={()=>setNewTeacher(false)}/></Sheet>
+    <Sheet open={!!payment} title={`${t.teacher} Ödemesi`} subtitle={payment?data.ogretmenler.find(x=>x.ogretmen_id===payment)?.ad_soyad:''} onClose={()=>setPayment(null)}>{payment&&<TeacherPaymentQuickForm teacherId={payment} onDone={()=>setPayment(null)} onCancel={()=>setPayment(null)}/>}</Sheet>
+    <Sheet open={!!edit} title={`${t.teacher} Düzenle`} subtitle={`İletişim, ${t.branch.toLocaleLowerCase('tr-TR')} ve durum`} onClose={()=>setEdit(null)}>{edit&&<TeacherForm teacher={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
+    <Sheet open={newTeacher} title={`Yeni ${t.teacher}`} subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setNewTeacher(false)}><TeacherForm onDone={()=>setNewTeacher(false)} onCancel={()=>setNewTeacher(false)}/></Sheet>
   </div>
 }

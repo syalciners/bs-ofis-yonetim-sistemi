@@ -14,6 +14,7 @@ import { MorePage } from './pages/MorePage'
 import { TeachersPage } from './pages/TeachersPage'
 import { TeacherPaymentsPage } from './pages/TeacherPaymentsPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
+import { GroupsPage } from './pages/GroupsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { FixedProgramPage } from './pages/FixedProgramPage'
 import { NotificationsPage } from './pages/NotificationsPage'
@@ -21,14 +22,15 @@ import { SettingsPage } from './pages/SettingsPage'
 import { SystemPage } from './pages/SystemPage'
 import { PortalPreviewPage } from './pages/PortalPreviewPage'
 import { LoaderCircle } from 'lucide-react'
+import { featureEnabled, productProfile } from './lib/productProfile'
 
 function ProtectedApp() {
   const { session, loading, error, data } = useAppData()
   const location = useLocation()
   const portalDetail = /^\/portal-onizleme\/(ogretmen|ogrenci)\/[^/]+$/.test(location.pathname)
-  if (loading) return <main className="boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
+  if (loading) return <main className="boot"><img src="./bs-logo.svg" alt={productProfile.brandShort}/><LoaderCircle className="spin" size={24}/><span>{productProfile.brandShort} hazırlanıyor…</span></main>
   if (!session) return <LoginScreen />
-  if (error && !data) return <main className="boot error-boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
+  if (error && !data) return <main className="boot error-boot"><img src="./bs-logo.svg" alt={productProfile.brandShort}/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
   return <div className="app-shell"><AppHeader/><DemoBanner/><main className="page-container"><Routes>
     <Route path="/" element={<OverviewPage/>}/>
     <Route path="/takvim" element={<CalendarPage/>}/>
@@ -38,7 +40,8 @@ function ProtectedApp() {
     <Route path="/menu" element={<MorePage/>}/>
     <Route path="/ogretmenler" element={<TeachersPage/>}/>
     <Route path="/ogretmen-odemeleri" element={<TeacherPaymentsPage/>}/>
-    <Route path="/odevler" element={<AssignmentsPage/>}/>
+    <Route path="/gruplar" element={featureEnabled('groups')?<GroupsPage/>:<Navigate to="/menu" replace/>}/>
+    <Route path="/odevler" element={featureEnabled('assignments')?<AssignmentsPage/>:<Navigate to="/menu" replace/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>
     <Route path="/bildirimler" element={<NotificationsPage/>}/>

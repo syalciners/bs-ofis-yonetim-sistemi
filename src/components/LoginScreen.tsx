@@ -1,5 +1,6 @@
 import { LogIn, ShieldCheck, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
+import { productProfile, t } from '../lib/productProfile'
 import { APP_MODE } from '../lib/supabase'
 import { useAppData } from './AppDataProvider'
 
@@ -21,10 +22,10 @@ export function LoginScreen() {
     }
   }
   return <main className="login-page"><section className="login-card">
-    <img className="login-logo" src="./bs-logo.svg" alt="BS Eğitim" />
-    <h1>BS Eğitim Yönetimi</h1>
-    <p>{isDemo ? 'Satış demosunu yalnızca örnek verilerle deneyin.' : 'Ders, öğrenci, öğretmen, program ve finans işlemlerini tek yerden yönetin.'}</p>
-    {isDemo && <div className="demo-data-warning"><TriangleAlert size={17}/><span>Gerçek öğrenci, veli, öğretmen veya finans bilgisi girmeyin. Demo verileri geçicidir ve otomatik silinir.</span></div>}
+    <img className="login-logo" src="./bs-logo.svg" alt={productProfile.brandShort} />
+    <h1>{productProfile.brand}</h1>
+    <p>{isDemo ? 'Satış demosunu yalnızca örnek verilerle deneyin.' : `Ders, ${t.studentLower}, ${t.teacherLower}, program ve finans işlemlerini tek yerden yönetin.`}</p>
+    {isDemo && <div className="demo-data-warning"><TriangleAlert size={17}/><span>Gerçek {t.studentLower}, veli, {t.teacherLower} veya finans bilgisi girmeyin. Demo verileri geçicidir ve otomatik silinir.</span></div>}
     <button className="primary-btn login-btn" disabled={busy} onClick={() => void handleSignIn()}><LogIn size={18}/>{busy ? (isDemo ? 'Demo açılıyor…' : 'Yönlendiriliyor…') : (isDemo ? 'Yönetici Olarak Demoyu Aç' : 'Google ile Giriş Yap')}</button>
     <div className="login-security"><ShieldCheck size={15}/> {isDemo ? 'DEMO · Her ziyaretçiye ayrı kişisel demo ortamı açılır.' : 'Yalnız yetkili kurum kullanıcıları erişebilir.'}</div>
     {(loginError || error) && <div className="inline-error">{loginError || error}</div>}

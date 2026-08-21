@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "muzik-dans-demo-v1": false
+      "muzik-dans-demo-v1": false,
+      "muzik-dans-build-probe": false
     }
   }
 }

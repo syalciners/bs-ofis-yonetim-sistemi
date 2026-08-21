@@ -135,9 +135,10 @@ export function MusicDanceDataProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async () => {
     setError(null)
+    const redirectTo = `${window.location.origin}${window.location.pathname}`
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href.split('#')[0] },
+      options: { redirectTo },
     })
     if (authError) throw authError
   }, [])

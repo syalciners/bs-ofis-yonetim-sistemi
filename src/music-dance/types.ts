@@ -3,6 +3,7 @@ export type MdKullaniciRolu = 'Yönetici' | 'Ofis' | 'Eğitmen'
 export type MdProgramTuru = 'Bireysel' | 'Grup'
 export type MdDersDurumu = 'Planlandı' | 'Yapıldı' | 'İptal' | 'Ertelendi' | 'Eğitmen İptali'
 export type MdKatilimDurumu = 'Planlandı' | 'Katıldı' | 'Gelmedi' | 'Mazeretli' | 'İptal'
+export type MdOdemeYontemi = 'Nakit' | 'Kredi Kartı' | 'Banka' | 'Havale' | 'Diğer'
 
 export interface MdKurumSecenegi {
   kurum_id: string
@@ -108,6 +109,8 @@ export interface MdSabitProgram {
   sure_dk: number
   baslangic_tarihi: string
   bitis_tarihi?: string | null
+  kursiyer_birim_ucreti: number
+  egitmen_birim_hakedisi: number
   durum: 'Aktif' | 'Pasif'
   aciklama?: string | null
 }
@@ -125,6 +128,7 @@ export interface MdDers {
   baslangic_saati: string
   sure_dk: number
   ders_durumu: MdDersDurumu
+  egitmen_hakedis_tutari: number
   aciklama?: string | null
 }
 
@@ -134,6 +138,7 @@ export interface MdDersKatilim {
   ders_id: string
   kursiyer_id: string
   katilim_durumu: MdKatilimDurumu
+  birim_ucret: number
   notlar?: string | null
 }
 
@@ -154,6 +159,57 @@ export interface MdHaftaUretimSonucu {
 export interface MdHaftaVerisi {
   dersler: MdDers[]
   katilimlar: MdDersKatilim[]
+}
+
+export interface MdKursiyerBakiye {
+  kurum_id: string
+  kursiyer_id: string
+  ad_soyad: string
+  toplam_borc: number
+  toplam_tahsilat: number
+  bakiye: number
+}
+
+export interface MdEgitmenBakiye {
+  kurum_id: string
+  egitmen_id: string
+  ad_soyad: string
+  toplam_hakedis: number
+  toplam_odeme: number
+  bakiye: number
+}
+
+export interface MdTahsilat {
+  tahsilat_id: string
+  kurum_id: string
+  kursiyer_id: string
+  tarih: string
+  tutar: number
+  odeme_yontemi: MdOdemeYontemi
+  aciklama?: string | null
+  durum: 'Aktif' | 'İptal'
+  olusturma_zamani: string
+}
+
+export interface MdEgitmenOdeme {
+  odeme_id: string
+  kurum_id: string
+  egitmen_id: string
+  tarih: string
+  tutar: number
+  odeme_yontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>
+  aciklama?: string | null
+  durum: 'Aktif' | 'İptal'
+  olusturma_zamani: string
+}
+
+export interface MdFinansVerisi {
+  kursiyerBakiyeleri: MdKursiyerBakiye[]
+  egitmenBakiyeleri: MdEgitmenBakiye[]
+  tahsilatlar: MdTahsilat[]
+  egitmenOdemeleri: MdEgitmenOdeme[]
+  toplamDersUcreti: number
+  toplamHakedis: number
 }
 
 export interface MusicDanceData {

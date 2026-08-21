@@ -47,24 +47,28 @@ export function PortalNotifications() {
     let live = true
     void supabase.auth.getSession().then(({ data }) => {
       if (!live) return
-      const signedIn = Boolean(data.session?.user)
-      setActive(signedIn)
-      if (signedIn) void load()
+      setActive(Boolean(data.session?.user))
     })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!live) return
       const signedIn = Boolean(session?.user)
       setActive(signedIn)
-      if (signedIn) void load()
-      else { setItems([]); setOpen(false) }
+      if (!signedIn) { setItems([]); setOpen(false) }
     })
     return () => { live = false; listener.subscription.unsubscribe() }
   }, [])
 
   useEffect(() => {
     if (!active) return
-    const id = window.setInterval(() => void load(), 60000)
-    return () => window.clearInterval(id)
+    let live = true
+    const run = () => { if (live) void load() }
+    const initial = window.setTimeout(run, 0)
+    const interval = window.setInterval(run, 60000)
+    return () => {
+      live = false
+      window.clearTimeout(initial)
+      window.clearInterval(interval)
+    }
   }, [active])
 
   const unread = useMemo(() => items.filter(item => !item.okundu).length, [items])

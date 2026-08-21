@@ -1,0 +1,1 @@
+BS Müzik & Dans Kasa + Gider entegrasyonu için geçici CI doğrulama işareti.

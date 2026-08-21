@@ -4,7 +4,7 @@ on:
   push:
     branches: [muzik-dans-demo-v1]
   pull_request:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, muzik-dans-demo-v1]
   workflow_dispatch:
 
 permissions:

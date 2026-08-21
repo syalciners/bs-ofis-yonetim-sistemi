@@ -1,5 +1,15 @@
 import { supabase } from '../lib/supabase'
-import type { MdKurumSecenegi, MdKullaniciRolu, MdUrunProfili, MusicDanceData } from './types'
+import type {
+  MdDersDurumu,
+  MdHaftaUretimSonucu,
+  MdHaftaVerisi,
+  MdKatilimDurumu,
+  MdKurumSecenegi,
+  MdKullaniciRolu,
+  MdProgramTuru,
+  MdUrunProfili,
+  MusicDanceData,
+} from './types'
 
 const fail = (label: string, error: { message?: string } | null) => {
   if (error) throw new Error(`${label}: ${error.message || 'Bilinmeyen hata'}`)
@@ -31,7 +41,7 @@ export async function mdKurumlariGetir(): Promise<MdKurumSecenegi[]> {
 }
 
 export async function mdVerisiniGetir(kurumId: string): Promise<MusicDanceData> {
-  const [subeler, mekanlar, branslar, kursiyerler, egitmenler, egitmenBranslari, gruplar, grupUyeleri] = await Promise.all([
+  const [subeler, mekanlar, branslar, kursiyerler, egitmenler, egitmenBranslari, gruplar, grupUyeleri, programlar] = await Promise.all([
     supabase.from('md_subeler').select('*').eq('kurum_id', kurumId).order('sube_adi'),
     supabase.from('md_mekanlar').select('*').eq('kurum_id', kurumId).order('mekan_adi'),
     supabase.from('md_branslar').select('*').eq('kurum_id', kurumId).order('brans_adi'),
@@ -40,9 +50,10 @@ export async function mdVerisiniGetir(kurumId: string): Promise<MusicDanceData> 
     supabase.from('md_egitmen_branslari').select('*').eq('kurum_id', kurumId),
     supabase.from('md_kurs_gruplari').select('*').eq('kurum_id', kurumId).order('grup_adi'),
     supabase.from('md_kurs_grup_uyeleri').select('*').eq('kurum_id', kurumId),
+    supabase.from('md_sabit_programlar').select('*').eq('kurum_id', kurumId).order('haftanin_gunu').order('baslangic_saati'),
   ])
 
-  const results = [subeler, mekanlar, branslar, kursiyerler, egitmenler, egitmenBranslari, gruplar, grupUyeleri]
+  const results = [subeler, mekanlar, branslar, kursiyerler, egitmenler, egitmenBranslari, gruplar, grupUyeleri, programlar]
   const error = results.find(x => x.error)?.error
   fail('Müzik & Dans verisi alınamadı', error || null)
 
@@ -55,6 +66,7 @@ export async function mdVerisiniGetir(kurumId: string): Promise<MusicDanceData> 
     egitmenBranslari: (egitmenBranslari.data || []) as MusicDanceData['egitmenBranslari'],
     gruplar: (gruplar.data || []) as MusicDanceData['gruplar'],
     grupUyeleri: (grupUyeleri.data || []) as MusicDanceData['grupUyeleri'],
+    programlar: (programlar.data || []) as MusicDanceData['programlar'],
   }
 }
 
@@ -111,4 +123,77 @@ export async function mdGrubaKursiyerEkle(kurumId: string, grupId: string, kursi
     birim_ucret: birimUcret ?? null,
   })
   fail('Kursiyer gruba eklenemedi', result.error)
+}
+
+export async function mdProgramEkle(kurumId: string, input: {
+  program_turu: MdProgramTuru
+  kursiyer_id?: string | null
+  grup_id?: string | null
+  egitmen_id: string
+  brans_id: string
+  mekan_id?: string | null
+  haftanin_gunu: number
+  baslangic_saati: string
+  sure_dk: number
+  baslangic_tarihi: string
+  bitis_tarihi?: string | null
+  aciklama?: string | null
+}) {
+  const result = await supabase.from('md_sabit_programlar').insert({ kurum_id: kurumId, ...input })
+  fail('Sabit program eklenemedi', result.error)
+}
+
+export async function mdProgramDurumuGuncelle(programId: string, durum: 'Aktif' | 'Pasif') {
+  const result = await supabase.from('md_sabit_programlar').update({ durum, guncelleme_zamani: new Date().toISOString() }).eq('program_id', programId)
+  fail('Program durumu güncellenemedi', result.error)
+}
+
+export async function mdHaftaDersleriniGetir(kurumId: string, haftaBaslangici: string, haftaBitisi: string): Promise<MdHaftaVerisi> {
+  const dersler = await supabase
+    .from('md_dersler')
+    .select('*')
+    .eq('kurum_id', kurumId)
+    .gte('tarih', haftaBaslangici)
+    .lte('tarih', haftaBitisi)
+    .order('tarih')
+    .order('baslangic_saati')
+  fail('Haftalık dersler alınamadı', dersler.error)
+
+  const ids = (dersler.data || []).map((x: any) => String(x.ders_id))
+  if (!ids.length) return { dersler: [], katilimlar: [] }
+
+  const katilimlar = await supabase
+    .from('md_ders_katilimlari')
+    .select('*')
+    .eq('kurum_id', kurumId)
+    .in('ders_id', ids)
+  fail('Ders katılımları alınamadı', katilimlar.error)
+
+  return {
+    dersler: (dersler.data || []) as MdHaftaVerisi['dersler'],
+    katilimlar: (katilimlar.data || []) as MdHaftaVerisi['katilimlar'],
+  }
+}
+
+export async function mdHaftayiOlustur(haftaBaslangici: string): Promise<MdHaftaUretimSonucu> {
+  const result = await supabase.rpc('md_haftalik_dersleri_olustur_v1', { p_hafta_baslangici: haftaBaslangici })
+  fail('Haftalık dersler oluşturulamadı', result.error)
+  const raw = result.data as Partial<MdHaftaUretimSonucu> | null
+  return {
+    hafta_baslangici: String(raw?.hafta_baslangici || haftaBaslangici),
+    olusturulan: Number(raw?.olusturulan || 0),
+    mevcut: Number(raw?.mevcut || 0),
+    hata: Number(raw?.hata || 0),
+    hatalar: Array.isArray(raw?.hatalar) ? raw!.hatalar! : [],
+  }
+}
+
+export async function mdDersDurumuGuncelle(dersId: string, dersDurumu: MdDersDurumu) {
+  const result = await supabase.from('md_dersler').update({ ders_durumu: dersDurumu, guncelleme_zamani: new Date().toISOString() }).eq('ders_id', dersId)
+  fail('Ders durumu güncellenemedi', result.error)
+}
+
+export async function mdKatilimDurumuGuncelle(katilimId: string, katilimDurumu: MdKatilimDurumu) {
+  const result = await supabase.from('md_ders_katilimlari').update({ katilim_durumu: katilimDurumu, guncelleme_zamani: new Date().toISOString() }).eq('katilim_id', katilimId)
+  fail('Yoklama güncellenemedi', result.error)
 }

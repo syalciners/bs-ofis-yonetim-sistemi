@@ -32,10 +32,10 @@ const checks = [
   ['Kurum verisi md_kurumlar alanından okunur', mdService.includes("from('md_kurumlar')") && mdService.includes("from('md_kurum_kullanicilari')")],
   ['Kursiyer ve eğitmen yalnız md_ tablolarına yazılır', mdService.includes("from('md_kursiyerler').insert") && mdService.includes("from('md_egitmenler').insert")],
   ['Grup ve üyelik yalnız md_ tablolarına yazılır', mdService.includes("from('md_kurs_gruplari').insert") && mdService.includes("from('md_kurs_grup_uyeleri').insert")],
-  ['Program ve finans henüz eski motorlara bağlanmaz', !mdCode.includes('ders_kaydet_guvenli') && !mdCode.includes('tahsilat_kaydet_guvenli') && !mdCode.includes('ogretmen_odeme_kaydet_guvenli')],
+  ['Program ve finans eski motorlara bağlanmaz', !mdCode.includes('ders_kaydet_guvenli') && !mdCode.includes('tahsilat_kaydet_guvenli') && !mdCode.includes('ogretmen_odeme_kaydet_guvenli')],
   ['BS ürün ailesi markası korunur', mdApp.includes('BS EĞİTİM YÖNETİMİ · ÜRÜN AİLESİ') && !mdCode.toLocaleLowerCase('tr-TR').includes('armoni')],
   ['Sanatsal kabuk BS ana renklerini korur', mdCss.includes('--md-navy:#0B1F3A') && mdCss.includes('--md-blue:#168BFF')],
-  ['Müzik-dans branchi BS Koçluk Vercel deployunu tetiklemez', vercel.includes('"muzik-dans-demo-v1": false')],
+  ['BS Koçluk yalnız main branchinden deploy olabilir', vercel.includes('"*": false') && vercel.includes('"main": true')],
 ]
 
 let failed = 0

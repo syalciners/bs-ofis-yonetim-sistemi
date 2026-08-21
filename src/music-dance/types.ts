@@ -1,5 +1,8 @@
 export type MdUrunProfili = 'muzik-dans' | 'muzik' | 'dans'
 export type MdKullaniciRolu = 'Yönetici' | 'Ofis' | 'Eğitmen'
+export type MdProgramTuru = 'Bireysel' | 'Grup'
+export type MdDersDurumu = 'Planlandı' | 'Yapıldı' | 'İptal' | 'Ertelendi' | 'Eğitmen İptali'
+export type MdKatilimDurumu = 'Planlandı' | 'Katıldı' | 'Gelmedi' | 'Mazeretli' | 'İptal'
 
 export interface MdKurumSecenegi {
   kurum_id: string
@@ -91,6 +94,68 @@ export interface MdKursGrupUyesi {
   durum: 'Aktif' | 'Pasif'
 }
 
+export interface MdSabitProgram {
+  program_id: string
+  kurum_id: string
+  program_turu: MdProgramTuru
+  kursiyer_id?: string | null
+  grup_id?: string | null
+  egitmen_id: string
+  brans_id: string
+  mekan_id?: string | null
+  haftanin_gunu: number
+  baslangic_saati: string
+  sure_dk: number
+  baslangic_tarihi: string
+  bitis_tarihi?: string | null
+  durum: 'Aktif' | 'Pasif'
+  aciklama?: string | null
+}
+
+export interface MdDers {
+  ders_id: string
+  kurum_id: string
+  program_id?: string | null
+  ders_turu: MdProgramTuru
+  grup_id?: string | null
+  egitmen_id: string
+  brans_id: string
+  mekan_id?: string | null
+  tarih: string
+  baslangic_saati: string
+  sure_dk: number
+  ders_durumu: MdDersDurumu
+  aciklama?: string | null
+}
+
+export interface MdDersKatilim {
+  katilim_id: string
+  kurum_id: string
+  ders_id: string
+  kursiyer_id: string
+  katilim_durumu: MdKatilimDurumu
+  notlar?: string | null
+}
+
+export interface MdHaftaUretimHatasi {
+  program_id: string
+  tarih: string
+  mesaj: string
+}
+
+export interface MdHaftaUretimSonucu {
+  hafta_baslangici: string
+  olusturulan: number
+  mevcut: number
+  hata: number
+  hatalar: MdHaftaUretimHatasi[]
+}
+
+export interface MdHaftaVerisi {
+  dersler: MdDers[]
+  katilimlar: MdDersKatilim[]
+}
+
 export interface MusicDanceData {
   subeler: MdSube[]
   mekanlar: MdMekan[]
@@ -100,4 +165,5 @@ export interface MusicDanceData {
   egitmenBranslari: MdEgitmenBransi[]
   gruplar: MdKursGrubu[]
   grupUyeleri: MdKursGrupUyesi[]
+  programlar: MdSabitProgram[]
 }

@@ -1,6 +1,7 @@
 import { BookOpenCheck, CalendarPlus, Mail, MessageCircle, Pencil, Phone, WalletCards } from 'lucide-react'
 import type { Ogrenci } from '../lib/types'
 import { fullDate, money, normalizePhone, shortDate, time } from '../lib/format'
+import { featureEnabled, t } from '../lib/productProfile'
 import { useAppData } from './AppDataProvider'
 import { branchName, nextLessonForStudent, studentDebt, teacherName } from '../services/metrics'
 
@@ -10,7 +11,7 @@ export function StudentDetail({ student, onCollection, onLesson, onAssignment, o
   const initials=student.ad_soyad.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr-TR')
   const balanceText=debt>0?`${money(debt)} Borç`:debt<0?`${money(Math.abs(debt))} Avans`:money(0)
   return <div className="detail-stack profile-detail-stack student-detail-v2">
-    <section className="profile-detail-hero student-profile-hero"><div className="profile-detail-avatar student-avatar">{initials}</div><div className="profile-detail-copy"><span>Öğrenci Profili</span><strong>{student.ad_soyad}</strong><small>{student.veli_adi?`Veli · ${student.veli_adi}`:'Veli bilgisi eklenmemiş'}</small></div><span className="profile-status">{student.durum||'Aktif'}</span></section>
+    <section className="profile-detail-hero student-profile-hero"><div className="profile-detail-avatar student-avatar">{initials}</div><div className="profile-detail-copy"><span>{t.student} Profili</span><strong>{student.ad_soyad}</strong><small>{student.veli_adi?`Veli · ${student.veli_adi}`:'Veli bilgisi eklenmemiş'}</small></div><span className="profile-status">{student.durum||'Aktif'}</span></section>
 
     {(phone||student.email)&&<section className="profile-contact-strip" aria-label="İletişim">
       {phone&&<a className="profile-contact-btn phone" href={`tel:+${normalizePhone(phone)}`}><Phone size={17}/><span>Ara</span></a>}
@@ -25,7 +26,7 @@ export function StudentDetail({ student, onCollection, onLesson, onAssignment, o
     <section className="detail-action-cards" aria-label="Hızlı işlemler">
       <button className="detail-action-card primary" onClick={onCollection}><span className="detail-action-icon teal"><WalletCards/></span><span><b>Tahsilat Al</b><small>Ödemeyi kaydet</small></span></button>
       <button className="detail-action-card" onClick={onLesson}><span className="detail-action-icon blue"><CalendarPlus/></span><span><b>Ders Ekle</b><small>Yeni ders kaydı</small></span></button>
-      <button className="detail-action-card" onClick={onAssignment}><span className="detail-action-icon purple"><BookOpenCheck/></span><span><b>Ödev Ekle</b><small>Yeni çalışma oluştur</small></span></button>
+      {featureEnabled('assignments')&&<button className="detail-action-card" onClick={onAssignment}><span className="detail-action-icon purple"><BookOpenCheck/></span><span><b>Ödev Ekle</b><small>Yeni çalışma oluştur</small></span></button>}
       <button className="detail-action-card" onClick={onEdit}><span className="detail-action-icon orange"><Pencil/></span><span><b>Kaydı Düzenle</b><small>Profil bilgilerini değiştir</small></span></button>
     </section>
 

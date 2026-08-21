@@ -3,6 +3,8 @@ name: Müzik Dans Build Doğrulama
 on:
   push:
     branches: [muzik-dans-demo-v1]
+  pull_request:
+    branches: [demo-hazirlik]
   workflow_dispatch:
 
 permissions:

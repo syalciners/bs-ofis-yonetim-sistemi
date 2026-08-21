@@ -1,5 +1,6 @@
 import { Clock3, Send, X } from 'lucide-react'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { productProfile, t } from '../lib/productProfile'
 import { APP_MODE, supabase } from '../lib/supabase'
 import { useAppData } from './AppDataProvider'
 import './DemoBanner.css'
@@ -87,12 +88,12 @@ export function DemoBanner() {
       <section className="demo-lead-modal" role="dialog" aria-modal="true" aria-labelledby="demo-lead-title">
         <button className="demo-modal-close" type="button" onClick={close} aria-label="Kapat"><X size={19}/></button>
         {done ? <div className="demo-lead-success"><span>Talebiniz alındı</span><h2 id="demo-lead-title">Sizinle iletişime geçeceğiz.</h2><p>Kurumunuza uygun kurulum ve kullanım modelini birlikte netleştireceğiz.</p><button className="primary-btn" type="button" onClick={close}>Demoya Dön</button></div> : <>
-          <div className="demo-lead-heading"><span>BS EĞİTİM YÖNETİMİ</span><h2 id="demo-lead-title">Kurumunuz için teklif alın</h2><p>İletişim bilgilerinizi bırakın; size uygun kurulum modelini görüşelim.</p></div>
+          <div className="demo-lead-heading"><span>{productProfile.demoLeadLabel}</span><h2 id="demo-lead-title">Kurumunuz için teklif alın</h2><p>İletişim bilgilerinizi bırakın; size uygun kurulum modelini görüşelim.</p></div>
           <form className="demo-lead-form" onSubmit={submit}>
             <label><span>Ad Soyad</span><input required maxLength={80} value={form.ad_soyad} onChange={e => update('ad_soyad', e.target.value)} /></label>
             <label><span>Kurum Adı</span><input required maxLength={120} value={form.kurum_adi} onChange={e => update('kurum_adi', e.target.value)} /></label>
             <label><span>Telefon</span><input required inputMode="tel" maxLength={30} placeholder="05xx xxx xx xx" value={form.telefon} onChange={e => update('telefon', e.target.value)} /></label>
-            <div className="demo-lead-grid"><label><span>Öğrenci Sayısı</span><input type="number" min="1" max="5000" value={form.ogrenci_sayisi} onChange={e => update('ogrenci_sayisi', e.target.value)} /></label><label><span>Öğretmen Sayısı</span><input type="number" min="1" max="500" value={form.ogretmen_sayisi} onChange={e => update('ogretmen_sayisi', e.target.value)} /></label></div>
+            <div className="demo-lead-grid"><label><span>{t.student} Sayısı</span><input type="number" min="1" max="5000" value={form.ogrenci_sayisi} onChange={e => update('ogrenci_sayisi', e.target.value)} /></label><label><span>{t.teacher} Sayısı</span><input type="number" min="1" max="500" value={form.ogretmen_sayisi} onChange={e => update('ogretmen_sayisi', e.target.value)} /></label></div>
             <label><span>Kısa Not <small>(opsiyonel)</small></span><textarea maxLength={500} rows={3} value={form.notlar} onChange={e => update('notlar', e.target.value)} /></label>
             <p className="demo-lead-privacy-note">Bu formdaki iletişim bilgileri yalnızca teklif talebinize dönüş yapmak için kaydedilir. <button type="button" className="demo-privacy-link" onClick={() => setPrivacyOpen(true)}>Aydınlatma Metni</button></p>
             {error && <div className="demo-lead-error">{error}</div>}
@@ -107,7 +108,7 @@ export function DemoBanner() {
         <div className="demo-lead-heading"><span>KİŞİSEL VERİLER</span><h2 id="demo-privacy-title">Teklif Talebi Aydınlatma Metni</h2></div>
         <div className="demo-privacy-copy">
           <p><strong>Veri sorumlusu:</strong> Süleyman Yalçıner<br/><strong>İletişim:</strong> bsofisyonetim@gmail.com</p>
-          <p><strong>İşlenen bilgiler:</strong> Ad soyad, kurum adı, telefon, öğrenci ve öğretmen sayısı, isteğe bağlı not ile talebin geldiği kampanya/kaynak bilgileri.</p>
+          <p><strong>İşlenen bilgiler:</strong> Ad soyad, kurum adı, telefon, {t.studentLower} ve {t.teacherLower} sayısı, isteğe bağlı not ile talebin geldiği kampanya/kaynak bilgileri.</p>
           <p><strong>İşleme amacı:</strong> Teklif talebinize dönüş yapmak, ürün hakkında bilgi vermek, olası sözleşme sürecini yürütmek ve tanıtım kanallarının etkinliğini ölçmek.</p>
           <p><strong>Toplama yöntemi ve hukuki sebep:</strong> Bilgiler bu elektronik form aracılığıyla doğrudan sizden alınır; talebinize dönüş ve olası sözleşme kurulmasıyla doğrudan ilgili işlemler ile veri sorumlusunun ölçüm ve güvenlik konusundaki meşru menfaatleri kapsamında işlenir.</p>
           <p><strong>Aktarım:</strong> Veriler yalnızca talebin yanıtlanması ve teknik hizmetlerin sağlanması amacıyla kullanılan barındırma ve e-posta hizmet sağlayıcılarıyla, hizmetin gerektirdiği ölçüde paylaşılabilir. Bu teknik hizmetlerin bir kısmı yurt dışı altyapı kullanabilir.</p>

@@ -107,3 +107,10 @@ export const productProfile = profiles[selectedKey]
 export const productProfiles = profiles
 export const t = productProfile.terms
 export const featureEnabled = (feature: keyof ProductFeatures) => productProfile.features[feature]
+
+// Ürün ailesinin ortak kodunda görsel alt kimlik yalnız seçili profile uygulanır.
+// Böylece müzik/dans sanat yönü BS Eğitim ve diğer ürünlerin arayüzüne sızmaz.
+if (typeof document !== 'undefined') {
+  document.documentElement.dataset.productProfile = productProfile.key
+  document.documentElement.dataset.productFamily = 'bs-egitim'
+}

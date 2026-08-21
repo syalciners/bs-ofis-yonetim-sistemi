@@ -16,6 +16,7 @@ type ProductTerms = {
 type ProductFeatures = {
   assignments: boolean
   parentFields: boolean
+  groups: boolean
 }
 
 export type ProductProfile = {
@@ -40,7 +41,7 @@ const profiles: Record<ProductProfileKey, ProductProfile> = {
       teacher: 'Öğretmen', teachers: 'Öğretmenler', teacherLower: 'öğretmen', teachersLower: 'öğretmenler',
       branch: 'Branş', room: 'Derslik',
     },
-    features: { assignments: true, parentFields: true },
+    features: { assignments: true, parentFields: true, groups: false },
   },
   'muzik-dans': {
     key: 'muzik-dans',
@@ -53,7 +54,7 @@ const profiles: Record<ProductProfileKey, ProductProfile> = {
       teacher: 'Eğitmen', teachers: 'Eğitmenler', teacherLower: 'eğitmen', teachersLower: 'eğitmenler',
       branch: 'Branş', room: 'Stüdyo / Salon',
     },
-    features: { assignments: false, parentFields: true },
+    features: { assignments: false, parentFields: true, groups: true },
   },
   muzik: {
     key: 'muzik',
@@ -66,7 +67,7 @@ const profiles: Record<ProductProfileKey, ProductProfile> = {
       teacher: 'Eğitmen', teachers: 'Eğitmenler', teacherLower: 'eğitmen', teachersLower: 'eğitmenler',
       branch: 'Enstrüman / Alan', room: 'Stüdyo / Oda',
     },
-    features: { assignments: false, parentFields: true },
+    features: { assignments: false, parentFields: true, groups: true },
   },
   dans: {
     key: 'dans',
@@ -79,7 +80,7 @@ const profiles: Record<ProductProfileKey, ProductProfile> = {
       teacher: 'Eğitmen', teachers: 'Eğitmenler', teacherLower: 'eğitmen', teachersLower: 'eğitmenler',
       branch: 'Dans Türü', room: 'Stüdyo',
     },
-    features: { assignments: false, parentFields: true },
+    features: { assignments: false, parentFields: true, groups: true },
   },
 }
 

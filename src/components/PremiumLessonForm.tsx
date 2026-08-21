@@ -2,6 +2,7 @@ import { Check, Clock3, MapPin } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { Ders } from '../lib/types'
 import { formatClockInput, todayISO } from '../lib/format'
+import { t } from '../lib/productProfile'
 import { lessonConflict, saveLesson, updateLesson } from '../services/officeService'
 import { useAppData } from './AppDataProvider'
 import { useToast } from './Toast'
@@ -27,9 +28,9 @@ const overlaps=(aStart:number,aEnd:number,bStart:number,bEnd:number)=>aStart<bEn
 
 const conflictMessage=(result:any)=>{
   const messages:string[]=[]
-  if(result?.ogrenci_cakisma)messages.push('Öğrenci bu saat aralığında başka bir derste.')
-  if(result?.ogretmen_cakisma)messages.push('Öğretmen bu saat aralığında başka bir derste.')
-  if(result?.derslik_dolu)messages.push('Seçilen derslik bu saat aralığında dolu.')
+  if(result?.ogrenci_cakisma)messages.push(`${t.student} bu saat aralığında başka bir derste.`)
+  if(result?.ogretmen_cakisma)messages.push(`${t.teacher} bu saat aralığında başka bir derste.`)
+  if(result?.derslik_dolu)messages.push(`Seçilen ${t.room.toLocaleLowerCase('tr-TR')} bu saat aralığında dolu.`)
   const first=result?.ilk_cakisma
   const detail=first?` Çakışan ders: ${first.ogrenci||'—'} · ${first.ogretmen||'—'} · ${String(first.baslangic||'').slice(0,5)}–${String(first.bitis||'').slice(0,5)}.`:''
   return `${messages.join(' ')}${detail}`.trim()||result?.mesaj||'Bu tarih ve saatte çakışma var.'
@@ -117,12 +118,12 @@ export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime
 
   return <form className="form-grid premium-lesson-form" onSubmit={async e=>{
     e.preventDefault()
-    if(!student){toast('Öğrenci seçin.','error');return}
-    if(!teacher){toast('Öğretmen seçin.','error');return}
-    if(!branch){toast('Branş seçin.','error');return}
-    if(studentBusy){toast('Öğrenci bu saat aralığında başka bir derste.','error');return}
-    if(teacherBusy){toast('Öğretmen bu saat aralığında başka bir derste.','error');return}
-    if(!room){toast(scheduleReady?'Bu saat aralığında müsait bir derslik seçin.':'Tarih ve saati tamamlayın.','error');return}
+    if(!student){toast(`${t.student} seçin.`,'error');return}
+    if(!teacher){toast(`${t.teacher} seçin.`,'error');return}
+    if(!branch){toast(`${t.branch} seçin.`,'error');return}
+    if(studentBusy){toast(`${t.student} bu saat aralığında başka bir derste.`,'error');return}
+    if(teacherBusy){toast(`${t.teacher} bu saat aralığında başka bir derste.`,'error');return}
+    if(!room){toast(scheduleReady?`Bu saat aralığında müsait bir ${t.room.toLocaleLowerCase('tr-TR')} seçin.`:'Tarih ve saati tamamlayın.','error');return}
     setBusy(true)
     const f=new FormData(e.currentTarget)
     const input={ders_id:lesson?.ders_id,tarih:String(f.get('tarih')),ogrenci_id:student,ogretmen_id:teacher,brans_id:branch,derslik_id:room,baslangic_saati:String(f.get('baslangic_saati')),ders_sayisi:units,ogrenci_birim_ucreti:Number(f.get('ogrenci_birim_ucreti')),ogretmen_birim_hakedisi:Number(f.get('ogretmen_birim_hakedisi')),aciklama:String(f.get('aciklama')||'')||null}
@@ -135,24 +136,24 @@ export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime
   }}>
     {lockedSlot&&<div className="wide lesson-slot-lock"><span className="lesson-slot-icon"><Clock3 size={18}/></span><div><small>TAKVİMDEN SEÇİLEN ZAMAN</small><strong>{slotLabel}</strong></div><span className="lesson-slot-ready"><Check size={14}/>Hazır</span></div>}
 
-    <label className="lesson-primary-field">Öğrenci<select name="ogrenci_id" value={student} onChange={e=>setStudent(e.target.value)} required><option value="">Seçin</option>{data.ogrenciler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select></label>
-    <label className="lesson-primary-field">Öğretmen<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('')}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
+    <label className="lesson-primary-field">{t.student}<select name="ogrenci_id" value={student} onChange={e=>setStudent(e.target.value)} required><option value="">Seçin</option>{data.ogrenciler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogrenci_id} value={x.ogrenci_id}>{x.ad_soyad}</option>)}</select></label>
+    <label className="lesson-primary-field">{t.teacher}<select name="ogretmen_id" value={teacher} onChange={e=>{setTeacher(e.target.value);setBranch('')}} required><option value="">Seçin</option>{data.ogretmenler.filter(x=>x.durum!=='Pasif').map(x=><option key={x.ogretmen_id} value={x.ogretmen_id}>{x.ad_soyad}</option>)}</select></label>
 
-    <div className="wide lesson-choice-field"><span className="field-label">Branş</span>{!teacher?<small className="lesson-choice-help">Önce öğretmen seçin.</small>:branchOptions.length?<div className="lesson-chip-row">{branchOptions.map(x=><button key={x.brans_id} type="button" className={`lesson-choice-chip ${branch===x.brans_id?'active':''}`} onClick={()=>chooseBranch(x.brans_id)}>{branch===x.brans_id&&<Check size={14}/>}<span>{x.brans_adi}</span></button>)}</div>:<div className="lesson-inline-alert danger">Bu öğretmene aktif branş tanımlanmamış.</div>}<input type="hidden" name="brans_id" value={branch}/>{teacher&&branchOptions.length===1&&<small className="lesson-auto-note">Tek branş otomatik seçildi.</small>}</div>
+    <div className="wide lesson-choice-field"><span className="field-label">{t.branch}</span>{!teacher?<small className="lesson-choice-help">Önce {t.teacherLower} seçin.</small>:branchOptions.length?<div className="lesson-chip-row">{branchOptions.map(x=><button key={x.brans_id} type="button" className={`lesson-choice-chip ${branch===x.brans_id?'active':''}`} onClick={()=>chooseBranch(x.brans_id)}>{branch===x.brans_id&&<Check size={14}/>}<span>{x.brans_adi}</span></button>)}</div>:<div className="lesson-inline-alert danger">Bu {t.teacherLower} için aktif {t.branch.toLocaleLowerCase('tr-TR')} tanımlanmamış.</div>}<input type="hidden" name="brans_id" value={branch}/>{teacher&&branchOptions.length===1&&<small className="lesson-auto-note">Tek {t.branch.toLocaleLowerCase('tr-TR')} otomatik seçildi.</small>}</div>
 
     {!lockedSlot?<><label>Tarih<input name="tarih" type="date" value={date} onChange={e=>setDate(e.target.value)} required/></label><label>Saat<input name="baslangic_saati" type="text" inputMode="numeric" autoComplete="off" enterKeyHint="next" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" placeholder="19:00" title="Saati 00:00–23:59 arasında girin." value={startTime} onChange={e=>setStartTime(formatClockInput(e.target.value))} required/></label></>:<><input type="hidden" name="tarih" value={date}/><input type="hidden" name="baslangic_saati" value={startTime}/></>}
 
     <div className="lesson-choice-field"><span className="field-label">Ders Sayısı</span><div className="lesson-chip-row compact">{[1,2].map(x=><button key={x} type="button" className={`lesson-unit-chip ${units===x?'active':''}`} onClick={()=>setUnits(x)}><strong>{x}</strong><span>Ders</span></button>)}</div><input type="hidden" name="ders_sayisi" value={units}/>{hasLegacyUnits&&<small className="lesson-auto-note warning">Mevcut kayıtta {units} ders birimi var. Değiştirmek için 1 veya 2 seçin.</small>}</div>
 
-    <div className="wide lesson-choice-field"><div className="lesson-field-heading"><span className="field-label">Müsait Derslikler</span>{scheduleReady&&<small>{availableRooms.length} uygun</small>}</div>{!scheduleReady?<small className="lesson-choice-help">Tarih ve saat belirlenince uygun derslikler burada görünür.</small>:availableRooms.length?<div className="lesson-chip-row room-row">{availableRooms.map(x=>{const capacity=Math.max(Number(x.kapasite||1),1);const occupied=overlappingLessons.filter(d=>d.derslik_id===x.derslik_id).length;return <button key={x.derslik_id} type="button" className={`lesson-choice-chip room ${room===x.derslik_id?'active':''}`} onClick={()=>chooseRoom(x.derslik_id)}><MapPin size={14}/><span>{x.mekan_adi}</span><small>{capacity-occupied} yer</small></button>})}</div>:<div className="lesson-inline-alert danger">Bu saat aralığında müsait derslik yok.</div>}<input type="hidden" name="derslik_id" value={room}/></div>
+    <div className="wide lesson-choice-field"><div className="lesson-field-heading"><span className="field-label">Müsait {t.room}</span>{scheduleReady&&<small>{availableRooms.length} uygun</small>}</div>{!scheduleReady?<small className="lesson-choice-help">Tarih ve saat belirlenince uygun mekanlar burada görünür.</small>:availableRooms.length?<div className="lesson-chip-row room-row">{availableRooms.map(x=>{const capacity=Math.max(Number(x.kapasite||1),1);const occupied=overlappingLessons.filter(d=>d.derslik_id===x.derslik_id).length;return <button key={x.derslik_id} type="button" className={`lesson-choice-chip room ${room===x.derslik_id?'active':''}`} onClick={()=>chooseRoom(x.derslik_id)}><MapPin size={14}/><span>{x.mekan_adi}</span><small>{capacity-occupied} yer</small></button>})}</div>:<div className="lesson-inline-alert danger">Bu saat aralığında müsait mekan yok.</div>}<input type="hidden" name="derslik_id" value={room}/></div>
 
-    {(studentBusy||teacherBusy)&&<div className="wide lesson-conflict-alert">{studentBusy&&<span><b>Öğrenci dolu</b> — bu saat aralığında başka bir dersi var.</span>}{teacherBusy&&<span><b>Öğretmen dolu</b> — bu saat aralığında başka bir dersi var.</span>}<small>Kayıt bu çakışmalar giderilmeden yapılamaz.</small></div>}
+    {(studentBusy||teacherBusy)&&<div className="wide lesson-conflict-alert">{studentBusy&&<span><b>{t.student} dolu</b> — bu saat aralığında başka bir dersi var.</span>}{teacherBusy&&<span><b>{t.teacher} dolu</b> — bu saat aralığında başka bir dersi var.</span>}<small>Kayıt bu çakışmalar giderilmeden yapılamaz.</small></div>}
 
-    <label>Öğrenci Birim Ücreti<input name="ogrenci_birim_ucreti" type="number" min="0" step="0.01" inputMode="decimal" value={studentPrice} onChange={e=>setStudentPrice(e.target.value)} required/></label>
-    <label>Öğretmen Birim Hakedişi<input name="ogretmen_birim_hakedisi" type="number" min="0" step="0.01" inputMode="decimal" value={teacherPrice} onChange={e=>setTeacherPrice(e.target.value)} required/></label>
+    <label>{t.student} Birim Ücreti<input name="ogrenci_birim_ucreti" type="number" min="0" step="0.01" inputMode="decimal" value={studentPrice} onChange={e=>setStudentPrice(e.target.value)} required/></label>
+    <label>{t.teacher} Birim Hakedişi<input name="ogretmen_birim_hakedisi" type="number" min="0" step="0.01" inputMode="decimal" value={teacherPrice} onChange={e=>setTeacherPrice(e.target.value)} required/></label>
     {!lesson&&student&&teacher&&branch&&studentPrice!==''&&<div className="wide form-summary lesson-price-note">Ücret ve hakediş mevcut sabit programdan otomatik getirildi. Bu derse özel değiştirebilirsin.</div>}
     <label className="wide">Açıklama<textarea name="aciklama" rows={2} defaultValue={lesson?.aciklama||''} placeholder="İsteğe bağlı not"/></label>
-    <div className="wide lesson-security-note"><Check size={15}/><span>Kaydetmeden önce öğrenci, öğretmen ve derslik çakışması sunucuda tekrar doğrulanır.</span></div>
+    <div className="wide lesson-security-note"><Check size={15}/><span>Kaydetmeden önce {t.studentLower}, {t.teacherLower} ve mekan çakışması sunucuda tekrar doğrulanır.</span></div>
     <div className="wide form-actions lesson-form-actions"><button className="secondary-btn" type="button" onClick={onCancel}>Vazgeç</button><button className="primary-btn" type="submit" disabled={!canSubmit}>{busy?'Kaydediliyor…':lesson?'Dersi Güncelle':'Ders Ekle'}</button></div>
   </form>
 }

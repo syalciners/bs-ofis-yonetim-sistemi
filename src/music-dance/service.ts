@@ -175,8 +175,8 @@ export async function mdHaftaDersleriniGetir(kurumId: string, haftaBaslangici: s
   }
 }
 
-export async function mdHaftayiOlustur(haftaBaslangici: string): Promise<MdHaftaUretimSonucu> {
-  const result = await supabase.rpc('md_haftalik_dersleri_olustur_v1', { p_hafta_baslangici: haftaBaslangici })
+export async function mdHaftayiOlustur(kurumId: string, haftaBaslangici: string): Promise<MdHaftaUretimSonucu> {
+  const result = await supabase.rpc('md_haftalik_dersleri_olustur_v1', { p_kurum_id: kurumId, p_hafta_baslangici: haftaBaslangici })
   fail('Haftalık dersler oluşturulamadı', result.error)
   const raw = result.data as Partial<MdHaftaUretimSonucu> | null
   return {

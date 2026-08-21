@@ -1,1 +1,0 @@
-BS Müzik & Dans Program ekranı için geçici CI doğrulama işareti.

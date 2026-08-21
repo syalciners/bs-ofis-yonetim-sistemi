@@ -2,11 +2,12 @@ name: PWA Dogrulama
 
 on:
   push:
-    branches: [main]
+    branches: [main, muzik-dans-v1-gelistirme]
     paths:
       - 'servisler/**.js'
       - 'moduller/**.js'
       - 'operasyon-test.html'
+      - 'kurs-test.html'
       - 'operasyon-test-sw.js'
       - '.github/workflows/pwa-dogrulama.yml'
   workflow_dispatch:
@@ -30,17 +31,18 @@ jobs:
             node --check "$f"
           done
           node --check operasyon-test-sw.js
-      - name: Test kabugu scriptini kontrol et
+      - name: Test kabuklarinin scriptlerini kontrol et
         shell: python
         run: |
           from pathlib import Path
           import re, subprocess, tempfile
-          text = Path('operasyon-test.html').read_text(encoding='utf-8')
-          scripts = re.findall(r'<script>(.*?)</script>', text, flags=re.S)
-          if not scripts:
-              raise SystemExit('operasyon-test.html icinde inline script bulunamadi')
-          for i, script in enumerate(scripts):
-              p = Path(tempfile.gettempdir()) / f'operasyon-test-inline-{i}.js'
-              p.write_text(script, encoding='utf-8')
-              subprocess.run(['node', '--check', str(p)], check=True)
-          print('Inline script kontrolu basarili')
+          for dosya in ('operasyon-test.html', 'kurs-test.html'):
+              text = Path(dosya).read_text(encoding='utf-8')
+              scripts = re.findall(r'<script>(.*?)</script>', text, flags=re.S)
+              if not scripts:
+                  raise SystemExit(f'{dosya} icinde inline script bulunamadi')
+              for i, script in enumerate(scripts):
+                  p = Path(tempfile.gettempdir()) / f'{Path(dosya).stem}-inline-{i}.js'
+                  p.write_text(script, encoding='utf-8')
+                  subprocess.run(['node', '--check', str(p)], check=True)
+              print(f'{dosya}: inline script kontrolu basarili')

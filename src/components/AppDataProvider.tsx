@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { APP_MODE, supabase } from '../lib/supabase'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
+import { loadUnreadNotificationCount } from '../services/notificationService'
 
 interface DemoInstitutionSettings {
   takvim_baslangic_saati?: string | null
@@ -19,7 +20,9 @@ interface AppCtx {
   refreshing: boolean
   error: string | null
   demoExpiresAt: string | null
+  unreadNotifications: number
   refresh: () => Promise<void>
+  refreshNotifications: () => Promise<void>
   signIn: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -100,7 +103,20 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [demoExpiresAt, setDemoExpiresAt] = useState<string | null>(null)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
   const timer = useRef<number | null>(null)
+
+  const refreshNotifications = useCallback(async () => {
+    if (!session?.user) {
+      setUnreadNotifications(0)
+      return
+    }
+    try {
+      setUnreadNotifications(await loadUnreadNotificationCount())
+    } catch {
+      setUnreadNotifications(0)
+    }
+  }, [session?.user?.id])
 
   const refresh = useCallback(async () => {
     if (!session?.user) return
@@ -110,20 +126,29 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         const expiresAt = await ensureDemoSession()
         if (expiresAt) setDemoExpiresAt(expiresAt)
         await captureDemoSource()
-        const nextData = await loadAppData()
+        const [nextData, nextUnread] = await Promise.all([
+          loadAppData(),
+          loadUnreadNotificationCount().catch(() => 0),
+        ])
         setData(nextData)
         setProfile(demoProfile(session.user))
+        setUnreadNotifications(nextUnread)
         setError(null)
         return
       }
-      const [nextData, nextProfile] = await Promise.all([loadAppData(), loadProfile(session.user.id)])
+      const nextProfile = await loadProfile(session.user.id)
       if (!nextProfile?.aktif) {
         const redirected = await redirectToPortalIfEligible(session)
         if (redirected) return
         throw new Error('Bu kullanıcı hesabı uygulama için aktif değil.')
       }
+      const [nextData, nextUnread] = await Promise.all([
+        loadAppData(),
+        loadUnreadNotificationCount().catch(() => 0),
+      ])
       setData(nextData)
       setProfile(nextProfile as KullaniciProfili)
+      setUnreadNotifications(nextUnread)
       setError(null)
     } catch (e: any) {
       const message = e?.message || String(e)
@@ -132,12 +157,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         setData(null)
         setProfile(null)
         setDemoExpiresAt(null)
+        setUnreadNotifications(0)
         await supabase.auth.signOut()
       } else if (IS_DEMO && message.includes('DEMO_KAPASITE_DOLU')) {
         setError('Demo şu anda yoğun. Lütfen birkaç dakika sonra tekrar deneyin.')
         setData(null)
         setProfile(null)
         setDemoExpiresAt(null)
+        setUnreadNotifications(0)
         await supabase.auth.signOut()
       } else {
         setError(message)
@@ -151,7 +178,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const { data: auth } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next)
       setLoading(!next)
-      if (!next) { setData(null); setProfile(null); setDemoExpiresAt(null) }
+      if (!next) { setData(null); setProfile(null); setDemoExpiresAt(null); setUnreadNotifications(0) }
     })
     return () => { mounted = false; auth.subscription.unsubscribe() }
   }, [])
@@ -166,6 +193,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setData(null)
       setProfile(null)
       setDemoExpiresAt(null)
+      setUnreadNotifications(0)
       void supabase.auth.signOut()
     }
     tick()
@@ -192,9 +220,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href.split('#')[0] } })
     if (error) throw error
   }, [])
-  const signOut = useCallback(async () => { setDemoExpiresAt(null); await supabase.auth.signOut() }, [])
+  const signOut = useCallback(async () => { setDemoExpiresAt(null); setUnreadNotifications(0); await supabase.auth.signOut() }, [])
 
-  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, institution: IS_DEMO ? DEMO_INSTITUTION : null, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut }), [session, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut])
+  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, institution: IS_DEMO ? DEMO_INSTITUTION : null, data, loading, refreshing, error, demoExpiresAt, unreadNotifications, refresh, refreshNotifications, signIn, signOut }), [session, profile, data, loading, refreshing, error, demoExpiresAt, unreadNotifications, refresh, refreshNotifications, signIn, signOut])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

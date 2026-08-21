@@ -70,6 +70,24 @@ const fail = (label: string, error: { message?: string } | null) => {
   if (error) throw new Error(`${label}: ${error.message || 'Bilinmeyen hata'}`)
 }
 
+export async function mdKasaIlkKurulum(kurumId: string) {
+  const mevcut = await supabase.from('md_kasa_hesaplari').select('hesap_id').eq('kurum_id', kurumId).limit(1)
+  fail('Kasa kurulumu kontrol edilemedi', mevcut.error)
+  if (!(mevcut.data || []).length) {
+    const hesap = await supabase.from('md_kasa_hesaplari').insert({ kurum_id: kurumId, hesap_adi: 'Genel Kasa', hesap_turu: 'Nakit', acilis_bakiyesi: 0 })
+    fail('Genel Kasa oluşturulamadı', hesap.error)
+  }
+
+  const kategoriler = await supabase.from('md_gider_kategorileri').select('kategori_adi').eq('kurum_id', kurumId)
+  fail('Gider kategorileri kontrol edilemedi', kategoriler.error)
+  const varOlan = new Set((kategoriler.data || []).map((x: any) => String(x.kategori_adi).toLocaleLowerCase('tr-TR')))
+  const eksik = ['Kira', 'Fatura', 'Malzeme', 'Pazarlama', 'Diğer'].filter(x => !varOlan.has(x.toLocaleLowerCase('tr-TR')))
+  if (eksik.length) {
+    const ekle = await supabase.from('md_gider_kategorileri').insert(eksik.map(kategori_adi => ({ kurum_id: kurumId, kategori_adi })))
+    fail('Varsayılan gider kategorileri oluşturulamadı', ekle.error)
+  }
+}
+
 export async function mdKasaVerisiniGetir(kurumId: string): Promise<MdKasaVerisi> {
   const [hesaplar, kategoriler, giderler, bakiyeler, hareketler] = await Promise.all([
     supabase.from('md_kasa_hesaplari').select('*').eq('kurum_id', kurumId).order('hesap_adi'),

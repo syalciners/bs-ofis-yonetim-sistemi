@@ -34,6 +34,16 @@
   color: #0B1F3A;
 }
 
+.md-login-card .md-family-chip {
+  font-size: 0;
+}
+
+.md-login-card .md-family-chip::before {
+  content: 'BS ÜRÜN AİLESİ';
+  font-size: 11px;
+  letter-spacing: .13em;
+}
+
 .md-login-card::before {
   content: '';
   position: absolute;

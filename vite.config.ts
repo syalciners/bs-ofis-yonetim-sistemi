@@ -11,9 +11,13 @@ export default defineConfig(({ mode }) => {
     ? [
         'brand/music-dance/bs-md-icon.svg',
         'brand/music-dance/bs-md-icon-white.svg',
-        'brand/music-dance/bs-md-icon-maskable.svg',
         'brand/music-dance/bs-md-logo-horizontal.svg',
         'brand/music-dance/bs-md-logo-horizontal-white.svg',
+        'brand/music-dance/bs-md-favicon-32.png',
+        'brand/music-dance/bs-md-apple-touch-180.png',
+        'brand/music-dance/bs-md-icon-192.png',
+        'brand/music-dance/bs-md-icon-512.png',
+        'brand/music-dance/bs-md-icon-maskable-512.png',
       ]
     : ['bs-logo.svg','bs-egitim-favicon-16-v2.png','bs-egitim-favicon-32-v2.png','bs-egitim-favicon-48-v2.png','bs-egitim-apple-touch-v2.png']
 
@@ -27,8 +31,9 @@ export default defineConfig(({ mode }) => {
         display: 'standalone' as const,
         lang: 'tr-TR',
         icons: [
-          { src: 'brand/music-dance/bs-md-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' as const },
-          { src: 'brand/music-dance/bs-md-icon-maskable.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' as const },
+          { src: 'brand/music-dance/bs-md-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' as const },
+          { src: 'brand/music-dance/bs-md-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' as const },
+          { src: 'brand/music-dance/bs-md-icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' as const },
         ],
       }
     : {

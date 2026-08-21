@@ -1,8 +1,9 @@
-import { ArrowLeft, Banknote, Check, ChevronRight, CircleDollarSign, CreditCard, GraduationCap, Landmark, LoaderCircle, Pencil, Plus, ReceiptText, RefreshCw, Sparkles, Users, WalletCards, X } from 'lucide-react'
+import { ArrowLeft, Banknote, BarChart3, Check, ChevronRight, CircleDollarSign, CreditCard, GraduationCap, Landmark, LoaderCircle, Pencil, Plus, ReceiptText, RefreshCw, Sparkles, Users, WalletCards, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { t } from '../lib/productProfile'
 import { useMusicDanceData } from './MusicDanceDataProvider'
 import { CashPage } from './CashPage'
+import { ReportsPage } from './ReportsPage'
 import { mdKasaVerisiniGetir, type MdKasaHesabi } from './cashService'
 import { mdEgitmenOdemeKaydet, mdFinansVerisiniGetir, mdProgramFinansAyariGuncelle, mdTahsilatKaydet } from './financeService'
 import type { MdFinansVerisi, MdOdemeYontemi, MdSabitProgram, MusicDanceData } from './types'
@@ -38,6 +39,7 @@ export function FinancePage() {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('kursiyer')
   const [cashMode, setCashMode] = useState(false)
+  const [reportMode, setReportMode] = useState(false)
   const [collectionOpen, setCollectionOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [pricingProgram, setPricingProgram] = useState<MdSabitProgram | null>(null)
@@ -78,6 +80,7 @@ export function FinancePage() {
   if (!aktifKurum || !data) return null
 
   if (cashMode) return <div className="md-page-stack"><div className="md-finance-cash-back"><button className="md-secondary" type="button" onClick={() => setCashMode(false)}><ArrowLeft/>Finansın Temposuna Dön</button></div><CashPage/></div>
+  if (reportMode) return <ReportsPage onBack={() => setReportMode(false)}/>
 
   const afterAction = async (message: string) => {
     setNotice(message)
@@ -108,6 +111,7 @@ export function FinancePage() {
         <button className={tab === 'tarife' ? 'active' : ''} onClick={() => setTab('tarife')}><Sparkles/>Ücret Tarifeleri</button>
       </div>
       <div className="md-finance-actions">
+        <button className="md-secondary" type="button" onClick={() => setReportMode(true)}><BarChart3/>Raporlar</button>
         <button className="md-secondary" type="button" onClick={() => setCashMode(true)}><WalletCards/>Kasa & Giderler</button>
         <button className="md-secondary" type="button" onClick={() => void load(true)}><RefreshCw className={refreshing ? 'spin' : ''}/>Yenile</button>
         {tab === 'kursiyer' && <button className="md-primary" type="button" onClick={() => setCollectionOpen(true)}><Plus/>Tahsilat Gir</button>}

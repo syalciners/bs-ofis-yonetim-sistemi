@@ -1,0 +1,24 @@
+name: Müzik Dans Build Doğrulama
+
+on:
+  push:
+    branches: [muzik-dans-demo-v1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Bağımlılıkları kur
+        run: npm install --no-audit --no-fund
+      - name: Demo izolasyonunu kontrol et
+        run: npm run check:demo-isolation
+      - name: TypeScript ve Vite build
+        run: npm run build

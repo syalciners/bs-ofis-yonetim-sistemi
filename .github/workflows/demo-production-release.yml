@@ -69,10 +69,14 @@ jobs:
           fi
           INDEX_JS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -n 1)"
           INDEX_CSS="$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.css' dist/index.html | head -n 1)"
-          test -n "$INDEX_JS" && test -n "$INDEX_CSS"
+          PDFMAKE_JS="$(find dist/assets -maxdepth 1 -type f -name 'pdfmake-*.js' -printf 'assets/%f\n' | sort | head -n 1)"
+          VFS_JS="$(find dist/assets -maxdepth 1 -type f -name 'vfs_fonts-*.js' -printf 'assets/%f\n' | sort | head -n 1)"
+          test -n "$INDEX_JS" && test -n "$INDEX_CSS" && test -n "$PDFMAKE_JS" && test -n "$VFS_JS"
           echo "EXPECTED_INDEX_JS=$INDEX_JS" >> "$GITHUB_ENV"
           echo "EXPECTED_INDEX_CSS=$INDEX_CSS" >> "$GITHUB_ENV"
-          echo "Paket güvenli: $INDEX_JS / $INDEX_CSS"
+          echo "EXPECTED_PDFMAKE_JS=$PDFMAKE_JS" >> "$GITHUB_ENV"
+          echo "EXPECTED_VFS_JS=$VFS_JS" >> "$GITHUB_ENV"
+          echo "Paket güvenli: $INDEX_JS / $INDEX_CSS / $PDFMAKE_JS / $VFS_JS"
 
       - name: Deploy öncesi canlı bundleı kaydet
         id: before
@@ -114,8 +118,8 @@ jobs:
           curl -fsSL --retry 3 "$PRODUCTION_ALIAS/manifest.webmanifest?release_check=$GITHUB_RUN_ID" -o /tmp/manifest.json
           curl -fsSL --retry 3 "$PRODUCTION_ALIAS/sw.js?release_check=$GITHUB_RUN_ID" -o /tmp/sw.js
           curl -fsSL --retry 3 "$PRODUCTION_ALIAS/workbox-9c191d2f.js?release_check=$GITHUB_RUN_ID" -o /tmp/workbox.js
-          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/pdfmake-Cs1GMa1L.js?release_check=$GITHUB_RUN_ID" -o /tmp/pdfmake.js
-          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/assets/vfs_fonts-DzK-djW1.js?release_check=$GITHUB_RUN_ID" -o /tmp/vfs.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_PDFMAKE_JS?release_check=$GITHUB_RUN_ID" -o /tmp/pdfmake.js
+          curl -fsSL --retry 3 "$PRODUCTION_ALIAS/$EXPECTED_VFS_JS?release_check=$GITHUB_RUN_ID" -o /tmp/vfs.js
           curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-192-v2.png?release_check=$GITHUB_RUN_ID" -o /tmp/icon192.png
           curl -fsSL --retry 3 "$PRODUCTION_ALIAS/bs-egitim-icon-512-v2.png?release_check=$GITHUB_RUN_ID" -o /tmp/icon512.png
           grep -F -q "$DEMO_SUPABASE_URL" /tmp/index.js || { echo "::error::Canlı JS doğru demo Supabase URL içermiyor."; exit 1; }
@@ -154,6 +158,8 @@ jobs:
           before_index_js=${BEFORE_INDEX_JS:-}
           expected_index_js=${EXPECTED_INDEX_JS:-}
           expected_index_css=${EXPECTED_INDEX_CSS:-}
+          expected_pdfmake_js=${EXPECTED_PDFMAKE_JS:-}
+          expected_vfs_js=${EXPECTED_VFS_JS:-}
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

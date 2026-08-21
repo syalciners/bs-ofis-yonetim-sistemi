@@ -1,10 +1,11 @@
 import { CalendarDays, Grid2X2, Home, Users, WalletCards } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { t } from '../lib/productProfile'
 
 const items = [
   { to: '/', label: 'Özet', Icon: Home },
   { to: '/takvim', label: 'Program', Icon: CalendarDays },
-  { to: '/ogrenciler', label: 'Öğrenciler', Icon: Users },
+  { to: '/ogrenciler', label: t.students, Icon: Users },
   { to: '/finans', label: 'Finans', Icon: WalletCards },
   { to: '/menu', label: 'Menü', Icon: Grid2X2 },
 ]

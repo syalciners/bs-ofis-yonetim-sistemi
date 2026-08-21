@@ -32,6 +32,7 @@ import './music-dance-groups-art.css'
 import './music-dance-overview-art.css'
 import './music-dance/music-dance-shell.css'
 import './music-dance/finance-art.css'
+import './music-dance/cash-art.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

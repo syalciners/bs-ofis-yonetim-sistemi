@@ -14,6 +14,7 @@ import { MorePage } from './pages/MorePage'
 import { TeachersPage } from './pages/TeachersPage'
 import { TeacherPaymentsPage } from './pages/TeacherPaymentsPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
+import { GroupsPage } from './pages/GroupsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { FixedProgramPage } from './pages/FixedProgramPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -38,6 +39,7 @@ function ProtectedApp() {
     <Route path="/menu" element={<MorePage/>}/>
     <Route path="/ogretmenler" element={<TeachersPage/>}/>
     <Route path="/ogretmen-odemeleri" element={<TeacherPaymentsPage/>}/>
+    <Route path="/gruplar" element={featureEnabled('groups')?<GroupsPage/>:<Navigate to="/menu" replace/>}/>
     <Route path="/odevler" element={featureEnabled('assignments')?<AssignmentsPage/>:<Navigate to="/menu" replace/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>

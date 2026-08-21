@@ -323,13 +323,13 @@ function Shell({ data, onRefresh, onSignOut }: { data: PortalData; onRefresh: ()
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
+  const [authReady, setAuthReady] = useState(false)
   const [data, setData] = useState<PortalData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const refresh = useCallback(async (activeSession?: Session | null) => {
-    const current = activeSession ?? session
-    if (!current?.user) return
+  const refresh = useCallback(async (activeSession: Session | null) => {
+    if (!activeSession?.user) return
     setLoading(true)
     try {
       setData(await loadPortalData())
@@ -340,24 +340,43 @@ export default function App() {
     } finally {
       setLoading(false)
     }
-  }, [session])
+  }, [])
 
   useEffect(() => {
     let live = true
-    void supabase.auth.getSession().then(({ data: auth }) => {
+    const applySession = (next: Session | null) => {
       if (!live) return
-      setSession(auth.session)
-      if (auth.session) void refresh(auth.session)
-      else setLoading(false)
-    })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, next) => {
-      if (!live) return
-      setSession(next)
-      if (next) void refresh(next)
-      else { setData(null); setLoading(false) }
-    })
-    return () => { live = false; listener.subscription.unsubscribe() }
-  }, [refresh])
+      setSession(current => current?.access_token === next?.access_token ? current : next)
+      setAuthReady(true)
+    }
+
+    void supabase.auth.getSession().then(({ data: auth }) => applySession(auth.session))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, next) => applySession(next))
+
+    return () => {
+      live = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!authReady) return
+    if (!session?.user) {
+      setData(null)
+      setLoading(false)
+      return
+    }
+
+    let live = true
+    const initial = window.setTimeout(() => {
+      if (live) void refresh(session)
+    }, 0)
+
+    return () => {
+      live = false
+      window.clearTimeout(initial)
+    }
+  }, [authReady, session, refresh])
 
   const login = async () => {
     setError(null)
@@ -369,5 +388,5 @@ export default function App() {
   if (loading) return <main className="boot"><div className="brand-mark">BS</div><b>Portal hazırlanıyor…</b></main>
   if (!session) return <Login error={error} onLogin={() => void login()} />
   if (!data) return <main className="boot error-state"><div className="brand-mark">BS</div><b>Portal açılamadı</b><span>{error}</span><button className="primary" onClick={() => void supabase.auth.signOut()}>Farklı hesapla giriş</button></main>
-  return <Shell data={data} onRefresh={() => void refresh()} onSignOut={() => void supabase.auth.signOut()} />
+  return <Shell data={data} onRefresh={() => void refresh(session)} onSignOut={() => void supabase.auth.signOut()} />
 }

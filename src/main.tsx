@@ -40,15 +40,16 @@ const musicDanceProfile = productProfile.key !== 'egitim'
 
 if (musicDanceProfile) {
   document.title = productProfile.brand
-  const iconHref = '/brand/music-dance/bs-md-icon.svg'
-  const touchHref = '/brand/music-dance/bs-md-icon-maskable.svg'
+  const iconHref = '/brand/music-dance/bs-md-favicon-32.png'
+  const touchHref = '/brand/music-dance/bs-md-apple-touch-180.png'
   let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
   if (!icon) {
     icon = document.createElement('link')
     icon.rel = 'icon'
     document.head.appendChild(icon)
   }
-  icon.type = 'image/svg+xml'
+  icon.type = 'image/png'
+  icon.sizes = '32x32'
   icon.href = iconHref
 
   let touch = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
@@ -57,6 +58,7 @@ if (musicDanceProfile) {
     touch.rel = 'apple-touch-icon'
     document.head.appendChild(touch)
   }
+  touch.sizes = '180x180'
   touch.href = touchHref
 
   const theme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')

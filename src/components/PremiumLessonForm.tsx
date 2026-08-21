@@ -47,14 +47,14 @@ type PremiumLessonFormProps={
 }
 
 export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime,defaultRoomId,lockDateTime=false,onDone,onCancel}:PremiumLessonFormProps){
-  const{data,refresh}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
+  const{data,refresh,institution}=useAppData();const{toast}=useToast();const[busy,setBusy]=useState(false)
   const[student,setStudent]=useState(lesson?.ogrenci_id||studentId||'')
   const[teacher,setTeacher]=useState(lesson?.ogretmen_id||'')
   const[branch,setBranch]=useState(lesson?.brans_id||'')
   const[room,setRoom]=useState(lesson?.derslik_id||defaultRoomId||'')
   const[date,setDate]=useState(lesson?.tarih||defaultDate||todayISO())
   const[startTime,setStartTime]=useState(String(lesson?.baslangic_saati||defaultStartTime||'').slice(0,5))
-  const[units,setUnits]=useState(Number(lesson?.ders_sayisi||1))
+  const[units,setUnits]=useState(Number(lesson?.ders_sayisi || institution?.varsayilan_ders_birimi || 1))
   const[studentPrice,setStudentPrice]=useState(lesson?.ogrenci_birim_ucreti!=null?String(lesson.ogrenci_birim_ucreti):'')
   const[teacherPrice,setTeacherPrice]=useState(lesson?.ogretmen_birim_hakedisi!=null?String(lesson.ogretmen_birim_hakedisi):'')
 
@@ -73,12 +73,12 @@ export function PremiumLessonForm({lesson,studentId,defaultDate,defaultStartTime
   useEffect(()=>{
     if(!data||lesson||!student||!teacher||!branch)return
     const program=data.sabitProgramlar.find(x=>x.ogrenci_id===student&&x.ogretmen_id===teacher&&x.brans_id===branch&&x.program_durumu!=='Pasif'&&x.aktif!==false)
-    if(program){setStudentPrice(String(program.ogrenci_birim_ucreti??''));setTeacherPrice(String(program.ogretmen_birim_hakedisi??''))}
-    else{setStudentPrice('');setTeacherPrice('')}
-  },[data,lesson,student,teacher,branch])
+    if(program){setStudentPrice(String(program.ogrenci_birim_ucreti??''));setTeacherPrice(String(program.ogretmen_birim_hakedisi??''));setUnits(Number(program.ders_sayisi||institution?.varsayilan_ders_birimi||1))}
+    else{setStudentPrice('');setTeacherPrice('');setUnits(Number(institution?.varsayilan_ders_birimi||1))}
+  },[data,lesson,student,teacher,branch,institution?.varsayilan_ders_birimi])
 
   const proposedStart=timeToMinutes(startTime)
-  const proposedEnd=proposedStart==null?null:proposedStart+Math.max(units,1)*60
+  const proposedEnd=proposedStart==null?null:proposedStart+Math.max(1, Number(units || 1)) * 60
   const scheduleReady=Boolean(date&&proposedStart!=null&&proposedEnd!=null)
 
   const overlappingLessons=useMemo(()=>{

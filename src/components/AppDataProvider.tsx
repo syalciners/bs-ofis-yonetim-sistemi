@@ -8,6 +8,7 @@ import { loadUnreadNotificationCount } from '../services/notificationService'
 interface DemoInstitutionSettings {
   takvim_baslangic_saati?: string | null
   takvim_bitis_saati?: string | null
+  varsayilan_ders_birimi?: number | null
 }
 
 interface AppCtx {
@@ -32,6 +33,7 @@ const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
 const DEMO_INSTITUTION: DemoInstitutionSettings = {
   takvim_baslangic_saati: '08:00',
   takvim_bitis_saati: '21:00',
+  varsayilan_ders_birimi: 1,
 }
 
 function portalSessionUrl(session: Session) {

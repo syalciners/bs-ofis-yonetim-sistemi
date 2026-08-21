@@ -1,9 +1,11 @@
-import { Banknote, Check, ChevronRight, CircleDollarSign, CreditCard, GraduationCap, Landmark, LoaderCircle, Pencil, Plus, ReceiptText, RefreshCw, Sparkles, Users, WalletCards, X } from 'lucide-react'
+import { ArrowLeft, Banknote, Check, ChevronRight, CircleDollarSign, CreditCard, GraduationCap, Landmark, LoaderCircle, Pencil, Plus, ReceiptText, RefreshCw, Sparkles, Users, WalletCards, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { t } from '../lib/productProfile'
 import { useMusicDanceData } from './MusicDanceDataProvider'
+import { CashPage } from './CashPage'
+import { mdKasaVerisiniGetir, type MdKasaHesabi } from './cashService'
 import { mdEgitmenOdemeKaydet, mdFinansVerisiniGetir, mdProgramFinansAyariGuncelle, mdTahsilatKaydet } from './financeService'
-import type { MdFinansVerisi, MdOdemeYontemi, MdSabitProgram } from './types'
+import type { MdFinansVerisi, MdOdemeYontemi, MdSabitProgram, MusicDanceData } from './types'
 
 type Tab = 'kursiyer' | 'egitmen' | 'tarife'
 
@@ -28,12 +30,14 @@ function FinanceModal({ open, title, subtitle, onClose, children }: { open: bool
 }
 
 export function FinancePage() {
-  const { aktifKurum, data } = useMusicDanceData()
+  const { aktifKurum, data, refresh } = useMusicDanceData()
   const [finans, setFinans] = useState<MdFinansVerisi | null>(null)
+  const [cashAccounts, setCashAccounts] = useState<MdKasaHesabi[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('kursiyer')
+  const [cashMode, setCashMode] = useState(false)
   const [collectionOpen, setCollectionOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [pricingProgram, setPricingProgram] = useState<MdSabitProgram | null>(null)
@@ -44,7 +48,12 @@ export function FinancePage() {
     if (!aktifKurum?.kurum_id) return
     quiet ? setRefreshing(true) : setLoading(true)
     try {
-      setFinans(await mdFinansVerisiniGetir(aktifKurum.kurum_id))
+      const [nextFinance, nextCash] = await Promise.all([
+        mdFinansVerisiniGetir(aktifKurum.kurum_id),
+        mdKasaVerisiniGetir(aktifKurum.kurum_id),
+      ])
+      setFinans(nextFinance)
+      setCashAccounts(nextCash.hesaplar.filter(x => x.aktif))
       setError(null)
     } catch (e: any) {
       setError(e?.message || String(e))
@@ -67,6 +76,8 @@ export function FinancePage() {
   }, [finans])
 
   if (!aktifKurum || !data) return null
+
+  if (cashMode) return <div className="md-page-stack"><div className="md-finance-cash-back"><button className="md-secondary" type="button" onClick={() => setCashMode(false)}><ArrowLeft/>Finansın Temposuna Dön</button></div><CashPage/></div>
 
   const afterAction = async (message: string) => {
     setNotice(message)
@@ -97,6 +108,7 @@ export function FinancePage() {
         <button className={tab === 'tarife' ? 'active' : ''} onClick={() => setTab('tarife')}><Sparkles/>Ücret Tarifeleri</button>
       </div>
       <div className="md-finance-actions">
+        <button className="md-secondary" type="button" onClick={() => setCashMode(true)}><WalletCards/>Kasa & Giderler</button>
         <button className="md-secondary" type="button" onClick={() => void load(true)}><RefreshCw className={refreshing ? 'spin' : ''}/>Yenile</button>
         {tab === 'kursiyer' && <button className="md-primary" type="button" onClick={() => setCollectionOpen(true)}><Plus/>Tahsilat Gir</button>}
         {tab === 'egitmen' && <button className="md-primary" type="button" onClick={() => setPaymentOpen(true)}><Plus/>Ödeme Gir</button>}
@@ -110,14 +122,14 @@ export function FinancePage() {
     </>}
 
     <FinanceModal open={collectionOpen} title="Tahsilat Gir" subtitle="Borcu aşan tutar peşin bakiye olarak korunur." onClose={() => setCollectionOpen(false)}>
-      <CollectionForm busy={busy} students={data.kursiyerler.filter(x => x.durum !== 'Pasif')} onCancel={() => setCollectionOpen(false)} onSubmit={async input => {
+      <CollectionForm busy={busy} students={data.kursiyerler.filter(x => x.durum !== 'Pasif')} accounts={cashAccounts} onCancel={() => setCollectionOpen(false)} onSubmit={async input => {
         setBusy(true)
         try { await mdTahsilatKaydet(input); setCollectionOpen(false); await afterAction('Tahsilat kaydedildi.') } finally { setBusy(false) }
       }}/>
     </FinanceModal>
 
     <FinanceModal open={paymentOpen} title={`${t.teacher} Ödemesi`} subtitle="Hakedişten bağımsız ödeme kaydı; bakiye otomatik hesaplanır." onClose={() => setPaymentOpen(false)}>
-      <TeacherPaymentForm busy={busy} teachers={data.egitmenler.filter(x => x.durum !== 'Pasif')} onCancel={() => setPaymentOpen(false)} onSubmit={async input => {
+      <TeacherPaymentForm busy={busy} teachers={data.egitmenler.filter(x => x.durum !== 'Pasif')} accounts={cashAccounts} onCancel={() => setPaymentOpen(false)} onSubmit={async input => {
         setBusy(true)
         try { await mdEgitmenOdemeKaydet(input); setPaymentOpen(false); await afterAction(`${t.teacher} ödemesi kaydedildi.`) } finally { setBusy(false) }
       }}/>
@@ -128,8 +140,7 @@ export function FinancePage() {
         setBusy(true)
         try {
           await mdProgramFinansAyariGuncelle(pricingProgram.program_id, studentFee, teacherFee)
-          pricingProgram.kursiyer_birim_ucreti = studentFee
-          pricingProgram.egitmen_birim_hakedisi = teacherFee
+          await refresh()
           setPricingProgram(null)
           await afterAction('Ücret tarifesi güncellendi. Yeni dersler bu tarifeyi kullanacak.')
         } finally { setBusy(false) }
@@ -165,7 +176,7 @@ function TeacherAccounts({ finans, onPay }: { finans: MdFinansVerisi | null; onP
   </section>
 }
 
-function Pricing({ data, onEdit }: { data: NonNullable<ReturnType<typeof useMusicDanceData>['data']>; onEdit: (p: MdSabitProgram) => void }) {
+function Pricing({ data, onEdit }: { data: MusicDanceData; onEdit: (p: MdSabitProgram) => void }) {
   const active = data.programlar.filter(x => x.durum !== 'Pasif')
   if (!active.length) return <FinanceEmpty icon={<Sparkles/>} title="Tarife bağlanacak program yok." text="Önce Program ekranından bireysel veya grup sabit programı oluşturun."/>
   return <section className="md-pricing-grid">
@@ -179,28 +190,28 @@ function Pricing({ data, onEdit }: { data: NonNullable<ReturnType<typeof useMusi
   </section>
 }
 
-function programName(p: MdSabitProgram, data: NonNullable<ReturnType<typeof useMusicDanceData>['data']>) {
+function programName(p: MdSabitProgram, data: MusicDanceData) {
   return p.program_turu === 'Grup'
     ? data.gruplar.find(x => x.grup_id === p.grup_id)?.grup_adi || 'Grup dersi'
     : data.kursiyerler.find(x => x.kursiyer_id === p.kursiyer_id)?.ad_soyad || 'Bireysel ders'
 }
 
-function CollectionForm({ students, busy, onCancel, onSubmit }: { students: { kursiyer_id: string; ad_soyad: string }[]; busy: boolean; onCancel: () => void; onSubmit: (input: { kursiyerId: string; tarih: string; tutar: number; odemeYontemi: MdOdemeYontemi; aciklama?: string | null }) => Promise<void> }) {
-  return <form className="md-form" onSubmit={async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); await onSubmit({ kursiyerId: String(f.get('kursiyer_id')), tarih: String(f.get('tarih')), tutar: Number(f.get('tutar')), odemeYontemi: String(f.get('odeme_yontemi')) as MdOdemeYontemi, aciklama: String(f.get('aciklama') || '') || null }) }}>
+function CollectionForm({ students, accounts, busy, onCancel, onSubmit }: { students: { kursiyer_id: string; ad_soyad: string }[]; accounts: MdKasaHesabi[]; busy: boolean; onCancel: () => void; onSubmit: (input: { kursiyerId: string; kasaHesapId: string; tarih: string; tutar: number; odemeYontemi: MdOdemeYontemi; aciklama?: string | null }) => Promise<void> }) {
+  return <form className="md-form" onSubmit={async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); await onSubmit({ kursiyerId: String(f.get('kursiyer_id')), kasaHesapId: String(f.get('kasa_hesap_id')), tarih: String(f.get('tarih')), tutar: Number(f.get('tutar')), odemeYontemi: String(f.get('odeme_yontemi')) as MdOdemeYontemi, aciklama: String(f.get('aciklama') || '') || null }) }}>
     <label>{t.student}<select name="kursiyer_id" required autoFocus><option value="">Seçin</option>{students.map(x => <option key={x.kursiyer_id} value={x.kursiyer_id}>{x.ad_soyad}</option>)}</select></label>
+    <div className="md-form-two"><label>Kasa Hesabı<select name="kasa_hesap_id" required defaultValue={accounts[0]?.hesap_id || ''}><option value="">Seçin</option>{accounts.map(x => <option key={x.hesap_id} value={x.hesap_id}>{x.hesap_adi} · {x.hesap_turu}</option>)}</select></label><label>Ödeme Yöntemi<select name="odeme_yontemi" defaultValue="Nakit"><option>Nakit</option><option>Kredi Kartı</option><option>Banka</option><option>Havale</option><option>Diğer</option></select></label></div>
     <div className="md-form-two"><label>Tarih<input name="tarih" type="date" defaultValue={localDate()} required/></label><label>Tutar<input name="tutar" type="number" min="0.01" step="0.01" required placeholder="0,00"/></label></div>
-    <label>Ödeme Yöntemi<select name="odeme_yontemi" defaultValue="Nakit"><option>Nakit</option><option>Kredi Kartı</option><option>Banka</option><option>Havale</option><option>Diğer</option></select></label>
     <label>Açıklama <small>(opsiyonel)</small><input name="aciklama" placeholder="Örn. Eylül peşin ödeme"/></label>
     <div className="md-finance-form-note"><CreditCard/><span>Tahsilat mevcut borçtan büyük olabilir. Fazla tutar kursiyerin peşin bakiyesi olarak kalır.</span></div>
     <FinanceFormActions busy={busy} onCancel={onCancel} label="Tahsilatı Kaydet"/>
   </form>
 }
 
-function TeacherPaymentForm({ teachers, busy, onCancel, onSubmit }: { teachers: { egitmen_id: string; ad_soyad: string }[]; busy: boolean; onCancel: () => void; onSubmit: (input: { egitmenId: string; tarih: string; tutar: number; odemeYontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>; aciklama?: string | null }) => Promise<void> }) {
-  return <form className="md-form" onSubmit={async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); await onSubmit({ egitmenId: String(f.get('egitmen_id')), tarih: String(f.get('tarih')), tutar: Number(f.get('tutar')), odemeYontemi: String(f.get('odeme_yontemi')) as Exclude<MdOdemeYontemi, 'Kredi Kartı'>, aciklama: String(f.get('aciklama') || '') || null }) }}>
+function TeacherPaymentForm({ teachers, accounts, busy, onCancel, onSubmit }: { teachers: { egitmen_id: string; ad_soyad: string }[]; accounts: MdKasaHesabi[]; busy: boolean; onCancel: () => void; onSubmit: (input: { egitmenId: string; kasaHesapId: string; tarih: string; tutar: number; odemeYontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>; aciklama?: string | null }) => Promise<void> }) {
+  return <form className="md-form" onSubmit={async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); await onSubmit({ egitmenId: String(f.get('egitmen_id')), kasaHesapId: String(f.get('kasa_hesap_id')), tarih: String(f.get('tarih')), tutar: Number(f.get('tutar')), odemeYontemi: String(f.get('odeme_yontemi')) as Exclude<MdOdemeYontemi, 'Kredi Kartı'>, aciklama: String(f.get('aciklama') || '') || null }) }}>
     <label>{t.teacher}<select name="egitmen_id" required autoFocus><option value="">Seçin</option>{teachers.map(x => <option key={x.egitmen_id} value={x.egitmen_id}>{x.ad_soyad}</option>)}</select></label>
+    <div className="md-form-two"><label>Kasa Hesabı<select name="kasa_hesap_id" required defaultValue={accounts[0]?.hesap_id || ''}><option value="">Seçin</option>{accounts.map(x => <option key={x.hesap_id} value={x.hesap_id}>{x.hesap_adi} · {x.hesap_turu}</option>)}</select></label><label>Ödeme Yöntemi<select name="odeme_yontemi" defaultValue="Banka"><option>Nakit</option><option>Banka</option><option>Havale</option><option>Diğer</option></select></label></div>
     <div className="md-form-two"><label>Tarih<input name="tarih" type="date" defaultValue={localDate()} required/></label><label>Tutar<input name="tutar" type="number" min="0.01" step="0.01" required placeholder="0,00"/></label></div>
-    <label>Ödeme Yöntemi<select name="odeme_yontemi" defaultValue="Banka"><option>Nakit</option><option>Banka</option><option>Havale</option><option>Diğer</option></select></label>
     <label>Açıklama <small>(opsiyonel)</small><input name="aciklama"/></label>
     <FinanceFormActions busy={busy} onCancel={onCancel} label="Ödemeyi Kaydet"/>
   </form>

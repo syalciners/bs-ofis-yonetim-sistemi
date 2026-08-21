@@ -1,4 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-19T23:10:00+03:00
+Tarih: 2026-08-21T22:00:00+03:00
+Hedef commit: 06aa35abb343dfefaafc29943efbee53a349dbea
+Kapsam: Ana uygulama paritesi — Takvim/Program, Ayarlar Merkezi, Bildirim Merkezi ve son çekirdek UX düzeltmeleri.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
-Güvenlik: doğru demo Supabase + gerçek secret regex kontrolü + canlı smoke testi.
+Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + gerçek secret regex kontrolü + canlı smoke testi.

@@ -1,0 +1,87 @@
+html[data-product-profile="muzik-dans"] .branch-pulse-grid,
+html[data-product-profile="muzik"] .branch-pulse-grid,
+html[data-product-profile="dans"] .branch-pulse-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+html[data-product-profile="muzik-dans"] .branch-pulse-card,
+html[data-product-profile="muzik"] .branch-pulse-card,
+html[data-product-profile="dans"] .branch-pulse-card{
+  --pulse-accent:var(--brand-blue);
+  min-height:92px;
+  border:1px solid rgba(11,31,58,.09);
+  border-radius:18px;
+  background:linear-gradient(145deg,#FFF 0%,#FBFCFF 100%);
+  padding:12px;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(11,31,58,.045);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+  position:relative;
+  overflow:hidden;
+}
+html[data-product-profile="muzik-dans"] .branch-pulse-card:hover,
+html[data-product-profile="muzik"] .branch-pulse-card:hover,
+html[data-product-profile="dans"] .branch-pulse-card:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb,var(--pulse-accent) 28%,transparent);
+  box-shadow:0 16px 36px rgba(11,31,58,.08);
+}
+html[data-product-profile="muzik-dans"] .branch-pulse-card::after,
+html[data-product-profile="muzik"] .branch-pulse-card::after,
+html[data-product-profile="dans"] .branch-pulse-card::after{
+  content:"";
+  position:absolute;
+  right:-28px;
+  top:-34px;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--pulse-accent) 11%,transparent),transparent 68%);
+}
+html[data-product-profile="muzik-dans"] .branch-pulse-tone-2,
+html[data-product-profile="muzik"] .branch-pulse-tone-2,
+html[data-product-profile="dans"] .branch-pulse-tone-2{--pulse-accent:var(--art-violet)}
+html[data-product-profile="muzik-dans"] .branch-pulse-tone-3,
+html[data-product-profile="muzik"] .branch-pulse-tone-3,
+html[data-product-profile="dans"] .branch-pulse-tone-3{--pulse-accent:var(--art-gold)}
+html[data-product-profile="muzik-dans"] .branch-pulse-tone-4,
+html[data-product-profile="muzik"] .branch-pulse-tone-4,
+html[data-product-profile="dans"] .branch-pulse-tone-4{--pulse-accent:var(--art-rose)}
+.branch-pulse-mark{
+  width:40px;
+  height:54px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--pulse-accent) 13%,white),color-mix(in srgb,var(--pulse-accent) 5%,white));
+  color:var(--pulse-accent);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  border:1px solid color-mix(in srgb,var(--pulse-accent) 14%,transparent);
+  position:relative;
+}
+.branch-pulse-mark::before,.branch-pulse-mark::after{content:"";position:absolute;left:8px;right:8px;height:1px;background:color-mix(in srgb,var(--pulse-accent) 28%,transparent)}
+.branch-pulse-mark::before{top:15px}.branch-pulse-mark::after{bottom:15px}
+.branch-pulse-copy{display:grid;gap:2px;min-width:0;position:relative;z-index:1}
+.branch-pulse-copy small{font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;font-style:normal;font-weight:850;color:#8B96A7}
+.branch-pulse-copy b{font-size:12px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.branch-pulse-copy em{font-size:8.2px;line-height:1.4;color:#78869A;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:820px){
+  html[data-product-profile="muzik-dans"] .branch-pulse-grid,
+  html[data-product-profile="muzik"] .branch-pulse-grid,
+  html[data-product-profile="dans"] .branch-pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+  html[data-product-profile="muzik-dans"] .branch-pulse-grid,
+  html[data-product-profile="muzik"] .branch-pulse-grid,
+  html[data-product-profile="dans"] .branch-pulse-grid{grid-template-columns:1fr}
+}

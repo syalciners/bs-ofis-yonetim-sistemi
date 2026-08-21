@@ -27,5 +27,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Demo izolasyonunu kontrol et
         run: npm run check:demo-isolation
+      - name: Müzik dans ürün güvenlik kontrolleri
+        run: node scripts/check-muzik-dans-profile.mjs
       - name: TypeScript ve Vite build
         run: npm run build

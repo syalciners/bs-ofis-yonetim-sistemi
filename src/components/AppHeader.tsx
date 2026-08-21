@@ -1,4 +1,4 @@
-import { Cloud, RefreshCw, Settings } from 'lucide-react'
+import { Bell, Cloud, RefreshCw, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { APP_MODE } from '../lib/supabase'
 import { useAppData } from './AppDataProvider'
@@ -16,6 +16,7 @@ const pageSection=(pathname:string)=>{
     '/odevler':'ÖDEV TAKİBİ',
     '/raporlar':'RAPORLAR',
     '/sabit-program':'PROGRAM ŞABLONLARI',
+    '/bildirimler':'BİLDİRİM MERKEZİ',
     '/ayarlar':'AYARLAR',
     '/sistem':'SİSTEM',
   }
@@ -23,11 +24,13 @@ const pageSection=(pathname:string)=>{
 }
 
 export function AppHeader() {
-  const { refreshing, refresh, profile } = useAppData()
+  const { refreshing, refresh, profile, unreadNotifications } = useAppData()
   const nav = useNavigate()
   const location = useLocation()
   const sectionLabel=pageSection(location.pathname)
   const isDemo=APP_MODE==='demo'
+  const isManager=profile?.rol==='Yönetici'
+  const notificationLabel=unreadNotifications>99?'99+':String(unreadNotifications)
   return <header className="app-header-wrap">
     <div className="app-header">
       <div className="app-header-main">
@@ -37,6 +40,10 @@ export function AppHeader() {
         </button>
         <div className="header-actions">
           <span className="cloud-chip"><Cloud size={13}/> {isDemo?'DEMO':'Bulut'}</span>
+          {isManager&&<button className="icon-btn header-notification-btn" type="button" onClick={() => nav('/bildirimler')} aria-label={unreadNotifications>0?`${unreadNotifications} okunmamış bildirim`:'Bildirimler'}>
+            <Bell size={17}/>
+            {unreadNotifications>0&&<span className="header-notification-badge">{notificationLabel}</span>}
+          </button>}
           <button className="icon-btn" type="button" onClick={() => void refresh()} aria-label="Yenile"><RefreshCw size={17} className={refreshing ? 'spin' : ''}/></button>
           <button className="icon-btn" type="button" onClick={() => nav('/ayarlar')} aria-label="Ayarlar"><Settings size={17}/></button>
         </div>

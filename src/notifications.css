@@ -1,0 +1,68 @@
+.notifications-page{gap:14px}
+.notifications-title-row{align-items:flex-end}
+.notifications-refresh{min-height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 12px;display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:900;cursor:pointer}
+.notifications-refresh:disabled{opacity:.55;cursor:not-allowed}
+.notifications-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.notifications-summary>div{border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 5px 16px rgba(31,48,79,.03)}
+.notifications-summary>div.is-unread{border-color:#c8d9ff;background:#fbfdff}
+.notifications-summary-icon{width:36px;height:36px;border-radius:11px;background:var(--blue2);color:var(--blue);display:grid;place-items:center;flex:0 0 auto}
+.notifications-summary>div>span:last-child{display:grid;gap:2px}
+.notifications-summary strong{font-size:18px;line-height:1}
+.notifications-summary small{font-size:9px;color:var(--muted);font-weight:800}
+.notifications-filters{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:1px 1px 3px;scrollbar-width:none}
+.notifications-filters::-webkit-scrollbar{display:none}
+.notifications-filters button{white-space:nowrap;min-height:34px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:0 11px;display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:900;color:#5d6c83;cursor:pointer}
+.notifications-filters button.active{background:var(--blue2);border-color:#c8d9ff;color:var(--blue)}
+.notifications-filters button span{min-width:18px;height:18px;border-radius:999px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:8px}
+.notifications-error{border:1px solid #facbcb;background:var(--red2);color:#b93434;border-radius:13px;padding:11px 12px;display:flex;align-items:center;gap:8px;font-size:10px;font-weight:750}
+.notifications-empty{min-height:190px;border:1px dashed #ccd6e4;border-radius:18px;background:#fff;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;color:#8491a3;padding:24px}
+.notifications-empty strong{font-size:12px;color:#40506a}
+.notifications-empty span{font-size:9px}
+.notifications-list{display:grid;gap:10px}
+.notification-card{position:relative;border:1px solid var(--line);border-radius:17px;background:#fff;padding:14px 15px;box-shadow:0 5px 16px rgba(31,48,79,.03);overflow:hidden}
+.notification-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#d8e0ec}
+.notification-card.is-unread{border-color:#cedbfd;background:#fff}
+.notification-card.is-unread:before{background:var(--blue)}
+.notification-card.priority-yüksek:before,.notification-card.priority-kritik:before{background:var(--orange)}
+.notification-card.priority-kritik{border-color:#f4cccc}
+.notification-card.priority-kritik:before{background:var(--red)}
+.notification-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.notification-card-title{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.notification-dot{width:8px;height:8px;border-radius:999px;background:#cbd5e1;margin-top:7px;flex:0 0 auto}
+.notification-card.is-unread .notification-dot{background:var(--blue);box-shadow:0 0 0 4px var(--blue2)}
+.notification-card-title>div{min-width:0}
+.notification-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px}
+.notification-tags span{display:inline-flex;align-items:center;min-height:20px;border-radius:999px;background:#f1f4f8;color:#66758d;padding:0 7px;font-size:7.5px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+.notification-card.is-unread .notification-tags span:first-child{background:var(--blue2);color:var(--blue)}
+.notification-card h2{font-size:13px;line-height:1.25;margin:0;letter-spacing:-.01em}
+.notification-card-head time{flex:0 0 auto;color:#8a97aa;font-size:8px;font-weight:750;white-space:nowrap;padding-top:2px}
+.notification-body{margin:9px 0 0 17px;color:#5f6e84;font-size:10px;line-height:1.55;white-space:pre-wrap}
+.notification-meta{margin:11px 0 0 17px;border:1px solid #e7ecf3;background:#f9fbfd;border-radius:12px;padding:9px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.notification-meta>div{min-width:0;display:grid;gap:2px}
+.notification-meta dt{font-size:7.5px;font-weight:900;color:#8a97aa;text-transform:uppercase;letter-spacing:.06em}
+.notification-meta dd{margin:0;font-size:9.5px;font-weight:800;color:#35455f;overflow-wrap:anywhere}
+.notification-card-footer{margin:12px 0 0 17px;border-top:1px solid #edf1f6;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.notification-source{font-size:8px;color:#8a97aa;font-weight:750}
+.notification-actions{display:flex;align-items:center;gap:7px}
+.notification-actions button{min-height:32px;border-radius:10px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:8.5px;font-weight:900;cursor:pointer}
+.notification-read-toggle{border:1px solid var(--line);background:#fff;color:#52627a}
+.notification-open{border:1px solid #cbdcff;background:var(--blue2);color:var(--blue)}
+.notification-actions button:disabled{opacity:.55;cursor:not-allowed}
+.header-notification-btn{position:relative}
+.header-notification-badge{position:absolute;right:-4px;top:-4px;min-width:17px;height:17px;border-radius:999px;background:var(--red);color:#fff;border:2px solid #fff;display:grid;place-items:center;padding:0 4px;font-size:7px;font-weight:950;line-height:1}
+
+@media (max-width:640px){
+  .notifications-title-row{align-items:flex-end}
+  .notifications-refresh span{display:none}
+  .notifications-refresh{width:40px;padding:0;justify-content:center}
+  .notifications-summary{gap:8px}
+  .notifications-summary>div{padding:11px 12px}
+  .notification-card{padding:13px 12px}
+  .notification-card-head{display:grid;gap:5px}
+  .notification-card-head time{padding-left:17px}
+  .notification-body,.notification-meta,.notification-card-footer{margin-left:17px}
+  .notification-meta{grid-template-columns:1fr}
+  .notification-card-footer{align-items:flex-start;display:grid}
+  .notification-actions{width:100%}
+  .notification-actions button{flex:1}
+}

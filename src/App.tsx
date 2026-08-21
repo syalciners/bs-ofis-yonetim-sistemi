@@ -16,6 +16,7 @@ import { TeacherPaymentsPage } from './pages/TeacherPaymentsPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { FixedProgramPage } from './pages/FixedProgramPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SystemPage } from './pages/SystemPage'
 import { PortalPreviewPage } from './pages/PortalPreviewPage'
@@ -40,6 +41,7 @@ function ProtectedApp() {
     <Route path="/odevler" element={<AssignmentsPage/>}/>
     <Route path="/raporlar" element={<ReportsPage/>}/>
     <Route path="/sabit-program" element={<FixedProgramPage/>}/>
+    <Route path="/bildirimler" element={<NotificationsPage/>}/>
     <Route path="/ayarlar" element={<SettingsPage/>}/>
     <Route path="/sistem" element={<SystemPage/>}/>
     <Route path="/portal-onizleme/ogretmen" element={<PortalPreviewPage role="Öğretmen"/>}/>

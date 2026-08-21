@@ -1,4 +1,4 @@
-import { BookOpenCheck, FileBarChart, GraduationCap, HeartPulse, Repeat2, Settings } from 'lucide-react'
+import { BookOpenCheck, FileBarChart, GraduationCap, HeartPulse, Repeat2, Settings, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { ManagerModeNav } from '../components/ManagerModeNav'
@@ -10,6 +10,7 @@ export function MorePage(){
   const isManager=profile?.rol==='Yönetici'
   const items=[
     {to:'/ogretmenler',Icon:GraduationCap,title:t.teachers,text:'Hakediş, program ve iletişim'},
+    ...(featureEnabled('groups')?[{to:'/gruplar',Icon:Users,title:'Gruplar',text:'Grup dersleri, kontenjan ve katılımcılar'}]:[]),
     {to:'/sabit-program',Icon:Repeat2,title:'Sabit Ders Programı',text:'Tekrar eden ders şablonları'},
     ...(featureEnabled('assignments')?[{to:'/odevler',Icon:BookOpenCheck,title:'Ödevler',text:`${t.student} çalışma takibi`}]:[]),
     {to:'/raporlar',Icon:FileBarChart,title:'Raporlar',text:`${t.student}, ${t.teacherLower} ve kurum özetleri`},

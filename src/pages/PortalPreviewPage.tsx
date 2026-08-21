@@ -55,6 +55,10 @@ interface PreviewAssignment {
 const sourceRowExists = (row: unknown) => (row as { kaynakta_var?: boolean }).kaynakta_var !== false
 const roleSlug = (role: PortalPreviewRole) => role === 'Öğretmen' ? 'ogretmen' : 'ogrenci'
 const roleCopy = (role: PortalPreviewRole) => role === 'Öğretmen' ? 'Öğretmen Portalı' : 'Öğrenci Portalı'
+const greetingName = (name: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  return parts.length >= 3 ? parts.slice(0, 2).join(' ') : parts[0] || name
+}
 
 function formatDate(value: string, long = false) {
   const date = new Date(`${value}T12:00:00+03:00`)
@@ -119,7 +123,7 @@ function LessonList({ items, emptyText }: { items: PreviewLesson[]; emptyText: s
   return <div className="portal-preview-lesson-list">{items.map(lesson => <article className="portal-preview-lesson-card" key={lesson.ders_id}>
     <div className="portal-preview-lesson-time"><strong>{formatTime(lesson.baslangic_saati)}</strong><span>{formatTime(lesson.bitis_saati)}</span></div>
     <div className="portal-preview-lesson-main">
-      <div className="portal-preview-lesson-heading"><strong>{lesson.brans_adi || 'Ders'}</strong><span>{lesson.ders_durumu || 'Planlandı'}</span></div>
+      <div className="portal-preview-lesson-heading"><strong>{lesson.brans_adi || 'Ders'}</strong><span className="portal-preview-lesson-status" data-status={lesson.ders_durumu || 'Planlandı'}>{lesson.ders_durumu || 'Planlandı'}</span></div>
       <div className="portal-preview-lesson-meta">
         <span>{lesson.ogrenci_adi && lesson.ogretmen_adi ? `${lesson.ogrenci_adi} · ${lesson.ogretmen_adi}` : lesson.ogrenci_adi || lesson.ogretmen_adi || '—'}</span>
         <span>{lesson.derslik_adi || 'Ders yeri belirtilmedi'}</span>
@@ -132,7 +136,7 @@ function LessonList({ items, emptyText }: { items: PreviewLesson[]; emptyText: s
 function TodayView({ role, name, lessons }: { role: PortalPreviewRole; name: string; lessons: PreviewLesson[] }) {
   return <>
     <section className="portal-preview-hero">
-      <div><span>{roleCopy(role)}</span><h2>Merhaba, {name.split(' ')[0]}</h2><p>{todayLong()}</p></div>
+      <div><span>{roleCopy(role)}</span><h2>Merhaba, {greetingName(name)}</h2><p>{todayLong()}</p></div>
       <div className="portal-preview-hero-icon">{role === 'Öğretmen' ? <GraduationCap size={30}/> : <BookOpenCheck size={29}/>}</div>
     </section>
     <section className="portal-preview-section">

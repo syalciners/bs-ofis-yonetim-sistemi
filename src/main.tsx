@@ -26,6 +26,7 @@ import './portal-preview.css'
 import './brand-palette.css'
 import './demo-discovery.css'
 import './music-dance-art-direction.css'
+import './music-dance-groups-art.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

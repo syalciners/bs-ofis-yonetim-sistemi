@@ -1,4 +1,4 @@
-import { CalendarCheck2, Check, List, Plus, X } from 'lucide-react'
+import { CalendarCheck2, Check, FileDown, List, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -9,8 +9,10 @@ import { WeekPlanningReviewPanel } from '../components/WeekPlanningReviewPanel'
 import { useToast } from '../components/Toast'
 import type { Ders } from '../lib/types'
 import { addDays, mondayOf, shortDate, todayISO, weekRangeLong } from '../lib/format'
+import { calendarRoomColumns } from '../lib/calendarRooms'
 import { teacherTone } from '../lib/teacherTone'
 import { lessonConflict, moveProgramDate, updateLesson } from '../services/officeService'
+import { openDailyCalendarPdf } from '../services/dailyCalendarPdfService'
 import type { WeekPlanningReview } from '../services/programSuggestionService'
 import { createWeek, getWeekCreationStatus, reviewWeekPlanning, type WeekCreationStatus } from '../services/weekPlanningService'
 
@@ -102,18 +104,28 @@ function StatusIndicator({status}:{status?:string|null}){
 }
 
 export function DailyCalendarPage(){
-  const{data,refresh}=useAppData();const{toast}=useToast();const nav=useNavigate()
+  const{data,refresh,institution}=useAppData();const{toast}=useToast();const nav=useNavigate()
   const baseMonday=mondayOf(todayISO())
-  const[monday,setMonday]=useState(()=>{const stored=sessionStorage.getItem('bs-takvim-hafta');return stored&&/^\d{4}-\d{2}-\d{2}$/.test(stored)?stored:baseMonday})
+  const[monday,setMonday]=useState(()=>{
+    const stored=sessionStorage.getItem('bs-takvim-hafta')
+    if(!stored||!/^\d{4}-\d{2}-\d{2}$/.test(stored))return baseMonday
+    const storedOffset=Math.round((new Date(`${stored}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
+    return addDays(baseMonday,Math.max(-1,Math.min(1,storedOffset))*7)
+  })
   const[selectedDate,setSelectedDate]=useState(()=>todayISO())
   const[selected,setSelected]=useState<Ders|null>(null);const[editLesson,setEditLesson]=useState<Ders|null>(null);const[quickSlot,setQuickSlot]=useState<QuickSlot|null>(null)
   const[weekBusy,setWeekBusy]=useState(false);const[weekStatusBusy,setWeekStatusBusy]=useState(true);const[weekStatus,setWeekStatus]=useState<WeekStatusState|null>(null);const[weekReview,setWeekReview]=useState<WeekPlanningReview|null>(null)
-  const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false)
+  const[dragView,setDragView]=useState<DragView|null>(null);const[moveBusy,setMoveBusy]=useState(false);const[pdfBusy,setPdfBusy]=useState(false)
   const dragRef=useRef<DragRuntime|null>(null);const suppressClickRef=useRef(false)
   const isPastWeek=monday<baseMonday;const isCurrentWeek=monday===baseMonday
   const weekOffset=Math.round((new Date(`${monday}T12:00:00`).getTime()-new Date(`${baseMonday}T12:00:00`).getTime())/(7*86400000))
-  const moveWeek=(delta:number)=>{setMonday(current=>addDays(current,delta*7));setWeekReview(null)}
+  const moveWeek=(delta:number)=>{
+    const nextOffset=Math.max(-1,Math.min(1,weekOffset+delta))
+    setMonday(addDays(baseMonday,nextOffset*7))
+    setWeekReview(null)
+  }
   const goCurrentWeek=()=>{setMonday(baseMonday);setWeekReview(null)}
+  const weekNavLabel=weekOffset<0?'Geçen Hafta':weekOffset>0?'Gelecek Hafta':'Bu Hafta'
   const readWeekStatus=useCallback(async():Promise<WeekStatusState>=>({monday,status:await getWeekCreationStatus(monday)}),[monday])
   useEffect(()=>{sessionStorage.setItem('bs-takvim-hafta',monday);const today=todayISO();setSelectedDate(today>=monday&&today<=addDays(monday,6)?today:monday)},[monday])
   useEffect(()=>{let active=true;setWeekStatusBusy(true);void readWeekStatus().then(status=>{if(active)setWeekStatus(status)}).catch(()=>{if(active)setWeekStatus(null)}).finally(()=>{if(active)setWeekStatusBusy(false)});return()=>{active=false}},[readWeekStatus])
@@ -156,23 +168,26 @@ export function DailyCalendarPage(){
 
   const selectedDayIndex=Math.max(0,Math.min(6,Math.round((new Date(`${selectedDate}T12:00:00`).getTime()-new Date(`${monday}T12:00:00`).getTime())/86400000)))
   const dayLessons=data.dersler.filter(x=>x.tarih===selectedDate&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||''))).sort((a,b)=>String(a.baslangic_saati||'').localeCompare(String(b.baslangic_saati||'')))
+  const weekLessons=data.dersler.filter(x=>typeof x.tarih==='string'&&x.tarih>=monday&&x.tarih<=addDays(monday,6)&&!CALENDAR_HIDDEN_STATUSES.has(String(x.ders_durumu||'')))
   const dayLessonHours=dayLessons.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const allPlaced=placeLessons(dayLessons)
-  const rangeStart=allPlaced.length?Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_START
-  const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
+  const configuredStart=timeToMinutes(institution?.takvim_baslangic_saati)??DEFAULT_START
+  const configuredEnd=timeToMinutes(institution?.takvim_bitis_saati)??DEFAULT_END
+  const rangeStart=allPlaced.length?Math.min(configuredStart,Math.floor(Math.min(...allPlaced.map(x=>x.start))/SLOT_MINUTES)*SLOT_MINUTES):configuredStart
+  const rangeEnd=allPlaced.length?Math.max(configuredEnd,Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES):configuredEnd
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
   const studentName=(id?:string|null)=>data.ogrenciler.find(x=>x.ogrenci_id===id)?.ad_soyad||'Öğrenci'
   const teacherName=(id?:string|null)=>data.ogretmenler.find(x=>x.ogretmen_id===id)?.ad_soyad||'Öğretmen'
   const branchName=(id?:string|null)=>data.branslar.find(x=>x.brans_id===id)?.brans_adi||'Branş'
-  const roomColumns=[...data.derslikler]
-  .filter(room=>room.aktif!==false)
-  .sort((a,b)=>{
-    const aOnline=String(a.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
-    const bOnline=String(b.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
-    return aOnline-bOnline||String(a.derslik_id).localeCompare(String(b.derslik_id),'tr-TR')
-  })
-  .map(room=>({id:room.derslik_id,room,label:room.mekan_adi||'Derslik'}))
+  const roomColumns=calendarRoomColumns(data.derslikler,dayLessons.map(x=>x.derslik_id))
+  const openDayPdf=async()=>{
+    if(!weekLessons.length){toast('Seçilen haftada PDF oluşturulacak ders yok.','error');return}
+    setPdfBusy(true)
+    try{await openDailyCalendarPdf(data,weekLessons,monday,rangeStart,rangeEnd)}
+    catch(error:any){toast(error?.message||'Takvim PDF’i oluşturulamadı.','error')}
+    finally{setPdfBusy(false)}
+  }
   const quickRoom=quickSlot?roomColumns.find(x=>x.id===quickSlot.roomId):null
   const canDragLesson=(lesson:Ders)=>String(lesson.ders_durumu||'Planlandı')==='Planlandı'
   const dragTargetAt=(clientX:number,clientY:number):DragTarget|null=>{
@@ -260,9 +275,9 @@ export function DailyCalendarPage(){
       <button className="calendar-mode-btn calendar-toolbar-mode-btn" type="button" onClick={()=>nav('/takvim')}><List size={16}/>Liste</button>
       <div className="calendar-week-range-long"><b>{weekRangeLong(monday,addDays(monday,6))}</b></div>
       <div className="calendar-week-nav-compact" role="group" aria-label="Hafta değiştir">
-        <button type="button" aria-label="Önceki hafta" onClick={()=>moveWeek(-1)}>‹</button>
-        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>Bu Hafta</button>
-        <button type="button" aria-label="Gelecek hafta" onClick={()=>moveWeek(1)}>›</button>
+        <button type="button" aria-label="Önceki hafta" disabled={weekOffset<=-1} onClick={()=>moveWeek(-1)}>‹</button>
+        <button type="button" className={weekOffset===0?'active':''} onClick={goCurrentWeek}>{weekNavLabel}</button>
+        <button type="button" aria-label="Gelecek hafta" disabled={weekOffset>=1} onClick={()=>moveWeek(1)}>›</button>
       </div>
     </section>
 
@@ -271,9 +286,9 @@ export function DailyCalendarPage(){
     </section>
 
     <section className="daily-calendar-card">
-      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></header>
+      <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{dayTitle(selectedDate,selectedDayIndex)}</b><small className="daily-drag-help">Planlandı ders: 0,55 sn basılı tutup sürükle</small></div><div className="daily-calendar-head-actions"><button className="secondary-btn calendar-pdf-btn daily-calendar-pdf-btn" type="button" disabled={!weekLessons.length||pdfBusy} onClick={()=>void openDayPdf()}><FileDown size={14}/>{pdfBusy?'Hazırlanıyor…':'PDF Al'}</button><div className="daily-lesson-count"><strong>{dayLessonHours}</strong><span>ders saati</span></div></div></header>
       <div className="daily-room-grid-scroll" aria-label="Dersliklere göre günlük takvim">
-        <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
+        <div className="daily-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
           <div className="daily-room-header-row">
             <div className="daily-time-head">Saat</div>
             {roomColumns.map(column=><div className={`daily-room-head room-${column.id.toLowerCase()}`} key={column.id} title={column.room?.mekan_adi||column.label}><strong>{column.label}</strong></div>)}

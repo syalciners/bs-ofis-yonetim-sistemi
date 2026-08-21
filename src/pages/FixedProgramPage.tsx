@@ -6,6 +6,7 @@ import { ProgramMoveForm } from '../components/forms'
 import { SmartProgramForm } from '../components/SmartProgramForm'
 import type { SabitProgram } from '../lib/types'
 import { fullDate, money, time, todayISO } from '../lib/format'
+import { calendarRoomColumns } from '../lib/calendarRooms'
 import { teacherTone } from '../lib/teacherTone'
 import { branchName, roomName, studentName, teacherName } from '../services/metrics'
 import { previewProgram, skipProgramDate } from '../services/officeService'
@@ -123,14 +124,7 @@ export function FixedProgramPage(){
   const rangeEnd=allPlaced.length?Math.ceil(Math.max(...allPlaced.map(x=>x.end))/SLOT_MINUTES)*SLOT_MINUTES:DEFAULT_END
   const slotCount=Math.max(1,Math.ceil((rangeEnd-rangeStart)/SLOT_MINUTES))
   const slots=Array.from({length:slotCount},(_,i)=>rangeStart+i*SLOT_MINUTES)
-  const roomColumns=[...data.derslikler]
-  .filter(room=>room.aktif!==false)
-  .sort((a,b)=>{
-    const aOnline=String(a.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
-    const bOnline=String(b.mekan_turu||'').toLocaleLowerCase('tr-TR')==='online'?1:0
-    return aOnline-bOnline||String(a.derslik_id).localeCompare(String(b.derslik_id),'tr-TR')
-  })
-  .map(room=>({id:room.derslik_id,room,label:room.mekan_adi||'Derslik'}))
+  const roomColumns=calendarRoomColumns(data.derslikler,selectedPrograms.map(x=>x.derslik_id))
   const canDragProgram=(program:SabitProgram)=>!dragBusy&&!(program.program_durumu==='Pasif'||program.aktif===false)
   const dragTargetAt=(clientX:number,clientY:number):ProgramDragTarget|null=>{
     const element=document.elementFromPoint(clientX,clientY) as HTMLElement|null
@@ -227,7 +221,7 @@ export function FixedProgramPage(){
       <section className="daily-calendar-card fixed-program-calendar-card">
         <header className="daily-calendar-card-head"><div><span>SEÇİLİ GÜN</span><b>{selectedDay}</b><small className="daily-drag-help">Aktif program: 0,55 sn basılı tutup sürükle</small></div><div className="daily-lesson-count"><strong>{selectedPrograms.length}</strong><span>program</span></div></header>
         <div className="daily-room-grid-scroll" aria-label="Dersliklere göre sabit program takvimi">
-          <div className="daily-room-grid fixed-program-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`} as React.CSSProperties}>
+          <div className="daily-room-grid fixed-program-room-grid" style={{'--slot-height':`${SLOT_HEIGHT}px`,'--room-count':roomColumns.length,minWidth:Math.max(650,52+roomColumns.length*116)} as React.CSSProperties}>
             <div className="daily-room-header-row">
               <div className="daily-time-head">Saat</div>
               {roomColumns.map(column=><div className={`daily-room-head room-${column.id.toLowerCase()}`} key={column.id} title={column.room?.mekan_adi||column.label}><strong>{column.label}</strong></div>)}

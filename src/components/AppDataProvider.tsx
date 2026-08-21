@@ -4,10 +4,16 @@ import { APP_MODE, supabase } from '../lib/supabase'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
 
+interface DemoInstitutionSettings {
+  takvim_baslangic_saati?: string | null
+  takvim_bitis_saati?: string | null
+}
+
 interface AppCtx {
   session: Session | null
   user: User | null
   profile: KullaniciProfili | null
+  institution: DemoInstitutionSettings | null
   data: AppData | null
   loading: boolean
   refreshing: boolean
@@ -20,6 +26,10 @@ interface AppCtx {
 const Ctx = createContext<AppCtx | null>(null)
 const IS_DEMO = APP_MODE === 'demo'
 const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
+const DEMO_INSTITUTION: DemoInstitutionSettings = {
+  takvim_baslangic_saati: '08:00',
+  takvim_bitis_saati: '21:00',
+}
 
 function portalSessionUrl(session: Session) {
   const fragment = new URLSearchParams({
@@ -184,7 +194,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [])
   const signOut = useCallback(async () => { setDemoExpiresAt(null); await supabase.auth.signOut() }, [])
 
-  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut }), [session, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut])
+  const value = useMemo<AppCtx>(() => ({ session, user: session?.user || null, profile, institution: IS_DEMO ? DEMO_INSTITUTION : null, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut }), [session, profile, data, loading, refreshing, error, demoExpiresAt, refresh, signIn, signOut])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

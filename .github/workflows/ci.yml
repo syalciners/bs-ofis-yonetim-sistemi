@@ -2,7 +2,9 @@ name: Build doğrulama
 
 on:
   push:
-    branches: ['v1-*', clean-v1-golden]
+    branches: ['v1-*', clean-v1-golden, muzik-dans-demo-v1]
+  pull_request:
+    branches: [demo-hazirlik]
   workflow_dispatch:
 
 permissions:

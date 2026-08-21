@@ -1,3 +1,3 @@
-target_main_commit=306bd8754927b0f785d941937c24cf35d00e292b
-reason=Portal bildirim auth dongusu duzeltmesi production yayini ve smoke dogrulamasi
-attempt=9
+target_main_commit=53d685f643dbcef2262009257c5ae32adec49a15
+reason=Portal ana auth yeniden yukleme dongusu duzeltmesi production yayini ve smoke dogrulamasi
+attempt=10

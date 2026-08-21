@@ -19,16 +19,23 @@ export function OverviewPage() {
   if(!data||!metrics)return null
   const isDemo=APP_MODE==='demo'
   const assignmentsEnabled=featureEnabled('assignments')
+  const artsProfile=featureEnabled('groups')
   const todayLessonHours=metrics.today.reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
   const plannedLessonHours=metrics.today.filter(x=>x.ders_durumu==='Planlandı').reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
+  const branchPulse=artsProfile?data.branslar.filter(x=>x.aktif!==false).map(branch=>{
+    const programs=data.sabitProgramlar.filter(x=>x.brans_id===branch.brans_id&&x.aktif!==false&&x.program_durumu!=='Pasif')
+    const students=new Set(programs.map(x=>x.ogrenci_id).filter(Boolean)).size
+    const todayHours=metrics.today.filter(x=>x.brans_id===branch.brans_id).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)
+    return{id:branch.brans_id,name:branch.brans_adi,students,todayHours}
+  }).sort((a,b)=>b.students-a.students||b.todayHours-a.todayHours||a.name.localeCompare(b.name,'tr')).slice(0,6):[]
   const attention=[
     {show:plannedLessonHours>0,icon:CalendarCheck2,title:`${plannedLessonHours} planlı ders saati`,text:'Bugün sonuç bekleyen dersler',go:()=>nav('/takvim')},
     {show:metrics.debtors>0,icon:WalletCards,title:`${metrics.debtors} ${t.studentLower}de açık bakiye`,text:`${money(metrics.debt)} tahsilat bekliyor`,go:()=>nav('/ogrenciler?filtre=borclu')},
     {show:assignmentsEnabled&&metrics.assign.length>0,icon:ReceiptText,title:`${metrics.assign.length} geciken ödev`,text:'Son teslim tarihi geçmiş kayıtlar',go:()=>nav('/odevler')},
     {show:metrics.zoom.length>0,icon:AlertCircle,title:`${metrics.zoom.length} Zoom uyarısı`,text:'Kontrol edilmesi gereken online ders',go:()=>nav('/sistem')},
   ].filter(x=>x.show)
-  return <div className="page-stack">
-    <section className="page-title-row"><div><span className="eyebrow">YÖNETİM ÖZETİ</span><h1>Bugün</h1></div></section>
+  return <div className="page-stack artistic-overview">
+    <section className="page-title-row"><div><span className="eyebrow">YÖNETİM ÖZETİ</span><h1>Bugün</h1>{artsProfile&&<p>Kursunuzun ritmi, ders akışı ve finans görünümü.</p>}</div></section>
 
     {isDemo&&<section className="demo-discovery" aria-label="Önerilen demo rotası">
       <div className="demo-discovery-copy"><span>ÖNERİLEN DEMO ROTASI</span><h2>Demoyu 3 adımda keşfedin</h2><p>Örnek veriler üzerinden günlük yönetim akışının en güçlü üç bölümünü deneyin.</p></div>
@@ -45,6 +52,14 @@ export function OverviewPage() {
       <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>{t.studentLower} bakiyeleri</small></button>
       <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>{t.teacher} Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
     </section>
+
+    {artsProfile&&branchPulse.length>0&&<section className="branch-pulse-section">
+      <div className="section-heading"><div><h2>Branş Nabzı</h2><span>aktif program yoğunluğu</span></div><button className="text-btn" onClick={()=>nav('/takvim')}>Programı Aç</button></div>
+      <div className="branch-pulse-grid">{branchPulse.map((branch,index)=><button className={`branch-pulse-card branch-pulse-tone-${(index%4)+1}`} key={branch.id} onClick={()=>nav('/takvim')}>
+        <span className="branch-pulse-mark" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>
+        <span className="branch-pulse-copy"><small>{t.branch}</small><b>{branch.name}</b><em>{branch.students} aktif {t.studentLower}{branch.todayHours?` · bugün ${branch.todayHours} saat`:''}</em></span>
+      </button>)}</div>
+    </section>}
 
     <section><div className="section-heading"><div><h2>Hızlı İşlemler</h2><span>tek dokunuş</span></div></div><div className="quick-actions">
       <button onClick={()=>setModal('collection')}><span className="quick-icon teal"><Banknote/></span><b>Tahsilat Al</b><small>{t.studentLower} ödemesi</small></button>

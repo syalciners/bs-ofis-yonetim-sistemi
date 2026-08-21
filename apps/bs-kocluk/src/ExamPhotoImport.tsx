@@ -66,7 +66,7 @@ export function ExamPhotoImport({ data, studentId, onClose, onApply, onManual }:
         <input ref={cameraInputRef} className="exam-photo-file" type="file" accept="image/*" capture="environment" onChange={event => void process(event)} aria-label="Kamerayla fotoğraf çek"/>
         <input ref={libraryInputRef} className="exam-photo-file" type="file" accept="image/*,.png,.jpg,.jpeg,.webp,.heic,.heif" onChange={event => void process(event)} aria-label="Galeriden veya dosyalardan fotoğraf seç"/>
 
-        {!preview && <div className="exam-photo-source-grid">
+        {!preview && <div className="exam-photo-source-grid" style={{ display:'grid', gap:10 }}>
           <button type="button" className="exam-photo-capture" onClick={takePhoto} disabled={busy}>
             <Camera/><div><b>Fotoğraf Çek</b><span>Deneme sonucunu şimdi kamerayla çekin.</span></div>
           </button>
@@ -77,9 +77,9 @@ export function ExamPhotoImport({ data, studentId, onClose, onApply, onManual }:
 
         {preview && <div className="exam-photo-preview-wrap">
           <img className="exam-photo-preview" src={preview} alt="Seçilen deneme sonucu"/>
-          <div className="exam-photo-replace-actions">
-            <button type="button" className="exam-photo-replace" onClick={takePhoto} disabled={busy}><Camera/> Yeniden Çek</button>
-            <button type="button" className="exam-photo-replace" onClick={chooseExisting} disabled={busy}><ImagePlus/> Başka Görsel Seç</button>
+          <div className="exam-photo-replace-actions" style={{ position:'absolute', right:10, bottom:10, display:'flex', gap:7, flexWrap:'wrap', justifyContent:'flex-end' }}>
+            <button type="button" className="exam-photo-replace" style={{ position:'static' }} onClick={takePhoto} disabled={busy}><Camera/> Yeniden Çek</button>
+            <button type="button" className="exam-photo-replace" style={{ position:'static' }} onClick={chooseExisting} disabled={busy}><ImagePlus/> Başka Görsel Seç</button>
           </div>
         </div>}
 

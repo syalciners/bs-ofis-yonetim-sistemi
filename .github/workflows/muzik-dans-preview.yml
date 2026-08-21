@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 20
     env:
       VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
-      VERCEL_PROJECT_ID: prj_SU2C3RE5lTS56EnSJT8hp7skicr0
+      VERCEL_PROJECT_ID: prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       MD_SUPABASE_URL: https://igmtuouhdozkgwmdxlme.supabase.co
       MD_SUPABASE_PUBLISHABLE_KEY: sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf
@@ -40,11 +40,11 @@ jobs:
           node <<'NODE'
           const fs = require('fs')
           const j = JSON.parse(fs.readFileSync('/tmp/vercel-project.json','utf8'))
-          if (j.id !== process.env.VERCEL_PROJECT_ID || j.name !== 'bs-test-studio') {
-            console.error('GÜVENLİK ENGELİ: Hedef boş bs-test-studio preview projesi değil.')
+          if (j.id !== process.env.VERCEL_PROJECT_ID || j.name !== 'bs-egitim-demo') {
+            console.error('GÜVENLİK ENGELİ: Hedef BS Eğitim Demo preview projesi değil.')
             process.exit(1)
           }
-          console.log(`Hedef doğrulandı: ${j.name} / ${j.id}`)
+          console.log(`Preview hedefi doğrulandı: ${j.name} / ${j.id}`)
           NODE
 
       - name: Bağımlılıkları kur

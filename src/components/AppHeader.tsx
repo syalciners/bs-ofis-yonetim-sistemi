@@ -16,6 +16,7 @@ const pageSection=(pathname:string)=>{
     '/menu':'DİĞER İŞLEMLER',
     '/ogretmenler':'PERSONEL',
     '/ogretmen-odemeleri':`${upper(t.teacher)} YÖNETİMİ`,
+    '/gruplar':'GRUP YÖNETİMİ',
     '/odevler':'ÇALIŞMA TAKİBİ',
     '/raporlar':'RAPORLAR',
     '/sabit-program':'PROGRAM ŞABLONLARI',

@@ -25,7 +25,7 @@ export interface Ogretmen {
 
 export interface Brans { brans_id: Id; brans_adi: string; aktif?: boolean | null }
 export interface OgretmenBransi { ogretmen_id: Id; brans_id: Id; aktif: boolean }
-export interface Derslik { derslik_id: Id; mekan_adi: string; mekan_turu?: string | null; kapasite?: number | null; aktif?: boolean | null }
+export interface Derslik { derslik_id: Id; mekan_adi: string; mekan_turu?: string | null; kapasite?: number | null; aktif?: boolean | null; aciklama?: string | null }
 
 export interface SabitProgram {
   program_id: Id
@@ -97,7 +97,7 @@ export interface Gider {
   iptal_mi: boolean
 }
 
-export interface GiderKategori { kategori_id: Id; kategori_adi: string; grup?: string | null; aktif?: boolean | null; sira_no?: number | null }
+export interface GiderKategori { kategori_id: Id; kategori_adi: string; grup?: string | null; aktif?: boolean | null; sira_no?: number | null; aciklama?: string | null }
 
 export interface OgretmenOdeme {
   ogretmen_odeme_id: Id
@@ -112,7 +112,7 @@ export interface OgretmenOdeme {
 }
 
 export interface HakedisDonemi { hakedis_donemi_id: Id; donem_adi: string; baslangic_tarihi: string; bitis_tarihi: string; aktif?: boolean | null }
-export interface KasaHesabi { hesap_id: Id; hesap_adi: string; hesap_turu?: string | null; banka_adi?: string | null; acilis_bakiyesi?: number | null; aktif?: boolean | null }
+export interface KasaHesabi { hesap_id: Id; hesap_adi: string; hesap_turu?: string | null; banka_adi?: string | null; iban?: string | null; acilis_bakiyesi?: number | null; aktif?: boolean | null; aciklama?: string | null }
 export interface KasaHareketi { hareket_id: Id; tarih: string; hareket_turu?: string | null; kaynak_turu?: string | null; kaynak_id?: Id | null; hesap_id?: Id | null; tutar: number; aciklama?: string | null; ogrenci_id?: Id | null; ogretmen_id?: Id | null; iptal_mi?: boolean | null; durum?: string | null }
 
 export interface Odev {

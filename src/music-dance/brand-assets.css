@@ -1,0 +1,68 @@
+.md-login-logo,
+.md-onboarding-card > img,
+.md-boot > img,
+.md-side-brand > img {
+  content: url('/brand/music-dance/bs-md-icon.svg');
+}
+
+.md-login-logo {
+  width: 118px;
+  height: 118px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 34px rgba(11, 31, 58, 0.16));
+}
+
+.md-onboarding-card > img,
+.md-boot > img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.md-side-brand > img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex: 0 0 52px;
+}
+
+.md-side-brand {
+  min-height: 72px;
+}
+
+.md-side-brand > div strong {
+  color: #0B1F3A;
+}
+
+.md-login-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0B1F3A 0%, #168BFF 58%, #B8C1CC 100%);
+  opacity: .95;
+}
+
+.md-login-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.md-login-card::after {
+  content: '';
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  right: -210px;
+  top: -180px;
+  border: 1px solid rgba(22, 139, 255, .12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 32px rgba(22, 139, 255, .035), 0 0 0 72px rgba(11, 31, 58, .025);
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .md-login-logo { width: 96px; height: 96px; }
+  .md-side-brand > img { width: 44px; height: 44px; flex-basis: 44px; }
+}

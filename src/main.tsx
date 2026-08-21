@@ -31,9 +31,37 @@ import './music-dance-art-direction.css'
 import './music-dance-groups-art.css'
 import './music-dance-overview-art.css'
 import './music-dance/music-dance-shell.css'
+import './music-dance/brand-assets.css'
 import './music-dance/finance-art.css'
 import './music-dance/cash-art.css'
 import './music-dance/report-art.css'
+
+const musicDanceProfile = productProfile.key !== 'egitim'
+
+if (musicDanceProfile) {
+  document.title = productProfile.brand
+  const iconHref = '/brand/music-dance/bs-md-icon.svg'
+  const touchHref = '/brand/music-dance/bs-md-icon-maskable.svg'
+  let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+  if (!icon) {
+    icon = document.createElement('link')
+    icon.rel = 'icon'
+    document.head.appendChild(icon)
+  }
+  icon.type = 'image/svg+xml'
+  icon.href = iconHref
+
+  let touch = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
+  if (!touch) {
+    touch = document.createElement('link')
+    touch.rel = 'apple-touch-icon'
+    document.head.appendChild(touch)
+  }
+  touch.href = touchHref
+
+  const theme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+  if (theme) theme.content = '#F7F9FC'
+}
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

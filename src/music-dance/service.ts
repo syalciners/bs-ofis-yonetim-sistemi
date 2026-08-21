@@ -11,6 +11,8 @@ import type {
   MusicDanceData,
 } from './types'
 
+const ACTIVE_KURUM_KEY = 'bs-md-aktif-kurum'
+
 const fail = (label: string, error: { message?: string } | null) => {
   if (error) throw new Error(`${label}: ${error.message || 'Bilinmeyen hata'}`)
 }
@@ -175,7 +177,9 @@ export async function mdHaftaDersleriniGetir(kurumId: string, haftaBaslangici: s
   }
 }
 
-export async function mdHaftayiOlustur(kurumId: string, haftaBaslangici: string): Promise<MdHaftaUretimSonucu> {
+export async function mdHaftayiOlustur(haftaBaslangici: string): Promise<MdHaftaUretimSonucu> {
+  const kurumId = window.localStorage.getItem(ACTIVE_KURUM_KEY)
+  if (!kurumId) throw new Error('Aktif kurum seçimi bulunamadı. Sayfayı yenileyip tekrar deneyin.')
   const result = await supabase.rpc('md_haftalik_dersleri_olustur_v1', { p_kurum_id: kurumId, p_hafta_baslangici: haftaBaslangici })
   fail('Haftalık dersler oluşturulamadı', result.error)
   const raw = result.data as Partial<MdHaftaUretimSonucu> | null

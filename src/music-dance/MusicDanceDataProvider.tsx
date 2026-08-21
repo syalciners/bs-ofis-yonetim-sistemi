@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { mdKurumlariGetir, mdKurumOlustur, mdVerisiniGetir } from './service'
+import { mdKasaIlkKurulum } from './cashService'
 import type { MdKurumSecenegi, MdUrunProfili, MusicDanceData } from './types'
 
 type MusicDanceCtx = {
@@ -121,6 +122,7 @@ export function MusicDanceDataProvider({ children }: { children: ReactNode }) {
     setRefreshing(true)
     try {
       const kurumId = await mdKurumOlustur(kurumAdi, profil, session.user.id)
+      await mdKasaIlkKurulum(kurumId)
       await kurumlariYenile(kurumId)
       setError(null)
     } catch (e: any) {

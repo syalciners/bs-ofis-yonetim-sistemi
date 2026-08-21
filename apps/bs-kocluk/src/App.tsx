@@ -14,7 +14,7 @@ import { supabase } from './supabase'
 import { WeeklyPlan } from './WeeklyPlan'
 
 function BrandLogo({ small = false }: { small?: boolean }) {
-  return <img className={small ? 'brand-logo small' : 'brand-logo'} src="./bs-kocluk-ai-logo.svg" alt="BS Koçluk AI" />
+  return <img className={small ? 'brand-logo small' : 'brand-logo'} src="./bs-kocluk-ai-logo-v2.webp" alt="BS Koçluk AI" />
 }
 
 function Login({ error, onLogin }: { error: string | null; onLogin: () => void }) {

@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
+import { productProfile } from './lib/productProfile'
+import { MusicDanceApp } from './music-dance/MusicDanceApp'
 import './styles.css'
 import './ux-overrides.css'
 import './detail-polish.css'
@@ -28,6 +30,7 @@ import './demo-discovery.css'
 import './music-dance-art-direction.css'
 import './music-dance-groups-art.css'
 import './music-dance-overview-art.css'
+import './music-dance/music-dance-shell.css'
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({
@@ -39,10 +42,12 @@ registerSW({
   },
 })
 
+const RootApp = productProfile.key === 'egitim' ? App : MusicDanceApp
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HashRouter>
-      <App />
+      <RootApp />
     </HashRouter>
   </React.StrictMode>,
 )

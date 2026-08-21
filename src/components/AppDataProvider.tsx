@@ -75,17 +75,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (!session?.user) return
     setRefreshing(true)
     try {
-      const [nextData, nextProfile, nextInstitution, nextUnread] = await Promise.all([
-        loadAppData(),
-        loadProfile(session.user.id),
-        loadInstitutionSettings(),
-        loadUnreadNotificationCount().catch(() => 0),
-      ])
+      const nextProfile = await loadProfile(session.user.id)
       if (!nextProfile?.aktif) {
         const redirected = await redirectToPortalIfEligible(session)
         if (redirected) return
         throw new Error('Bu kullanıcı hesabı uygulama için aktif değil.')
       }
+
+      const [nextData, nextInstitution, nextUnread] = await Promise.all([
+        loadAppData(),
+        loadInstitutionSettings(),
+        loadUnreadNotificationCount().catch(() => 0),
+      ])
       setData(nextData)
       setProfile(nextProfile as KullaniciProfili)
       setInstitution(nextInstitution)

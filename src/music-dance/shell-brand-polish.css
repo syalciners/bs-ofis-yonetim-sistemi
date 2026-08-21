@@ -1,0 +1,126 @@
+.md-sidebar {
+  box-shadow: 14px 0 44px rgba(11,31,58,.035);
+}
+
+.md-sidebar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg,#168BFF 0%,rgba(22,139,255,.12) 34%,transparent 72%);
+}
+
+.md-side-brand {
+  margin: 0 2px 14px;
+  padding: 7px 6px 18px;
+  border-bottom: 1px solid rgba(11,31,58,.065);
+}
+
+.md-side-brand > img {
+  filter: drop-shadow(0 8px 15px rgba(11,31,58,.13));
+}
+
+.md-side-brand > div strong {
+  font-size: 12.5px;
+  letter-spacing: -.025em;
+}
+
+.md-side-brand > div span {
+  margin-top: 2px;
+  color: #168BFF;
+}
+
+.md-sidebar nav a {
+  position: relative;
+}
+
+.md-sidebar nav a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(#168BFF,#6caef7);
+}
+
+.md-side-art {
+  min-height: 104px;
+  padding-right: 56px;
+  isolation: isolate;
+}
+
+.md-side-art::before {
+  content: '';
+  position: absolute;
+  width: 78px;
+  height: 78px;
+  right: -13px;
+  bottom: -9px;
+  background: url('/brand/music-dance/bs-md-icon-white.svg') center / contain no-repeat;
+  opacity: .105;
+  transform: rotate(-5deg);
+  z-index: 0;
+}
+
+.md-side-art span,
+.md-side-art p {
+  position: relative;
+  z-index: 2;
+}
+
+.md-topbar {
+  box-shadow: 0 8px 28px rgba(11,31,58,.025);
+}
+
+.md-topbar::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg,rgba(22,139,255,.35),rgba(184,193,204,.22),transparent 70%);
+  pointer-events: none;
+}
+
+.md-hero-mark {
+  width: 118px;
+  height: 118px;
+  border-color: rgba(255,255,255,.13);
+  background:
+    url('/brand/music-dance/bs-md-icon-white.svg') center / 74% auto no-repeat,
+    radial-gradient(circle at 30% 25%,rgba(255,255,255,.12),rgba(255,255,255,.035) 56%,transparent 57%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035),0 18px 44px rgba(0,0,0,.12);
+}
+
+.md-hero-mark svg,
+.md-hero-mark > span {
+  display: none;
+}
+
+.md-hero {
+  background:
+    radial-gradient(circle at 86% 18%,rgba(22,139,255,.22),transparent 22%),
+    linear-gradient(130deg,#081a31 0%,#0B1F3A 44%,#123d6b 75%,#253e73 100%);
+}
+
+.md-hero::before {
+  background:
+    repeating-linear-gradient(180deg,transparent 0 25px,rgba(255,255,255,.038) 25px 26px),
+    linear-gradient(112deg,transparent 0 56%,rgba(22,139,255,.06) 56.3% 56.7%,transparent 57%);
+  mask-image: linear-gradient(90deg,transparent,#000 42%,#000);
+}
+
+@media (max-width: 980px) {
+  .md-side-brand { border-bottom: 0; margin-bottom: 8px; }
+}
+
+@media (max-width: 720px) {
+  .md-topbar::after { left: 14px; right: 14px; }
+  .md-bottom-nav { border-color: rgba(11,31,58,.075); }
+  .md-bottom-nav a.active { box-shadow: inset 0 0 0 1px rgba(22,139,255,.07); }
+}

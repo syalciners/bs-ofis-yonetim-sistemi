@@ -1,0 +1,65 @@
+html[data-product-profile="muzik-dans"] .group-stage-grid,
+html[data-product-profile="muzik"] .group-stage-grid,
+html[data-product-profile="dans"] .group-stage-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+html[data-product-profile="muzik-dans"] .group-card,
+html[data-product-profile="muzik"] .group-card,
+html[data-product-profile="dans"] .group-card{
+  --group-accent:var(--brand-blue);
+  border:1px solid rgba(11,31,58,.10);
+  border-radius:20px;
+  background:linear-gradient(150deg,#FFF 0%,#FCFDFF 72%,#F8FAFE 100%);
+  box-shadow:0 10px 30px rgba(11,31,58,.055);
+  padding:16px;
+  display:grid;
+  gap:14px;
+  position:relative;
+  overflow:hidden;
+}
+html[data-product-profile="muzik-dans"] .group-card::before,
+html[data-product-profile="muzik"] .group-card::before,
+html[data-product-profile="dans"] .group-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:linear-gradient(180deg,var(--group-accent),transparent 86%);
+}
+html[data-product-profile="muzik-dans"] .group-tone-2,
+html[data-product-profile="muzik"] .group-tone-2,
+html[data-product-profile="dans"] .group-tone-2{--group-accent:var(--art-violet)}
+html[data-product-profile="muzik-dans"] .group-tone-3,
+html[data-product-profile="muzik"] .group-tone-3,
+html[data-product-profile="dans"] .group-tone-3{--group-accent:var(--art-gold)}
+html[data-product-profile="muzik-dans"] .group-tone-4,
+html[data-product-profile="muzik"] .group-tone-4,
+html[data-product-profile="dans"] .group-tone-4{--group-accent:var(--art-rose)}
+
+.group-card-head{display:flex;align-items:center;gap:11px;min-width:0}
+.group-emblem{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;flex:0 0 auto;background:color-mix(in srgb,var(--group-accent) 11%,white);color:var(--group-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--group-accent) 13%,transparent)}
+.group-card-title{min-width:0;display:grid;gap:2px;flex:1}
+.group-card-title span{font-size:8.5px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;color:#7b8798;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-card-title strong{font-size:15px;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-card-tags{display:flex;flex-wrap:wrap;gap:6px;min-height:1px}
+.group-card-tags span{display:inline-flex;padding:5px 8px;border-radius:999px;background:#F4F7FB;border:1px solid rgba(11,31,58,.07);color:#65748a;font-size:8px;font-weight:800}
+.group-occupancy{display:grid;gap:7px;padding:11px 12px;border-radius:14px;background:linear-gradient(145deg,#F8FAFD,#FBFCFF);border:1px solid rgba(11,31,58,.075)}
+.group-occupancy>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.group-occupancy span{font-size:8.5px;color:#77859a;font-weight:800}
+.group-occupancy b{font-size:12px}
+.group-occupancy small{font-size:8px;color:#8491a4;text-align:right}
+.group-progress{height:5px;border-radius:999px;background:#E9EEF5;overflow:hidden}
+.group-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--group-accent),color-mix(in srgb,var(--group-accent) 56%,white));transition:width .25s ease}
+.group-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group-card-meta>div{display:grid;gap:3px;padding:9px 10px;border-radius:12px;border:1px solid rgba(11,31,58,.07);background:#FFF}
+.group-card-meta span{font-size:7.8px;text-transform:uppercase;letter-spacing:.07em;font-weight:850;color:#8995a6}
+.group-card-meta b{font-size:9.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:720px){
+  html[data-product-profile="muzik-dans"] .group-stage-grid,
+  html[data-product-profile="muzik"] .group-stage-grid,
+  html[data-product-profile="dans"] .group-stage-grid{grid-template-columns:1fr}
+}

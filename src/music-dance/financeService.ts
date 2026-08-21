@@ -29,28 +29,34 @@ export async function mdFinansVerisiniGetir(kurumId: string): Promise<MdFinansVe
   }
 }
 
-export async function mdTahsilatKaydet(input: { kursiyerId: string; tarih: string; tutar: number; odemeYontemi: MdOdemeYontemi; aciklama?: string | null }) {
-  const result = await supabase.rpc('md_tahsilat_kaydet_v1', {
+export async function mdTahsilatKaydet(input: { kursiyerId: string; kasaHesapId?: string | null; tarih: string; tutar: number; odemeYontemi: MdOdemeYontemi; aciklama?: string | null }) {
+  const rpc = input.kasaHesapId ? 'md_tahsilat_kaydet_v2' : 'md_tahsilat_kaydet_v1'
+  const params: Record<string, unknown> = {
     p_islem_anahtari: operationKey(),
     p_kursiyer_id: input.kursiyerId,
     p_tarih: input.tarih,
     p_tutar: input.tutar,
     p_odeme_yontemi: input.odemeYontemi,
     p_aciklama: input.aciklama || null,
-  })
+  }
+  if (input.kasaHesapId) params.p_kasa_hesap_id = input.kasaHesapId
+  const result = await supabase.rpc(rpc, params)
   fail('Tahsilat kaydedilemedi', result.error)
   return String(result.data || '')
 }
 
-export async function mdEgitmenOdemeKaydet(input: { egitmenId: string; tarih: string; tutar: number; odemeYontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>; aciklama?: string | null }) {
-  const result = await supabase.rpc('md_egitmen_odeme_kaydet_v1', {
+export async function mdEgitmenOdemeKaydet(input: { egitmenId: string; kasaHesapId?: string | null; tarih: string; tutar: number; odemeYontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>; aciklama?: string | null }) {
+  const rpc = input.kasaHesapId ? 'md_egitmen_odeme_kaydet_v2' : 'md_egitmen_odeme_kaydet_v1'
+  const params: Record<string, unknown> = {
     p_islem_anahtari: operationKey(),
     p_egitmen_id: input.egitmenId,
     p_tarih: input.tarih,
     p_tutar: input.tutar,
     p_odeme_yontemi: input.odemeYontemi,
     p_aciklama: input.aciklama || null,
-  })
+  }
+  if (input.kasaHesapId) params.p_kasa_hesap_id = input.kasaHesapId
+  const result = await supabase.rpc(rpc, params)
   fail('Eğitmen ödemesi kaydedilemedi', result.error)
   return String(result.data || '')
 }

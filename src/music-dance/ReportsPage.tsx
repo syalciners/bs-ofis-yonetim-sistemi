@@ -1,5 +1,5 @@
 import { ArrowLeft, Banknote, BarChart3, ChevronRight, CircleDollarSign, GraduationCap, Layers3, LoaderCircle, Music2, RefreshCw, Sparkles, TrendingUp, Users, WalletCards } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMusicDanceData } from './MusicDanceDataProvider'
 import { mdRaporVerisiniGetir, type MdRaporVerisi } from './reportService'
 
@@ -75,4 +75,4 @@ export function ReportsPage({ onBack }: { onBack?: () => void }) {
   </div>
 }
 
-function ReportEmpty({ icon, title, text, compact }: { icon: React.ReactNode; title: string; text: string; compact?: boolean }) { return <div className={`md-report-empty${compact ? ' compact' : ''}`}><span>{icon}</span><div><strong>{title}</strong><p>{text}</p></div></div> }
+function ReportEmpty({ icon, title, text, compact }: { icon: ReactNode; title: string; text: string; compact?: boolean }) { return <div className={`md-report-empty${compact ? ' compact' : ''}`}><span>{icon}</span><div><strong>{title}</strong><p>{text}</p></div></div> }

@@ -1,0 +1,110 @@
+/* BS Müzik & Dans — Kasanın Akışı Premium v2 */
+
+.md-cash-page { gap:18px; }
+.md-cash-hero {
+  min-height:194px;
+  padding:30px 32px;
+  border-radius:29px;
+  background:
+    radial-gradient(circle at 86% 18%,rgba(22,139,255,.24),transparent 24%),
+    radial-gradient(circle at 90% 76%,rgba(201,150,62,.13),transparent 28%),
+    linear-gradient(126deg,#081b32 0%,#0b1f3a 45%,#123b68 76%,#315977 100%);
+  box-shadow:0 25px 64px rgba(11,31,58,.18);
+}
+.md-cash-hero > div:first-child > span { font-size:8.5px; }
+.md-cash-hero h1 { font-size:38px; }
+.md-cash-hero p { font-size:12px; }
+.md-cash-symbol { width:114px;height:114px;border-radius:32px; }
+
+.md-cash-kpis { gap:13px; }
+.md-cash-kpis article {
+  min-height:106px;
+  grid-template-columns:46px minmax(0,1fr);
+  gap:12px;
+  padding:16px;
+  border-radius:21px;
+  box-shadow:0 11px 30px rgba(11,31,58,.05);
+}
+.md-cash-kpis article > span { width:44px;height:44px;border-radius:14px; }
+.md-cash-kpis article > span svg { width:20px;height:20px; }
+.md-cash-kpis small { font-size:8px; }
+.md-cash-kpis strong { font-size:21px; }
+.md-cash-kpis em { font-size:7.5px; }
+
+.md-cash-toolbar { padding:12px 14px;border-radius:19px; }
+.md-cash-toolbar > div:first-child span { font-size:7.5px; }
+.md-cash-toolbar > div:first-child strong { font-size:11px; }
+.md-cash-toolbar > div:last-child button { min-height:40px;border-radius:12px;font-size:9px; }
+
+.md-cash-account-grid { gap:12px; }
+.md-cash-account-grid article {
+  min-height:170px;
+  padding:17px;
+  border-radius:22px;
+  gap:14px;
+  box-shadow:0 12px 34px rgba(11,31,58,.05);
+}
+.md-cash-account-grid article::before { width:4px; }
+.md-cash-account-grid header { gap:11px; }
+.md-cash-account-grid header > span { width:42px;height:42px;border-radius:14px; }
+.md-cash-account-grid header > span svg { width:19px;height:19px; }
+.md-cash-account-grid header small { font-size:7.5px; }
+.md-cash-account-grid header strong { font-size:10.5px; }
+.md-cash-account-grid article > b { font-size:26px; }
+.md-cash-account-grid footer { gap:8px; }
+.md-cash-account-grid footer span { padding:9px;border-radius:12px;font-size:7px; }
+.md-cash-account-grid footer em { font-size:8px; }
+
+.md-cash-two-col { gap:14px; }
+.md-cash-panel { padding:18px;border-radius:22px;box-shadow:0 12px 34px rgba(11,31,58,.05); }
+.md-cash-panel > header { margin-bottom:13px; }
+.md-cash-panel > header span { font-size:7.5px; }
+.md-cash-panel > header h2 { font-size:17px; }
+.md-cash-panel > header > small { font-size:7.5px; }
+.md-cash-panel > header > button { font-size:8px; }
+
+.md-cash-movement,.md-expense-row { min-height:62px; }
+.md-cash-movement { grid-template-columns:40px minmax(0,1fr) auto;gap:10px; }
+.md-cash-movement > span,.md-expense-row > span { width:38px;height:38px;border-radius:13px; }
+.md-cash-movement > span svg,.md-expense-row > span svg { width:16px;height:16px; }
+.md-cash-movement strong,.md-expense-row strong { font-size:9.5px; }
+.md-cash-movement small,.md-expense-row small { font-size:7.5px; }
+.md-cash-movement > b,.md-expense-row > b { font-size:9px; }
+
+.md-cash-empty { min-height:130px;border-radius:18px; }
+.md-cash-empty strong { font-size:9.5px; }
+.md-cash-empty p { font-size:7.5px; }
+
+@media(max-width:920px){
+  .md-cash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .md-cash-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:720px){
+  .md-cash-hero { min-height:154px;padding:20px;border-radius:23px; }
+  .md-cash-hero h1 { font-size:28px; }
+  .md-cash-hero p { font-size:9.5px; }
+  .md-cash-symbol { width:74px;height:74px;border-radius:22px; }
+
+  .md-cash-kpis { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+  .md-cash-kpis article { min-height:104px;padding:13px;grid-template-columns:40px minmax(0,1fr);gap:9px;border-radius:18px; }
+  .md-cash-kpis article > span { width:38px;height:38px;border-radius:13px; }
+  .md-cash-kpis strong { font-size:17px; }
+
+  .md-cash-toolbar { padding:10px; }
+  .md-cash-toolbar > div:last-child button { min-height:42px; }
+  .md-cash-account-grid { grid-template-columns:1fr 1fr;gap:9px; }
+  .md-cash-account-grid article { min-height:155px;padding:14px; }
+  .md-cash-account-grid article > b { font-size:22px; }
+  .md-cash-panel { padding:14px;border-radius:20px; }
+}
+
+@media(max-width:480px){
+  .md-cash-symbol { display:none; }
+  .md-cash-account-grid { grid-template-columns:1fr; }
+  .md-cash-kpis { grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:370px){
+  .md-cash-kpis { grid-template-columns:1fr; }
+}

@@ -2,31 +2,14 @@
 
 .md-program-page { gap: 18px; }
 
-.md-program-head {
-  padding: 0 0 2px 14px;
-}
+.md-program-head { padding: 0 0 2px 14px; }
 .md-program-head span { font-size: 8px; }
 .md-program-head h1 { font-size: 30px; }
 .md-program-head p { font-size: 10.5px; line-height: 1.55; }
 .md-program-head-actions button { min-height: 40px; font-size: 9.5px; border-radius: 12px; }
 
-.md-rhythm-toolbar {
-  min-height: 84px;
-  padding: 12px 15px;
-  border-radius: 22px;
-  box-shadow: 0 12px 34px rgba(11,31,58,.055);
-  background:
-    radial-gradient(circle at 68% 18%,rgba(22,139,255,.06),transparent 25%),
-    linear-gradient(135deg,rgba(255,255,255,.99),rgba(248,251,255,.97));
-}
-.md-rhythm-toolbar::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background: repeating-linear-gradient(180deg,transparent 0 24px,rgba(11,31,58,.018) 24px 25px);
-  mask-image:linear-gradient(90deg,transparent,#000 35%,#000 75%,transparent);
-}
+.md-rhythm-toolbar { min-height:84px;padding:12px 15px;border-radius:22px;box-shadow:0 12px 34px rgba(11,31,58,.055);background:radial-gradient(circle at 68% 18%,rgba(22,139,255,.06),transparent 25%),linear-gradient(135deg,rgba(255,255,255,.99),rgba(248,251,255,.97)); }
+.md-rhythm-toolbar::before { content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 24px,rgba(11,31,58,.018) 24px 25px);mask-image:linear-gradient(90deg,transparent,#000 35%,#000 75%,transparent); }
 .md-week-arrow,.md-week-today { position:relative;z-index:1; }
 .md-week-arrow { width:40px;height:40px;border-radius:13px; }
 .md-week-today { height:40px;padding:0 14px;font-size:9px;border-radius:13px; }
@@ -35,151 +18,49 @@
 .md-week-title strong { font-size:18px; }
 .md-week-title small { font-size:8.5px; }
 
-.md-week-board {
-  gap: 10px;
-  grid-template-columns: repeat(7,minmax(150px,1fr));
-}
-.md-day-lane {
-  border-radius: 20px;
-  background: rgba(255,255,255,.86);
-  box-shadow: 0 9px 28px rgba(11,31,58,.04);
-  transition: transform .18s ease,box-shadow .18s ease,border-color .18s ease;
-}
-.md-day-lane:hover { transform:translateY(-2px); box-shadow:0 16px 36px rgba(11,31,58,.075); }
+.md-week-board { gap:10px;grid-template-columns:repeat(7,minmax(150px,1fr)); }
+.md-day-lane { border-radius:20px;background:rgba(255,255,255,.86);box-shadow:0 9px 28px rgba(11,31,58,.04);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
+.md-day-lane:hover { transform:translateY(-2px);box-shadow:0 16px 36px rgba(11,31,58,.075); }
 .md-day-lane > header { height:62px;padding:10px 11px; }
 .md-day-lane > header span { font-size:7px; }
 .md-day-lane > header strong { font-size:22px; }
 .md-day-lane > header small { font-size:7px; }
-.md-day-lane.today {
-  border-color: rgba(22,139,255,.34);
-  box-shadow: 0 15px 38px rgba(22,139,255,.09);
-}
-.md-day-lane.today > header {
-  background:linear-gradient(135deg,#ebf6ff 0%,#f6f2ff 100%);
-}
-
-.md-day-track {
-  min-height: 270px;
-  padding: 9px;
-  gap: 9px;
-  background: repeating-linear-gradient(180deg,transparent 0 53px,rgba(11,31,58,.024) 53px 54px);
-}
-
-.md-lesson-card {
-  min-height: 116px;
-  border-radius: 16px;
-  padding: 11px 11px 10px;
-  gap: 5px;
-  box-shadow: 0 7px 20px rgba(11,31,58,.05);
-}
+.md-day-lane.today { border-color:rgba(22,139,255,.34);box-shadow:0 15px 38px rgba(22,139,255,.09); }
+.md-day-lane.today > header { background:linear-gradient(135deg,#ebf6ff 0%,#f6f2ff 100%); }
+.md-day-track { min-height:270px;padding:9px;gap:9px;background:repeating-linear-gradient(180deg,transparent 0 53px,rgba(11,31,58,.024) 53px 54px); }
+.md-lesson-card { min-height:116px;border-radius:16px;padding:11px 11px 10px;gap:5px;box-shadow:0 7px 20px rgba(11,31,58,.05); }
 .md-lesson-card::before { top:11px;bottom:11px;width:3px; }
 .md-lesson-card:hover { transform:translateY(-2px);box-shadow:0 13px 28px rgba(11,31,58,.09); }
-.md-lesson-time svg { width:11px;height:11px; }
-.md-lesson-time strong { font-size:10px; }
-.md-lesson-time span { font-size:7px; }
-.md-lesson-name { font-size:10px; line-height:1.3; }
-.md-lesson-branch { font-size:7.5px; }
-.md-lesson-meta span { font-size:7px; }
-.md-lesson-meta svg { width:9px;height:9px; }
-.md-lesson-card > small { font-size:7px; }
-.md-status { font-size:6.5px;padding:4px 7px; }
+.md-lesson-time svg { width:11px;height:11px; }.md-lesson-time strong { font-size:10px; }.md-lesson-time span { font-size:7px; }
+.md-lesson-name { font-size:10px;line-height:1.3; }.md-lesson-branch { font-size:7.5px; }.md-lesson-meta span { font-size:7px; }.md-lesson-meta svg { width:9px;height:9px; }.md-lesson-card > small { font-size:7px; }.md-status { font-size:6.5px;padding:4px 7px; }
 
-.md-fixed-program-panel { padding: 19px; }
-.md-fixed-program-grid { gap: 10px; }
-.md-fixed-card {
-  min-height: 78px;
-  grid-template-columns: 60px minmax(0,1fr) 46px auto;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 17px;
+.md-fixed-program-panel { padding:19px; }.md-fixed-program-grid { gap:10px; }
+.md-fixed-card { min-height:82px;grid-template-columns:60px minmax(0,1fr) 46px auto;gap:12px;padding:12px;border-radius:17px; }
+.md-fixed-day { width:57px;min-height:50px;border-radius:13px; }.md-fixed-day span { font-size:6.5px; }.md-fixed-day strong { font-size:12px; }
+.md-fixed-copy { gap:2px; }.md-fixed-copy small { font-size:7px; }.md-fixed-copy strong { font-size:10px; }.md-fixed-copy span { font-size:7.5px; }.md-fixed-copy em { font-style:normal;font-size:6.6px;color:#8b7798;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.md-fixed-duration b { font-size:13px; }.md-fixed-duration small { font-size:6.5px; }.md-fixed-pause { min-height:30px;font-size:7px;border-radius:10px; }
+
+.md-program-zero { min-height:136px;border-radius:19px;padding:17px;background:radial-gradient(circle at 14% 20%,rgba(22,139,255,.055),transparent 26%),linear-gradient(135deg,#fbfdff,#fcfbff); }
+.md-program-zero > svg { width:38px;height:38px;border-radius:13px; }.md-program-zero strong { font-size:10.5px; }.md-program-zero span { font-size:8.5px;line-height:1.45; }
+.md-program-alert { border-radius:18px;padding:13px 15px; }.md-program-alert strong { font-size:10px; }.md-program-alert span { font-size:8.5px; }.md-program-alert small { font-size:7.5px; }
+
+/* Ticari fiyatlandırma: teknik terim değil, sözleşme mantığı */
+.md-commercial-pricing-box { border:1px solid rgba(11,31,58,.08);border-radius:16px;background:linear-gradient(135deg,#f9fbff,#fbf9ff);padding:12px;display:grid;gap:10px; }
+.md-commercial-pricing-box>div:first-child { display:grid;gap:2px; }
+.md-commercial-pricing-box>div:first-child small { font-size:6.5px;letter-spacing:.13em;color:var(--md-blue);font-weight:950; }
+.md-commercial-pricing-box>div:first-child strong { font-size:8.8px;color:#526177; }
+.md-commercial-pricing-box p { margin:0;padding:8px 9px;border-radius:10px;background:#fff;border:1px solid rgba(11,31,58,.055);font-size:7px;line-height:1.5;color:#7a8799; }
+.md-commercial-group-summary { min-height:46px;border-radius:12px;background:#fff;border:1px solid rgba(11,31,58,.07);padding:8px 10px;display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:8px; }
+.md-commercial-group-summary span { font-size:7px;font-weight:900;color:var(--md-violet);background:#f2edff;padding:5px 7px;border-radius:999px; }
+.md-commercial-group-summary b { font-size:10px; }.md-commercial-group-summary small { font-size:6.6px;color:#8a97a9; }.md-commercial-group-summary.muted { grid-template-columns:1fr; }
+
+@media (max-width:1120px) { .md-week-board { grid-template-columns:repeat(7,172px);overflow-x:auto;padding:2px 3px 12px;margin-inline:-3px;scroll-snap-type:x proximity;scrollbar-width:thin; }.md-day-lane { scroll-snap-align:start; } }
+@media (max-width:720px) {
+  .md-program-page { gap:14px; }.md-program-head { padding-left:11px; }.md-program-head h1 { font-size:26px; }.md-program-head p { font-size:9px; }.md-program-head-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px; }.md-program-head-actions button { width:100%;min-height:42px; }
+  .md-rhythm-toolbar { min-height:74px;grid-template-columns:38px minmax(0,1fr) 38px;padding:10px;border-radius:20px; }.md-week-arrow { width:38px;height:38px; }.md-week-title strong { font-size:14px; }.md-week-title small { font-size:7.5px; }
+  .md-week-board { grid-template-columns:repeat(7,minmax(176px,78vw));gap:9px;margin-right:-12px;padding-right:12px;scroll-padding-left:2px; }.md-day-lane { border-radius:19px; }.md-day-lane > header { height:58px; }.md-day-track { min-height:250px;padding:8px; }.md-lesson-card { min-height:108px; }.md-lesson-name { font-size:9.5px; }
+  .md-fixed-program-panel { padding:16px; }.md-fixed-card { grid-template-columns:55px minmax(0,1fr) 40px;padding:11px; }.md-fixed-pause { grid-column:2/4;justify-self:start; }
+  .md-program-zero { grid-template-columns:38px 1fr;min-height:120px;padding:14px; }.md-program-zero > button { grid-column:1/3;width:100%;min-height:40px; }
+  .md-commercial-pricing-box { padding:10px; }.md-commercial-group-summary { grid-template-columns:1fr auto; }.md-commercial-group-summary small { grid-column:1/3; }
 }
-.md-fixed-day { width:57px;min-height:50px;border-radius:13px; }
-.md-fixed-day span { font-size:6.5px; }
-.md-fixed-day strong { font-size:12px; }
-.md-fixed-copy small { font-size:7px; }
-.md-fixed-copy strong { font-size:10px; }
-.md-fixed-copy span { font-size:7.5px; }
-.md-fixed-duration b { font-size:13px; }
-.md-fixed-duration small { font-size:6.5px; }
-.md-fixed-pause { min-height:30px;font-size:7px;border-radius:10px; }
-
-.md-program-zero {
-  min-height: 136px;
-  border-radius: 19px;
-  padding: 17px;
-  background:
-    radial-gradient(circle at 14% 20%,rgba(22,139,255,.055),transparent 26%),
-    linear-gradient(135deg,#fbfdff,#fcfbff);
-}
-.md-program-zero > svg { width:38px;height:38px;border-radius:13px; }
-.md-program-zero strong { font-size:10.5px; }
-.md-program-zero span { font-size:8.5px;line-height:1.45; }
-
-.md-program-alert { border-radius:18px;padding:13px 15px; }
-.md-program-alert strong { font-size:10px; }
-.md-program-alert span { font-size:8.5px; }
-.md-program-alert small { font-size:7.5px; }
-
-/* Tablet: haftalık panoyu yatay sahne gibi kaydır */
-@media (max-width: 1120px) {
-  .md-week-board {
-    grid-template-columns: repeat(7,172px);
-    overflow-x:auto;
-    padding: 2px 3px 12px;
-    margin-inline:-3px;
-    scroll-snap-type:x proximity;
-    scrollbar-width:thin;
-  }
-  .md-day-lane { scroll-snap-align:start; }
-}
-
-@media (max-width: 720px) {
-  .md-program-page { gap:14px; }
-  .md-program-head { padding-left:11px; }
-  .md-program-head h1 { font-size:26px; }
-  .md-program-head p { font-size:9px; }
-  .md-program-head-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
-  .md-program-head-actions button { width:100%;min-height:42px; }
-
-  .md-rhythm-toolbar {
-    min-height:74px;
-    grid-template-columns:38px minmax(0,1fr) 38px;
-    padding:10px;
-    border-radius:20px;
-  }
-  .md-week-arrow { width:38px;height:38px; }
-  .md-week-title strong { font-size:14px; }
-  .md-week-title small { font-size:7.5px; }
-
-  .md-week-board {
-    grid-template-columns:repeat(7,minmax(176px,78vw));
-    gap:9px;
-    margin-right:-12px;
-    padding-right:12px;
-    scroll-padding-left:2px;
-  }
-  .md-day-lane { border-radius:19px; }
-  .md-day-lane > header { height:58px; }
-  .md-day-track { min-height:250px;padding:8px; }
-  .md-lesson-card { min-height:108px; }
-  .md-lesson-name { font-size:9.5px; }
-
-  .md-fixed-program-panel { padding:16px; }
-  .md-fixed-card {
-    grid-template-columns:55px minmax(0,1fr) 40px;
-    padding:11px;
-  }
-  .md-fixed-pause { grid-column:2/4;justify-self:start; }
-
-  .md-program-zero {
-    grid-template-columns:38px 1fr;
-    min-height:120px;
-    padding:14px;
-  }
-  .md-program-zero > button { grid-column:1/3;width:100%;min-height:40px; }
-}
-
-@media (max-width: 390px) {
-  .md-program-head-actions { grid-template-columns:1fr; }
-  .md-week-board { grid-template-columns:repeat(7,82vw); }
-}
+@media (max-width:390px) { .md-program-head-actions { grid-template-columns:1fr; }.md-week-board { grid-template-columns:repeat(7,82vw); } }

@@ -1,0 +1,99 @@
+name: BS Soru Mimari brand preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [bs-soru-mimari-v2-source]
+    paths:
+      - bs-soru-mimari-v23/brand/**
+      - .github/workflows/bs-soru-mimari-brand-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
+      VERCEL_PROJECT_ID: prj_QmY56B8vnE1eWUOJBawN9IlTGWYV
+      VERCEL_TOKEN: ${{ secrets.VERCEL_PORTAL_TOKEN }}
+      APP_DIR: bs-soru-mimari-v23/brand
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Vercel token kontrolü
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_PORTAL_TOKEN tanımlı değil."; exit 1; }
+          HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          test "$HTTP_CODE" = "200" || { echo "::error::Token BS Soru Mimarı projesine erişemiyor (HTTP $HTTP_CODE)."; exit 1; }
+
+      - name: Marka sürümünü kur ve build doğrula
+        working-directory: bs-soru-mimari-v23/brand
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -f public/bs-soru-mimari-mark.svg
+          grep -q '#6D46F7' public/bs-soru-mimari-mark.svg
+          grep -q 'BS Soru Mimarı brand layer applied' <(node -e "console.log('BS Soru Mimarı brand layer applied')")
+
+      - name: Vercel proje bağını hazırla
+        working-directory: bs-soru-mimari-v23/brand
+        shell: bash
+        run: |
+          mkdir -p .vercel
+          printf '%s\n' "{\"orgId\":\"$VERCEL_ORG_ID\",\"projectId\":\"$VERCEL_PROJECT_ID\"}" > .vercel/project.json
+
+      - name: Vercel CLI kur
+        run: npm install --global vercel@latest
+
+      - name: Preview deploy
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="$(vercel deploy --cwd "$APP_DIR" --yes --token="$VERCEL_TOKEN" | tail -n 1)"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "PREVIEW_URL=$URL" >> "$GITHUB_ENV"
+          echo "Preview: $URL"
+
+      - name: Preview smoke testi
+        shell: bash
+        run: |
+          set -euo pipefail
+          HTML="$(curl -fsSL --retry 5 --retry-delay 2 "$PREVIEW_URL")"
+          [[ "$HTML" == *"BS Soru Mimarı"* ]] || { echo "::error::BS Soru Mimarı başlığı bulunamadı."; exit 1; }
+          SVG="$(curl -fsSL --retry 5 --retry-delay 2 "$PREVIEW_URL/bs-soru-mimari-mark.svg")"
+          [[ "$SVG" == *"#6D46F7"* && "$SVG" == *"#FF7A45"* ]] || { echo "::error::Yeni marka SVG'si preview'da bulunamadı."; exit 1; }
+          echo "Brand preview smoke testi başarılı."
+
+      - name: Preview sonucunu kaydet
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          git reset --hard HEAD
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          cat > .bs-soru-mimari-brand-preview-result.txt <<EOF
+          run_id=$GITHUB_RUN_ID
+          status=$JOB_STATUS
+          preview_url=${PREVIEW_URL:-}
+          commit=$GITHUB_SHA
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .bs-soru-mimari-brand-preview-result.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "BS Soru Mimarı marka preview sonucunu kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

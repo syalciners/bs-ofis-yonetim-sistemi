@@ -1,0 +1,181 @@
+/* BS Müzik & Dans — Mobil / Tablet Final Kalite */
+
+.md-shell button,
+.md-shell a,
+.md-shell input,
+.md-shell select,
+.md-shell textarea,
+.md-login-page button,
+.md-onboarding-page button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.md-shell button:focus-visible,
+.md-shell a:focus-visible,
+.md-shell input:focus-visible,
+.md-shell select:focus-visible,
+.md-shell textarea:focus-visible,
+.md-login-page button:focus-visible,
+.md-onboarding-page button:focus-visible {
+  outline: 3px solid rgba(22,139,255,.23);
+  outline-offset: 2px;
+}
+
+.md-shell img { max-width:100%; }
+.md-main,.md-content,.md-page-stack { min-width:0; }
+
+@media (min-width:721px) and (max-width:1024px) {
+  .md-shell { grid-template-columns:190px minmax(0,1fr); }
+  .md-sidebar { padding-inline:11px; }
+  .md-sidebar nav a { min-height:42px;padding:10px;font-size:9.5px; }
+  .md-content { width:min(100% - 28px,1100px); }
+  .md-topbar { padding-inline:18px; }
+}
+
+@media (max-width:720px) {
+  html,body,#root { min-height:100%; }
+  body { overscroll-behavior-y:none; }
+
+  .md-shell {
+    display:block;
+    min-height:100svh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .md-sidebar { display:none !important; }
+  .md-main { min-height:100svh; }
+
+  .md-topbar {
+    height:60px;
+    padding:env(safe-area-inset-top) 13px 0;
+    min-height:calc(60px + env(safe-area-inset-top));
+    background:rgba(247,249,252,.94);
+    border-bottom-color:rgba(11,31,58,.065);
+    backdrop-filter:blur(20px);
+  }
+  .md-topbar-title span { font-size:7px; }
+  .md-topbar-title strong {
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:11px;
+  }
+  .md-topbar-actions { gap:6px; }
+  .md-topbar-actions select { max-width:125px;height:38px;font-size:8px; }
+  .md-topbar-actions button { width:38px;height:38px;border-radius:12px; }
+
+  .md-content {
+    width:calc(100% - 22px);
+    margin-inline:auto;
+    padding-top:14px;
+    padding-bottom:calc(98px + env(safe-area-inset-bottom));
+  }
+
+  .md-bottom-nav {
+    position:fixed;
+    left:8px;
+    right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    z-index:70;
+    min-height:68px;
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:3px;
+    padding:6px;
+    border:1px solid rgba(11,31,58,.08);
+    border-radius:23px;
+    background:rgba(255,255,255,.95);
+    box-shadow:0 18px 48px rgba(11,31,58,.16);
+    backdrop-filter:blur(22px);
+  }
+  .md-bottom-nav a {
+    min-width:0;
+    min-height:56px;
+    border-radius:17px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    text-decoration:none;
+    color:#68778d;
+    font-size:7.5px;
+    font-weight:850;
+    transition:background .15s ease,color .15s ease,transform .15s ease;
+  }
+  .md-bottom-nav a svg { width:20px;height:20px; }
+  .md-bottom-nav a.active {
+    color:#168BFF;
+    background:linear-gradient(145deg,#eef6ff,#f5f2ff);
+  }
+  .md-bottom-nav a:active { transform:scale(.97); }
+
+  .md-primary,.md-secondary { min-height:42px; }
+  .md-panel-heading button { min-height:34px;padding-inline:4px; }
+
+  .md-modal-backdrop {
+    padding:8px;
+    place-items:end center;
+  }
+  .md-modal {
+    width:100%;
+    max-height:calc(92svh - env(safe-area-inset-top));
+    border-radius:24px 24px 18px 18px;
+    overscroll-behavior:contain;
+  }
+  .md-modal > header {
+    padding:15px 16px;
+    padding-top:17px;
+  }
+  .md-modal > header > button { width:38px;height:38px;border-radius:12px; }
+  .md-modal-body {
+    padding:15px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .md-form input,.md-form select,.md-form textarea {
+    min-height:46px;
+    font-size:16px; /* iOS Safari otomatik zoom yapmasın */
+  }
+  .md-form-actions {
+    position:sticky;
+    bottom:calc(-18px - env(safe-area-inset-bottom));
+    z-index:2;
+    margin-inline:-16px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(16px);
+  }
+  .md-form-actions button { flex:1;min-height:44px; }
+
+  .md-week-board,
+  .md-finance-ledger,
+  .md-flow-chart {
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .md-week-board::-webkit-scrollbar,
+  .md-finance-ledger::-webkit-scrollbar,
+  .md-flow-chart::-webkit-scrollbar { display:none; }
+
+  .md-login-page,.md-onboarding-page,.md-boot {
+    min-height:100svh;
+  }
+}
+
+@media (max-width:390px) {
+  .md-content { width:calc(100% - 16px); }
+  .md-topbar { padding-inline:9px; }
+  .md-topbar-title strong { max-width:140px; }
+  .md-bottom-nav { left:5px;right:5px;border-radius:21px; }
+  .md-bottom-nav a { font-size:7px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .md-shell *,
+  .md-login-page *,
+  .md-onboarding-page * {
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name":"bs-soru-mimari-brand-preview",
+  "version":"2.3.2",
+  "private":true,
+  "scripts":{
+    "postinstall":"node bootstrap.cjs",
+    "build":"next build"
+  },
+  "dependencies":{
+    "next":"16.3.1",
+    "pdf-lib":"1.17.1",
+    "pdfjs-dist":"6.2.108",
+    "react":"19.2.8",
+    "react-dom":"19.2.8"
+  },
+  "devDependencies":{
+    "typescript":"^5.9.2",
+    "@types/react":"^19.0.0",
+    "@types/node":"^24.0.0"
+  },
+  "engines":{"node":"24.x"}
+}

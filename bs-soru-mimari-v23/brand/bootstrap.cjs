@@ -10,12 +10,36 @@ async function text(url){
   return await r.text();
 }
 
+function applyV231(files){
+  let p=String(files['app/page.tsx']);
+  const rep=(a,b,n)=>{
+    if(p.includes(a)){p=p.replace(a,b);console.log('PATCH',n,'OK')}
+    else console.log('PATCH',n,'SKIP');
+  };
+
+  rep(`type CropEditor = {\n  rect:{x:number;y:number;w:number;h:number};\n  sourceNumber?:number;\n  autoDetected:boolean;\n  mask?:{x:number;y:number;w:number;h:number};\n  answer:string;\n};`,`type CropEditor = {\n  rect:{x:number;y:number;w:number;h:number};\n  sourceNumber?:number;\n  autoDetected:boolean;\n  maskAbs?:{x:number;y:number;w:number;h:number};\n  answer:string;\n};`,'mask-type');
+
+  rep(`const bottom=Math.min(H*.935,next?next.y-Math.max(next.fontH*1.35,H*.012):H*.925);`,`const bottom=Math.min(H*.925,next?next.y-Math.max(next.fontH*2.4,H*.022):H*.905);`,'safe-bottom');
+
+  rep(`setCropEditor({rect:{x:box.x,y:box.y,w:box.w,h:box.h},sourceNumber:box.sourceNumber,autoDetected:true,mask:box.mask,answer:""});`,`const maskAbs=box.mask?{x:box.x+box.mask.x*box.w,y:box.y+box.mask.y*box.h,w:box.mask.w*box.w,h:box.mask.h*box.h}:undefined;\n    setCropEditor({rect:{x:box.x,y:box.y,w:box.w,h:box.h},sourceNumber:box.sourceNumber,autoDetected:true,maskAbs,answer:""});`,'mask-abs');
+
+  rep(`const sel:Selection={id:crypto.randomUUID(),page:pageNo,x:r.x,y:r.y,w:r.w,h:r.h,sourceNumber:cropEditor.sourceNumber,autoDetected:cropEditor.autoDetected,mask:cropEditor.mask,answer:cropEditor.answer};`,`let mask:Selection["mask"]=undefined;\n    if(cropEditor.maskAbs){const m=cropEditor.maskAbs;const ix=Math.max(r.x,m.x),iy=Math.max(r.y,m.y),ir=Math.min(r.x+r.w,m.x+m.w),ib=Math.min(r.y+r.h,m.y+m.h);if(ir>ix&&ib>iy)mask={x:(ix-r.x)/r.w,y:(iy-r.y)/r.h,w:(ir-ix)/r.w,h:(ib-iy)/r.h};}\n    const sel:Selection={id:crypto.randomUUID(),page:pageNo,x:r.x,y:r.y,w:r.w,h:r.h,sourceNumber:cropEditor.sourceNumber,autoDetected:cropEditor.autoDetected,mask,answer:cropEditor.answer};`,'mask-confirm');
+
+  rep(`let col=cols===1?0:(i%2);\n      if(!fits(col,m.total)&&cols===2&&fits(1-col,m.total)) col=1-col;\n      if(!fits(col,m.total)) {state=createPage();col=cols===1?0:(i%2);}`,`let col=cols===1?0:(state.ys[0]>=state.ys[1]?0:1);\n      if(!fits(col,m.total)&&cols===2&&fits(1-col,m.total)) col=1-col;\n      if(!fits(col,m.total)){state=createPage();col=0;}`,'masonry');
+
+  files['app/page.tsx']=p;
+  return files;
+}
+
 async function main(){
   const parts=[];
   for(let i=0;i<4;i++) parts.push((await text(`${ROOT}/source2/${i}.txt`)).trim());
-  const files=JSON.parse(zlib.gunzipSync(Buffer.from(parts.join(''),'base64')).toString('utf8'));
+  let files=JSON.parse(zlib.gunzipSync(Buffer.from(parts.join(''),'base64')).toString('utf8'));
 
-  // Keep the working V2.3 source intact; brand is appended as a presentation layer only.
+  // Restore the currently approved functional V2.3.1 behavior first.
+  files=applyV231(files);
+
+  // Brand is appended strictly as a presentation layer.
   const brandCss=await text(`${ROOT}/brand/brand-overrides.css`);
   files['app/globals.css']=String(files['app/globals.css']).replace(/\\\\n/g,'\n')+'\n\n'+brandCss;
 
@@ -32,7 +56,7 @@ async function main(){
   const worker=path.join(process.cwd(),'node_modules','pdfjs-dist','build','pdf.worker.min.mjs');
   if(fs.existsSync(worker)) fs.copyFileSync(worker,path.join(publicDir,'pdf.worker.min.mjs'));
 
-  console.log('BS Soru Mimarı brand layer applied');
+  console.log('BS Soru Mimarı V2.3.2 brand layer applied on V2.3.1');
 }
 
 main().catch(err=>{console.error(err);process.exit(1)});

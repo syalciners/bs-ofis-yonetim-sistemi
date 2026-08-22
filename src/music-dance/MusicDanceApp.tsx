@@ -5,6 +5,7 @@ import { productProfile, t } from '../lib/productProfile'
 import { MusicDanceDataProvider, useMusicDanceData } from './MusicDanceDataProvider'
 import { ProgramPage } from './ProgramPage'
 import { FinancePage } from './FinancePage'
+import { StudentDetailPage } from './StudentDetailPage'
 import { mdBransEkle, mdEgitmenEkle, mdGrubaKursiyerEkle, mdGrupEkle, mdKursiyerEkle, mdMekanEkle } from './service'
 import type { MdUrunProfili } from './types'
 
@@ -26,7 +27,7 @@ function Login() {
   return <main className="md-login-page">
     <section className="md-login-art" aria-hidden="true"><div className="md-staff-lines"/><span className="md-art-orb orb-one"/><span className="md-art-orb orb-two"/></section>
     <section className="md-login-card">
-      <div className="md-family-chip">BS EĞİTİM YÖNETİMİ · ÜRÜN AİLESİ</div>
+      <div className="md-family-chip">BS ÜRÜN AİLESİ</div>
       <img src="./bs-logo.svg" alt="BS" className="md-login-logo"/>
       <h1>{productProfile.brand}</h1>
       <p>Müzik ve dans kursunuzun kursiyer, eğitmen, grup, stüdyo ve finans operasyonlarını tek ritimde yönetin.</p>
@@ -67,6 +68,11 @@ const nav = [
 function Shell() {
   const { aktifKurum, kurumlar, kurumSec, refresh, refreshing, signOut } = useMusicDanceData()
   const location=useLocation()
+  const sectionLabel = location.pathname === '/'
+    ? 'YÖNETİM ÖZETİ'
+    : location.pathname.startsWith('/kursiyerler/')
+      ? 'KURSİYER DETAYI'
+      : nav.find(x=>x.to===location.pathname)?.label?.toLocaleUpperCase('tr-TR')||'BS MÜZİK & DANS'
   return <div className="md-shell">
     <aside className="md-sidebar">
       <div className="md-side-brand"><img src="./bs-logo.svg" alt="BS"/><div><strong>{productProfile.brandShort}</strong><span>{productProfile.brandSuffix}</span></div></div>
@@ -75,7 +81,7 @@ function Shell() {
     </aside>
     <div className="md-main">
       <header className="md-topbar">
-        <div className="md-topbar-title"><span>{location.pathname==='/'?'YÖNETİM ÖZETİ':nav.find(x=>x.to===location.pathname)?.label?.toLocaleUpperCase('tr-TR')||'BS MÜZİK & DANS'}</span><strong>{aktifKurum?.kurum_adi}</strong></div>
+        <div className="md-topbar-title"><span>{sectionLabel}</span><strong>{aktifKurum?.kurum_adi}</strong></div>
         <div className="md-topbar-actions">
           {kurumlar.length>1&&<select value={aktifKurum?.kurum_id||''} onChange={e=>kurumSec(e.target.value)}>{kurumlar.map(x=><option key={x.kurum_id} value={x.kurum_id}>{x.kurum_adi}</option>)}</select>}
           <button type="button" onClick={()=>void refresh()} aria-label="Yenile"><RefreshCw size={17} className={refreshing?'spin':''}/></button>
@@ -83,7 +89,7 @@ function Shell() {
         </div>
       </header>
       <main className="md-content"><Routes>
-        <Route path="/" element={<Dashboard/>}/><Route path="/program" element={<Program/>}/><Route path="/kursiyerler" element={<Students/>}/><Route path="/egitmenler" element={<Teachers/>}/><Route path="/gruplar" element={<Groups/>}/><Route path="/finans" element={<Finance/>}/><Route path="/ayarlar" element={<SettingsPage/>}/><Route path="*" element={<Navigate to="/" replace/>}/>
+        <Route path="/" element={<Dashboard/>}/><Route path="/program" element={<Program/>}/><Route path="/kursiyerler" element={<Students/>}/><Route path="/kursiyerler/:kursiyerId" element={<StudentDetailPage/>}/><Route path="/egitmenler" element={<Teachers/>}/><Route path="/gruplar" element={<Groups/>}/><Route path="/finans" element={<Finance/>}/><Route path="/ayarlar" element={<SettingsPage/>}/><Route path="*" element={<Navigate to="/" replace/>}/>
       </Routes></main>
       <nav className="md-bottom-nav">{nav.filter(x=>['/','/program','/kursiyerler','/gruplar','/ayarlar'].includes(x.to)).map(({to,label,icon:Icon,end})=><NavLink key={to} to={to} end={end}><Icon size={19}/><span>{label==='Ana Sayfa'?'Ana':label}</span></NavLink>)}</nav>
     </div>
@@ -101,7 +107,7 @@ function Dashboard(){
   </div>
 }
 
-function Students(){const{data,aktifKurum,refresh}=useMusicDanceData();const[q,setQ]=useState('');const[open,setOpen]=useState(false);const[busy,setBusy]=useState(false);if(!data||!aktifKurum)return null;const rows=data.kursiyerler.filter(x=>x.ad_soyad.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));return <div className="md-page-stack"><PageHead eyebrow="KURSİYER YÖNETİMİ" title={t.students} action={<button className="md-primary" onClick={()=>setOpen(true)}><UserPlus/> {t.student} Ekle</button>}/><div className="md-search"><Search/><input placeholder={`${t.student} ara…`} value={q} onChange={e=>setQ(e.target.value)}/><span>{rows.length} kayıt</span></div><div className="md-person-grid">{rows.map((x,i)=><article key={x.kursiyer_id} className={`md-person tone-${i%4+1}`}><div className="md-avatar">{initials(x.ad_soyad)}</div><div><strong>{x.ad_soyad}</strong><span>{x.seviye||'Seviye belirtilmedi'}</span><small>{x.telefon||x.email||'İletişim bilgisi yok'}</small></div><em>{x.durum}</em></article>)}</div>{!rows.length&&<Empty icon={<Users/>} text={`${t.student} bulunamadı.`}/>}<Modal open={open} title={`Yeni ${t.student}`} subtitle="Kısa profil bilgileri" onClose={()=>setOpen(false)}><form className="md-form" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);try{await mdKursiyerEkle(aktifKurum.kurum_id,{ad_soyad:String(f.get('ad_soyad')),telefon:String(f.get('telefon')||'')||null,email:String(f.get('email')||'')||null,seviye:String(f.get('seviye')||'')||null,dogum_tarihi:String(f.get('dogum_tarihi')||'')||null});await refresh();setOpen(false)}finally{setBusy(false)}}}><label>Ad Soyad<input name="ad_soyad" required autoFocus/></label><div className="md-form-two"><label>Telefon<input name="telefon" inputMode="tel"/></label><label>E-posta<input name="email" type="email"/></label></div><div className="md-form-two"><label>Seviye<input name="seviye" placeholder="Başlangıç / Orta / İleri"/></label><label>Doğum Tarihi<input name="dogum_tarihi" type="date"/></label></div><FormActions busy={busy} onCancel={()=>setOpen(false)} label={`${t.student} Kaydet`}/></form></Modal></div>}
+function Students(){const{data,aktifKurum,refresh}=useMusicDanceData();const go=useNavigate();const[q,setQ]=useState('');const[open,setOpen]=useState(false);const[busy,setBusy]=useState(false);if(!data||!aktifKurum)return null;const rows=data.kursiyerler.filter(x=>x.ad_soyad.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));return <div className="md-page-stack"><PageHead eyebrow="KURSİYER YÖNETİMİ" title={t.students} action={<button className="md-primary" onClick={()=>setOpen(true)}><UserPlus/> {t.student} Ekle</button>}/><div className="md-search"><Search/><input placeholder={`${t.student} ara…`} value={q} onChange={e=>setQ(e.target.value)}/><span>{rows.length} kayıt</span></div><div className="md-person-grid">{rows.map((x,i)=><button type="button" key={x.kursiyer_id} className={`md-person md-person-button tone-${i%4+1}`} onClick={()=>go(`/kursiyerler/${x.kursiyer_id}`)}><div className="md-avatar">{initials(x.ad_soyad)}</div><div><strong>{x.ad_soyad}</strong><span>{x.seviye||'Seviye belirtilmedi'}</span><small>{x.telefon||x.email||'İletişim bilgisi yok'}</small></div><em>{x.durum}</em></button>)}</div>{!rows.length&&<Empty icon={<Users/>} text={`${t.student} bulunamadı.`}/>}<Modal open={open} title={`Yeni ${t.student}`} subtitle="Kısa profil bilgileri" onClose={()=>setOpen(false)}><form className="md-form" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);try{await mdKursiyerEkle(aktifKurum.kurum_id,{ad_soyad:String(f.get('ad_soyad')),telefon:String(f.get('telefon')||'')||null,email:String(f.get('email')||'')||null,seviye:String(f.get('seviye')||'')||null,dogum_tarihi:String(f.get('dogum_tarihi')||'')||null});await refresh();setOpen(false)}finally{setBusy(false)}}}><label>Ad Soyad<input name="ad_soyad" required autoFocus/></label><div className="md-form-two"><label>Telefon<input name="telefon" inputMode="tel"/></label><label>E-posta<input name="email" type="email"/></label></div><div className="md-form-two"><label>Seviye<input name="seviye" placeholder="Başlangıç / Orta / İleri"/></label><label>Doğum Tarihi<input name="dogum_tarihi" type="date"/></label></div><FormActions busy={busy} onCancel={()=>setOpen(false)} label={`${t.student} Kaydet`}/></form></Modal></div>}
 
 function Teachers(){const{data,aktifKurum,refresh}=useMusicDanceData();const[q,setQ]=useState('');const[open,setOpen]=useState(false);const[busy,setBusy]=useState(false);if(!data||!aktifKurum)return null;const rows=data.egitmenler.filter(x=>x.ad_soyad.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));const branchNames=(id:string)=>data.egitmenBranslari.filter(x=>x.egitmen_id===id&&x.aktif!==false).map(x=>data.branslar.find(b=>b.brans_id===x.brans_id)?.brans_adi).filter(Boolean);return <div className="md-page-stack"><PageHead eyebrow="EĞİTİM KADROSU" title={t.teachers} action={<button className="md-primary" onClick={()=>setOpen(true)}><Plus/> {t.teacher} Ekle</button>}/><div className="md-search"><Search/><input placeholder={`${t.teacher} ara…`} value={q} onChange={e=>setQ(e.target.value)}/><span>{rows.length} kişi</span></div><div className="md-person-grid">{rows.map((x,i)=><article key={x.egitmen_id} className={`md-person teacher tone-${i%4+1}`}><div className="md-avatar">{initials(x.ad_soyad)}</div><div><strong>{x.ad_soyad}</strong><span>{branchNames(x.egitmen_id).join(' · ')||`${t.branch} tanımlanmamış`}</span><small>{x.telefon||x.email||'İletişim bilgisi yok'}</small></div><em>{x.durum}</em></article>)}</div>{!rows.length&&<Empty icon={<GraduationCap/>} text={`${t.teacher} bulunamadı.`}/>}<Modal open={open} title={`Yeni ${t.teacher}`} subtitle={`${t.branch} ve iletişim bilgileri`} onClose={()=>setOpen(false)}><form className="md-form" onSubmit={async e=>{e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);try{await mdEgitmenEkle(aktifKurum.kurum_id,{ad_soyad:String(f.get('ad_soyad')),telefon:String(f.get('telefon')||'')||null,email:String(f.get('email')||'')||null},f.getAll('brans_id').map(String));await refresh();setOpen(false)}finally{setBusy(false)}}}><label>Ad Soyad<input name="ad_soyad" required autoFocus/></label><div className="md-form-two"><label>Telefon<input name="telefon" inputMode="tel"/></label><label>E-posta<input name="email" type="email"/></label></div><fieldset><legend>{t.branch}</legend><div className="md-check-grid">{data.branslar.filter(x=>x.aktif!==false).map(x=><label key={x.brans_id}><input type="checkbox" name="brans_id" value={x.brans_id}/><span>{x.brans_adi}</span></label>)}</div></fieldset><FormActions busy={busy} onCancel={()=>setOpen(false)} label={`${t.teacher} Kaydet`}/></form></Modal></div>}
 

@@ -22,12 +22,12 @@
   content: '';
   position: absolute;
   left: 50%;
-  top: 45%;
-  width: min(220px, 28vw);
-  aspect-ratio: 1;
+  top: 44%;
+  width: min(250px, 31vw);
+  aspect-ratio: 224 / 152;
   transform: translate(-50%,-50%);
-  background: url('/brand/music-dance/bs-md-icon-512.png') center / contain no-repeat;
-  filter: drop-shadow(0 24px 46px rgba(0,0,0,.18));
+  background: url('/bs-logo.svg') center / contain no-repeat;
+  filter: drop-shadow(0 24px 46px rgba(0,0,0,.20));
   z-index: 4;
 }
 

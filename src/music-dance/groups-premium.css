@@ -1,0 +1,111 @@
+/* BS Müzik & Dans — Gruplar Premium v2 */
+
+.md-group-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.md-group-card {
+  min-height:250px;
+  padding:18px;
+  border-radius:24px;
+  gap:14px;
+  border-color:rgba(11,31,58,.075);
+  background:
+    radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--tone) 8%,transparent),transparent 27%),
+    linear-gradient(148deg,#fff 0%,#fbfcff 100%);
+  box-shadow:0 13px 34px rgba(11,31,58,.055);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.md-group-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 20px 42px rgba(11,31,58,.085);
+  border-color:color-mix(in srgb,var(--tone) 20%,rgba(11,31,58,.05));
+}
+.md-group-card::before { width:4px; }
+
+.md-group-card header {
+  grid-template-columns:48px minmax(0,1fr) auto;
+  gap:12px;
+}
+.md-group-symbol {
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tone) 8%,transparent);
+}
+.md-group-symbol svg { width:20px;height:20px; }
+.md-group-card header small { font-size:8px;letter-spacing:.03em; }
+.md-group-card header strong { font-size:14px;letter-spacing:-.02em; }
+.md-group-card header em { font-size:7.5px;padding:6px 9px; }
+
+.md-group-tags { gap:6px; }
+.md-group-tags span {
+  font-size:8px;
+  padding:6px 9px;
+  border-radius:999px;
+}
+
+.md-occupancy {
+  padding:13px;
+  border-radius:16px;
+  gap:8px;
+  background:linear-gradient(145deg,#f8fafd,#f4f7fb);
+}
+.md-occupancy span,.md-occupancy small { font-size:8px; }
+.md-occupancy b { font-size:11px; }
+.md-progress { height:7px; }
+
+.md-group-meta {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.md-group-meta > span {
+  min-width:0;
+  padding:10px 11px;
+  border-radius:14px;
+  background:#f7f9fc;
+  border:1px solid rgba(11,31,58,.055);
+  display:grid;
+  gap:3px;
+}
+.md-group-meta small { font-size:7px;color:#8a97a9;letter-spacing:.05em;text-transform:uppercase;font-weight:850; }
+.md-group-meta b { font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+.md-group-card .md-secondary.full {
+  min-height:40px;
+  margin-top:auto;
+  border-radius:12px;
+  font-size:9px;
+  background:linear-gradient(145deg,#fff,#f8fbff);
+}
+.md-group-card .md-secondary.full:hover {
+  border-color:color-mix(in srgb,var(--tone) 24%,rgba(11,31,58,.06));
+  color:var(--tone);
+}
+
+@media(max-width:880px){
+  .md-group-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:720px){
+  .md-group-grid { gap:10px; }
+  .md-group-card {
+    min-height:230px;
+    padding:15px;
+    border-radius:21px;
+    gap:12px;
+  }
+  .md-group-card header { grid-template-columns:44px minmax(0,1fr) auto;gap:10px; }
+  .md-group-symbol { width:42px;height:42px;border-radius:14px; }
+  .md-group-card header strong { font-size:12px; }
+  .md-group-meta > span { padding:9px; }
+  .md-group-card .md-secondary.full { min-height:42px; }
+}
+
+@media(max-width:390px){
+  .md-group-card header { grid-template-columns:42px minmax(0,1fr); }
+  .md-group-card header em { grid-column:2;justify-self:start; }
+  .md-group-meta { grid-template-columns:1fr; }
+}

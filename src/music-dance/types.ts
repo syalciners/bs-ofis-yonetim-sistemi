@@ -4,6 +4,8 @@ export type MdProgramTuru = 'Bireysel' | 'Grup'
 export type MdDersDurumu = 'Planlandı' | 'Yapıldı' | 'İptal' | 'Ertelendi' | 'Eğitmen İptali'
 export type MdKatilimDurumu = 'Planlandı' | 'Katıldı' | 'Gelmedi' | 'Mazeretli' | 'İptal'
 export type MdOdemeYontemi = 'Nakit' | 'Kredi Kartı' | 'Banka' | 'Havale' | 'Diğer'
+export type MdKursiyerUcretModeli = 'Ders Başı' | 'Aylık Sabit'
+export type MdEgitmenHakedisModeli = 'Ders Başı' | 'Katılımcı Başı'
 
 export interface MdKurumSecenegi {
   kurum_id: string
@@ -82,6 +84,8 @@ export interface MdKursGrubu {
   yas_grubu?: string | null
   aciklama?: string | null
   durum: 'Aktif' | 'Pasif'
+  ucret_modeli: MdKursiyerUcretModeli
+  varsayilan_ucret: number
 }
 
 export interface MdKursGrupUyesi {
@@ -110,7 +114,9 @@ export interface MdSabitProgram {
   baslangic_tarihi: string
   bitis_tarihi?: string | null
   kursiyer_birim_ucreti: number
+  kursiyer_ucret_modeli: MdKursiyerUcretModeli
   egitmen_birim_hakedisi: number
+  egitmen_hakedis_modeli: MdEgitmenHakedisModeli
   durum: 'Aktif' | 'Pasif'
   aciklama?: string | null
 }
@@ -129,6 +135,7 @@ export interface MdDers {
   sure_dk: number
   ders_durumu: MdDersDurumu
   egitmen_hakedis_tutari: number
+  egitmen_hakedis_modeli: MdEgitmenHakedisModeli
   aciklama?: string | null
 }
 
@@ -200,6 +207,19 @@ export interface MdEgitmenOdeme {
   odeme_yontemi: Exclude<MdOdemeYontemi, 'Kredi Kartı'>
   aciklama?: string | null
   durum: 'Aktif' | 'İptal'
+  olusturma_zamani: string
+}
+
+export interface MdDonemUcreti {
+  donem_ucret_id: string
+  kurum_id: string
+  kursiyer_id: string
+  program_id?: string | null
+  grup_uye_id?: string | null
+  donem_ayi: string
+  tutar: number
+  durum: 'Aktif' | 'İptal'
+  aciklama?: string | null
   olusturma_zamani: string
 }
 

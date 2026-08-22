@@ -1,4 +1,9 @@
-run_id=32599804098
-status=failure
+run_id=32599924086
+status=success
+build=success
+token=failure
+token_http=404
+deploy=skipped
+smoke=skipped
 preview_url=
-commit=a84c2e5841c40d7bc128772c5e93b85e610695ef
+commit=47f07929572bdab8c664d02217afba4925c26d6e

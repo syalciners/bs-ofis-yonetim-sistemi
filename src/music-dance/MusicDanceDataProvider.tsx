@@ -135,10 +135,13 @@ export function MusicDanceDataProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async () => {
     setError(null)
-    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    const current = new URL(window.location.href)
+    const shareToken = current.searchParams.get('_vercel_share')
+    const redirect = new URL(window.location.pathname || '/', window.location.origin)
+    if (shareToken) redirect.searchParams.set('_vercel_share', shareToken)
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      options: { redirectTo: redirect.toString() },
     })
     if (authError) throw authError
   }, [])

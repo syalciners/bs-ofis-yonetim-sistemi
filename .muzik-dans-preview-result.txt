@@ -1,7 +1,7 @@
-run_id=32563164856
+run_id=32563802621
 job_status=success
 project_guard=success
 build=success
 artifact_guard=success
 deploy=success
-preview_url=https://bs-egitim-demo-9gxqty5yk-syalciners-8325s-projects.vercel.app
+preview_url=https://bs-egitim-demo-ofo0kuh9u-syalciners-8325s-projects.vercel.app

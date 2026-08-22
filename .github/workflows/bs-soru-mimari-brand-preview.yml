@@ -18,7 +18,7 @@ jobs:
     env:
       VERCEL_ORG_ID: team_3m9L8toJmRGCAENDwfPFTUJq
       VERCEL_PROJECT_ID: prj_QmY56B8vnE1eWUOJBawN9IlTGWYV
-      VERCEL_TOKEN: ${{ secrets.VERCEL_PORTAL_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       APP_DIR: bs-soru-mimari-v23/brand
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_PORTAL_TOKEN tanımlı değil."; exit 1; }
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN tanımlı değil."; exit 1; }
           HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
           test "$HTTP_CODE" = "200" || { echo "::error::Token BS Soru Mimarı projesine erişemiyor (HTTP $HTTP_CODE)."; exit 1; }
 
@@ -42,7 +42,7 @@ jobs:
           npm run build
           test -f public/bs-soru-mimari-mark.svg
           grep -q '#6D46F7' public/bs-soru-mimari-mark.svg
-          grep -q 'BS Soru Mimarı brand layer applied' <(node -e "console.log('BS Soru Mimarı brand layer applied')")
+          grep -q '#FF7A45' public/bs-soru-mimari-mark.svg
 
       - name: Vercel proje bağını hazırla
         working-directory: bs-soru-mimari-v23/brand

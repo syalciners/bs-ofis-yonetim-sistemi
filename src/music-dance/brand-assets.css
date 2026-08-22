@@ -2,28 +2,28 @@
 .md-onboarding-card > img,
 .md-boot > img,
 .md-side-brand > img {
-  content: url('/brand/music-dance/bs-md-icon-512.png');
+  content: url('/bs-logo.svg');
 }
 
 .md-login-logo {
-  width: 104px;
-  height: 104px;
+  width: 112px;
+  height: 76px;
   object-fit: contain;
-  filter: drop-shadow(0 16px 30px rgba(11, 31, 58, 0.15));
+  filter: drop-shadow(0 16px 30px rgba(11, 31, 58, 0.13));
 }
 
 .md-onboarding-card > img,
 .md-boot > img {
-  width: 92px;
-  height: 92px;
+  width: 108px;
+  height: 74px;
   object-fit: contain;
 }
 
 .md-side-brand > img {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 38px;
   object-fit: contain;
-  flex: 0 0 48px;
+  flex: 0 0 50px;
 }
 
 .md-side-brand {
@@ -74,14 +74,13 @@
 
 @media (max-width: 720px) {
   .md-login-logo {
-    content: url('/brand/music-dance/bs-md-icon-192.png');
-    width: 86px;
-    height: 86px;
+    width: 102px;
+    height: 70px;
   }
   .md-onboarding-card > img,
   .md-boot > img,
   .md-side-brand > img {
-    content: url('/brand/music-dance/bs-md-icon-192.png');
+    content: url('/bs-logo.svg');
   }
-  .md-side-brand > img { width: 42px; height: 42px; flex-basis: 42px; }
+  .md-side-brand > img { width: 46px; height: 34px; flex-basis: 46px; }
 }

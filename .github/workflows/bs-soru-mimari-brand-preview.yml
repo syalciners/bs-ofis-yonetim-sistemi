@@ -27,24 +27,35 @@ jobs:
         with:
           node-version: 24
 
-      - name: Vercel token kontrolü
+      - name: Marka sürümünü kur ve build doğrula
+        id: build
+        working-directory: bs-soru-mimari-v23/brand
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN tanımlı değil."; exit 1; }
-          HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
-          test "$HTTP_CODE" = "200" || { echo "::error::Token BS Soru Mimarı projesine erişemiyor (HTTP $HTTP_CODE)."; exit 1; }
-
-      - name: Marka sürümünü kur ve build doğrula
-        working-directory: bs-soru-mimari-v23/brand
-        run: |
           npm install --no-audit --no-fund
           npm run build
           test -f public/bs-soru-mimari-mark.svg
           grep -q '#6D46F7' public/bs-soru-mimari-mark.svg
           grep -q '#FF7A45' public/bs-soru-mimari-mark.svg
+          grep -q '#0F1530' public/bs-soru-mimari-mark.svg
+          grep -q '#6D46F7' app/globals.css
+          grep -q '#FF7A45' app/globals.css
+          echo "V2.3.2 marka build doğrulaması başarılı."
+
+      - name: Vercel token kontrolü
+        id: token
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN:-}" || { echo "::error::VERCEL_TOKEN tanımlı değil."; exit 1; }
+          HTTP_CODE="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_ORG_ID")"
+          echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
+          test "$HTTP_CODE" = "200" || { echo "::warning::Token BS Soru Mimarı projesine erişemiyor (HTTP $HTTP_CODE); build sağlam, deploy atlandı."; exit 1; }
 
       - name: Vercel proje bağını hazırla
+        if: steps.token.outcome == 'success'
         working-directory: bs-soru-mimari-v23/brand
         shell: bash
         run: |
@@ -52,9 +63,11 @@ jobs:
           printf '%s\n' "{\"orgId\":\"$VERCEL_ORG_ID\",\"projectId\":\"$VERCEL_PROJECT_ID\"}" > .vercel/project.json
 
       - name: Vercel CLI kur
+        if: steps.token.outcome == 'success'
         run: npm install --global vercel@latest
 
       - name: Preview deploy
+        if: steps.token.outcome == 'success'
         id: deploy
         shell: bash
         run: |
@@ -65,6 +78,8 @@ jobs:
           echo "Preview: $URL"
 
       - name: Preview smoke testi
+        if: steps.token.outcome == 'success'
+        id: smoke
         shell: bash
         run: |
           set -euo pipefail
@@ -79,6 +94,11 @@ jobs:
         shell: bash
         env:
           JOB_STATUS: ${{ job.status }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          TOKEN_OUTCOME: ${{ steps.token.outcome }}
+          TOKEN_HTTP: ${{ steps.token.outputs.http_code }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
@@ -87,6 +107,11 @@ jobs:
           cat > .bs-soru-mimari-brand-preview-result.txt <<EOF
           run_id=$GITHUB_RUN_ID
           status=$JOB_STATUS
+          build=${BUILD_OUTCOME:-}
+          token=${TOKEN_OUTCOME:-}
+          token_http=${TOKEN_HTTP:-}
+          deploy=${DEPLOY_OUTCOME:-}
+          smoke=${SMOKE_OUTCOME:-}
           preview_url=${PREVIEW_URL:-}
           commit=$GITHUB_SHA
           EOF

@@ -10,7 +10,7 @@ import {
   mdProgramDurumuGuncelle,
   mdProgramEkle,
 } from './service'
-import type { MdDers, MdDersDurumu, MdHaftaUretimSonucu, MdHaftaVerisi, MdKatilimDurumu, MdProgramTuru } from './types'
+import type { MdDers, MdDersDurumu, MdEgitmenHakedisModeli, MdHaftaUretimSonucu, MdHaftaVerisi, MdKatilimDurumu, MdKursiyerUcretModeli, MdProgramTuru } from './types'
 import './program-art.css'
 
 const GUNLER = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
@@ -58,6 +58,7 @@ function longWeek(start: string) {
 
 function timeShort(value: string) { return value.slice(0, 5) }
 function statusClass(value: string) { return value.toLocaleLowerCase('tr-TR').replaceAll(' ', '-').replaceAll('ı', 'i').replaceAll('ğ', 'g').replaceAll('ş', 's').replaceAll('ç', 'c').replaceAll('ö', 'o').replaceAll('ü', 'u') }
+function money(value: number) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(value || 0) }
 
 function ProgramModal({ open, title, subtitle, onClose, children }: { open: boolean; title: string; subtitle?: string; onClose: () => void; children: ReactNode }) {
   if (!open) return null
@@ -81,6 +82,8 @@ export function ProgramPage() {
   const [teacherId, setTeacherId] = useState('')
   const [roomId, setRoomId] = useState('')
   const [duration, setDuration] = useState(60)
+  const [studentFeeModel, setStudentFeeModel] = useState<MdKursiyerUcretModeli>('Ders Başı')
+  const [teacherPayModel, setTeacherPayModel] = useState<MdEgitmenHakedisModeli>('Ders Başı')
   const [busy, setBusy] = useState(false)
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
@@ -151,11 +154,16 @@ export function ProgramPage() {
         sure_dk: Number(form.get('sure_dk')),
         baslangic_tarihi: String(form.get('baslangic_tarihi')),
         bitis_tarihi: String(form.get('bitis_tarihi') || '') || null,
+        kursiyer_ucret_modeli: programType === 'Bireysel' ? studentFeeModel : 'Ders Başı',
+        kursiyer_birim_ucreti: programType === 'Bireysel' ? Number(form.get('kursiyer_birim_ucreti') || 0) : 0,
+        egitmen_hakedis_modeli: teacherPayModel,
+        egitmen_birim_hakedisi: Number(form.get('egitmen_birim_hakedisi') || 0),
         aciklama: String(form.get('aciklama') || '') || null,
       })
       await refresh()
       setProgramOpen(false)
       setSourceId(''); setBranchId(''); setTeacherId(''); setRoomId(''); setDuration(60)
+      setStudentFeeModel('Ders Başı'); setTeacherPayModel('Ders Başı')
     } catch (e: any) {
       setLocalError(e?.message || String(e))
     } finally { setBusy(false) }
@@ -198,6 +206,7 @@ export function ProgramPage() {
 
   const eligibleBranches = data.branslar.filter(x => x.aktif !== false && (programType === 'Grup' ? x.grup_uygun : x.bireysel_uygun))
   const eligibleTeachers = data.egitmenler.filter(x => x.durum === 'Aktif' && (!branchId || !data.egitmenBranslari.some(link => link.egitmen_id === x.egitmen_id && link.aktif !== false) || data.egitmenBranslari.some(link => link.egitmen_id === x.egitmen_id && link.brans_id === branchId && link.aktif !== false)))
+  const selectedGroup = programType === 'Grup' ? data.gruplar.find(x => x.grup_id === sourceId) : null
 
   return <div className="md-page-stack md-program-page">
     <section className="md-page-head md-program-head">
@@ -249,25 +258,37 @@ export function ProgramPage() {
         const branch = data.branslar.find(x => x.brans_id === program.brans_id)
         const teacher = data.egitmenler.find(x => x.egitmen_id === program.egitmen_id)
         const room = data.mekanlar.find(x => x.mekan_id === program.mekan_id)
+        const group = program.program_turu === 'Grup' ? data.gruplar.find(x => x.grup_id === program.grup_id) : null
+        const feeLabel = program.program_turu === 'Grup'
+          ? `${group?.ucret_modeli || 'Ders Başı'} · ${money(group?.varsayilan_ucret || program.kursiyer_birim_ucreti)}`
+          : `${program.kursiyer_ucret_modeli} · ${money(program.kursiyer_birim_ucreti)}`
         return <article className={`md-fixed-card tone-${index % 4 + 1}`} key={program.program_id}>
           <div className="md-fixed-day"><span>{GUNLER[program.haftanin_gunu - 1]?.slice(0, 3)}</span><strong>{timeShort(program.baslangic_saati)}</strong></div>
-          <div className="md-fixed-copy"><small>{program.program_turu} · {branch?.brans_adi || t.branch}</small><strong>{sourceName(program)}</strong><span>{teacher?.ad_soyad || t.teacher}{room ? ` · ${room.mekan_adi}` : ''}</span></div>
+          <div className="md-fixed-copy"><small>{program.program_turu} · {branch?.brans_adi || t.branch}</small><strong>{sourceName(program)}</strong><span>{teacher?.ad_soyad || t.teacher}{room ? ` · ${room.mekan_adi}` : ''}</span><em>{feeLabel} · Hakediş {program.egitmen_hakedis_modeli} {money(program.egitmen_birim_hakedisi)}</em></div>
           <div className="md-fixed-duration"><b>{program.sure_dk}</b><small>dk</small></div>
           <button className="md-fixed-pause" disabled={busyKey === `program-${program.program_id}`} onClick={() => void deactivateProgram(program.program_id)}>Pasife Al</button>
         </article>
       })}</div> : <div className="md-program-zero"><CalendarDays/><div><strong>Henüz sabit program yok.</strong><span>İlk bireysel veya grup ders akışını tanımlayın; sonra haftayı tek dokunuşla hazırlayın.</span></div><button className="md-primary" onClick={() => setProgramOpen(true)}><Plus/> İlk Programı Ekle</button></div>}
     </section>
 
-    <ProgramModal open={programOpen} title="Sabit Program Ekle" subtitle="Bireysel ve grup dersleri aynı takvim motorunda" onClose={() => setProgramOpen(false)}>
+    <ProgramModal open={programOpen} title="Sabit Program Ekle" subtitle="Program, ücret ve hakediş tek akışta" onClose={() => setProgramOpen(false)}>
       <form className="md-form" onSubmit={submitProgram}>
         <div className="md-program-type-switch"><button type="button" className={programType === 'Bireysel' ? 'active' : ''} onClick={() => { setProgramType('Bireysel'); setSourceId(''); setBranchId(''); setTeacherId(''); setRoomId('') }}><Users/>Bireysel</button><button type="button" className={programType === 'Grup' ? 'active' : ''} onClick={() => { setProgramType('Grup'); setSourceId(''); setBranchId(''); setTeacherId(''); setRoomId('') }}><Layers3/>Grup</button></div>
         <label>{programType === 'Grup' ? 'Grup' : t.student}<select name="source_id" required value={sourceId} onChange={e => setSourceId(e.target.value)}><option value="">Seçin</option>{programSources.map((x: any) => <option key={programType === 'Grup' ? x.grup_id : x.kursiyer_id} value={programType === 'Grup' ? x.grup_id : x.kursiyer_id}>{programType === 'Grup' ? x.grup_adi : x.ad_soyad}</option>)}</select></label>
         <div className="md-form-two"><label>{t.branch}<select name="brans_id" required value={branchId} onChange={e => { const id = e.target.value; setBranchId(id); const b = data.branslar.find(x => x.brans_id === id); if (b?.varsayilan_sure_dk) setDuration(b.varsayilan_sure_dk) }}><option value="">Seçin</option>{eligibleBranches.map(x => <option key={x.brans_id} value={x.brans_id}>{x.brans_adi}</option>)}</select></label><label>{t.teacher}<select name="egitmen_id" required value={teacherId} onChange={e => setTeacherId(e.target.value)}><option value="">Seçin</option>{eligibleTeachers.map(x => <option key={x.egitmen_id} value={x.egitmen_id}>{x.ad_soyad}</option>)}</select></label></div>
         <div className="md-form-two"><label>{t.room}<select name="mekan_id" value={roomId} onChange={e => setRoomId(e.target.value)}><option value="">Mekan yok / sonra seç</option>{data.mekanlar.filter(x => x.aktif !== false).map(x => <option key={x.mekan_id} value={x.mekan_id}>{x.mekan_adi}</option>)}</select></label><label>Süre<input name="sure_dk" type="number" min="15" max="360" value={duration} onChange={e => setDuration(Number(e.target.value))} required/></label></div>
+
+        <section className="md-commercial-pricing-box">
+          <div><small>TİCARİ ÜCRET AYARLARI</small><strong>{programType === 'Grup' ? 'Grup ücreti grup kartından yönetilir.' : 'Kursiyer ücret modelini seçin.'}</strong></div>
+          {programType === 'Bireysel' ? <div className="md-form-two"><label>Kursiyer Ücret Modeli<select name="kursiyer_ucret_modeli" value={studentFeeModel} onChange={e => setStudentFeeModel(e.target.value as MdKursiyerUcretModeli)}><option>Ders Başı</option><option>Aylık Sabit</option></select></label><label>{studentFeeModel === 'Aylık Sabit' ? 'Aylık Ücret' : 'Ders Ücreti'}<input name="kursiyer_birim_ucreti" type="number" min="0" step="0.01" defaultValue="0"/></label></div> : selectedGroup ? <div className="md-commercial-group-summary"><span>{selectedGroup.ucret_modeli}</span><b>{money(selectedGroup.varsayilan_ucret)}</b><small>Üye özel ücreti varsa grup üyeliğindeki tutar kullanılır.</small></div> : <div className="md-commercial-group-summary muted"><small>Ücret özetini görmek için grup seçin.</small></div>}
+          <div className="md-form-two"><label>Eğitmen Hakediş Modeli<select name="egitmen_hakedis_modeli" value={teacherPayModel} onChange={e => setTeacherPayModel(e.target.value as MdEgitmenHakedisModeli)}><option>Ders Başı</option><option>Katılımcı Başı</option></select></label><label>{teacherPayModel === 'Katılımcı Başı' ? 'Katılımcı Başına Hakediş' : 'Ders Başına Hakediş'}<input name="egitmen_birim_hakedisi" type="number" min="0" step="0.01" defaultValue="0"/></label></div>
+          <p>{teacherPayModel === 'Katılımcı Başı' ? 'Yalnız derse katılan kursiyer sayısı kadar hakediş oluşur.' : 'Ders yapıldığında ve en az bir katılım olduğunda bir kez hakediş oluşur.'}</p>
+        </section>
+
         <div className="md-form-three"><label>Gün<select name="haftanin_gunu" defaultValue="1">{GUNLER.map((x, i) => <option value={i + 1} key={x}>{x}</option>)}</select></label><label>Saat<input name="baslangic_saati" type="time" defaultValue="10:00" required/></label><label>Başlangıç<input name="baslangic_tarihi" type="date" defaultValue={localIso(new Date())} required/></label></div>
         <label>Bitiş Tarihi <small>(opsiyonel)</small><input name="bitis_tarihi" type="date"/></label>
         <label>Not <small>(opsiyonel)</small><textarea name="aciklama" rows={2} placeholder="Programla ilgili kısa not…"/></label>
-        <div className="md-program-form-note"><Sparkles/><span>Haftayı hazırlarken eğitmen, stüdyo/salon ve kursiyer çakışmaları otomatik kontrol edilir. Çakışan ders atlanır, diğerleri oluşturulur.</span></div>
+        <div className="md-program-form-note"><Sparkles/><span>Haftayı hazırlarken eğitmen, stüdyo/salon ve kursiyer çakışmaları otomatik kontrol edilir. Aylık sabit ücretler Finans ekranında dönem bazında tek kez oluşturulur.</span></div>
         <div className="md-form-actions"><button type="button" className="md-secondary" onClick={() => setProgramOpen(false)}>Vazgeç</button><button className="md-primary" disabled={busy}>{busy ? <LoaderCircle className="spin"/> : <Plus/>}{busy ? 'Kaydediliyor…' : 'Programı Kaydet'}</button></div>
       </form>
     </ProgramModal>

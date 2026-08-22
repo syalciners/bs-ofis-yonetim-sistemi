@@ -45,6 +45,7 @@ import './music-dance/cash-art.css'
 import './music-dance/cash-premium.css'
 import './music-dance/report-art.css'
 import './music-dance/report-premium.css'
+import './music-dance/settings-premium.css'
 
 const musicDanceProfile = productProfile.key !== 'egitim'
 

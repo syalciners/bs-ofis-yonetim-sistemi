@@ -31,6 +31,21 @@ function applyV231(files){
   return files;
 }
 
+function applyBrandMetadata(files){
+  let layout=String(files['app/layout.tsx']||'');
+  if(!layout) return files;
+
+  if(layout.includes('export const metadata: Metadata = {') && !layout.includes('manifest: "/manifest.webmanifest"')){
+    layout=layout.replace(
+      'export const metadata: Metadata = {',
+      'export const metadata: Metadata = {\n  applicationName: "BS Soru Mimarı",\n  manifest: "/manifest.webmanifest",\n  icons: { icon: "/bs-soru-mimari-mark.svg", shortcut: "/bs-soru-mimari-mark.svg" },'
+    );
+    console.log('PATCH brand-metadata OK');
+  }
+  files['app/layout.tsx']=layout;
+  return files;
+}
+
 async function main(){
   const parts=[];
   for(let i=0;i<4;i++) parts.push((await text(`${ROOT}/source2/${i}.txt`)).trim());
@@ -38,6 +53,7 @@ async function main(){
 
   // Restore the currently approved functional V2.3.1 behavior first.
   files=applyV231(files);
+  files=applyBrandMetadata(files);
 
   // Brand is appended strictly as a presentation layer.
   const brandCss=await text(`${ROOT}/brand/brand-overrides.css`);
@@ -52,6 +68,16 @@ async function main(){
   const publicDir=path.join(process.cwd(),'public');
   fs.mkdirSync(publicDir,{recursive:true});
   fs.writeFileSync(path.join(publicDir,'bs-soru-mimari-mark.svg'),await text(`${ROOT}/brand/bs-soru-mimari-mark.svg`));
+  fs.writeFileSync(path.join(publicDir,'manifest.webmanifest'),JSON.stringify({
+    name:'BS Soru Mimarı',
+    short_name:'Soru Mimarı',
+    description:'PDF belgelerinden soru seçip profesyonel test oluşturma uygulaması',
+    start_url:'/',
+    display:'standalone',
+    background_color:'#F5F6FA',
+    theme_color:'#0F1530',
+    icons:[{src:'/bs-soru-mimari-mark.svg',sizes:'any',type:'image/svg+xml',purpose:'any maskable'}]
+  },null,2));
 
   const worker=path.join(process.cwd(),'node_modules','pdfjs-dist','build','pdf.worker.min.mjs');
   if(fs.existsSync(worker)) fs.copyFileSync(worker,path.join(publicDir,'pdf.worker.min.mjs'));

@@ -1,0 +1,75 @@
+:root{
+  --bg:#F5F6FA;
+  --paper:#FFFFFF;
+  --ink:#0F1530;
+  --muted:#70778A;
+  --line:#E3E6EE;
+  --navy:#0F1530;
+  --blue:#6D46F7;
+  --violet:#6D46F7;
+  --coral:#FF7A45;
+  --soft:#F6F3FF;
+  --good:#1FA77A;
+  --ice:#E5E7EB;
+  --brand-shadow:0 16px 42px rgba(15,21,48,.12);
+}
+
+body{background:#F5F6FA;color:var(--ink)}
+.app{background:linear-gradient(180deg,#fff 0 76px,#F5F6FA 76px)}
+.topbar{border-bottom:1px solid #E8EAF0;box-shadow:0 8px 24px rgba(15,21,48,.035)}
+.brand{gap:11px}
+.brandMark{background:#0F1530!important;border-radius:15px!important;box-shadow:0 10px 28px rgba(15,21,48,.16)!important;overflow:hidden;color:transparent!important;position:relative}
+.brandMark::before{content:"";position:absolute;inset:0;background:url('/bs-soru-mimari-mark.svg') center/cover no-repeat}
+.brandText b{color:#0F1530;font-weight:850;letter-spacing:-.025em}
+.brandText small{color:#7A8191}
+.topAction,.primary{background:linear-gradient(135deg,#6D46F7,#7B58F8)!important;box-shadow:0 10px 26px rgba(109,70,247,.24)!important}
+.topAction:hover,.primary:hover{filter:brightness(.98);transform:translateY(-1px)}
+.left,.right{border-color:#E6E8EF}
+.modeBtn{border-color:#E2E5ED;background:#fff;color:#596174;transition:.18s ease}
+.modeBtn:hover{border-color:#CDC4FF;background:#FAF8FF;color:#5140B8}
+.modeBtn.active,.modeBtn.smart.active{border-color:#8A6AF8!important;background:#F4F0FF!important;color:#5B3ED6!important;box-shadow:inset 0 0 0 1px rgba(109,70,247,.16)!important}
+.viewerBar{border-bottom-color:#E4E7EE}
+.viewerBar button{border-color:#DFE3EB;color:#26304A}
+.viewerBar button:hover{border-color:#C9BEFF;background:#F8F6FF;color:#5B3ED6}
+.mobileModes button.active{border-color:#8062F7!important;background:#F4F0FF!important;color:#5B3ED6!important}
+.scrollArea{background:radial-gradient(circle at 50% 0,#FCFCFE 0,#EFF1F6 60%,#E9ECF2 100%)}
+.smartBox{border-color:#7B58F8!important;background:rgba(109,70,247,.045)!important}
+.smartBox:hover{background:rgba(109,70,247,.09)!important}
+.smartBox.selected{border-color:#1FA77A!important;background:rgba(31,167,122,.075)!important}
+.smartBadge{background:#6D46F7!important;box-shadow:0 6px 14px rgba(109,70,247,.22)}
+.dragRect{border-color:#6D46F7!important;background:rgba(109,70,247,.09)!important}
+.toast{border-color:#D8D0FF;background:rgba(255,255,255,.97);color:#5744B8;box-shadow:0 10px 24px rgba(15,21,48,.08)}
+.uploadCard{background:#F7F6FB;border-color:#E1E4EC}
+.emptyIcon{border-color:#DADDEA;background:linear-gradient(160deg,#fff,#F2EEFF);color:#6D46F7;box-shadow:0 18px 45px rgba(15,21,48,.10)}
+.empty label{background:#0F1530;box-shadow:0 9px 22px rgba(15,21,48,.16)}
+.count{background:#F1EDFF;color:#6042DB}
+.basketItem{border-bottom-color:#EEF0F4}
+.iconBtn{background:#F7F8FA;color:#7A8191}
+.iconBtn:hover{background:#FFF0EB;color:#E85F2B}
+.builder{background:#F2F3F7}
+.builderTop{border-bottom-color:#E6E8EE}
+.settingsPanel,.previewPanel{border-color:#E1E4EB;box-shadow:0 14px 40px rgba(15,21,48,.07)}
+.tab.active{background:#F1EDFF;color:#5E42D6}
+.field input:focus,.field select:focus{border-color:#7B58F8;box-shadow:0 0 0 3px rgba(109,70,247,.10)}
+.switch.on{background:#6D46F7}
+.segment button.active{background:#0F1530;color:#fff}
+.styleCard.active{border-color:#7B58F8;background:#F4F0FF;color:#5135CA;box-shadow:inset 0 0 0 1px #7B58F8}
+.answerNo{background:#F1EDFF;color:#5A3FD3}
+.previewHead .live{color:#1FA77A}
+.successBtn{background:#1FA77A}
+.secondary:hover{border-color:#D0C7FF;background:#F9F7FF;color:#553BCB}
+.errorBox{background:#FFF2ED;border-color:#FFD0BF;color:#A94727}
+.statusBox{background:#EEF9F4;border-color:#C7EBDD;color:#147451}
+.logoPlaceholder{background:#0F1530;color:#fff}
+.levelBadge{background:#0F1530}
+.keyLabel{background:#0F1530}
+.qCircle{background:#6D46F7!important}
+.solutionMini{color:#43318E}
+
+/* Coral is reserved for destructive/warning actions so the brand remains premium rather than noisy. */
+button[aria-label*='sil' i],button[title*='sil' i],.danger,.delete{color:#E35F31}
+
+@media(max-width:950px){
+  .right{box-shadow:0 16px 42px rgba(15,21,48,.15)}
+  .topAction{box-shadow:0 9px 22px rgba(109,70,247,.20)!important}
+}

@@ -40,6 +40,7 @@ import './music-dance/people-premium.css'
 import './music-dance/groups-premium.css'
 import './music-dance/teachers-premium.css'
 import './music-dance/finance-art.css'
+import './music-dance/finance-premium.css'
 import './music-dance/cash-art.css'
 import './music-dance/report-art.css'
 

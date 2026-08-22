@@ -42,6 +42,7 @@ import './music-dance/teachers-premium.css'
 import './music-dance/finance-art.css'
 import './music-dance/finance-premium.css'
 import './music-dance/cash-art.css'
+import './music-dance/cash-premium.css'
 import './music-dance/report-art.css'
 
 const musicDanceProfile = productProfile.key !== 'egitim'

@@ -1,0 +1,124 @@
+/* BS Müzik & Dans — Finansın Temposu Premium v2 */
+
+.md-finance-page { gap:18px; }
+.md-finance-hero {
+  min-height:198px;
+  padding:30px 32px;
+  border-radius:29px;
+  background:
+    radial-gradient(circle at 88% 18%,rgba(201,150,62,.20),transparent 23%),
+    linear-gradient(128deg,#081b32 0%,#0b1f3a 45%,#133d68 76%,#42396d 100%);
+  box-shadow:0 25px 66px rgba(11,31,58,.19);
+}
+.md-finance-hero > div:first-child > span { font-size:8.5px; }
+.md-finance-hero h1 { font-size:38px; }
+.md-finance-hero p { font-size:12px;max-width:620px; }
+.md-finance-orbit { width:118px;height:118px; }
+
+.md-finance-kpis { gap:13px; }
+.md-finance-kpis article {
+  min-height:108px;
+  grid-template-columns:46px minmax(0,1fr);
+  gap:12px;
+  padding:16px;
+  border-radius:21px;
+  box-shadow:0 11px 30px rgba(11,31,58,.05);
+}
+.md-finance-kpis article > span { width:44px;height:44px;border-radius:14px; }
+.md-finance-kpis article > span svg { width:20px;height:20px; }
+.md-finance-kpis small { font-size:8px; }
+.md-finance-kpis strong { font-size:21px; }
+.md-finance-kpis em { font-size:7.5px; }
+
+.md-finance-toolbar {
+  padding:9px;
+  border-radius:19px;
+  box-shadow:0 9px 28px rgba(11,31,58,.04);
+}
+.md-finance-tabs { gap:5px; }
+.md-finance-tabs button {
+  height:40px;
+  padding:0 13px;
+  border-radius:12px;
+  font-size:8.5px;
+}
+.md-finance-tabs button svg { width:14px;height:14px; }
+.md-finance-actions button { min-height:40px;border-radius:12px;font-size:9px; }
+
+.md-finance-ledger {
+  padding:18px;
+  border-radius:23px;
+  box-shadow:0 12px 34px rgba(11,31,58,.05);
+}
+.md-finance-ledger > header { padding-bottom:14px; }
+.md-finance-ledger > header span { font-size:7.5px; }
+.md-finance-ledger > header h2 { font-size:17px; }
+.md-finance-ledger > header > small { font-size:8px;padding:6px 9px; }
+
+.md-finance-table-head,.md-finance-row {
+  grid-template-columns:minmax(190px,1.45fr) repeat(3,minmax(115px,.7fr));
+  gap:12px;
+}
+.md-finance-table-head { min-height:36px;padding:0 13px;border-radius:11px; }
+.md-finance-table-head span { font-size:7.5px; }
+.md-finance-row { min-height:66px;padding:9px 13px; }
+.md-finance-row::before { top:14px;bottom:14px;width:3px; }
+.md-finance-name { gap:10px; }
+.md-finance-name i { width:38px;height:38px;border-radius:12px;font-size:8px; }
+.md-finance-name strong { font-size:10px; }
+.md-finance-row > span,.md-finance-row > b { font-size:9px; }
+.md-finance-row > b { padding:6px 8px;border-radius:9px; }
+
+.md-pricing-grid { gap:12px; }
+.md-pricing-card { padding:17px;border-radius:21px;gap:12px; }
+.md-pricing-card h3 { font-size:13px; }
+.md-pricing-card > p { font-size:8px; }
+.md-pricing-card b { font-size:12px; }
+
+.md-finance-empty { min-height:180px;border-radius:22px; }
+.md-finance-empty strong { font-size:11px; }
+.md-finance-empty p { font-size:8.5px; }
+
+@media(max-width:900px){
+  .md-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:720px){
+  .md-finance-hero {
+    min-height:154px;
+    padding:20px;
+    border-radius:23px;
+  }
+  .md-finance-hero h1 { font-size:28px; }
+  .md-finance-hero p { font-size:9.5px;line-height:1.5; }
+  .md-finance-orbit { width:74px;height:74px; }
+
+  .md-finance-kpis { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+  .md-finance-kpis article {
+    min-height:106px;
+    grid-template-columns:40px minmax(0,1fr);
+    padding:13px;
+    gap:9px;
+    border-radius:18px;
+  }
+  .md-finance-kpis article > span { width:38px;height:38px;border-radius:13px; }
+  .md-finance-kpis strong { font-size:17px; }
+
+  .md-finance-toolbar { padding:7px; }
+  .md-finance-tabs button { min-width:max-content;height:38px;font-size:7.8px; }
+  .md-finance-actions button { min-height:42px; }
+
+  .md-finance-ledger { padding:12px;border-radius:20px; }
+  .md-finance-ledger > header { min-width:620px; }
+  .md-finance-table-head,.md-finance-row { min-width:620px; }
+}
+
+@media(max-width:460px){
+  .md-finance-orbit { display:none; }
+  .md-finance-kpis { grid-template-columns:1fr 1fr; }
+  .md-finance-tabs { padding-bottom:2px; }
+}
+
+@media(max-width:370px){
+  .md-finance-kpis { grid-template-columns:1fr; }
+}

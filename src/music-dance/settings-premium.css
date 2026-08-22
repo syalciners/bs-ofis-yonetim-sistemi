@@ -1,0 +1,84 @@
+/* BS Müzik & Dans — Ayarlar Premium v2
+   Mevcut Ayarlar bileşenini yeni veri modeli oluşturmadan premiumlaştırır. */
+
+.md-tag-list {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.md-tag-list > span {
+  min-height:76px;
+  padding:13px 14px;
+  border-radius:17px;
+  border-color:rgba(11,31,58,.075);
+  background:
+    radial-gradient(circle at 92% 16%,rgba(22,139,255,.06),transparent 27%),
+    linear-gradient(145deg,#fff,#fbfcff);
+  box-shadow:0 7px 20px rgba(11,31,58,.035);
+  position:relative;
+  overflow:hidden;
+}
+.md-tag-list > span::before {
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:3px;
+  background:linear-gradient(#168BFF,#7657D9 70%,transparent);
+}
+.md-tag-list b { font-size:11px;letter-spacing:-.015em; }
+.md-tag-list small { font-size:8px;line-height:1.45; }
+
+.md-check-grid { gap:9px; }
+.md-check-grid label {
+  min-height:44px;
+  padding:10px 11px;
+  border-radius:12px;
+  background:linear-gradient(145deg,#fafcff,#f7f9fc);
+  transition:border-color .16s ease,background .16s ease;
+}
+.md-check-grid label:has(input:checked) {
+  border-color:rgba(22,139,255,.22);
+  background:linear-gradient(145deg,#eef7ff,#f6f2ff);
+}
+.md-check-grid input { width:16px;height:16px;accent-color:#168BFF; }
+.md-check-grid span { font-size:8.5px; }
+
+.md-onboarding-card {
+  width:min(500px,100%);
+  padding:36px;
+  border-radius:30px;
+  box-shadow:0 36px 110px rgba(11,31,58,.14);
+}
+.md-onboarding-card > img { width:82px;height:82px; }
+.md-onboarding-card h1 { font-size:30px; }
+.md-onboarding-card > p { font-size:10.5px; }
+.md-onboarding-card form { gap:13px; }
+.md-onboarding-card label { font-size:8.5px; }
+.md-onboarding-card input,.md-onboarding-card select {
+  height:44px;
+  border-radius:12px;
+  font-size:10px;
+}
+.md-onboarding-note {
+  padding:12px;
+  border-radius:14px;
+  font-size:8.5px;
+}
+
+@media(max-width:720px){
+  .md-tag-list { grid-template-columns:1fr;gap:8px; }
+  .md-tag-list > span { min-height:66px;padding:11px 12px; }
+  .md-tag-list b { font-size:10.5px; }
+
+  .md-onboarding-page { padding:14px;place-items:start center; }
+  .md-onboarding-card {
+    width:min(100%,500px);
+    padding:24px 19px 22px;
+    border-radius:23px;
+  }
+  .md-onboarding-card > img { width:68px;height:68px;margin-top:10px; }
+  .md-onboarding-card h1 { font-size:25px; }
+  .md-onboarding-card > p { font-size:9.5px;margin-bottom:16px; }
+  .md-onboarding-card input,.md-onboarding-card select { height:46px;font-size:10px; }
+  .md-onboarding-note { font-size:8px; }
+  .md-check-grid { grid-template-columns:1fr; }
+}

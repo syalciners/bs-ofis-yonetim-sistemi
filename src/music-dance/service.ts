@@ -1,11 +1,13 @@
 import { supabase } from '../lib/supabase'
 import type {
   MdDersDurumu,
+  MdEgitmenHakedisModeli,
   MdHaftaUretimSonucu,
   MdHaftaVerisi,
   MdKatilimDurumu,
   MdKurumSecenegi,
   MdKullaniciRolu,
+  MdKursiyerUcretModeli,
   MdProgramTuru,
   MdUrunProfili,
   MusicDanceData,
@@ -61,21 +63,31 @@ export async function mdVerisiniGetir(kurumId: string): Promise<MusicDanceData> 
 
   return {
     subeler: (subeler.data || []) as MusicDanceData['subeler'],
-    mekanlar: (mekanlar.data || []) as MusicDanceData['mekanlar'],
-    branslar: (branslar.data || []) as MusicDanceData['branslar'],
+    mekanlar: (mekanlar.data || []).map((x: any) => ({ ...x, kapasite: Number(x.kapasite || 0) })) as MusicDanceData['mekanlar'],
+    branslar: (branslar.data || []).map((x: any) => ({ ...x, varsayilan_sure_dk: Number(x.varsayilan_sure_dk || 0) })) as MusicDanceData['branslar'],
     kursiyerler: (kursiyerler.data || []) as MusicDanceData['kursiyerler'],
     egitmenler: (egitmenler.data || []) as MusicDanceData['egitmenler'],
     egitmenBranslari: (egitmenBranslari.data || []) as MusicDanceData['egitmenBranslari'],
-    gruplar: (gruplar.data || []) as MusicDanceData['gruplar'],
-    grupUyeleri: (grupUyeleri.data || []) as MusicDanceData['grupUyeleri'],
-    programlar: (programlar.data || []) as MusicDanceData['programlar'],
+    gruplar: (gruplar.data || []).map((x: any) => ({
+      ...x,
+      kapasite: x.kapasite == null ? null : Number(x.kapasite),
+      ucret_modeli: (x.ucret_modeli || 'Ders Başı') as MdKursiyerUcretModeli,
+      varsayilan_ucret: Number(x.varsayilan_ucret || 0),
+    })) as MusicDanceData['gruplar'],
+    grupUyeleri: (grupUyeleri.data || []).map((x: any) => ({ ...x, birim_ucret: x.birim_ucret == null ? null : Number(x.birim_ucret) })) as MusicDanceData['grupUyeleri'],
+    programlar: (programlar.data || []).map((x: any) => ({
+      ...x,
+      sure_dk: Number(x.sure_dk || 0),
+      haftanin_gunu: Number(x.haftanin_gunu || 0),
+      kursiyer_birim_ucreti: Number(x.kursiyer_birim_ucreti || 0),
+      egitmen_birim_hakedisi: Number(x.egitmen_birim_hakedisi || 0),
+      kursiyer_ucret_modeli: (x.kursiyer_ucret_modeli || 'Ders Başı') as MdKursiyerUcretModeli,
+      egitmen_hakedis_modeli: (x.egitmen_hakedis_modeli || 'Ders Başı') as MdEgitmenHakedisModeli,
+    })) as MusicDanceData['programlar'],
   }
 }
 
 export async function mdKurumOlustur(kurumAdi: string, urunProfili: MdUrunProfili, userId: string) {
-  // İlk kurum oluşturulurken INSERT ... RETURNING kullanmıyoruz. RLS SELECT politikası
-  // kurum üyeliğini şart koşuyor; üyelik ise md_kurumlar AFTER INSERT trigger'ında oluşuyor.
-  // UUID'yi önceden üretmek, ilk kayıt sırasında gereksiz geri-okuma/RLS yarışını kaldırır.
   const kurumId = crypto.randomUUID()
   const kurum = await supabase.from('md_kurumlar').insert({
     kurum_id: kurumId,
@@ -115,7 +127,17 @@ export async function mdEgitmenEkle(kurumId: string, input: { ad_soyad: string; 
   }
 }
 
-export async function mdGrupEkle(kurumId: string, input: { grup_adi: string; brans_id?: string | null; varsayilan_egitmen_id?: string | null; varsayilan_mekan_id?: string | null; kapasite?: number | null; seviye?: string | null; yas_grubu?: string | null }) {
+export async function mdGrupEkle(kurumId: string, input: {
+  grup_adi: string
+  brans_id?: string | null
+  varsayilan_egitmen_id?: string | null
+  varsayilan_mekan_id?: string | null
+  kapasite?: number | null
+  seviye?: string | null
+  yas_grubu?: string | null
+  ucret_modeli?: MdKursiyerUcretModeli
+  varsayilan_ucret?: number
+}) {
   const result = await supabase.from('md_kurs_gruplari').insert({ kurum_id: kurumId, ...input })
   fail('Grup eklenemedi', result.error)
 }
@@ -142,6 +164,10 @@ export async function mdProgramEkle(kurumId: string, input: {
   sure_dk: number
   baslangic_tarihi: string
   bitis_tarihi?: string | null
+  kursiyer_birim_ucreti?: number
+  kursiyer_ucret_modeli?: MdKursiyerUcretModeli
+  egitmen_birim_hakedisi?: number
+  egitmen_hakedis_modeli?: MdEgitmenHakedisModeli
   aciklama?: string | null
 }) {
   const result = await supabase.from('md_sabit_programlar').insert({ kurum_id: kurumId, ...input })
@@ -175,8 +201,13 @@ export async function mdHaftaDersleriniGetir(kurumId: string, haftaBaslangici: s
   fail('Ders katılımları alınamadı', katilimlar.error)
 
   return {
-    dersler: (dersler.data || []) as MdHaftaVerisi['dersler'],
-    katilimlar: (katilimlar.data || []) as MdHaftaVerisi['katilimlar'],
+    dersler: (dersler.data || []).map((x: any) => ({
+      ...x,
+      sure_dk: Number(x.sure_dk || 0),
+      egitmen_hakedis_tutari: Number(x.egitmen_hakedis_tutari || 0),
+      egitmen_hakedis_modeli: (x.egitmen_hakedis_modeli || 'Ders Başı') as MdEgitmenHakedisModeli,
+    })) as MdHaftaVerisi['dersler'],
+    katilimlar: (katilimlar.data || []).map((x: any) => ({ ...x, birim_ucret: Number(x.birim_ucret || 0) })) as MdHaftaVerisi['katilimlar'],
   }
 }
 
@@ -192,6 +223,18 @@ export async function mdHaftayiOlustur(haftaBaslangici: string): Promise<MdHafta
     mevcut: Number(raw?.mevcut || 0),
     hata: Number(raw?.hata || 0),
     hatalar: Array.isArray(raw?.hatalar) ? raw!.hatalar! : [],
+  }
+}
+
+export async function mdAylikUcretleriOlustur(kurumId: string, donemAyi: string) {
+  const result = await supabase.rpc('md_aylik_ucretleri_olustur_v1', { p_kurum_id: kurumId, p_donem_ayi: donemAyi })
+  fail('Aylık ücretler oluşturulamadı', result.error)
+  const raw = (result.data || {}) as any
+  return {
+    donem: String(raw.donem || donemAyi),
+    bireysel_olusturulan: Number(raw.bireysel_olusturulan || 0),
+    grup_olusturulan: Number(raw.grup_olusturulan || 0),
+    toplam_olusturulan: Number(raw.toplam_olusturulan || 0),
   }
 }
 

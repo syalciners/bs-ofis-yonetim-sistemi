@@ -1,0 +1,116 @@
+/* BS Müzik & Dans — Yönetim Panoraması Premium v2 */
+
+.md-report-page { gap:18px; }
+.md-report-hero {
+  min-height:198px;
+  padding:30px 32px;
+  border-radius:29px;
+  background:
+    radial-gradient(circle at 86% 17%,rgba(201,150,62,.20),transparent 23%),
+    radial-gradient(circle at 91% 75%,rgba(118,87,217,.22),transparent 29%),
+    linear-gradient(128deg,#081b32 0%,#0b1f3a 44%,#163e69 72%,#554477 100%);
+  box-shadow:0 25px 66px rgba(11,31,58,.19);
+}
+.md-report-hero > div:first-child > span { font-size:8.5px; }
+.md-report-hero h1 { font-size:38px; }
+.md-report-hero p { font-size:12px; }
+.md-report-mark { width:114px;height:114px; }
+
+.md-report-toolbar { padding:12px 14px;border-radius:19px; }
+.md-report-toolbar span { font-size:7.5px; }
+.md-report-toolbar strong { font-size:11px; }
+.md-report-toolbar button { min-height:40px;border-radius:12px;font-size:9px; }
+
+.md-report-kpis { gap:13px; }
+.md-report-kpis article {
+  min-height:106px;
+  grid-template-columns:46px minmax(0,1fr);
+  gap:12px;
+  padding:16px;
+  border-radius:21px;
+  box-shadow:0 11px 30px rgba(11,31,58,.05);
+}
+.md-report-kpis article > span { width:44px;height:44px;border-radius:14px; }
+.md-report-kpis article > span svg { width:20px;height:20px; }
+.md-report-kpis small { font-size:8px; }
+.md-report-kpis strong { font-size:21px; }
+.md-report-kpis em { font-size:7.5px; }
+
+.md-report-grid-main,.md-report-two-col { gap:14px; }
+.md-report-panel {
+  padding:18px;
+  border-radius:22px;
+  box-shadow:0 12px 34px rgba(11,31,58,.05);
+}
+.md-report-panel > header { margin-bottom:14px; }
+.md-report-panel > header span { font-size:7.5px; }
+.md-report-panel > header h2 { font-size:17px; }
+.md-report-panel > header > small { font-size:7.5px; }
+
+.md-flow-chart { height:235px;gap:8px;padding-top:12px; }
+.md-flow-bars { height:176px;gap:4px; }
+.md-flow-bars i { width:min(13px,38%); }
+.md-flow-month strong { font-size:7.2px; }
+.md-flow-month small { font-size:6.5px; }
+.md-report-flow > footer span { font-size:7px; }
+
+.md-report-stat-stack { gap:8px; }
+.md-report-stat-stack > div { min-height:42px;padding:0 11px;border-radius:12px; }
+.md-report-stat-stack span { font-size:7.5px; }
+.md-report-stat-stack b { font-size:10px; }
+.md-report-stat-stack > div.accent b { font-size:12px; }
+
+.md-report-ranking article,.md-group-report-list article { min-height:62px;gap:10px; }
+.md-report-ranking .rank { width:34px;height:40px;border-radius:12px;font-size:7px; }
+.md-report-ranking strong,.md-group-report-list strong { font-size:9.5px; }
+.md-report-ranking small,.md-group-report-list small { font-size:7px; }
+.md-report-ranking article > b,.md-group-report-list aside b { font-size:9px; }
+.md-report-progress,.md-group-report-progress { height:5px; }
+
+.md-report-insight {
+  min-height:92px;
+  padding:18px 20px;
+  border-radius:22px;
+  grid-template-columns:46px minmax(0,1fr) auto;
+  gap:13px;
+}
+.md-report-insight > span { width:44px;height:44px;border-radius:14px; }
+.md-report-insight small { font-size:7px; }
+.md-report-insight strong { font-size:10.5px; }
+.md-report-insight p { font-size:7.5px; }
+
+.md-report-empty { min-height:165px;border-radius:19px; }
+.md-report-empty strong { font-size:9.5px; }
+.md-report-empty p { font-size:7.5px; }
+
+@media(max-width:930px){
+  .md-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .md-report-grid-main,.md-report-two-col{grid-template-columns:1fr}
+}
+
+@media(max-width:720px){
+  .md-report-hero { min-height:154px;padding:20px;border-radius:23px; }
+  .md-report-hero h1 { font-size:28px; }
+  .md-report-hero p { font-size:9.5px; }
+  .md-report-mark { width:74px;height:74px; }
+
+  .md-report-kpis { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+  .md-report-kpis article { min-height:104px;padding:13px;grid-template-columns:40px minmax(0,1fr);gap:9px;border-radius:18px; }
+  .md-report-kpis article > span { width:38px;height:38px;border-radius:13px; }
+  .md-report-kpis strong { font-size:17px; }
+
+  .md-report-panel { padding:14px;border-radius:20px; }
+  .md-flow-chart { height:210px;overflow-x:auto; }
+  .md-flow-bars { height:154px; }
+  .md-flow-month { min-width:46px; }
+  .md-report-insight { padding:14px;grid-template-columns:40px minmax(0,1fr); }
+}
+
+@media(max-width:470px){
+  .md-report-mark { display:none; }
+  .md-report-kpis { grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:370px){
+  .md-report-kpis { grid-template-columns:1fr; }
+}

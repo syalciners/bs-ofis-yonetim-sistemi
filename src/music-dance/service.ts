@@ -73,14 +73,17 @@ export async function mdVerisiniGetir(kurumId: string): Promise<MusicDanceData> 
 }
 
 export async function mdKurumOlustur(kurumAdi: string, urunProfili: MdUrunProfili, userId: string) {
+  // İlk kurum oluşturulurken INSERT ... RETURNING kullanmıyoruz. RLS SELECT politikası
+  // kurum üyeliğini şart koşuyor; üyelik ise md_kurumlar AFTER INSERT trigger'ında oluşuyor.
+  // UUID'yi önceden üretmek, ilk kayıt sırasında gereksiz geri-okuma/RLS yarışını kaldırır.
+  const kurumId = crypto.randomUUID()
   const kurum = await supabase.from('md_kurumlar').insert({
+    kurum_id: kurumId,
     kurum_adi: kurumAdi.trim(),
     urun_profili: urunProfili,
     olusturan: userId,
-  }).select('kurum_id').single()
+  })
   fail('Kurum oluşturulamadı', kurum.error)
-  const kurumId = String(kurum.data?.kurum_id || '')
-  if (!kurumId) throw new Error('Kurum kimliği oluşturulamadı.')
 
   const sube = await supabase.from('md_subeler').insert({ kurum_id: kurumId, sube_adi: 'Merkez' })
   fail('Merkez şube oluşturulamadı', sube.error)

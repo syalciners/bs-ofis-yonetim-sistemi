@@ -38,6 +38,7 @@ import './music-dance/dashboard-premium.css'
 import './music-dance/program-premium.css'
 import './music-dance/people-premium.css'
 import './music-dance/student-detail-premium.css'
+import './music-dance/group-detail-premium.css'
 import './music-dance/groups-premium.css'
 import './music-dance/teachers-premium.css'
 import './music-dance/finance-art.css'
@@ -78,7 +79,6 @@ if (musicDanceProfile) {
   if (theme) theme.content = '#F7F9FC'
 }
 
-// Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({
   immediate: true,
   onRegisteredSW: (_swUrl, registration) => {

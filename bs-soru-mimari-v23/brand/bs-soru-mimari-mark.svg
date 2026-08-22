@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">BS Soru Mimarı</title>
+  <desc id="desc">BS monogramı, açık kitap ve sayfa vurgusu</desc>
+  <defs>
+    <linearGradient id="sGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#6D46F7"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111A3A"/>
+      <stop offset="1" stop-color="#0F1530"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="124" height="124" rx="28" fill="url(#bgGrad)"/>
+  <text x="17" y="93" font-family="Arial Black, Inter, Arial, sans-serif" font-size="82" font-weight="900" fill="#FFFFFF">B</text>
+  <text x="61" y="93" font-family="Arial Black, Inter, Arial, sans-serif" font-size="82" font-weight="900" fill="url(#sGrad)">S</text>
+  <path d="M49 61c8-7 17-8 27-2v28c-9-5-18-5-27 2V61Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M77 59c8-5 15-4 22 2v28c-7-5-14-5-22-2V59Z" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M52 68c7-5 14-5 21-1" fill="none" stroke="#0F1530" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M52 75c7-4 14-4 21-1" fill="none" stroke="#0F1530" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M76 59c5 0 10 2 15 6" fill="none" stroke="#FF7A45" stroke-width="4" stroke-linecap="round"/>
+</svg>

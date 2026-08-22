@@ -1,0 +1,42 @@
+/* BS Müzik & Dans — Eğitmenler Premium v2 */
+
+.md-person.teacher {
+  min-height:104px;
+  background:
+    linear-gradient(118deg,transparent 0 68%,color-mix(in srgb,var(--tone) 4%,transparent) 68% 100%),
+    linear-gradient(145deg,#fff,#fbfcff);
+}
+.md-person.teacher::after {
+  content:'';
+  position:absolute;
+  right:-34px;
+  bottom:-42px;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--tone) 12%,transparent);
+  box-shadow:0 0 0 18px color-mix(in srgb,var(--tone) 2.5%,transparent);
+  pointer-events:none;
+}
+.md-person.teacher .md-avatar {
+  border-radius:50%;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--tone) 15%,white),color-mix(in srgb,var(--tone) 6%,white));
+}
+.md-person.teacher strong { font-size:12.5px; }
+.md-person.teacher span {
+  color:#66758a;
+  font-weight:700;
+  line-height:1.4;
+}
+.md-person.teacher small { color:#97a3b3; }
+.md-person.teacher em {
+  position:relative;
+  z-index:1;
+  background:linear-gradient(145deg,#edf8f1,#f5fbf7);
+  border:1px solid rgba(79,138,101,.10);
+}
+
+@media(max-width:720px){
+  .md-person.teacher { min-height:92px; }
+  .md-person.teacher strong { font-size:11.5px; }
+}

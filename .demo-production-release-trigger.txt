@@ -1,6 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-24T22:43:00+03:00
-Hedef commit: e2b29338b9b62ee7710a897d0586109d591b18b2
-Kapsam: Demo öğrenci portrelerinde kadın/erkek eşleşmesini düzeltmek; öğretmen portrelerini cinsiyet uyumlu ve tekrarsız atamak; belirsiz isimlerde güvenli baş-harf fallback kullanmak; kadın ve erkek öğretmen havuzuna ek gerçekçi portreler eklemek.
+Tarih: 2026-08-24T23:26:00+03:00
+Hedef commit: 2eb947035e909e8e7652573a2a5ae24495cca0f8
+Kapsam: Demo satışa hazırlık denetimi Ana Sayfa fazı; önerilen demo rotasını 5 adıma çıkararak Raporlar ve Öğrenci/Öğretmen Portallarını görünür yapmak; finans adımının satış dilini netleştirmek; Ana Sayfa “Öğretmen Borcu” ifadesini “Ödenecek Hakediş” olarak düzeltmek.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
 Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + TypeScript/Vite build + gerçek secret regex kontrolü + dinamik asset kontrolü + canlı smoke testi. Main ve canlı BS Ofis uygulamasına dokunulmayacak.

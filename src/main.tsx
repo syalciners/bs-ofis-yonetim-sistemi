@@ -31,6 +31,7 @@ import './settings-hub.css'
 import './institution-settings.css'
 import './notifications.css'
 import './teacher-card-compact.css'
+import './profile-photo-preview.css'
 
 // Uygulama her yeni başlangıçta Program Liste/Takvim görünümünü güncel haftadan açar.
 // Aynı uygulama oturumu içinde Liste ↔ Takvim geçişlerinde seçilen hafta korunmaya devam eder.

@@ -92,7 +92,7 @@ export function ProfileAvatar({ name, photoPath, className = 'avatar', preview }
       <div className="profile-photo-lightbox" role="dialog" aria-modal="true" aria-label={`${name} profil fotoğrafı büyük önizleme`} onClick={() => setPreviewOpen(false)}>
         <button type="button" className="profile-photo-lightbox-close" aria-label="Büyük fotoğrafı kapat" onClick={() => setPreviewOpen(false)}>×</button>
         <div className="profile-photo-lightbox-stage" onClick={event => event.stopPropagation()}>
-          <img className="profile-photo-lightbox-image" src={url} alt={`${name} profil fotoğrafı`}/>
+          <img className="profile-photo-lightbox-image" src={url ?? undefined} alt={`${name} profil fotoğrafı`}/>
           <span className="profile-photo-lightbox-name">{name}</span>
         </div>
       </div>,

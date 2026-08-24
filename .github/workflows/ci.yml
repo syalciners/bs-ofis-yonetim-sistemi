@@ -67,3 +67,8 @@ jobs:
         run: node scripts/sync-pages-root.mjs
       - name: Derlenmiş Pages paketini doğrula
         run: node scripts/check-published-pages.mjs
+      - name: Test branch'ine paket yazma kapalı
+        if: ${{ false }}
+        shell: bash
+        run: |
+          git push origin "HEAD:${GITHUB_REF_NAME}"

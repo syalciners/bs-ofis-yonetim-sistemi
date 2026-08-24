@@ -10,6 +10,7 @@ export interface Ogrenci {
   kayit_tarihi?: string | null
   durum?: string | null
   notlar?: string | null
+  profil_fotografi?: string | null
 }
 
 export interface Ogretmen {
@@ -21,6 +22,7 @@ export interface Ogretmen {
   durum?: string | null
   notlar?: string | null
   rol?: string | null
+  profil_fotografi?: string | null
 }
 
 export interface Brans { brans_id: Id; brans_adi: string; aktif?: boolean | null }
@@ -118,32 +120,26 @@ export interface KasaHareketi { hareket_id: Id; tarih: string; hareket_turu?: st
 export interface Odev {
   odev_id: Id
   ogrenci_id: Id
-  ogretmen_id: Id
+  ogretmen_id?: Id | null
   ders_id?: Id | null
-  konu?: string | null
-  odev_basligi?: string | null
-  odev_aciklamasi?: string | null
-  verilis_tarihi: string
+  verilme_tarihi?: string | null
+  verilis_tarihi?: string | null
   son_teslim_tarihi?: string | null
-  durum: string
-  oncelik?: string | null
-  odev_fotografi?: string | null
-  odev_dosyasi?: string | null
-  teslim_dosyasi?: string | null
-  odev_dosya_linki?: string | null
-  odev_fotograf_linki?: string | null
-  ogretmen_notu?: string | null
-  puan?: string | null
-  tamamlanma_tarihi?: string | null
+  teslim_tarihi?: string | null
+  baslik?: string | null
+  aciklama?: string | null
+  durum?: string | null
+  whatsapp_gonderildi_mi?: boolean | null
+  whatsapp_gonderim_tarihi?: string | null
 }
 
 export interface KullaniciProfili {
   auth_user_id: string
-  email: string
-  ad_soyad: string
-  rol: string
-  ogretmen_id?: Id | null
-  aktif: boolean
+  email?: string | null
+  ad_soyad?: string | null
+  rol?: string | null
+  ogretmen_id?: string | null
+  aktif?: boolean | null
   telefon?: string | null
 }
 

@@ -177,97 +177,116 @@
   .lesson-status-button b{font-size:9.5px}
 }
 
-/* Öğretmen fotoğrafları: karttaki boş sağ alanı kullanır ve portreyi daha görünür yapar. */
+/* Öğretmen fotoğrafları: sağda 4:5 portre, metin ve alt kartlarla dengeli boşluk. */
+.teachers-v2 .teacher-profile-card{
+  gap:14px;
+}
 .teachers-v2 .teacher-profile-head{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:14px;
+  grid-template-columns:minmax(0,1fr) clamp(84px,22vw,96px);
+  align-items:start;
+  column-gap:16px;
+  min-width:0;
+}
+.teachers-v2 .manager-card .teacher-profile-head{
+  grid-template-columns:minmax(0,1fr) clamp(92px,24vw,104px);
 }
 .teachers-v2 .teacher-profile-head>div:last-child{
   grid-column:1;
   grid-row:1;
   min-width:0;
+  padding-top:8px;
 }
 .teachers-v2 .teacher-profile-head>.avatar{
   grid-column:2;
   grid-row:1;
-  width:88px;
-  height:88px;
-  flex:0 0 88px;
-  border-radius:50%;
+  width:100%;
+  height:auto;
+  aspect-ratio:4/5;
+  border-radius:18px;
   font-size:20px;
   justify-self:end;
-  box-shadow:0 8px 20px rgba(15,23,42,.12);
+  align-self:start;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
 }
-.teachers-v2 .manager-card .teacher-profile-head>.avatar{
-  width:96px;
-  height:96px;
-  flex-basis:96px;
+.teachers-v2 .teacher-profile-head>.avatar img{
+  border-radius:inherit !important;
+  object-position:center center;
+}
+.teachers-v2 .teacher-branches{
+  margin-top:0;
 }
 
-/* Öğretmen profil detayında fotoğraf sağda, metin solda; fotoğraf listeden de büyük. */
+/* Öğretmen profil detayında portre sağda; metin solda, durum etiketi fotoğrafın altına taşmaz. */
 .teachers-v2 .teacher-detail-v2 .profile-detail-hero{
-  grid-template-columns:minmax(0,1fr) 112px !important;
+  grid-template-columns:minmax(0,1fr) clamp(94px,28vw,120px) !important;
   grid-template-areas:
     "copy avatar"
     "status avatar";
   column-gap:18px;
-  row-gap:8px;
-  align-items:center;
+  row-gap:10px;
+  align-items:start;
+  padding:18px;
 }
 .teachers-v2 .teacher-detail-v2 .profile-detail-copy{
   grid-area:copy;
+  padding-top:4px;
 }
 .teachers-v2 .teacher-detail-v2 .profile-status{
   grid-area:status;
   grid-column:auto;
   justify-self:start;
   align-self:start;
+  margin-top:2px;
 }
 .teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
   grid-area:avatar;
-  width:112px;
-  height:112px;
-  border-radius:50%;
+  width:100%;
+  height:auto;
+  aspect-ratio:4/5;
+  border-radius:20px;
   font-size:24px;
   justify-self:end;
-  align-self:center;
-  box-shadow:0 10px 24px rgba(15,23,42,.14);
+  align-self:start;
+  overflow:hidden;
+  box-shadow:0 10px 26px rgba(15,23,42,.14);
+}
+.teachers-v2 .teacher-detail-v2 .profile-detail-avatar img{
+  border-radius:inherit !important;
+  object-position:center center;
 }
 
 @media(max-width:700px){
   .teachers-v2 .teacher-detail-v2 .profile-detail-hero{
-    grid-template-columns:minmax(0,1fr) 104px !important;
+    grid-template-columns:minmax(0,1fr) clamp(94px,27vw,112px) !important;
     grid-template-areas:
       "copy avatar"
       "status avatar";
     column-gap:14px;
-  }
-  .teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
-    width:104px;
-    height:104px;
+    padding:16px;
   }
 }
 
 @media(max-width:520px){
-  .teachers-v2 .teacher-profile-head>.avatar{
-    width:82px;
-    height:82px;
-    flex-basis:82px;
+  .teachers-v2 .teacher-profile-head{
+    grid-template-columns:minmax(0,1fr) clamp(82px,23vw,90px);
+    column-gap:14px;
   }
-  .teachers-v2 .manager-card .teacher-profile-head>.avatar{
-    width:88px;
-    height:88px;
-    flex-basis:88px;
+  .teachers-v2 .manager-card .teacher-profile-head{
+    grid-template-columns:minmax(0,1fr) clamp(88px,25vw,98px);
+  }
+  .teachers-v2 .teacher-profile-head>div:last-child{
+    padding-top:6px;
   }
   .teachers-v2 .teacher-detail-v2 .profile-detail-hero{
-    grid-template-columns:minmax(0,1fr) 92px !important;
+    grid-template-columns:minmax(0,1fr) clamp(92px,28vw,106px) !important;
     column-gap:12px;
+    row-gap:9px;
+    padding:16px;
   }
   .teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
-    width:92px;
-    height:92px;
+    border-radius:18px;
     font-size:21px;
   }
 }

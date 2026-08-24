@@ -1,6 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-24T21:20:00+03:00
-Hedef commit: f6099c90eb3a03fa2c03da988427350c31b20c24
-Kapsam: Demo yönetici, öğretmen ve öğrenci portrelerinin sprite yerine 12 ayrı doğrulanmış WEBP dosyası olarak yayınlanması; görsel yükleme hatalarında güvenli fallback eklenmesi.
+Tarih: 2026-08-24T22:43:00+03:00
+Hedef commit: e2b29338b9b62ee7710a897d0586109d591b18b2
+Kapsam: Demo öğrenci portrelerinde kadın/erkek eşleşmesini düzeltmek; öğretmen portrelerini cinsiyet uyumlu ve tekrarsız atamak; belirsiz isimlerde güvenli baş-harf fallback kullanmak; kadın ve erkek öğretmen havuzuna ek gerçekçi portreler eklemek.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
 Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + TypeScript/Vite build + gerçek secret regex kontrolü + dinamik asset kontrolü + canlı smoke testi. Main ve canlı BS Ofis uygulamasına dokunulmayacak.

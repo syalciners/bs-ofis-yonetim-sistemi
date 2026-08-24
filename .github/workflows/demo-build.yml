@@ -2,7 +2,7 @@ name: Demo izolasyon ve build doğrulama
 
 on:
   push:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, demo-satis-audit-odevler-test]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,31 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
     steps:
       - uses: actions/checkout@v4
+      - name: Geçici Demo Ödevler satış patch'i
+        if: github.ref_name == 'demo-satis-audit-odevler-test'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path('src/pages/AssignmentsPage.tsx')
+          text = page.read_text()
+          old = "import { fullDate, todayISO } from '../lib/format'"
+          new = "import { fullDate, todayISO } from '../lib/format'\nimport { APP_MODE } from '../lib/supabase'"
+          if text.count(old) != 1: raise SystemExit('AssignmentsPage APP_MODE import eşleşmedi')
+          text = text.replace(old, new, 1)
+          old = "const{data}=useAppData();const{toast}=useToast();const[searchParams,setSearchParams]=useSearchParams();const driveArchiveEnabled=true;"
+          new = "const{data}=useAppData();const{toast}=useToast();const[searchParams,setSearchParams]=useSearchParams();const driveArchiveEnabled=APP_MODE!=='demo';"
+          if text.count(old) != 1: raise SystemExit('driveArchiveEnabled eşleşmedi')
+          page.write_text(text.replace(old, new, 1))
+
+          form = Path('src/components/AssignmentEditorForm.tsx')
+          text = form.read_text()
+          old = '''<div className="form-hint"><FileText size={14}/>Ekler önce güvenli depoya alınır, ardından öğrencinin Drive klasörüne arşivlenir.</div>'''
+          new = '''<div className="form-hint"><FileText size={14}/>{driveArchiveEnabled?'Ekler önce güvenli depoya alınır, ardından öğrencinin Drive klasörüne arşivlenir.':'Ekler güvenli depoya alınır ve ödev kaydıyla birlikte korunur.'}</div>'''
+          if text.count(old) != 1: raise SystemExit('Ödev formu arşiv açıklaması eşleşmedi')
+          form.write_text(text.replace(old, new, 1))
+          PY
       - uses: actions/setup-node@v4
         with:
           node-version: 22

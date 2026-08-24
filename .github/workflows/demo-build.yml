@@ -2,7 +2,7 @@ name: Demo izolasyon ve build doğrulama
 
 on:
   push:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, demo-satis-audit-raporlar-isolation-test]
   workflow_dispatch:
 
 permissions:

@@ -2,7 +2,7 @@ name: Demo izolasyon ve build doğrulama
 
 on:
   push:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, demo-satis-audit-portallar]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,65 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
     steps:
       - uses: actions/checkout@v4
+      - name: Geçici portal portre patch'i
+        if: github.ref_name == 'demo-satis-audit-portallar'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/pages/PortalPreviewPage.tsx')
+          text = path.read_text()
+
+          def replace_once(old: str, new: str, label: str):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: beklenen 1 eşleşme, bulunan {count}')
+              text = text.replace(old, new, 1)
+
+          replace_once("  CircleUserRound,\n", "", 'Kullanılmayan ikon importu')
+          replace_once(
+              "import { useAppData } from '../components/AppDataProvider'",
+              "import { useAppData } from '../components/AppDataProvider'\nimport { ProfileAvatar } from '../components/ProfileAvatar'",
+              'ProfileAvatar importu',
+          )
+          replace_once(
+              "import { addDays, todayISO } from '../lib/format'",
+              "import { addDays, todayISO } from '../lib/format'\nimport { APP_MODE } from '../lib/supabase'\nimport { demoPersonaPhoto } from '../lib/demoPersonaPhoto'",
+              'Demo portre importları',
+          )
+          replace_once(
+              "function ProfileView({ role, name, email, onExit }: { role: PortalPreviewRole; name: string; email: string | null; onExit: () => void }) {",
+              "function ProfileView({ role, name, email, photoPath, onExit }: { role: PortalPreviewRole; name: string; email: string | null; photoPath: string | null; onExit: () => void }) {",
+              'ProfileView imzası',
+          )
+          replace_once(
+              '<div className="portal-preview-profile-avatar"><CircleUserRound size={34}/></div>',
+              '<ProfileAvatar name={name} photoPath={photoPath} className="portal-preview-profile-avatar"/>',
+              'Profil portresi',
+          )
+          replace_once(
+              ".map(x => ({ id: x.ogretmen_id, ad_soyad: x.ad_soyad, email: x.email || null }))",
+              ".map(x => ({ id: x.ogretmen_id, ad_soyad: x.ad_soyad, email: x.email || null, photoPath: x.profil_fotografi || (APP_MODE === 'demo' ? demoPersonaPhoto(x.ogretmen_id, x.ad_soyad, 'teacher') : null) }))",
+              'Öğretmen portal portresi',
+          )
+          replace_once(
+              ".map(x => ({ id: x.ogrenci_id, ad_soyad: x.ad_soyad, email: x.email || null }))",
+              ".map(x => ({ id: x.ogrenci_id, ad_soyad: x.ad_soyad, email: x.email || null, photoPath: x.profil_fotografi || (APP_MODE === 'demo' ? demoPersonaPhoto(x.ogrenci_id, x.ad_soyad, 'student') : null) }))",
+              'Öğrenci portal portresi',
+          )
+          replace_once(
+              '''<span className="portal-person-avatar">{item.ad_soyad.split(/\\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr-TR')}</span>''',
+              '''<ProfileAvatar name={item.ad_soyad} photoPath={item.photoPath} className="portal-person-avatar"/>''',
+              'Kişi seçim portresi',
+          )
+          replace_once(
+              "{tab === 'profil' && <ProfileView role={role} name={person.ad_soyad} email={person.email} onExit={() => nav(selectorPath)}/>}",
+              "{tab === 'profil' && <ProfileView role={role} name={person.ad_soyad} email={person.email} photoPath={person.photoPath} onExit={() => nav(selectorPath)}/>}",
+              'Profil çağrısı',
+          )
+          path.write_text(text)
+          PY
       - uses: actions/setup-node@v4
         with:
           node-version: 22

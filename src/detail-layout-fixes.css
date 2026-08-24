@@ -176,3 +176,98 @@
   .lesson-status-button small{display:none}
   .lesson-status-button b{font-size:9.5px}
 }
+
+/* Öğretmen fotoğrafları: karttaki boş sağ alanı kullanır ve portreyi daha görünür yapar. */
+.teachers-v2 .teacher-profile-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:14px;
+}
+.teachers-v2 .teacher-profile-head>div:last-child{
+  grid-column:1;
+  grid-row:1;
+  min-width:0;
+}
+.teachers-v2 .teacher-profile-head>.avatar{
+  grid-column:2;
+  grid-row:1;
+  width:88px;
+  height:88px;
+  flex:0 0 88px;
+  border-radius:50%;
+  font-size:20px;
+  justify-self:end;
+  box-shadow:0 8px 20px rgba(15,23,42,.12);
+}
+.teachers-v2 .manager-card .teacher-profile-head>.avatar{
+  width:96px;
+  height:96px;
+  flex-basis:96px;
+}
+
+/* Öğretmen profil detayında fotoğraf sağda, metin solda; fotoğraf listeden de büyük. */
+.teachers-v2 .teacher-detail-v2 .profile-detail-hero{
+  grid-template-columns:minmax(0,1fr) 112px !important;
+  grid-template-areas:
+    "copy avatar"
+    "status avatar";
+  column-gap:18px;
+  row-gap:8px;
+  align-items:center;
+}
+.teachers-v2 .teacher-detail-v2 .profile-detail-copy{
+  grid-area:copy;
+}
+.teachers-v2 .teacher-detail-v2 .profile-status{
+  grid-area:status;
+  grid-column:auto;
+  justify-self:start;
+  align-self:start;
+}
+.teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
+  grid-area:avatar;
+  width:112px;
+  height:112px;
+  border-radius:50%;
+  font-size:24px;
+  justify-self:end;
+  align-self:center;
+  box-shadow:0 10px 24px rgba(15,23,42,.14);
+}
+
+@media(max-width:700px){
+  .teachers-v2 .teacher-detail-v2 .profile-detail-hero{
+    grid-template-columns:minmax(0,1fr) 104px !important;
+    grid-template-areas:
+      "copy avatar"
+      "status avatar";
+    column-gap:14px;
+  }
+  .teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
+    width:104px;
+    height:104px;
+  }
+}
+
+@media(max-width:520px){
+  .teachers-v2 .teacher-profile-head>.avatar{
+    width:82px;
+    height:82px;
+    flex-basis:82px;
+  }
+  .teachers-v2 .manager-card .teacher-profile-head>.avatar{
+    width:88px;
+    height:88px;
+    flex-basis:88px;
+  }
+  .teachers-v2 .teacher-detail-v2 .profile-detail-hero{
+    grid-template-columns:minmax(0,1fr) 92px !important;
+    column-gap:12px;
+  }
+  .teachers-v2 .teacher-detail-v2 .profile-detail-avatar{
+    width:92px;
+    height:92px;
+    font-size:21px;
+  }
+}

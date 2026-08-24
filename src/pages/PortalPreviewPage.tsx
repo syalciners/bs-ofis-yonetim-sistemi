@@ -4,7 +4,6 @@ import {
   BookOpenCheck,
   CalendarDays,
   ChevronRight,
-  CircleUserRound,
   Clock3,
   GraduationCap,
   LockKeyhole,
@@ -15,8 +14,11 @@ import {
 } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { ProfileAvatar } from '../components/ProfileAvatar'
 import { ManagerModeNav } from '../components/ManagerModeNav'
 import { addDays, todayISO } from '../lib/format'
+import { APP_MODE } from '../lib/supabase'
+import { demoPersonaPhoto } from '../lib/demoPersonaPhoto'
 import { isManagerTeacher } from '../lib/teacherTone'
 import type { AppData } from '../lib/types'
 
@@ -178,11 +180,11 @@ function AssignmentsView({ items, role }: { items: PreviewAssignment[]; role: Po
   </section>
 }
 
-function ProfileView({ role, name, email, onExit }: { role: PortalPreviewRole; name: string; email: string | null; onExit: () => void }) {
+function ProfileView({ role, name, email, photoPath, onExit }: { role: PortalPreviewRole; name: string; email: string | null; photoPath: string | null; onExit: () => void }) {
   return <section className="portal-preview-section portal-preview-page-section">
     <div className="portal-preview-page-heading"><div><span>Hesap ve erişim</span><h2>Profilim</h2></div><ReadOnlyPill/></div>
     <article className="portal-preview-profile-card">
-      <div className="portal-preview-profile-avatar"><CircleUserRound size={34}/></div>
+      <ProfileAvatar name={name} photoPath={photoPath} className="portal-preview-profile-avatar"/>
       <div className="portal-preview-profile-name"><strong>{name}</strong><span>{roleCopy(role)}</span></div>
       <div className="portal-preview-profile-rows">
         <div><span>Rol</span><strong>{role}</strong></div>
@@ -210,11 +212,11 @@ export function PortalPreviewPage({ role }: { role: PortalPreviewRole }) {
     if (role === 'Öğretmen') return data.ogretmenler
       .filter(x => x.durum !== 'Pasif' && x.rol !== 'Yönetici' && !isManagerTeacher(x.ad_soyad))
       .sort((a, b) => a.ad_soyad.localeCompare(b.ad_soyad, 'tr-TR'))
-      .map(x => ({ id: x.ogretmen_id, ad_soyad: x.ad_soyad, email: x.email || null }))
+      .map(x => ({ id: x.ogretmen_id, ad_soyad: x.ad_soyad, email: x.email || null, photoPath: x.profil_fotografi || (APP_MODE === 'demo' ? demoPersonaPhoto(x.ogretmen_id, x.ad_soyad, 'teacher') : null) }))
     return data.ogrenciler
       .filter(x => x.durum !== 'Pasif')
       .sort((a, b) => a.ad_soyad.localeCompare(b.ad_soyad, 'tr-TR'))
-      .map(x => ({ id: x.ogrenci_id, ad_soyad: x.ad_soyad, email: x.email || null }))
+      .map(x => ({ id: x.ogrenci_id, ad_soyad: x.ad_soyad, email: x.email || null, photoPath: x.profil_fotografi || (APP_MODE === 'demo' ? demoPersonaPhoto(x.ogrenci_id, x.ad_soyad, 'student') : null) }))
   }, [data, role])
 
   const person = useMemo(() => people.find(x => x.id === personId) || null, [people, personId])
@@ -234,7 +236,7 @@ export function PortalPreviewPage({ role }: { role: PortalPreviewRole }) {
     <section className="portal-selector-panel">
       <div className="portal-selector-heading"><div><span>{role === 'Öğretmen' ? 'EĞİTİM KADROSU' : 'AKTİF ÖĞRENCİLER'}</span><h2>{role === 'Öğretmen' ? 'Öğretmen seç' : 'Öğrenci seç'}</h2></div><strong>{people.length} kişi</strong></div>
       <div className="portal-person-grid">{people.map(item => <button className="portal-person-card" type="button" key={item.id} onClick={() => nav(`${selectorPath}/${encodeURIComponent(item.id)}`)}>
-        <span className="portal-person-avatar">{item.ad_soyad.split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr-TR')}</span>
+        <ProfileAvatar name={item.ad_soyad} photoPath={item.photoPath} className="portal-person-avatar"/>
         <span className="portal-person-copy"><strong>{item.ad_soyad}</strong><small>{item.email || 'E-posta tanımlı değil'}</small></span>
         <ChevronRight size={18}/>
       </button>)}</div>
@@ -261,7 +263,7 @@ export function PortalPreviewPage({ role }: { role: PortalPreviewRole }) {
         {tab === 'bugun' && <TodayView role={role} name={person.ad_soyad} lessons={todayLessons}/>} 
         {tab === 'program' && <ProgramView lessons={programLessons}/>} 
         {tab === 'odevler' && <AssignmentsView items={assignments} role={role}/>} 
-        {tab === 'profil' && <ProfileView role={role} name={person.ad_soyad} email={person.email} onExit={() => nav(selectorPath)}/>} 
+        {tab === 'profil' && <ProfileView role={role} name={person.ad_soyad} email={person.email} photoPath={person.photoPath} onExit={() => nav(selectorPath)}/>} 
       </main>
 
       <nav className="portal-preview-bottom-nav" aria-label="Portal menüsü">

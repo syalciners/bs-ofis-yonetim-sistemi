@@ -16,9 +16,11 @@ import './sheet-footer-fixed.css'
 import './report-corporate.css'
 import './assignment-whatsapp.css'
 import './program-share.css'
+import './program-share-recipient-choice.css'
 import './program-week-layout.css'
 import './daily-calendar.css'
 import './fixed-program-calendar.css'
+import './mobile-drag-context-fix.css'
 import './premium-lesson-form.css'
 import './premium-typography.css'
 import './page-title-standard.css'
@@ -27,6 +29,12 @@ import './brand-palette.css'
 import './demo-discovery.css'
 import './settings-hub.css'
 import './notifications.css'
+
+// Mobilde sürüklenebilir ders/program bloklarında uzun basmanın tarayıcı bağlam menüsünü açmasını engelle.
+document.addEventListener('contextmenu', event => {
+  const target=event.target
+  if(target instanceof Element&&target.closest('.daily-lesson-block.drag-enabled'))event.preventDefault()
+})
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

@@ -2,7 +2,7 @@ name: Demo izolasyon ve build doğrulama
 
 on:
   push:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, demo-yoneticiler-isolation-test]
   workflow_dispatch:
 
 permissions:

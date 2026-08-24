@@ -54,7 +54,7 @@ export function AssignmentEditorForm({ assignment, studentId, driveArchiveEnable
         <label className="assignment-file-picker"><ImagePlus size={18}/><span><b>Fotoğraf / Kamera</b><small>{image?.name||assignmentAttachmentName(assignment?.odev_fotografi)||(assignment?.odev_fotograf_linki?'Mevcut bağlantılı görsel':'Kamera, galeri veya Drive · en fazla 15 MB')}</small></span><input type="file" accept="image/*" aria-label="Kamera, galeri veya Drive’dan fotoğraf seç" onChange={e=>setImage(e.target.files?.[0]||null)}/></label>
         <label className="assignment-file-picker"><Paperclip size={18}/><span><b>Dosya / Drive</b><small>{file?.name||assignmentAttachmentName(assignment?.odev_dosyasi)||(assignment?.odev_dosya_linki?'Mevcut bağlantılı dosya':'Telefon, bilgisayar veya Drive · PDF, Word, Excel · en fazla 15 MB')}</small></span><input type="file" accept="application/pdf,.doc,.docx,.xls,.xlsx" aria-label="Telefon, bilgisayar veya Drive’dan dosya seç" onChange={e=>setFile(e.target.files?.[0]||null)}/></label>
       </div>
-      <div className="form-hint"><FileText size={14}/>Ekler önce güvenli depoya alınır, ardından öğrencinin Drive klasörüne arşivlenir.</div>
+      <div className="form-hint"><FileText size={14}/>{driveArchiveEnabled?'Ekler önce güvenli depoya alınır, ardından öğrencinin Drive klasörüne arşivlenir.':'Ekler güvenli depoya alınır ve ödev kaydıyla birlikte korunur.'}</div>
     </div>
     <div className="wide form-actions"><button type="button" className="secondary-btn" onClick={onCancel}>Vazgeç</button><button type="submit" className="primary-btn" disabled={busy}>{busy?'Kaydediliyor…':assignment?'Ödevi Güncelle':'Ödevi Kaydet'}</button></div>
   </form>

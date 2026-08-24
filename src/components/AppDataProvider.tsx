@@ -23,7 +23,8 @@ interface AppCtx {
 }
 const Ctx = createContext<AppCtx | null>(null)
 
-const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
+const portalBaseUrl = import.meta.env.VITE_PORTAL_URL?.trim() || ''
+const PORTAL_URL = portalBaseUrl ? `${portalBaseUrl.replace(/\/+$/, '')}/` : ''
 
 function portalSessionUrl(session: Session) {
   const fragment = new URLSearchParams({
@@ -37,6 +38,7 @@ function portalSessionUrl(session: Session) {
 }
 
 async function redirectToPortalIfEligible(session: Session) {
+  if (!PORTAL_URL) return false
   const { data, error } = await supabase.rpc('portal_oturum_bilgisi_v2')
   if (error || !data || typeof data !== 'object') return false
 

@@ -1,6 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-24T23:51:00+03:00
-Hedef commit: dde2f0bae50802aedb8e797f4f5aa1576805bd07
-Kapsam: Demo satışa hazırlık denetimi Finans fazı; Öğretmen Borcu ifadesini Ödenecek Hakediş olarak düzeltmek, sekmeyi Hakedişler olarak adlandırmak ve ödeme bekleyen öğretmen kartlarında tutarlı profil portreleri göstermek.
+Tarih: 2026-08-25T00:03:00+03:00
+Hedef commit: 7f18901784977bf82674b918cea165a24cd092fa
+Kapsam: Demo satışa hazırlık denetimi Raporlar fazı; Raporlar ekranı ve Kurum Yönetim PDF'sindeki Öğretmen Borcu ifadesini Ödenecek Hakediş olarak eşitlemek.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
 Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + TypeScript/Vite build + gerçek secret regex kontrolü + dinamik asset kontrolü + canlı smoke testi. Main ve canlı BS Ofis uygulamasına dokunulmayacak.

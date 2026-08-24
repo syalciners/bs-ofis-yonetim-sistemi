@@ -1,0 +1,23 @@
+.demo-synthetic-notice{
+  width:min(1180px,calc(100% - 32px));
+  margin:10px auto 0;
+  padding:9px 12px;
+  border:1px solid #dbeafe;
+  border-radius:12px;
+  background:#f8fbff;
+  color:#475569;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.45;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(15,23,42,.035);
+}
+@media(max-width:640px){
+  .demo-synthetic-notice{
+    width:calc(100% - 20px);
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    font-size:10px;
+  }
+}

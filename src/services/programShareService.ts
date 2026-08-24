@@ -4,6 +4,7 @@ import { buildWhatsappUrl, maskedPhone, normalizeTrWhatsappPhone } from '../lib/
 import { branchName, roomName, studentName, teacherName } from './metrics'
 
 export type ProgramShareTarget={type:'student'|'teacher';id:string}
+export type ProgramShareRecipient={id:'guardian'|'student'|'teacher';name:string;phone:string;masked:string}
 
 export interface ProgramSharePreviewData{
   target:ProgramShareTarget
@@ -11,6 +12,7 @@ export interface ProgramSharePreviewData{
   recipientName:string
   recipientPhone:string
   recipientMasked:string
+  recipientOptions:ProgramShareRecipient[]
   weekLabel:string
   message:string
   whatsappUrl:string|null
@@ -82,9 +84,15 @@ export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,
   const teacher=target.type==='teacher'?data.ogretmenler.find(x=>x.ogretmen_id===target.id):undefined
   const rawPersonName=student?.ad_soyad||teacher?.ad_soyad||'Seçili kişi'
   const personName=titleCaseTr(rawPersonName)
-  const guardianPhone=student?.veli_telefon||''
-  const recipientPhone=target.type==='student'?(guardianPhone||student?.ogrenci_telefon||''):(teacher?.telefon||'')
-  const recipientName=target.type==='student'&&guardianPhone?(student?.veli_adi?`${titleCaseTr(student.veli_adi)} (Veli)`:'Veli'):personName
+  const recipientOptions:ProgramShareRecipient[]=target.type==='student'
+    ?[
+      ...(student?.veli_telefon?[{id:'guardian' as const,name:student?.veli_adi?`${titleCaseTr(student.veli_adi)} (Veli)`:'Veli',phone:student.veli_telefon,masked:maskedPhone(student.veli_telefon)}]:[]),
+      ...(student?.ogrenci_telefon?[{id:'student' as const,name:`${personName} (Öğrenci)`,phone:student.ogrenci_telefon,masked:maskedPhone(student.ogrenci_telefon)}]:[]),
+    ]
+    :teacher?.telefon?[{id:'teacher',name:personName,phone:teacher.telefon,masked:maskedPhone(teacher.telefon)}]:[]
+  const defaultRecipient=recipientOptions[0]
+  const recipientPhone=defaultRecipient?.phone||''
+  const recipientName=defaultRecipient?.name||personName
   const weekLabel=compactWeekLabel(monday,sunday)
   const lines=['Merhaba 👋','','📅 *HAFTALIK DERS PROGRAMI*']
   lines.push(target.type==='student'?`👤 *Öğrenci:* ${personName}`:`👨‍🏫 *Öğretmen:* ${personName}`)
@@ -104,7 +112,8 @@ export function buildProgramSharePreview(data:AppData,target:ProgramShareTarget,
     personName,
     recipientName,
     recipientPhone,
-    recipientMasked:maskedPhone(recipientPhone),
+    recipientMasked:defaultRecipient?.masked||'',
+    recipientOptions,
     weekLabel,
     message,
     whatsappUrl:normalized?buildWhatsappUrl(recipientPhone,message):null,

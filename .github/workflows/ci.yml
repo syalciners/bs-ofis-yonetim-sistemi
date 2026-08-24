@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          env -u VITE_SUPABASE_URL -u VITE_SUPABASE_PUBLISHABLE_KEY npm run build >/tmp/missing-env.log 2>&1
+          VITE_SUPABASE_URL='' VITE_SUPABASE_PUBLISHABLE_KEY='' npm run build >/tmp/missing-env.log 2>&1
           STATUS=$?
           set -e
           test "$STATUS" -ne 0 || { echo "::error::Eksik env ile build beklenmedik şekilde başarılı oldu."; exit 1; }

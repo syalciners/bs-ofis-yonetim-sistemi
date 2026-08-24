@@ -13,18 +13,22 @@ function normalizeName(name: string) {
   return name.trim().toLocaleUpperCase('tr-TR')
 }
 
+function demoPhotoPath(index: number) {
+  return `/demo-photos/p${String(index).padStart(2, '0')}.webp`
+}
+
 export function demoPersonaPhoto(id: string, name: string, kind: DemoPersonaKind) {
   const normalized = normalizeName(name)
 
   if (kind === 'manager') {
-    if (normalized === 'DENİZ ARMAN') return 'demo-sprite:0'
-    if (normalized === 'SELİN AKSOY') return 'demo-sprite:1'
-    return `demo-sprite:${hashText(`${id}|${name}|${kind}`) % 2}`
+    if (normalized === 'DENİZ ARMAN') return demoPhotoPath(0)
+    if (normalized === 'SELİN AKSOY') return demoPhotoPath(1)
+    return demoPhotoPath(hashText(`${id}|${name}|${kind}`) % 2)
   }
 
   if (kind === 'teacher') {
-    return `demo-sprite:${2 + (hashText(`${id}|${name}|${kind}`) % 4)}`
+    return demoPhotoPath(2 + (hashText(`${id}|${name}|${kind}`) % 4))
   }
 
-  return `demo-sprite:${6 + (hashText(`${id}|${name}|${kind}`) % 6)}`
+  return demoPhotoPath(6 + (hashText(`${id}|${name}|${kind}`) % 6))
 }

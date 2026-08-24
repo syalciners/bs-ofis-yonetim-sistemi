@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useAppData } from '../components/AppDataProvider'
+import { APP_MODE } from '../lib/supabase'
 import { EducationDefinitionsPanel } from '../components/EducationDefinitionsPanel'
 import { FinancialDefinitionsPanel } from '../components/FinancialDefinitionsPanel'
 import { ProfileSettingsForm } from '../components/ProfileSettingsForm'
@@ -24,6 +25,7 @@ type SettingsInfoKey='kurum'|'kullanicilar'|'egitim'|'finans'|'program'|'portal'
 
 export function SettingsPage(){
   const{profile,signOut,data,refresh}=useAppData()
+  const isDemo=APP_MODE==='demo'
   const[editing,setEditing]=useState(false)
   const[info,setInfo]=useState<SettingsInfoKey|null>(null)
 
@@ -82,7 +84,7 @@ export function SettingsPage(){
       <section className="settings-card settings-account-card">
         <div className="settings-avatar"><UserCircle2/></div>
         <div><strong>{profile?.ad_soyad||'Demo Yönetici'}</strong><span>{profile?.rol||'Yönetici'}</span></div>
-        <button className="secondary-btn" onClick={()=>setEditing(true)}><Edit3 size={16}/>Profili Düzenle</button>
+        {!isDemo&&<button className="secondary-btn" onClick={()=>setEditing(true)}><Edit3 size={16}/>Profili Düzenle</button>}
       </section>
       <section className="settings-list settings-account-list">
         <div><Mail/><span><b>E-posta</b><small>{profile?.email||'demo@bsegitim.local'}</small></span></div>
@@ -92,7 +94,7 @@ export function SettingsPage(){
       <button className="danger-btn full settings-signout" onClick={()=>void signOut()}><LogOut size={17}/>Demo Oturumundan Çık</button>
     </section>
 
-    <Sheet open={editing} title="Profili Düzenle" subtitle="Demo oturumundaki profil bilgileri" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
+    <Sheet open={!isDemo&&editing} title="Profili Düzenle" subtitle="Profil bilgileri" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>
     <Sheet open={Boolean(info)} title={sheetTitle} subtitle={sheetSubtitle} onClose={()=>setInfo(null)}>
       {info==='egitim'&&<EducationDefinitionsPanel branches={data?.branslar||[]} rooms={data?.derslikler||[]} onUpdated={refresh}/>} 
       {info==='finans'&&<FinancialDefinitionsPanel accounts={data?.kasaHesaplari||[]} categories={data?.giderKategorileri||[]} movements={data?.kasaHareketleri||[]} onUpdated={refresh}/>} 

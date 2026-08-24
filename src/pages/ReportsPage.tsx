@@ -602,7 +602,7 @@ export function ReportsPage() {
                   <small>Açık öğrenci bakiyeleri</small>
                 </div>
                 <div>
-                  <span>Öğretmen Borcu</span>
+                  <span>Ödenecek Hakediş</span>
                   <b>{money(totalTeacherBalance(data))}</b>
                   <small>Ödenmemiş hakediş</small>
                 </div>

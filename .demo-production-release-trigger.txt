@@ -1,6 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-24T23:36:00+03:00
-Hedef commit: 612225fbae9de0a31adda536b865fa8632ea661c
-Kapsam: Demo satışa hazırlık denetimi Öğrenciler fazı; öğrenci liste kartındaki sentetik/gerçek profil fotoğrafını detay profilinde de aynı kişi için tutarlı göstermek ve görsel fallback'i korumak.
+Tarih: 2026-08-24T23:44:00+03:00
+Hedef commit: 7de29cc7a71edc562434a18c5c88b3c99b828e91
+Kapsam: Demo satışa hazırlık denetimi Takvim fazı; yönetici kimliklerini Demo sunum katmanında merkezi olarak Deniz Arman ve Selin Aksoy adlarına bağlamak ve Takvim, Öğretmenler, Finans, Raporlar ve Portal görünümlerinde aynı kimliği korumak.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
 Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + TypeScript/Vite build + gerçek secret regex kontrolü + dinamik asset kontrolü + canlı smoke testi. Main ve canlı BS Ofis uygulamasına dokunulmayacak.

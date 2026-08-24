@@ -29,7 +29,7 @@ function ProtectedApp() {
   if (loading) return <main className="boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><LoaderCircle className="spin" size={24}/><span>BS Eğitim hazırlanıyor…</span></main>
   if (!session) return <LoginScreen />
   if (error && !data) return <main className="boot error-boot"><img src="./bs-logo.svg" alt="BS Eğitim"/><strong>Uygulama açılamadı</strong><span>{error}</span></main>
-  return <div className="app-shell"><AppHeader/><DemoBanner/><main className="page-container"><Routes>
+  return <div className="app-shell"><AppHeader/><DemoBanner/><div className="demo-synthetic-notice" role="note">Demodaki isimler ve kişiler gerçek kişiler değildir, yapay zeka tarafından üretilmişlerdir.</div><main className="page-container"><Routes>
     <Route path="/" element={<OverviewPage/>}/>
     <Route path="/takvim" element={<CalendarPage/>}/>
     <Route path="/takvim/gunluk" element={<DailyCalendarPage/>}/>

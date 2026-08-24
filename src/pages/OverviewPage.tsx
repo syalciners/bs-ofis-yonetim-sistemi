@@ -1,4 +1,4 @@
-import { AlertCircle, Banknote, CalendarCheck2, CalendarPlus, GraduationCap, ReceiptText, UserPlus, WalletCards } from 'lucide-react'
+import { AlertCircle, Banknote, CalendarCheck2, CalendarPlus, FileBarChart, GraduationCap, ReceiptText, UserPlus, UsersRound, WalletCards } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
@@ -29,11 +29,13 @@ export function OverviewPage() {
     <section className="page-title-row"><div><span className="eyebrow">YÖNETİM ÖZETİ</span><h1>Bugün</h1></div></section>
 
     {isDemo&&<section className="demo-discovery" aria-label="Önerilen demo rotası">
-      <div className="demo-discovery-copy"><span>ÖNERİLEN DEMO ROTASI</span><h2>Demoyu 3 adımda keşfedin</h2><p>Örnek veriler üzerinden günlük yönetim akışının en güçlü üç bölümünü deneyin.</p></div>
+      <div className="demo-discovery-copy"><span>ÖNERİLEN DEMO ROTASI</span><h2>Demoyu 5 adımda keşfedin</h2><p>Örnek veriler üzerinden öğrenci yönetiminden raporlara ve portallara kadar temel satış senaryosunu deneyin.</p></div>
       <div className="demo-discovery-actions">
         <button type="button" onClick={()=>nav('/ogrenciler')}><span className="demo-discovery-step">1</span><span><b>Öğrenci ve bakiye</b><small>Öğrenci kartı, açık bakiye ve tahsilat geçmişi</small></span><UserPlus/></button>
         <button type="button" onClick={()=>nav('/takvim')}><span className="demo-discovery-step">2</span><span><b>Takvim ve ders</b><small>Haftalık program, ders sonucu ve günlük akış</small></span><CalendarCheck2/></button>
-        <button type="button" onClick={()=>nav('/finans')}><span className="demo-discovery-step">3</span><span><b>Finans ve rapor</b><small>Tahsilat, gider ve öğretmen hakediş özetleri</small></span><Banknote/></button>
+        <button type="button" onClick={()=>nav('/finans')}><span className="demo-discovery-step">3</span><span><b>Finans yönetimi</b><small>Tahsilat, gider, kasa ve öğretmen hakedişleri</small></span><Banknote/></button>
+        <button type="button" onClick={()=>nav('/raporlar')}><span className="demo-discovery-step">4</span><span><b>Raporlar</b><small>Kurum, öğrenci ekstresi ve öğretmen hakediş raporları</small></span><FileBarChart/></button>
+        <button type="button" onClick={()=>nav('/portal-onizleme/ogrenci')}><span className="demo-discovery-step">5</span><span><b>Öğrenci ve öğretmen portalları</b><small>Salt okunur portal deneyimini yönetici gözüyle inceleyin</small></span><UsersRound/></button>
       </div>
     </section>}
 
@@ -41,7 +43,7 @@ export function OverviewPage() {
       <button className="kpi-card teal" onClick={()=>nav('/takvim')}><div className="kpi-icon"><CalendarCheck2/></div><span>Bugünkü Ders Saati</span><strong>{todayLessonHours}</strong><small>{plannedLessonHours} planlandı</small></button>
       <button className="kpi-card blue" onClick={()=>nav('/finans?tab=tahsilatlar')}><div className="kpi-icon"><Banknote/></div><span>Bu Ay Tahsilat</span><strong>{money(metrics.collections)}</strong><small>gerçek nakit girişi</small></button>
       <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><div className="kpi-icon"><WalletCards/></div><span>Açık Alacak</span><strong>{money(metrics.debt)}</strong><small>öğrenci bakiyeleri</small></button>
-      <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>Öğretmen Borcu</span><strong>{money(metrics.teacher)}</strong><small>ödenmemiş hakediş</small></button>
+      <button className="kpi-card red" onClick={()=>nav('/finans?tab=ogretmen')}><div className="kpi-icon"><GraduationCap/></div><span>Ödenecek Hakediş</span><strong>{money(metrics.teacher)}</strong><small>öğretmenlere kalan ödeme</small></button>
     </section>
 
     <section><div className="section-heading"><div><h2>Hızlı İşlemler</h2><span>tek dokunuş</span></div></div><div className="quick-actions">

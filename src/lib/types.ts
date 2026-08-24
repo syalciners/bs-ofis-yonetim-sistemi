@@ -120,26 +120,32 @@ export interface KasaHareketi { hareket_id: Id; tarih: string; hareket_turu?: st
 export interface Odev {
   odev_id: Id
   ogrenci_id: Id
-  ogretmen_id?: Id | null
+  ogretmen_id: Id
   ders_id?: Id | null
-  verilme_tarihi?: string | null
-  verilis_tarihi?: string | null
+  konu?: string | null
+  odev_basligi?: string | null
+  odev_aciklamasi?: string | null
+  verilis_tarihi: string
   son_teslim_tarihi?: string | null
-  teslim_tarihi?: string | null
-  baslik?: string | null
-  aciklama?: string | null
-  durum?: string | null
-  whatsapp_gonderildi_mi?: boolean | null
-  whatsapp_gonderim_tarihi?: string | null
+  durum: string
+  oncelik?: string | null
+  odev_fotografi?: string | null
+  odev_dosyasi?: string | null
+  teslim_dosyasi?: string | null
+  odev_dosya_linki?: string | null
+  odev_fotograf_linki?: string | null
+  ogretmen_notu?: string | null
+  puan?: string | null
+  tamamlanma_tarihi?: string | null
 }
 
 export interface KullaniciProfili {
   auth_user_id: string
-  email?: string | null
-  ad_soyad?: string | null
-  rol?: string | null
-  ogretmen_id?: string | null
-  aktif?: boolean | null
+  email: string
+  ad_soyad: string
+  rol: string
+  ogretmen_id?: Id | null
+  aktif: boolean
   telefon?: string | null
 }
 

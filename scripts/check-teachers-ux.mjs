@@ -4,11 +4,13 @@ const page = readFileSync('src/pages/TeachersPage.tsx','utf8')
 const css = readFileSync('src/ux-overrides.css','utf8')
 const stability = readFileSync('src/navigation-stability.css','utf8')
 const payments = readFileSync('src/pages/TeacherPaymentsPage.tsx','utf8')
+const tone = readFileSync('src/lib/teacherTone.ts','utf8')
 
 const checks = [
   ['Yöneticiler ayrı üst gruptadır', page.includes('manager-teacher-grid') && page.includes('Yöneticiler')],
   ['Diğer öğretmenler ayrı gruptadır', page.includes('standard-teacher-grid') && page.includes('EĞİTİM KADROSU')],
-  ['Yöneticiler isim yardımcı fonksiyonuyla belirlenir', page.includes('isManagerTeacher')],
+  ['Yöneticiler rol alanıyla belirlenir', page.includes('isManagerTeacher(x)') && page.includes('isManagerTeacher(selected)') && tone.includes("normalizeTeacherRole(teacher.rol) === 'YÖNETİCİ'")],
+  ['Akademik unvanlar renk kimliğini bozmaz', tone.includes("replace(/^(?:(?:PROF|DOÇ|DR|UZM)") && tone.includes("normalized === 'BAŞAK ATİLLA'")],
   ['Branşlar öğretmen-branş ilişkisinden okunur', page.includes('data.ogretmenBranslari') && page.includes('data.branslar.find')],
   ['Kartlarda Verdiği Dersler gösterilir', page.includes('Verdiği Dersler')],
   ['Öğretmen detayında Bu Ay kayıt adedi değil ders saati toplamıdır', page.includes('monthLessonHours=') && page.includes('reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0)') && page.includes('yapılan ders saati')],

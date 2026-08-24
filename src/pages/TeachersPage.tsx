@@ -26,9 +26,9 @@ export function TeachersPage(){
     if(normalized.some(x=>x.includes('MATEMATİK')||x.includes('MATH')))return 'Matematik Öğretmeni'
     return branches[0]?`${branches[0]} Öğretmeni`:'Öğretmen'
   }
-  const managerRank=(name:string)=>name.trim().toLocaleUpperCase('tr-TR')==='BAŞAK ATİLLA'?0:1
-  const managers=rows.filter(x=>isManagerTeacher(x.ad_soyad)).sort((a,b)=>managerRank(a.ad_soyad)-managerRank(b.ad_soyad))
-  const teachers=rows.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
+  const managerRank=(name:string)=>teacherTone(name)==='teacher-pink'?0:1
+  const managers=rows.filter(x=>isManagerTeacher(x)).sort((a,b)=>managerRank(a.ad_soyad)-managerRank(b.ad_soyad))
+  const teachers=rows.filter(x=>!isManagerTeacher(x)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
 
   const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle;return <button className={`teacher-profile-card ${teacherTone(x.ad_soyad)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>setSelected(x)}>
     <div className="teacher-profile-head"><ProfileAvatar name={x.ad_soyad} photoPath={x.profil_fotografi} className="avatar purple"/><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
@@ -45,7 +45,7 @@ export function TeachersPage(){
     {!!teachers.length&&<section className="teacher-group"><div className="teacher-group-heading"><div><span className="eyebrow">EĞİTİM KADROSU</span><h2>Öğretmenler</h2></div><span>{teachers.length} kişi</span></div><div className="standard-teacher-grid">{teachers.map(x=>teacherCard(x,false))}</div></section>}
     {!rows.length&&<div className="calm-empty"><GraduationCap/><b>Öğretmen bulunamadı.</b><span>Arama metnini değiştir veya yeni öğretmen ekle.</span></div>}
 
-    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerTeacher(selected.ad_soyad),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
+    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerTeacher(selected),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
       <section className={`profile-detail-hero ${teacherTone(selected.ad_soyad)}`}><ProfileAvatar name={selected.ad_soyad} photoPath={selected.profil_fotografi} className="profile-detail-avatar"/><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
 
       {(phone||selected.email)&&<section className="profile-contact-strip" aria-label="İletişim">

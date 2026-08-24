@@ -20,6 +20,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test workflow kimliğini erken kaydet
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$GITHUB_RUN_ID" > .demo-build-run-id.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .demo-build-run-id.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Test workflow kimliğini kaydet [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
       - run: npm install --no-audit --no-fund
       - run: npm run check:demo-isolation
       - run: npm run check:rules
@@ -35,14 +48,12 @@ jobs:
         run: node scripts/sync-pages-root.mjs
       - name: Derlenmiş demo paketini doğrula
         run: node scripts/check-published-pages.mjs
-      - name: Workflow kimliğini kaydet
-        if: github.event_name == 'push'
-        run: printf '%s\n' "$GITHUB_RUN_ID" > .demo-build-run-id.txt
       - name: Derlenmiş demo paketini branch'e kaydet
         if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
+          git pull --rebase origin "$GITHUB_REF_NAME"
           git add -A
           if git diff --cached --quiet; then
             echo "Derlenmiş demo paketi zaten güncel."

@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: test
+      VITE_SUPABASE_URL: https://saas-env-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_saas_env_test_placeholder
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,7 +51,18 @@ jobs:
       - name: Yönetici portal önizleme kuralları
         run: node scripts/check-manager-portal-preview.mjs
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Eksik instance env doğrulaması reddediliyor
+        shell: bash
+        run: |
+          set +e
+          VITE_SUPABASE_URL='' VITE_SUPABASE_PUBLISHABLE_KEY='' npm run check:instance-config >/tmp/missing-env.log 2>&1
+          STATUS=$?
+          set -e
+          test "$STATUS" -ne 0 || { echo "::error::Eksik env doğrulaması beklenmedik şekilde başarılı oldu."; exit 1; }
+          grep -F -q 'VITE_SUPABASE_URL' /tmp/missing-env.log || { cat /tmp/missing-env.log; echo "::error::Beklenen fail-fast mesajı bulunamadı."; exit 1; }
+          echo "Eksik instance env güvenli biçimde reddediliyor."
+      - name: Instance env ile build
+        run: npm run build
       - name: Legacy Pages paketini repo köküne senkronla
         run: node scripts/sync-pages-root.mjs
       - name: Derlenmiş Pages paketini doğrula

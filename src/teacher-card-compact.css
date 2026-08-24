@@ -1,0 +1,64 @@
+/* Öğretmen kartları: portre sağda kalır, branşlar soldaki kullanılabilir alanı doldurur. */
+.teachers-v2 .teacher-profile-card{
+  grid-template-columns:minmax(0,1fr) clamp(84px,22vw,96px);
+  grid-template-areas:
+    "copy avatar"
+    "branches avatar"
+    "footer footer";
+  column-gap:16px;
+  row-gap:10px;
+  align-items:start;
+}
+.teachers-v2 .teacher-profile-card.manager-card{
+  grid-template-columns:minmax(0,1fr) clamp(92px,24vw,104px);
+}
+.teachers-v2 .teacher-profile-card .teacher-profile-head{
+  display:contents;
+}
+.teachers-v2 .teacher-profile-card .teacher-profile-head>div:last-child{
+  grid-area:copy;
+  min-width:0;
+  padding-top:8px;
+  align-self:start;
+}
+.teachers-v2 .teacher-profile-card .teacher-profile-head>.avatar{
+  grid-area:avatar;
+  width:100%;
+  height:auto;
+  aspect-ratio:4/5;
+  border-radius:18px;
+  justify-self:end;
+  align-self:start;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+}
+.teachers-v2 .teacher-profile-card .teacher-profile-head>.avatar img{
+  border-radius:inherit !important;
+  object-position:center center;
+}
+.teachers-v2 .teacher-profile-card .teacher-branches{
+  grid-area:branches;
+  min-width:0;
+  width:100%;
+  margin:0;
+  align-self:start;
+  padding:10px 11px;
+}
+.teachers-v2 .teacher-profile-card .teacher-branches b{overflow-wrap:anywhere}
+.teachers-v2 .teacher-profile-card .teacher-card-footer{
+  grid-area:footer;
+  width:100%;
+  margin-top:3px;
+}
+@media(max-width:520px){
+  .teachers-v2 .teacher-profile-card{
+    grid-template-columns:minmax(0,1fr) clamp(82px,23vw,90px);
+    column-gap:14px;
+    row-gap:9px;
+  }
+  .teachers-v2 .teacher-profile-card.manager-card{
+    grid-template-columns:minmax(0,1fr) clamp(88px,25vw,98px);
+  }
+  .teachers-v2 .teacher-profile-card .teacher-profile-head>div:last-child{padding-top:6px}
+  .teachers-v2 .teacher-profile-card .teacher-branches{padding:9px 10px}
+}

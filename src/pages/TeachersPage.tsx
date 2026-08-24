@@ -2,6 +2,8 @@ import { CalendarDays, Edit3, GraduationCap, Mail, MessageCircle, Phone, Plus, S
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { ProfileAvatar } from '../components/ProfileAvatar'
+import { ProfilePhotoEditor } from '../components/ProfilePhotoEditor'
 import { Sheet } from '../components/Sheet'
 import { TeacherSectionNav } from '../components/TeacherSectionNav'
 import { TeacherForm } from '../components/forms'
@@ -29,7 +31,7 @@ export function TeachersPage(){
   const teachers=rows.filter(x=>!isManagerTeacher(x.ad_soyad)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
 
   const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle;return <button className={`teacher-profile-card ${teacherTone(x.ad_soyad)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>setSelected(x)}>
-    <div className="teacher-profile-head"><div className="avatar purple">{x.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
+    <div className="teacher-profile-head"><ProfileAvatar name={x.ad_soyad} photoPath={x.profil_fotografi} className="avatar purple"/><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
     <div className="teacher-branches"><span>Verdiği Dersler</span><b>{branches.length?branches.join(' · '):'Branş tanımlanmamış'}</b></div>
     <div className="teacher-card-footer"><span>{next?<><b>{shortDate(next.tarih)} {time(next.baslangic_saati)}</b> sıradaki ders</>:<>Sıradaki ders yok</>}</span><span>Güncel kalan <b className={balance>0?'danger-text':''}>{money(Math.max(balance,0))}</b></span></div>
   </button>}
@@ -44,7 +46,7 @@ export function TeachersPage(){
     {!rows.length&&<div className="calm-empty"><GraduationCap/><b>Öğretmen bulunamadı.</b><span>Arama metnini değiştir veya yeni öğretmen ekle.</span></div>}
 
     <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerTeacher(selected.ad_soyad),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
-      <section className={`profile-detail-hero ${teacherTone(selected.ad_soyad)}`}><div className="profile-detail-avatar">{selected.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
+      <section className={`profile-detail-hero ${teacherTone(selected.ad_soyad)}`}><ProfileAvatar name={selected.ad_soyad} photoPath={selected.profil_fotografi} className="profile-detail-avatar"/><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
 
       {(phone||selected.email)&&<section className="profile-contact-strip" aria-label="İletişim">
         {phone&&<a className="profile-contact-btn phone" href={`tel:+${normalizePhone(phone)}`}><Phone size={17}/><span>Ara</span></a>}
@@ -64,7 +66,7 @@ export function TeachersPage(){
       <section className="detail-section visual-history-section"><div className="section-heading compact"><div><h3>Son Dersler</h3><span>{recent.length} kayıt</span></div></div>{recent.length?<div className="detail-history-list">{recent.map(x=><div className="detail-history-card" key={x.ders_id}><div><span>{shortDate(x.tarih)} · {time(x.baslangic_saati)}</span><strong>{studentName(data,x.ogrenci_id)}</strong></div><span className={`history-status ${x.ders_durumu==='Yapıldı'?'done':x.ders_durumu==='Planlandı'?'planned':'other'}`}>{x.ders_durumu}</span></div>)}</div>:<p className="muted">Ders kaydı yok.</p>}</section>
     </div>})()}</Sheet>
     <Sheet open={!!payment} title="Öğretmen Ödemesi" subtitle={payment?data.ogretmenler.find(x=>x.ogretmen_id===payment)?.ad_soyad:''} onClose={()=>setPayment(null)}>{payment&&<TeacherPaymentQuickForm teacherId={payment} onDone={()=>setPayment(null)} onCancel={()=>setPayment(null)}/>}</Sheet>
-    <Sheet open={!!edit} title="Öğretmeni Düzenle" subtitle="İletişim, branş ve durum" onClose={()=>setEdit(null)}>{edit&&<TeacherForm teacher={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/>}</Sheet>
+    <Sheet open={!!edit} title="Öğretmeni Düzenle" subtitle="İletişim, branş ve durum" onClose={()=>setEdit(null)}>{edit&&<><ProfilePhotoEditor kind="ogretmen" recordId={edit.ogretmen_id} name={edit.ad_soyad} photoPath={edit.profil_fotografi}/><TeacherForm teacher={edit} onDone={()=>setEdit(null)} onCancel={()=>setEdit(null)}/></>}</Sheet>
     <Sheet open={newTeacher} title="Yeni Öğretmen" subtitle="Yalnız gerekli bilgileri girin." onClose={()=>setNewTeacher(false)}><TeacherForm onDone={()=>setNewTeacher(false)} onCancel={()=>setNewTeacher(false)}/></Sheet>
   </div>
 }

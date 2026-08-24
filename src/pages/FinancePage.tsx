@@ -2,6 +2,7 @@ import { Banknote, GraduationCap, Landmark, Pencil, Plus, Receipt, ReceiptText, 
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { ProfileAvatar } from '../components/ProfileAvatar'
 import { Sheet } from '../components/Sheet'
 import { ExpenseForm } from '../components/forms'
 import { CollectionQuickForm } from '../components/CollectionQuickForm'
@@ -9,6 +10,8 @@ import { FinanceRecordEditForm } from '../components/FinanceRecordEditForm'
 import { TeacherPaymentQuickForm } from '../components/TeacherPaymentQuickForm'
 import { accountName, cashBalance, expenseName, monthCollections, monthExpenses, monthTeacherPayments, studentName, teacherBalance, teacherName, totalOpenDebt, totalTeacherBalance } from '../services/metrics'
 import { fullDate, money } from '../lib/format'
+import { APP_MODE } from '../lib/supabase'
+import { demoPersonaPhoto } from '../lib/demoPersonaPhoto'
 import { cancelCollection, cancelExpense, cancelTeacherPayment, deleteCanceledCollection } from '../services/financeCancelService'
 import { useToast } from '../components/Toast'
 
@@ -61,11 +64,11 @@ export function FinancePage(){
     <section className="kpi-grid four compact-kpis">
       <button className="kpi-card teal" onClick={()=>setTab('tahsilatlar')}><span>Bu Ay Tahsilat</span><strong>{money(kpis.collections)}</strong><small>gerçek nakit girişi</small></button>
       <button className="kpi-card orange" onClick={()=>nav('/ogrenciler?filtre=borclu')}><span>Açık Alacak</span><strong>{money(kpis.open)}</strong><small>borçlu öğrencileri aç</small></button>
-      <button className="kpi-card red" onClick={()=>setTab('ogretmen')}><span>Öğretmen Borcu</span><strong>{money(kpis.teacher)}</strong><small>{teacherDue.length} öğretmene ödeme bekliyor</small></button>
+      <button className="kpi-card red" onClick={()=>setTab('ogretmen')}><span>Ödenecek Hakediş</span><strong>{money(kpis.teacher)}</strong><small>{teacherDue.length} öğretmene ödeme bekliyor</small></button>
       <button className="kpi-card blue" onClick={()=>setTab('kasa')}><span>Toplam Kasa</span><strong>{money(kpis.cash)}</strong><small>nakit + banka</small></button>
     </section>
 
-    <div className="segmented four-seg"><button className={tab==='tahsilatlar'?'active':''} onClick={()=>setTab('tahsilatlar')}>Tahsilatlar</button><button className={tab==='ogretmen'?'active':''} onClick={()=>setTab('ogretmen')}>Öğretmen</button><button className={tab==='giderler'?'active':''} onClick={()=>setTab('giderler')}>Giderler</button><button className={tab==='kasa'?'active':''} onClick={()=>setTab('kasa')}>Kasa</button></div>
+    <div className="segmented four-seg"><button className={tab==='tahsilatlar'?'active':''} onClick={()=>setTab('tahsilatlar')}>Tahsilatlar</button><button className={tab==='ogretmen'?'active':''} onClick={()=>setTab('ogretmen')}>Hakedişler</button><button className={tab==='giderler'?'active':''} onClick={()=>setTab('giderler')}>Giderler</button><button className={tab==='kasa'?'active':''} onClick={()=>setTab('kasa')}>Kasa</button></div>
 
     {tab==='tahsilatlar'&&<>
       <div className="section-heading"><div><h2>Son Tahsilatlar</h2><span>{activeCollectionCount} aktif kayıt</span></div><div>{canceledCollectionCount>0&&<button type="button" className="text-btn" aria-pressed={showCanceledCollections} onClick={()=>{setShowCanceledCollections(x=>!x);setCollectionLimit(50)}}>{showCanceledCollections?'İptalleri Gizle':`İptalleri Göster (${canceledCollectionCount})`}</button>}<button type="button" className="text-btn" onClick={()=>nav('/ogrenciler?filtre=borclu')}>Borçlu Öğrenciler</button></div></div>
@@ -74,7 +77,7 @@ export function FinancePage(){
 
     {tab==='ogretmen'&&<>
       <div className="section-heading"><div><h2>Ödeme Bekleyen Öğretmenler</h2><span>{teacherDue.length} kişi</span></div></div>
-      {teacherDue.length?<section className="teacher-grid">{teacherDue.map(x=><button className="teacher-card" key={x.teacher.ogretmen_id} onClick={()=>openTeacherPayment(x.teacher.ogretmen_id)}><div className="student-top"><div className="avatar purple">{x.teacher.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div className="student-name"><strong>{x.teacher.ad_soyad}</strong><span>{teacherBranchLabel(x.teacher.ogretmen_id)}</span></div><span className="soft-pill">Ödeme Yap</span></div><div className="student-balance"><span>Güncel kalan hakediş</span><b className="danger-text">{money(x.balance)}</b></div></button>)}</section>:<div className="all-good"><GraduationCap/><span><b>Bekleyen öğretmen ödemesi yok.</b><small>Güncel hakedişler ödenmiş görünüyor.</small></span></div>}
+      {teacherDue.length?<section className="teacher-grid">{teacherDue.map(x=><button className="teacher-card" key={x.teacher.ogretmen_id} onClick={()=>openTeacherPayment(x.teacher.ogretmen_id)}><div className="student-top"><ProfileAvatar name={x.teacher.ad_soyad} photoPath={x.teacher.profil_fotografi||(APP_MODE==='demo'?demoPersonaPhoto(x.teacher.ogretmen_id,x.teacher.ad_soyad,x.teacher.rol==='Yönetici'?'manager':'teacher'):null)} className="avatar purple"/><div className="student-name"><strong>{x.teacher.ad_soyad}</strong><span>{teacherBranchLabel(x.teacher.ogretmen_id)}</span></div><span className="soft-pill">Ödeme Yap</span></div><div className="student-balance"><span>Güncel kalan hakediş</span><b className="danger-text">{money(x.balance)}</b></div></button>)}</section>:<div className="all-good"><GraduationCap/><span><b>Bekleyen öğretmen ödemesi yok.</b><small>Güncel hakedişler ödenmiş görünüyor.</small></span></div>}
       <div className="section-heading"><div><h2>Son Öğretmen Ödemeleri</h2><span>bu ay {money(kpis.teacherPaid)}</span></div>{canceledTeacherPaymentCount>0&&<button type="button" className="text-btn" aria-pressed={showCanceledTeacherPayments} onClick={()=>setShowCanceledTeacherPayments(x=>!x)}>{showCanceledTeacherPayments?'İptalleri Gizle':`İptalleri Göster (${canceledTeacherPaymentCount})`}</button>}</div>
       <section className="finance-list">{visibleTeacherPayments.length?visibleTeacherPayments.map(x=><button className="finance-card expense" style={x.iptal_mi?{opacity:.5}:undefined} key={x.ogretmen_odeme_id} onClick={()=>setSelected({type:'ogretmen',row:x})}><div className="finance-icon"><Banknote/></div><div><strong>{teacherName(data,x.ogretmen_id)}</strong><small>{fullDate(x.tarih)} · {data.hakedisDonemleri.find(d=>d.hakedis_donemi_id===x.hakedis_donemi_id)?.donem_adi||'—'} · {x.odeme_yontemi||'—'}{x.iptal_mi?' · İptal':''}</small></div><b>{x.iptal_mi?'İptal · ':'− '}{money(x.tutar)}</b></button>):<div className="calm-empty"><GraduationCap/><b>{canceledTeacherPaymentCount?'Aktif öğretmen ödemesi yok.':'Henüz öğretmen ödemesi yok.'}</b><span>{canceledTeacherPaymentCount?'İptal edilen ödemeler varsayılan listede gizleniyor.':'Ödeme bekleyen öğretmene dokunarak doğrudan ödeme başlatabilirsin.'}</span></div>}</section>
     </>}

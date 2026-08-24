@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { signedProfilePhotoUrl } from '../services/profilePhotoService'
 
@@ -15,9 +16,10 @@ type ProfileAvatarProps = {
   preview?: boolean
 }
 
-export function ProfileAvatar({ name, photoPath, className = 'avatar', preview = false }: ProfileAvatarProps) {
+export function ProfileAvatar({ name, photoPath, className = 'avatar', preview }: ProfileAvatarProps) {
   const [url, setUrl] = useState<string | null>(() => photoPath ? urlCache.get(photoPath) || null : null)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const previewEnabled = preview ?? className.split(/\s+/).includes('profile-detail-avatar')
 
   useEffect(() => {
     let active = true
@@ -60,11 +62,11 @@ export function ProfileAvatar({ name, photoPath, className = 'avatar', preview =
     }
   }, [previewOpen])
 
-  const canPreview = Boolean(preview && url)
+  const canPreview = Boolean(previewEnabled && url)
   const openPreview = () => {
     if (canPreview) setPreviewOpen(true)
   }
-  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!canPreview) return
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()

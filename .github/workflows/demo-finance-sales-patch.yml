@@ -1,0 +1,70 @@
+name: Demo Finans satış düzeltmesi
+
+on:
+  push:
+    branches: [demo-satis-audit-finans]
+    paths:
+      - .github/workflows/demo-finance-sales-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Finans ekranını satış diline ve portrelere uyumla
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/pages/FinancePage.tsx')
+          text = path.read_text()
+
+          def replace_once(old: str, new: str, label: str):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: beklenen 1 eşleşme, bulunan {count}')
+              text = text.replace(old, new, 1)
+
+          replace_once(
+              "import { useAppData } from '../components/AppDataProvider'",
+              "import { useAppData } from '../components/AppDataProvider'\nimport { ProfileAvatar } from '../components/ProfileAvatar'",
+              'ProfileAvatar importu',
+          )
+          replace_once(
+              "import { fullDate, money } from '../lib/format'",
+              "import { fullDate, money } from '../lib/format'\nimport { APP_MODE } from '../lib/supabase'\nimport { demoPersonaPhoto } from '../lib/demoPersonaPhoto'",
+              'Demo portre importları',
+          )
+          replace_once(
+              '<span>Öğretmen Borcu</span>',
+              '<span>Ödenecek Hakediş</span>',
+              'KPI terminolojisi',
+          )
+          replace_once(
+              "<button className={tab==='ogretmen'?'active':''} onClick={()=>setTab('ogretmen')}>Öğretmen</button>",
+              "<button className={tab==='ogretmen'?'active':''} onClick={()=>setTab('ogretmen')}>Hakedişler</button>",
+              'Hakediş sekmesi',
+          )
+          replace_once(
+              '''<div className="avatar purple">{x.teacher.ad_soyad.split(/\\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div>''',
+              '''<ProfileAvatar name={x.teacher.ad_soyad} photoPath={x.teacher.profil_fotografi||(APP_MODE==='demo'?demoPersonaPhoto(x.teacher.ogretmen_id,x.teacher.ad_soyad,x.teacher.rol==='Yönetici'?'manager':'teacher'):null)} className="avatar purple"/>''',
+              'Öğretmen portresi',
+          )
+
+          path.write_text(text)
+          PY
+      - name: Yalnız Finans dosyasını kaydet
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add src/pages/FinancePage.tsx
+          git diff --cached --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Demo Finans satış dilini ve portrelerini düzelt"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -2,7 +2,7 @@ name: Demo izolasyon ve build doğrulama
 
 on:
   push:
-    branches: [demo-hazirlik]
+    branches: [demo-hazirlik, demo-satis-audit-ayarlar]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,35 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_demo_placeholder
     steps:
       - uses: actions/checkout@v4
+      - name: Geçici Demo Ayarlar satış patch'i
+        if: github.ref_name == 'demo-satis-audit-ayarlar'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/pages/SettingsPage.tsx')
+          text = path.read_text()
+
+          old = "import { useAppData } from '../components/AppDataProvider'"
+          new = "import { useAppData } from '../components/AppDataProvider'\nimport { APP_MODE } from '../lib/supabase'"
+          if text.count(old) != 1: raise SystemExit('APP_MODE import eşleşmedi')
+          text = text.replace(old, new, 1)
+
+          old = "  const{profile,signOut,data,refresh}=useAppData()\n  const[editing,setEditing]=useState(false)"
+          new = "  const{profile,signOut,data,refresh}=useAppData()\n  const isDemo=APP_MODE==='demo'\n  const[editing,setEditing]=useState(false)"
+          if text.count(old) != 1: raise SystemExit('isDemo eşleşmedi')
+          text = text.replace(old, new, 1)
+
+          old = '''        <button className="secondary-btn" onClick={()=>setEditing(true)}><Edit3 size={16}/>Profili Düzenle</button>'''
+          new = '''        {!isDemo&&<button className="secondary-btn" onClick={()=>setEditing(true)}><Edit3 size={16}/>Profili Düzenle</button>}'''
+          if text.count(old) != 1: raise SystemExit('Profil düzenle butonu eşleşmedi')
+          text = text.replace(old, new, 1)
+
+          old = '''    <Sheet open={editing} title="Profili Düzenle" subtitle="Demo oturumundaki profil bilgileri" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>'''
+          new = '''    <Sheet open={!isDemo&&editing} title="Profili Düzenle" subtitle="Profil bilgileri" onClose={()=>setEditing(false)}><ProfileSettingsForm onDone={()=>setEditing(false)} onCancel={()=>setEditing(false)}/></Sheet>'''
+          if text.count(old) != 1: raise SystemExit('Profil sheet eşleşmedi')
+          path.write_text(text.replace(old, new, 1))
+          PY
       - uses: actions/setup-node@v4
         with:
           node-version: 22

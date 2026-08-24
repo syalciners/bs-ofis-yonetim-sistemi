@@ -1,6 +1,6 @@
 BS Eğitim Demo production release
-Tarih: 2026-08-24T19:28:00+03:00
-Hedef commit: 20fa824d12f805c386a43bdb385340df4f0dd2c9
-Kapsam: Ana uygulama profil fotoğrafı görsel parity’si; Demo yönetici, öğretmen ve öğrencileri için sentetik portreler; yapay zeka kişi bilgilendirmesi.
+Tarih: 2026-08-24T20:10:00+03:00
+Hedef commit: b806e6a406db2e88fd3596024708444a50cd73bb
+Kapsam: Çizim/SVG demo avatarlarının gerçekçi yapay zeka portreleriyle değiştirilmesi; 2 yönetici, 4 öğretmen ve 6 öğrenci portresinin yerel WEBP sprite üzerinden gösterilmesi.
 Hedef: yalnız bs-egitim-demo / prj_WdHf2M2WyrIEIdVGlYp65O7GKcw1
 Güvenlik: doğru demo Supabase + demo izolasyon + kritik iş kuralları + TypeScript/Vite build + gerçek secret regex kontrolü + dinamik asset kontrolü + canlı smoke testi. Main ve canlı BS Ofis uygulamasına dokunulmayacak.

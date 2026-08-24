@@ -1,12 +1,12 @@
-run_id=32756251444
+run_id=32761030806
 job_status=success
 project_guard=success
 build=success
 artifact_guard=success
 deploy=success
 smoke=success
-deployment_url=https://bs-egitim-demo-kazutllor-syalciners-8325s-projects.vercel.app
-before_index_js=assets/index-CI_37kHe.js
+deployment_url=https://bs-egitim-demo-qvhhgyqmj-syalciners-8325s-projects.vercel.app
+before_index_js=assets/index-B1vnTK9x.js
 expected_index_js=assets/index-B1vnTK9x.js
 expected_index_css=assets/index-CWQZPL1d.css
 expected_pdfmake_js=assets/pdfmake-CAybxvb_.js

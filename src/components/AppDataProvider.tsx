@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { APP_MODE, supabase } from '../lib/supabase'
+import { isManagerTeacher } from '../lib/teacherTone'
 import type { AppData, KullaniciProfili } from '../lib/types'
 import { loadAppData, loadProfile, subscribeToChanges } from '../services/officeService'
 import { loadUnreadNotificationCount } from '../services/notificationService'
@@ -30,6 +31,7 @@ interface AppCtx {
 const Ctx = createContext<AppCtx | null>(null)
 const IS_DEMO = APP_MODE === 'demo'
 const PORTAL_URL = 'https://bs-egitim-portali.vercel.app/'
+const DEMO_MANAGER_NAMES = ['Deniz Arman', 'Selin Aksoy'] as const
 const DEMO_INSTITUTION: DemoInstitutionSettings = {
   takvim_baslangic_saati: '08:00',
   takvim_bitis_saati: '21:00',
@@ -97,6 +99,25 @@ function demoProfile(user: User): KullaniciProfili {
   }
 }
 
+function presentDemoData(source: AppData): AppData {
+  const activeTeachers = [...source.ogretmenler]
+    .filter(x => x.durum !== 'Pasif')
+    .sort((a, b) => {
+      const aRank = a.rol === 'Yönetici' || isManagerTeacher(a.ad_soyad) ? 0 : 1
+      const bRank = b.rol === 'Yönetici' || isManagerTeacher(b.ad_soyad) ? 0 : 1
+      return aRank - bRank || a.ogretmen_id.localeCompare(b.ogretmen_id)
+    })
+    .slice(0, 2)
+  const aliases = new Map(activeTeachers.map((teacher, index) => [teacher.ogretmen_id, DEMO_MANAGER_NAMES[index]]))
+  return {
+    ...source,
+    ogretmenler: source.ogretmenler.map(teacher => {
+      const alias = aliases.get(teacher.ogretmen_id)
+      return alias ? { ...teacher, ad_soyad: alias, rol: 'Yönetici' } : teacher
+    }),
+  }
+}
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<KullaniciProfili | null>(null)
@@ -132,7 +153,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           loadAppData(),
           loadUnreadNotificationCount().catch(() => 0),
         ])
-        setData(nextData)
+        setData(presentDemoData(nextData))
         setProfile(demoProfile(session.user))
         setUnreadNotifications(nextUnread)
         setError(null)

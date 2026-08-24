@@ -13,7 +13,7 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['bs-egitim-favicon-16-v2.png', 'bs-egitim-favicon-32-v2.png', 'bs-egitim-favicon-48-v2.png', 'bs-egitim-apple-touch-v2.png'],
+            includeAssets: ['bs-logo.svg', 'bs-egitim-favicon-16-v2.png', 'bs-egitim-favicon-32-v2.png', 'bs-egitim-favicon-48-v2.png', 'bs-egitim-apple-touch-v2.png'],
             manifest: {
                 name: 'BS Eğitim Yönetimi',
                 short_name: 'BS Eğitim',

@@ -19,6 +19,7 @@ import './program-share.css'
 import './program-week-layout.css'
 import './daily-calendar.css'
 import './fixed-program-calendar.css'
+import './mobile-drag-context-fix.css'
 import './premium-lesson-form.css'
 import './premium-typography.css'
 import './page-title-standard.css'
@@ -32,6 +33,12 @@ import './notifications.css'
 // Uygulama her yeni başlangıçta Program Liste/Takvim görünümünü güncel haftadan açar.
 // Aynı uygulama oturumu içinde Liste ↔ Takvim geçişlerinde seçilen hafta korunmaya devam eder.
 sessionStorage.removeItem('bs-takvim-hafta')
+
+// Mobilde sürüklenebilir ders/program bloklarında uzun basmanın tarayıcı bağlam menüsünü açmasını engelle.
+document.addEventListener('contextmenu', event => {
+  const target=event.target
+  if(target instanceof Element&&target.closest('.daily-lesson-block.drag-enabled'))event.preventDefault()
+})
 
 // Mevcut service worker varsa uygulama açılışında sunucudan güncel sürümü açıkça kontrol et.
 registerSW({

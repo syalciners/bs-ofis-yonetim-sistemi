@@ -1,0 +1,78 @@
+/* Kişi detayında profil fotoğrafını dokunarak büyük görüntüleme. */
+.profile-avatar-preview-trigger{
+  cursor:zoom-in;
+  -webkit-tap-highlight-color:transparent;
+}
+.profile-avatar-preview-trigger:focus-visible{
+  outline:3px solid rgba(37,99,235,.35);
+  outline-offset:3px;
+}
+.profile-photo-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  padding-top:max(24px,env(safe-area-inset-top));
+  padding-right:max(24px,env(safe-area-inset-right));
+  padding-bottom:max(24px,env(safe-area-inset-bottom));
+  padding-left:max(24px,env(safe-area-inset-left));
+  background:rgba(8,15,30,.88);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.profile-photo-lightbox-stage{
+  width:min(92vw,720px);
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.profile-photo-lightbox-image{
+  display:block;
+  max-width:100%;
+  max-height:80vh;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:22px;
+  box-shadow:0 24px 70px rgba(0,0,0,.42);
+}
+.profile-photo-lightbox-name{
+  color:#fff;
+  font-size:15px;
+  line-height:1.25;
+  font-weight:800;
+  text-align:center;
+  text-shadow:0 1px 4px rgba(0,0,0,.35);
+}
+.profile-photo-lightbox-close{
+  position:absolute;
+  top:max(16px,env(safe-area-inset-top));
+  right:max(16px,env(safe-area-inset-right));
+  width:48px;
+  height:48px;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  font-size:32px;
+  line-height:1;
+  font-weight:300;
+  cursor:pointer;
+}
+.profile-photo-lightbox-close:focus-visible{
+  outline:3px solid rgba(255,255,255,.55);
+  outline-offset:3px;
+}
+@media(max-width:520px){
+  .profile-photo-lightbox{padding:16px}
+  .profile-photo-lightbox-stage{width:100%;max-height:90vh}
+  .profile-photo-lightbox-image{max-height:78vh;border-radius:18px}
+}

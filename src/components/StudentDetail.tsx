@@ -2,15 +2,15 @@ import { BookOpenCheck, CalendarPlus, Mail, MessageCircle, Pencil, Phone, Wallet
 import type { Ogrenci } from '../lib/types'
 import { fullDate, money, normalizePhone, shortDate, time } from '../lib/format'
 import { useAppData } from './AppDataProvider'
+import { ProfileAvatar } from './ProfileAvatar'
 import { branchName, nextLessonForStudent, studentDebt, teacherName } from '../services/metrics'
 
 export function StudentDetail({ student, onCollection, onLesson, onAssignment, onEdit }: {student:Ogrenci;onCollection:()=>void;onLesson:()=>void;onAssignment:()=>void;onEdit:()=>void}) {
   const {data}=useAppData();if(!data)return null
   const debt=studentDebt(data,student.ogrenci_id), next=nextLessonForStudent(data,student.ogrenci_id), programs=data.sabitProgramlar.filter(x=>x.ogrenci_id===student.ogrenci_id&&x.program_durumu!=='Pasif'&&x.aktif!==false), lessons=data.dersler.filter(x=>x.ogrenci_id===student.ogrenci_id).slice(0,6), payments=data.tahsilatlar.filter(x=>x.ogrenci_id===student.ogrenci_id&&!x.iptal_mi).slice(0,6),phone=student.veli_telefon||student.ogrenci_telefon||''
-  const initials=student.ad_soyad.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr-TR')
   const balanceText=debt>0?`${money(debt)} Borç`:debt<0?`${money(Math.abs(debt))} Avans`:money(0)
   return <div className="detail-stack profile-detail-stack student-detail-v2">
-    <section className="profile-detail-hero student-profile-hero"><div className="profile-detail-avatar student-avatar">{initials}</div><div className="profile-detail-copy"><span>Öğrenci Profili</span><strong>{student.ad_soyad}</strong><small>{student.veli_adi?`Veli · ${student.veli_adi}`:'Veli bilgisi eklenmemiş'}</small></div><span className="profile-status">{student.durum||'Aktif'}</span></section>
+    <section className="profile-detail-hero student-profile-hero"><ProfileAvatar name={student.ad_soyad} photoPath={student.profil_fotografi} className="profile-detail-avatar student-avatar"/><div className="profile-detail-copy"><span>Öğrenci Profili</span><strong>{student.ad_soyad}</strong><small>{student.veli_adi?`Veli · ${student.veli_adi}`:'Veli bilgisi eklenmemiş'}</small></div><span className="profile-status">{student.durum||'Aktif'}</span></section>
 
     {(phone||student.email)&&<section className="profile-contact-strip" aria-label="İletişim">
       {phone&&<a className="profile-contact-btn phone" href={`tel:+${normalizePhone(phone)}`}><Phone size={17}/><span>Ara</span></a>}

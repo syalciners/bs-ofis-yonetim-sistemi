@@ -276,7 +276,7 @@ export async function openInstitutionManagementPdf(input:InstitutionManagementPd
           widths:['*','*','*','*'],
           body:[[
             {stack:[metric('Öğrenci Bakiyesi',money(input.openStudentDebt),'Açık öğrenci bakiyeleri',ORANGE)]},
-            {stack:[metric('Öğretmen Borcu',money(input.teacherDebt),'Ödenmemiş hakediş',BLUE)]},
+            {stack:[metric('Ödenecek Hakediş',money(input.teacherDebt),'Ödenmemiş hakediş',BLUE)]},
             {stack:[metric('Kasa / Banka',money(input.cashBank),'Güncel hesap bakiyesi',TEAL)]},
             {stack:[metric('Yapılan Ders Saati',String(input.completedLessons),'Seçili dönem toplamı',SILVER)]},
           ]]

@@ -2,11 +2,14 @@ import { Banknote, CalendarRange, CheckCircle2, GraduationCap, Plus, WalletCards
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { ProfileAvatar } from '../components/ProfileAvatar'
 import { Sheet } from '../components/Sheet'
 import { TeacherPaymentQuickForm } from '../components/TeacherPaymentQuickForm'
 import { TeacherSectionNav } from '../components/TeacherSectionNav'
 import { useToast } from '../components/Toast'
 import { fullDate, money, todayISO } from '../lib/format'
+import { APP_MODE } from '../lib/supabase'
+import { demoPersonaPhoto } from '../lib/demoPersonaPhoto'
 import { teacherTone } from '../lib/teacherTone'
 import { cancelTeacherPayment } from '../services/financeCancelService'
 import { teacherName } from '../services/metrics'
@@ -50,7 +53,7 @@ export function TeacherPaymentsPage(){
 
     <div className="section-heading"><div><h2>Öğretmen Hakedişleri</h2><span>{period?.donem_adi||'Dönem seçin'}</span></div></div>
     <section className="teacher-payment-grid">{rows.map(x=><button key={x.teacher.ogretmen_id} className={`teacher-payment-card ${teacherTone(x.teacher.ad_soyad)} ${x.remaining<=0?'paid-up':''}`} onClick={()=>setPaymentTeacher(x.teacher.ogretmen_id)}>
-      <div className="teacher-payment-card-head"><div className="avatar purple">{x.teacher.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.teacher.ad_soyad}</strong><span>{x.branches.length?x.branches.join(' · '):'Branş tanımlanmamış'}</span></div>{x.remaining>0?<span className="soft-pill danger-soft">Ödeme Bekliyor</span>:<span className="soft-pill success-soft">Tamam</span>}</div>
+      <div className="teacher-payment-card-head"><ProfileAvatar name={x.teacher.ad_soyad} photoPath={x.teacher.profil_fotografi||(APP_MODE==='demo'?demoPersonaPhoto(x.teacher.ogretmen_id,x.teacher.ad_soyad,x.teacher.rol==='Yönetici'?'manager':'teacher'):null)} className="avatar purple"/><div><strong>{x.teacher.ad_soyad}</strong><span>{x.branches.length?x.branches.join(' · '):'Branş tanımlanmamış'}</span></div>{x.remaining>0?<span className="soft-pill danger-soft">Ödeme Bekliyor</span>:<span className="soft-pill success-soft">Tamam</span>}</div>
       <div className="teacher-payment-stats"><span><small>Hakediş</small><b>{money(x.earned)}</b></span><span><small>Ödenen</small><b>{money(x.paid)}</b></span><span><small>Kalan</small><b className={x.remaining>0?'danger-text':'success-text'}>{money(x.remaining)}</b></span></div>
       <div className="teacher-payment-card-foot"><span>{x.lessonHours} yapılan ders saati</span><b>{x.remaining>0?'Ödeme Yap':'Ödeme tamamlandı'}</b></div>
     </button>)}</section>

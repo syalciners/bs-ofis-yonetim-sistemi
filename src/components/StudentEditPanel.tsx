@@ -4,6 +4,7 @@ import type { Ogrenci } from '../lib/types'
 import { deleteStudentSafe } from '../services/studentAdminService'
 import { useAppData } from './AppDataProvider'
 import { StudentForm } from './forms'
+import { ProfilePhotoEditor } from './ProfilePhotoEditor'
 import { useToast } from './Toast'
 
 export function StudentEditPanel({ student, onDone, onCancel }: { student: Ogrenci; onDone: () => void; onCancel: () => void }) {
@@ -40,6 +41,7 @@ export function StudentEditPanel({ student, onDone, onCancel }: { student: Ogren
   }
 
   return <div className="student-edit-panel">
+    <ProfilePhotoEditor kind="ogrenci" recordId={student.ogrenci_id} name={student.ad_soyad} photoPath={student.profil_fotografi}/>
     <StudentForm student={student} onDone={onDone} onCancel={onCancel}/>
     <section className="record-danger-zone">
       <div><b>Kaydı Sil</b><span>{hasHistory ? 'Geçmiş kaydı bulunan öğrenci silinemez; Pasif yapılmalıdır.' : 'Yalnız hiç ders veya finans geçmişi olmayan kayıt silinebilir.'}</span></div>

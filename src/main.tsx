@@ -29,6 +29,8 @@ import './brand-palette.css'
 import './demo-discovery.css'
 import './settings-hub.css'
 import './notifications.css'
+import './teacher-card-compact.css'
+import './demo-synthetic-notice.css'
 
 // Mobilde sürüklenebilir ders/program bloklarında uzun basmanın tarayıcı bağlam menüsünü açmasını engelle.
 document.addEventListener('contextmenu', event => {

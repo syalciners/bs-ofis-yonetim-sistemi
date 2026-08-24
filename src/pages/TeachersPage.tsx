@@ -2,6 +2,7 @@ import { CalendarDays, Edit3, GraduationCap, Mail, MessageCircle, Phone, Plus, S
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
+import { ProfileAvatar } from '../components/ProfileAvatar'
 import { Sheet } from '../components/Sheet'
 import { TeacherSectionNav } from '../components/TeacherSectionNav'
 import { TeacherForm } from '../components/forms'
@@ -9,6 +10,7 @@ import { TeacherPaymentQuickForm } from '../components/TeacherPaymentQuickForm'
 import type { Ogretmen } from '../lib/types'
 import { firstOfMonth, money, normalizePhone, shortDate, time } from '../lib/format'
 import { APP_MODE } from '../lib/supabase'
+import { demoPersonaPhoto } from '../lib/demoPersonaPhoto'
 import { isManagerTeacher, teacherTone } from '../lib/teacherTone'
 import { nextLessonForTeacher, studentName, teacherBalance } from '../services/metrics'
 
@@ -44,8 +46,8 @@ export function TeachersPage(){
   const managers=rows.filter(isManagerRow).sort((a,b)=>managerRank(a.ad_soyad)-managerRank(b.ad_soyad))
   const teachers=rows.filter(x=>!isManagerRow(x)).sort((a,b)=>a.ad_soyad.localeCompare(b.ad_soyad,'tr-TR'))
 
-  const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle;return <button className={`teacher-profile-card ${toneFor(x,manager)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>setSelected(x)}>
-    <div className="teacher-profile-head"><div className="avatar purple">{x.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
+  const teacherCard=(x:Ogretmen,manager=false)=>{const balance=teacherBalance(data,x.ogretmen_id),next=nextLessonForTeacher(data,x.ogretmen_id),branches=branchNames(x.ogretmen_id),baseTitle=teachingTitle(branches),title=manager?`Yönetici - ${baseTitle}`:baseTitle,photo=x.profil_fotografi||(APP_MODE==='demo'?demoPersonaPhoto(x.ogretmen_id,x.ad_soyad,manager?'manager':'teacher'):null);return <button className={`teacher-profile-card ${toneFor(x,manager)} ${manager?'manager-card':'standard-card'}`} key={x.ogretmen_id} onClick={()=>setSelected(x)}>
+    <div className="teacher-profile-head"><ProfileAvatar name={x.ad_soyad} photoPath={photo} className="avatar purple"/><div><strong>{x.ad_soyad}</strong><span>{title}</span></div></div>
     <div className="teacher-branches"><span>Verdiği Dersler</span><b>{branches.length?branches.join(' · '):'Branş tanımlanmamış'}</b></div>
     <div className="teacher-card-footer"><span>{next?<><b>{shortDate(next.tarih)} {time(next.baslangic_saati)}</b> sıradaki ders</>:<>Sıradaki ders yok</>}</span><span>Güncel kalan <b className={balance>0?'danger-text':''}>{money(Math.max(balance,0))}</b></span></div>
   </button>}
@@ -59,8 +61,8 @@ export function TeachersPage(){
     {!!teachers.length&&<section className="teacher-group"><div className="teacher-group-heading"><div><span className="eyebrow">EĞİTİM KADROSU</span><h2>Öğretmenler</h2></div><span>{teachers.length} kişi</span></div><div className="standard-teacher-grid">{teachers.map(x=>teacherCard(x,false))}</div></section>}
     {!rows.length&&<div className="calm-empty"><GraduationCap/><b>Öğretmen bulunamadı.</b><span>Arama metnini değiştir veya yeni öğretmen ekle.</span></div>}
 
-    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerRow(selected),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
-      <section className={`profile-detail-hero ${toneFor(selected,manager)}`}><div className="profile-detail-avatar">{selected.ad_soyad.split(/\s+/).slice(0,2).map(y=>y[0]).join('').toLocaleUpperCase('tr-TR')}</div><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
+    <Sheet open={!!selected&&!payment&&!edit} title={selected?.ad_soyad||'Öğretmen'} subtitle="Öğretmen profili" onClose={()=>setSelected(null)}>{selected&&(()=>{const next=nextLessonForTeacher(data,selected.ogretmen_id),phone=selected.telefon||'',branches=branchNames(selected.ogretmen_id),manager=isManagerRow(selected),title=manager?`Yönetici - ${teachingTitle(branches)}`:teachingTitle(branches),balance=Math.max(teacherBalance(data,selected.ogretmen_id),0),monthPrefix=firstOfMonth().slice(0,7),monthLessonHours=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id&&x.ders_durumu==='Yapıldı'&&x.tarih?.startsWith(monthPrefix)).reduce((sum,x)=>sum+Number(x.ders_sayisi||1),0),recent=data.dersler.filter(x=>x.ogretmen_id===selected.ogretmen_id).slice(0,8),photo=selected.profil_fotografi||(APP_MODE==='demo'?demoPersonaPhoto(selected.ogretmen_id,selected.ad_soyad,manager?'manager':'teacher'):null);return <div className="detail-stack profile-detail-stack teacher-detail-v2">
+      <section className={`profile-detail-hero ${toneFor(selected,manager)}`}><ProfileAvatar name={selected.ad_soyad} photoPath={photo} className="profile-detail-avatar"/><div className="profile-detail-copy"><span>{title}</span><strong>{selected.ad_soyad}</strong><div className="profile-chip-row">{branches.length?branches.map(x=><small key={x}>{x}</small>):<small>Branş tanımlanmamış</small>}</div></div><span className="profile-status">{selected.durum||'Aktif'}</span></section>
 
       {(phone||selected.email)&&<section className="profile-contact-strip" aria-label="İletişim">
         {phone&&<a className="profile-contact-btn phone" href={`tel:+${normalizePhone(phone)}`}><Phone size={17}/><span>Ara</span></a>}

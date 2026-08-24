@@ -10,6 +10,7 @@ export interface Ogrenci {
   kayit_tarihi?: string | null
   durum?: string | null
   notlar?: string | null
+  profil_fotografi?: string | null
 }
 
 export interface Ogretmen {
@@ -21,6 +22,7 @@ export interface Ogretmen {
   durum?: string | null
   notlar?: string | null
   rol?: string | null
+  profil_fotografi?: string | null
 }
 
 export interface Brans { brans_id: Id; brans_adi: string; aktif?: boolean | null }

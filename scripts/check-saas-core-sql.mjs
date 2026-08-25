@@ -2,7 +2,10 @@ import { existsSync, readFileSync } from 'node:fs'
 
 const contract=JSON.parse(readFileSync('saas/core-rpc-contract.v1.json','utf8'))
 const files=[
-  'supabase/saas-v1-core/00_core_schema.sql',
+  'supabase/saas-v1-core/00a_core_tables.sql',
+  'supabase/saas-v1-core/00b_core_constraints.sql',
+  'supabase/saas-v1-core/00c_core_foreign_keys.sql',
+  'supabase/saas-v1-core/00d_core_indexes.sql',
   'supabase/saas-v1-core/01_private_helpers.sql',
   'supabase/saas-v1-core/02a_portal_rpc.sql',
   'supabase/saas-v1-core/02b_management_rpc.sql',
@@ -36,10 +39,27 @@ const forbidden=[
 ]
 for(const token of forbidden) ok(`Core SQL yasaklı bağımlılık içermez: ${token}`,!allSql.toLowerCase().includes(token.toLowerCase()))
 
-const schema=contents['supabase/saas-v1-core/00_core_schema.sql']
+const tables=contents['supabase/saas-v1-core/00a_core_tables.sql']
+const constraints=contents['supabase/saas-v1-core/00b_core_constraints.sql']
+const foreignKeys=contents['supabase/saas-v1-core/00c_core_foreign_keys.sql']
+const indexes=contents['supabase/saas-v1-core/00d_core_indexes.sql']
+const tableCreates=[...tables.matchAll(/create table public\.([a-z0-9_]+)/gi)].map(m=>m[1])
+const expectedTables=[
+  'aylik_snapshotlar','bildirim_okumalari','bildirimler','branslar','dersler','derslikler','gider_kategorileri','giderler',
+  'haftalik_ders_uretimleri','hakedis_donemleri','kasa_hareketleri','kasa_hesaplari','krediler','kullanici_profilleri','kurum_ayarlari',
+  'odevler','ogrenciler','ogretmen_branslari','ogretmen_odemeleri','ogretmenler','portal_kullanicilari','rapor_talepleri',
+  'sabit_ders_programi','sabit_program_istisnalari','tahsilatlar','tarifeler',
+]
+ok('Core tablo katmanı tam 26 public tablo oluşturur',tableCreates.length===26&&sameSet(tableCreates,expectedTables))
+ok('Core tablo katmanında tekrar yoktur',unique(tableCreates))
+ok('Core tablo katmanı pgcrypto eklentisini extensions şemasında kurar',/create extension if not exists pgcrypto with schema extensions;/i.test(tables))
+ok('Core tablo katmanı extension sürümü pinlemez',!/create extension[^;]*\bversion\b/i.test(tables))
 const coachingColumns=['ogrenci_kitap_id','calisma_turu','baslangic_no','bitis_no','calisma_detayi','kaynak_gorusme_id','haftalik_plan_id','plan_kaynagi','ai_plan_madde_anahtari']
-ok('Core ödev tablosunda Koçluk kolonları yoktur',coachingColumns.every(x=>!schema.includes(x)))
-ok('Core rol checki Koç rolünü içermez',!schema.includes("'Koç'::text"))
+ok('Core ödev tablosunda Koçluk kolonları yoktur',coachingColumns.every(x=>!tables.includes(x)))
+ok('Core rol checki Koç rolünü içermez',constraints.includes("array['Yönetici'::text, 'Personel'::text, 'Öğretmen'::text]")&&!constraints.includes("'Koç'::text"))
+ok('Core kısıt katmanında Koçluk ödev checkleri yoktur',!constraints.includes('odevler_calisma_araligi_chk')&&!constraints.includes('odevler_calisma_turu_chk'))
+ok('Core foreign key katmanı yalnız Core/Auth bağı taşır',!foreignKeys.includes('ogrenci_kitaplari')&&!foreignKeys.includes('kitap_katalogu')&&!foreignKeys.includes('kocluk_'))
+ok('Core indeks katmanında Koçluk ödev indeksleri yoktur',!indexes.includes('odevler_ai_plan_madde_anahtari_uidx')&&!indexes.includes('odevler_kaynak_gorusme_tekil_idx'))
 
 const helpers=contents['supabase/saas-v1-core/01_private_helpers.sql']
 ok('Normalize öğretmen-branş helperı kurulur',/function\s+private\.ogretmen_brans_uygun_mu\s*\(/i.test(helpers))
@@ -63,7 +83,7 @@ const legacy=contract.baseline_disinda_legacy_public_rpc||[]
 const coreClientFiles=[
   'src/services/officeService.ts','src/services/institutionService.ts','src/services/notificationService.ts',
   'src/services/financeCancelService.ts','src/services/financeEditService.ts','src/services/educationDefinitionsService.ts',
-  'src/services/financeDefinitionsService.ts','src/services/profilePhotoService.ts',
+  'src/services/financeDefinitionsService.ts','src/services/profilePhotoService.ts','src/services/assignmentAttachmentService.ts',
   'apps/bs-egitim-portali/src/App.tsx','apps/bs-egitim-portali/src/supabase.ts',
 ].filter(existsSync)
 const clientText=coreClientFiles.map(file=>readFileSync(file,'utf8')).join('\n')

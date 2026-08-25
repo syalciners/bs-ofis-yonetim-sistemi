@@ -14,6 +14,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: https://saas-portal-env-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_saas_portal_env_test_placeholder
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +27,17 @@ jobs:
       - name: Portal bağımlılıklarını kur
         working-directory: apps/bs-egitim-portali
         run: npm install --no-audit --no-fund
+      - name: Eksik portal instance env reddediliyor
+        working-directory: apps/bs-egitim-portali
+        shell: bash
+        run: |
+          set +e
+          VITE_SUPABASE_URL='' VITE_SUPABASE_PUBLISHABLE_KEY='' npm run check:instance-config >/tmp/portal-missing-env.log 2>&1
+          STATUS=$?
+          set -e
+          test "$STATUS" -ne 0 || { echo "::error::Eksik portal env doğrulaması beklenmedik şekilde başarılı oldu."; exit 1; }
+          grep -F -q 'VITE_SUPABASE_URL' /tmp/portal-missing-env.log || { cat /tmp/portal-missing-env.log; exit 1; }
+          echo "Eksik portal instance env güvenli biçimde reddediliyor."
       - name: Gerçek portal build doğrulaması
         working-directory: apps/bs-egitim-portali
         run: npm run build
@@ -38,8 +52,8 @@ jobs:
           rm -rf portal-preview
           mkdir -p portal-preview
           cp -R apps/bs-egitim-portali/dist/. portal-preview/
-      - name: Önizleme paketini PR branch'ine kaydet
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      - name: Test branch'ine portal paketi yazma kapalı
+        if: ${{ false }}
         shell: bash
         run: |
           set -euo pipefail

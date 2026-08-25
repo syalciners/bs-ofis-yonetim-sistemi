@@ -6,7 +6,12 @@ const edgePath='supabase/functions/odev-drive-yukle/index.ts'
 const portalSupabasePath='apps/bs-egitim-portali/src/supabase.ts'
 const portalVitePath='apps/bs-egitim-portali/vite.config.ts'
 const portalPackagePath='apps/bs-egitim-portali/package.json'
-const baselinePath='supabase/saas-v1-core/00_core_schema.sql'
+const baselinePaths=[
+  'supabase/saas-v1-core/00a_core_tables.sql',
+  'supabase/saas-v1-core/00b_core_constraints.sql',
+  'supabase/saas-v1-core/00c_core_foreign_keys.sql',
+  'supabase/saas-v1-core/00d_core_indexes.sql',
+]
 
 const manifest=JSON.parse(readFileSync(manifestPath,'utf8'))
 const rpcContract=JSON.parse(readFileSync(rpcContractPath,'utf8'))
@@ -14,7 +19,10 @@ const edge=readFileSync(edgePath,'utf8')
 const portalSupabase=readFileSync(portalSupabasePath,'utf8')
 const portalVite=readFileSync(portalVitePath,'utf8')
 const portalPackage=JSON.parse(readFileSync(portalPackagePath,'utf8'))
-const baseline=existsSync(baselinePath)?readFileSync(baselinePath,'utf8'):''
+const baselineFiles=baselinePaths.filter(existsSync)
+const baseline=baselineFiles.map(path=>readFileSync(path,'utf8')).join('\n')
+const tables=existsSync(baselinePaths[0])?readFileSync(baselinePaths[0],'utf8'):''
+const constraints=existsSync(baselinePaths[1])?readFileSync(baselinePaths[1],'utf8'):''
 const errors=[]
 const ok=(label,condition,message=label)=>{
   console.log(`${condition?'✓':'✗'} ${label}`)
@@ -113,23 +121,24 @@ ok('Finans sync için pg_net Core zorunluluğu değildir',finance?.pg_net_core_z
 ok('Tahsilat düzenleme/silme sanitizasyon kapsamındadır',sameSet(finance?.etkilenen_core_rpc||[],['tahsilat_guncelle_guvenli_v1','tahsilat_sil_guvenli_v1']))
 ok('Sanitize edilecek tahsilat RPCleri aktif contractta kalır',(finance?.etkilenen_core_rpc||[]).every((name)=>rpcNames.includes(name)))
 
-if(baseline){
-  const tableCreates=[...baseline.matchAll(/create table public\.([a-z0-9_]+)/gi)].map((m)=>m[1])
+ok('Katmanlı Core baseline dört dosyadan oluşur',baselineFiles.length===4)
+if(baselineFiles.length===4){
+  const tableCreates=[...tables.matchAll(/create table public\.([a-z0-9_]+)/gi)].map((m)=>m[1])
   ok('Core SQL baseline tam 26 public tablo oluşturur',tableCreates.length===26&&sameSet(tableCreates,core))
   ok('Core SQL baseline tablo adlarında tekrar yoktur',unique(tableCreates))
-  ok('Core SQL baseline pgcrypto eklentisini extensions şemasında kurar',/create extension if not exists pgcrypto with schema extensions;/i.test(baseline))
-  ok('Core SQL baseline extension sürümü pinlemez',!/create extension[^;]*\bversion\b/i.test(baseline))
+  ok('Core SQL baseline pgcrypto eklentisini extensions şemasında kurar',/create extension if not exists pgcrypto with schema extensions;/i.test(tables))
+  ok('Core SQL baseline extension sürümü pinlemez',!/create extension[^;]*\bversion\b/i.test(tables))
   const forbiddenOdev=['ogrenci_kitap_id','calisma_turu','baslangic_no','bitis_no','calisma_detayi','kaynak_gorusme_id','haftalik_plan_id','plan_kaynagi','ai_plan_madde_anahtari']
   ok('Core ödev şemasına Koçluk çalışma alanları sızmaz',forbiddenOdev.every((name)=>!baseline.includes(name)))
   ok('Core SQL baseline Koçluk kitap tablolarına bağlanmaz',!baseline.includes('ogrenci_kitaplari')&&!baseline.includes('kitap_katalogu'))
-  ok('Core kullanıcı rol checki Koç rolünü içermez',baseline.includes("array['Yönetici'::text, 'Personel'::text, 'Öğretmen'::text]")&&!baseline.includes("'Koç'::text"))
+  ok('Core kullanıcı rol checki Koç rolünü içermez',constraints.includes("array['Yönetici'::text, 'Personel'::text, 'Öğretmen'::text]")&&!constraints.includes("'Koç'::text"))
   ok('Core SQL baseline Finans Asistanı veya pg_net bağı taşımaz',!baseline.includes('finans_v18_')&&!baseline.includes('net.http_')&&!baseline.includes('pg_net'))
 }
 
 if(manifest.installable===true){
-  ok('Installable manifest için Core SQL baseline mevcuttur',existsSync(baselinePath))
+  ok('Installable manifest için dört Core baseline dosyası mevcuttur',baselineFiles.length===4)
 }else{
-  ok('Baseline tamamlanana kadar manifest installable=false kalır',manifest.installable===false)
+  ok('Tüm kurulum kapıları tamamlanana kadar manifest installable=false kalır',manifest.installable===false)
 }
 
 if(errors.length){

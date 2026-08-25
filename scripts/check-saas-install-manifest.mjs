@@ -2,10 +2,16 @@ import { existsSync, readFileSync } from 'node:fs'
 
 const manifestPath='saas/kurulum-manifesti.v1.json'
 const edgePath='supabase/functions/odev-drive-yukle/index.ts'
+const portalSupabasePath='apps/bs-egitim-portali/src/supabase.ts'
+const portalVitePath='apps/bs-egitim-portali/vite.config.ts'
+const portalPackagePath='apps/bs-egitim-portali/package.json'
 const baselinePath='supabase/saas-v1-core/00_core_schema.sql'
 
 const manifest=JSON.parse(readFileSync(manifestPath,'utf8'))
 const edge=readFileSync(edgePath,'utf8')
+const portalSupabase=readFileSync(portalSupabasePath,'utf8')
+const portalVite=readFileSync(portalVitePath,'utf8')
+const portalPackage=JSON.parse(readFileSync(portalPackagePath,'utf8'))
 const errors=[]
 const ok=(label,condition,message=label)=>{
   console.log(`${condition?'✓':'✗'} ${label}`)
@@ -50,6 +56,13 @@ ok('Ödev Drive fonksiyonu sabit publishable key içermez',!/sb_publishable_[A-Z
 ok('Ödev Drive fonksiyonu hosted publishable key sözlüğünü kullanır',edge.includes("Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')"))
 ok('Ödev Drive fonksiyonu legacy anon fallbackını korur',edge.includes("Deno.env.get('SUPABASE_ANON_KEY')"))
 ok('Ödev Drive fonksiyonu service-role veya secret key kullanmaz',!edge.includes('SUPABASE_SERVICE_ROLE_KEY')&&!edge.includes('SUPABASE_SECRET_KEYS')&&!edge.includes('SUPABASE_SECRET_KEY'))
+
+ok('Portal sabit Supabase URL içermez',!/[a-z0-9]{20}\.supabase\.co/i.test(portalSupabase))
+ok('Portal sabit publishable key içermez',!/sb_publishable_[A-Za-z0-9_-]+/.test(portalSupabase))
+ok('Portal Supabase URL değerini instance envden alır',portalSupabase.includes('import.meta.env.VITE_SUPABASE_URL'))
+ok('Portal publishable key değerini instance envden alır',portalSupabase.includes('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY'))
+ok('Portal Vite kök instance env dizinini kullanır',portalVite.includes("envDir: '../..'"))
+ok('Portal build instance config kontrolüyle başlar',String(portalPackage?.scripts?.build||'').startsWith('npm run check:instance-config &&'))
 
 if(manifest.installable===true){
   ok('Installable manifest için Core SQL baseline mevcuttur',existsSync(baselinePath))

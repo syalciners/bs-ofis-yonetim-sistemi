@@ -1,0 +1,64 @@
+{
+  "sozlesme_surumu": "1.0.0",
+  "urun": "BS Eğitim Yönetimi",
+  "dagitim_modeli": "dedicated-instance",
+  "amac": "Boş hosted Supabase projesinin yeni kurum instanceı olarak kurulabilirliğini ve güvenlik sınırlarını PASS/FAIL ile doğrulamak.",
+  "hedef_proje_kurali": "Canlı BS Ofis, Kurum Finans Asistanı veya başka üretim projesi kabul testi için kullanılmaz. Yalnız boş ve izole test projesi/branch kullanılır.",
+  "kurulum_sirasi": [
+    "supabase/saas-v1-core/00a_core_tables.sql",
+    "supabase/saas-v1-core/00b_core_constraints.sql",
+    "supabase/saas-v1-core/00c_core_foreign_keys.sql",
+    "supabase/saas-v1-core/00d_core_indexes.sql",
+    "supabase/saas-v1-core/01_private_helpers.sql",
+    "supabase/saas-v1-core/02a_portal_rpc.sql",
+    "supabase/saas-v1-core/02b_management_rpc.sql",
+    "supabase/saas-v1-core/02c_notifications_assignments_rpc.sql",
+    "supabase/saas-v1-core/02d_finance_rpc.sql",
+    "supabase/saas-v1-core/02e_lessons_weekly_rpc.sql",
+    "supabase/saas-v1-core/02f_fixed_schedule_health_rpc.sql",
+    "supabase/saas-v1-core/03_core_seed.sql",
+    "supabase/saas-v1-core/04_core_security.sql",
+    "supabase/saas-v1-core/05_core_storage.sql",
+    "supabase/saas-v1-core/06_first_admin_bootstrap.sql"
+  ],
+  "kurulum_oncesi": [
+    "Hedef proje boş ve üretim dışı olmalı.",
+    "Project ref kaydedilmeli; secret/service_role değerleri repoya yazılmamalı.",
+    "Core SQL dosyaları listedeki sırayla uygulanmalı; adım atlanmamalı."
+  ],
+  "otomatik_smoke": {
+    "sql": "supabase/saas-v1-core/07_hosted_smoke_readonly.sql",
+    "beklenen": "Tüm satırlar passed=true",
+    "degisiklik_yapar": false
+  },
+  "ilk_yonetici_kabulu": {
+    "on_kosul": "Test yöneticisi Google ile bir kez giriş yapmış ve auth.users kaydı email_confirmed_at dolu olmalı.",
+    "fonksiyon": "private.ilk_yonetici_bootstrap_v1(text,text)",
+    "cagri_yetkisi": "yalnız service_role/kurulum operatörü",
+    "kabul": [
+      "İlk çağrı Yönetici profilini oluşturmalı.",
+      "Aynı veya başka kullanıcıyla ikinci bootstrap çağrısı reddedilmeli.",
+      "anon ve authenticated doğrudan bootstrap execute yetkisine sahip olmamalı."
+    ]
+  },
+  "uygulama_smoke": [
+    "Oturum açılmadan kurum_public_bilgisi_v1 çalışmalı; diğer Core RPC'ler anon role kapalı kalmalı.",
+    "Yönetici Google oturumu sonrası kurum ayarı ve Core yönetim verileri okunabilmeli.",
+    "Yönetici güvenli RPC ile geçici öğrenci oluşturabilmeli ve ogrenci_sil_guvenli_v1 ile kaldırabilmeli.",
+    "Frontend service_role/secret anahtar kullanmamalı; yalnız publishable key kullanılmalı.",
+    "Yönetim uygulaması ve portal hedef hosted URL/key ile production build edilebilmeli."
+  ],
+  "security_advisor": {
+    "zorunlu": true,
+    "kabul_kurali": "Core kurulumundan kaynaklanan ERROR seviyesinde güvenlik bulgusu kalmamalı. RLS kapalı public tablo, auth.users exposure, user_metadata ile yetkilendirme, public/anon SECURITY DEFINER execute veya mutable function search_path bulgusu kabul edilmez.",
+    "manuel_inceleme": "INFO/WARN bulgular bağlama göre tek tek sınıflandırılır; güvenlik açığı oluşturan bulgu ertelenmez."
+  },
+  "installable_true_kapisi": [
+    "Kurulum sırası hatasız tamamlandı.",
+    "07_hosted_smoke_readonly.sql tüm kontrolleri geçti.",
+    "İlk yönetici bootstrap tek kullanımlık davranışı geçti.",
+    "Temel yönetim ve portal smoke geçti.",
+    "Security Advisor kabul kriterlerini geçti.",
+    "Yönetim ve portal production build geçti."
+  ]
+}

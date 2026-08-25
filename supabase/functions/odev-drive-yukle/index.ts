@@ -2,8 +2,24 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 const BUCKET='odev-ekleri'
-const PUBLISHABLE_KEY='sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf'
+const SUPABASE_URL=Deno.env.get('SUPABASE_URL')||''
 const APPS_SCRIPT_URL=Deno.env.get('ODEV_DRIVE_APPS_SCRIPT_URL')||''
+
+function readPublishableKey(){
+  const raw=Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')||''
+  if(raw){
+    try{
+      const keys=JSON.parse(raw) as Record<string,unknown>
+      const value=String(keys.default||'').trim()
+      if(value)return value
+    }catch{
+      console.warn('SUPABASE_PUBLISHABLE_KEYS okunamadı; uyumluluk fallback kullanılacak.')
+    }
+  }
+  return String(Deno.env.get('SUPABASE_PUBLISHABLE_KEY')||Deno.env.get('SUPABASE_ANON_KEY')||'').trim()
+}
+
+const PUBLISHABLE_KEY=readPublishableKey()
 const ALLOWED_MIME_TYPES=new Set([
   'image/jpeg','image/png','image/webp','application/pdf','application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -33,11 +49,12 @@ type UploadBody={
 Deno.serve(async(req:Request)=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders})
   if(req.method!=='POST')return json({ok:false,kod:'METHOD_NOT_ALLOWED',hata:'Yalnız POST desteklenir.'},405)
+  if(!SUPABASE_URL||!PUBLISHABLE_KEY)return json({ok:false,kod:'INSTANCE_CONFIG_MISSING',hata:'Supabase instance yapılandırması eksik.'},500)
 
   const authHeader=req.headers.get('Authorization')||''
   if(!authHeader.startsWith('Bearer '))return json({ok:false,kod:'UNAUTHORIZED',hata:'Oturum doğrulanamadı.'},401)
   const accessToken=authHeader.slice(7)
-  const supabase=createClient(Deno.env.get('SUPABASE_URL')||'',PUBLISHABLE_KEY,{global:{headers:{Authorization:authHeader}}})
+  const supabase=createClient(SUPABASE_URL,PUBLISHABLE_KEY,{global:{headers:{Authorization:authHeader}}})
 
   try{
     const{data:{user},error:userError}=await supabase.auth.getUser(accessToken)

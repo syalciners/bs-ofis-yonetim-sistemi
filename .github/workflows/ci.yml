@@ -13,6 +13,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: production
+      VITE_SUPABASE_URL: https://isolation-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_isolation_test_only
+      VITE_PORTAL_URL: https://portal.isolation.test
     steps:
       - uses: actions/checkout@v4
         with:

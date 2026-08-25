@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const SUPABASE_URL = 'https://igmtuouhdozkgwmdxlme.supabase.co'
-export const SUPABASE_KEY = 'sb_publishable_scFk1bnw1-VCw_ZQrfc7Mw_N518OvBf'
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim() || ''
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() || ''
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error('Portal yapılandırması eksik: Supabase instance bağlantısı bulunamadı.')
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {

@@ -1,15 +1,19 @@
 {
-  "manifest_surumu": "1.0.0-inventory",
+  "manifest_surumu": "1.0.1-hosted-kabul-bekliyor",
   "urun": "BS Eğitim Yönetimi",
   "dagitim_modeli": "dedicated-instance",
-  "durum": "envanter_sabitlendi",
+  "durum": "lokal_izolasyon_kabulu_tamam",
   "installable": false,
-  "installable_false_nedeni": "Tam ve tekrar üretilebilir Core SQL baseline henüz oluşturulmadı ve boş Supabase üzerinde doğrulanmadı.",
+  "installable_false_nedeni": "Core baseline, provisioning, RLS/Storage/bootstrap ve yönetim+portal production build izolasyonda doğrulandı. Installable=true için boş hosted Supabase üzerinde kurulum smoke testi ve security advisor kabulü bekleniyor.",
+  "modul_katalogu": "saas/modul-katalogu.v1.json",
   "zorunlu_instance_env": [
     "VITE_APP_MODE",
     "VITE_SUPABASE_URL",
     "VITE_SUPABASE_PUBLISHABLE_KEY",
     "VITE_PORTAL_URL"
+  ],
+  "opsiyonel_instance_env": [
+    "VITE_ENABLED_MODULES"
   ],
   "veritabani": {
     "core_public_tablolar": [
@@ -42,7 +46,7 @@
     ],
     "core_tablo_sayisi": 26,
     "zorunlu_eklentiler": ["pgcrypto"],
-    "core_rpc_stratejisi": "Tam Core SQL baseline üretiminde canlı frontend/trigger bağımlılıklarıyla kesin liste oluşturulacak; legacy RPC'ler körlemesine taşınmayacak."
+    "core_rpc_stratejisi": "53 aktif public Core RPC imzası saas/core-rpc-contract.v1.json ile sabitlenmiştir; legacy RPC'ler ve Core dışı ürün bağımlılıkları yeni instance'a kurulmaz."
   },
   "storage": {
     "core_bucketlar": [
@@ -113,12 +117,18 @@
     "kocluk-ai-haftalik-plan-v2",
     "kocluk-veli-ozeti-v1"
   ],
+  "tamamlanan_kabul_adimlari": [
+    "Sanitize edilmiş 26 Core tablo baseline üretildi.",
+    "53 aktif Core RPC ve private helper/trigger bağımlılıkları sabitlendi.",
+    "İzole PostgreSQL 17 üzerinde seed, RLS/grant, Storage ve tek kullanımlık ilk yönetici bootstrap testi geçti.",
+    "Yönetim uygulaması production build geçti.",
+    "BS Eğitim Portalı production build geçti.",
+    "Opsiyonel modül route/menü kapısı ve modül kataloğu kalite kontrollerine bağlandı."
+  ],
   "sonraki_zorunlu_adimlar": [
-    "Canlı katalogdan sanitize edilmiş BS Eğitim Core SQL başlangıç şeması üret.",
-    "Core RPC/trigger bağımlılıklarını exact liste halinde sabitle.",
-    "Boş Supabase test projesinde baseline + Storage + seed kurulumunu doğrula.",
-    "İlk yönetici bootstrap akışını doğrula.",
-    "Kurulum smoke testini otomatikleştir.",
-    "Tüm adımlar yeşil olmadan installable değerini true yapma."
+    "Boş hosted Supabase test projesinde 00a->00d->01->02a..02f->03->04->05->06 kurulum sırasını uygula.",
+    "Hosted instance üzerinde ilk yönetici bootstrap ve temel yönetim/portal RPC smoke testlerini çalıştır.",
+    "Supabase security advisor sonuçlarını kontrol et ve kritik/yüksek güvenlik uyarısı bırakma.",
+    "Hosted kabulün tüm adımları yeşil olduktan sonra installable değerini true yap."
   ]
 }

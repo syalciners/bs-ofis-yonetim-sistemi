@@ -1,5 +1,5 @@
 {
-  "surum": "1.0.0",
+  "surum": "1.0.1",
   "snapshot_tarihi": "2026-08-25",
   "urun": "BS Eğitim",
   "dagitim_modeli": "dedicated-instance",
@@ -87,8 +87,11 @@
     ],
     "anon_istisna_execute": ["anon", "authenticated"],
     "private_helper_execute": [],
+    "private_helper_execute_istisnalari": {
+      "private.bs_ofis_yonetici_mi": ["authenticated"]
+    },
     "private_trigger_execute": [],
-    "not": "SECURITY DEFINER fonksiyonlarda PUBLIC EXECUTE varsayılanı baseline içinde açıkça revoke edilecektir. Yetkilendirme yalnız role grant ile değil, fonksiyon gövdesindeki auth/yönetici/portal kimliği kontrolleriyle birlikte uygulanacaktır."
+    "not": "SECURITY DEFINER fonksiyonlarda PUBLIC EXECUTE baseline içinde açıkça revoke edilir. Private helperlar istemci rollerine kapalıdır; yalnız RLS ve Storage policy değerlendirmesinin doğrudan çağırdığı private.bs_ofis_yonetici_mi() için authenticated EXECUTE istisnası vardır. Yetkilendirme ayrıca fonksiyon gövdesindeki auth/yönetici/portal kimliği kontrolleriyle uygulanır."
   },
   "baseline_sanitizasyonlari": {
     "ogretmen_brans_trigger": {

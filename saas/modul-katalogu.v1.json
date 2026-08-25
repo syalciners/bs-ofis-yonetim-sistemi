@@ -1,5 +1,5 @@
 {
-  "sozlesme_surumu": "1.0.0",
+  "sozlesme_surumu": "1.0.1",
   "dagitim_modeli": "dedicated-instance",
   "aciklama": "Tek kod tabanında müşteri bazlı opsiyonel özelliklerin teknik kataloğu. Ticari paket ve fiyatlar bu dosyada tutulmaz.",
   "core": {
@@ -25,6 +25,7 @@
       "ad": "Koçluk",
       "varsayilan_acik": false,
       "backend_core_kurulumunda_var": false,
+      "instancea_acilabilir": false,
       "durum": "ayri_urun"
     },
     {
@@ -32,6 +33,7 @@
       "ad": "Deneme Merkezi",
       "varsayilan_acik": false,
       "backend_core_kurulumunda_var": false,
+      "instancea_acilabilir": false,
       "durum": "ayri_urun"
     },
     {
@@ -39,13 +41,15 @@
       "ad": "Kütüphane & Çalışma Alanı",
       "varsayilan_acik": false,
       "backend_core_kurulumunda_var": false,
+      "instancea_acilabilir": false,
       "durum": "tasarim"
     }
   ],
   "instance_env": {
     "alan": "VITE_ENABLED_MODULES",
     "format": "virgulle_ayrilmis_modul_id",
-    "bos_deger": "yalniz_core"
+    "bos_deger": "yalniz_core",
+    "kural": "Yalnız instancea_acilabilir=true olan modüller etkinleştirilebilir. Modül backend kurulum paketi ve kabul testi olmadan bu değer true yapılamaz."
   },
   "ticari_paket_kurali": "Paket adları, fiyatlar ve paket->modül eşlemeleri frontend kodunda sabitlenmez; SaaS kontrol düzleminde yönetilir."
 }

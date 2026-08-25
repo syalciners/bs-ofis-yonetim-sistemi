@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 
 const manifestPath='saas/kurulum-manifesti.v1.json'
+const rpcContractPath='saas/core-rpc-contract.v1.json'
 const edgePath='supabase/functions/odev-drive-yukle/index.ts'
 const portalSupabasePath='apps/bs-egitim-portali/src/supabase.ts'
 const portalVitePath='apps/bs-egitim-portali/vite.config.ts'
@@ -8,6 +9,7 @@ const portalPackagePath='apps/bs-egitim-portali/package.json'
 const baselinePath='supabase/saas-v1-core/00_core_schema.sql'
 
 const manifest=JSON.parse(readFileSync(manifestPath,'utf8'))
+const rpcContract=JSON.parse(readFileSync(rpcContractPath,'utf8'))
 const edge=readFileSync(edgePath,'utf8')
 const portalSupabase=readFileSync(portalSupabasePath,'utf8')
 const portalVite=readFileSync(portalVitePath,'utf8')
@@ -18,6 +20,8 @@ const ok=(label,condition,message=label)=>{
   if(!condition)errors.push(message)
 }
 const unique=(items)=>new Set(items).size===items.length
+const sameSet=(actual,expected)=>actual.length===expected.length&&expected.every((item)=>actual.includes(item))
+const functionName=(signature)=>String(signature).split('(')[0].trim()
 
 const core=manifest?.veritabani?.core_public_tablolar||[]
 const coaching=manifest?.haric_urunler?.bs_kocluk_tablolari||[]
@@ -64,6 +68,47 @@ ok('Portal publishable key değerini instance envden alır',portalSupabase.inclu
 ok('Portal Vite kök instance env dizinini kullanır',portalVite.includes("envDir: '../..'"))
 ok('Portal build instance config kontrolüyle başlar',String(portalPackage?.scripts?.build||'').startsWith('npm run check:instance-config &&'))
 
+const rpcSignatures=rpcContract?.aktif_public_api_imzalari||[]
+const rpcNames=rpcSignatures.map(functionName)
+const legacyRpc=rpcContract?.baseline_disinda_legacy_public_rpc||[]
+const privateHelpers=rpcContract?.private_runtime_helpers||[]
+const triggerRoots=rpcContract?.private_trigger_kokleri||[]
+const privateExcluded=rpcContract?.baseline_disinda_private||[]
+const security=rpcContract?.guvenlik_hedefi||{}
+const finance=rpcContract?.baseline_sanitizasyonlari?.finans_asistani||{}
+const teacherBranch=rpcContract?.baseline_sanitizasyonlari?.ogretmen_brans_trigger||{}
+
+ok('Core RPC sözleşmesi dedicated-instance modelidir',rpcContract?.dagitim_modeli==='dedicated-instance')
+ok('Core RPC sözleşmesi 53 aktif public API içerir',rpcSignatures.length===53&&rpcContract?.aktif_public_api_sayisi===53)
+ok('Aktif public API adlarında tekrar yoktur',unique(rpcNames))
+ok('Aktif public API imzalarında tekrar yoktur',unique(rpcSignatures))
+ok('Aktif API ile legacy RPC listesi kesişmez',!legacyRpc.some((name)=>rpcNames.includes(name)))
+ok('Legacy RPC listesinde tekrar yoktur',unique(legacyRpc))
+ok('Sabit program V4 aktif sözleşmededir',rpcNames.includes('sabit_program_kaydet_guvenli_v4'))
+ok('Sabit program V1-V3 legacy kalır',['sabit_program_kaydet_guvenli_v1','sabit_program_kaydet_guvenli_v2','sabit_program_kaydet_guvenli_v3'].every((name)=>legacyRpc.includes(name)&&!rpcNames.includes(name)))
+ok('Hafta üretimi yalnız V3/V6/V2 güncel setini kullanır',rpcNames.includes('haftalik_ders_uretim_durumu_v3')&&rpcNames.includes('haftalik_dersleri_hazirla_guvenli_v6')&&rpcNames.includes('haftalik_program_kontrol_oneri_v2'))
+ok('Portal V2 sözleşmesi aktif API setindedir',['portal_oturum_bilgisi_v2','portal_program_v2','portal_odevler_v2','portal_bugun_v2','portal_ogrenci_bugun_v1','portal_ogrenci_odev_tamamla_v1'].every((name)=>rpcNames.includes(name)))
+
+const expectedHelpers=['bs_ofis_yonetici_mi','bs_program_tarih_kontrol_v1','ogretmen_brans_uygun_mu','portal_kimligi_epostadan_v2','sabit_program_tarih_uygun_mu','sabit_program_tarihe_duser_mi']
+const expectedTriggers=['bs_ofis_ogretmen_brans_dogrula_v1','portal_yonetim_kimligi_cakisma_engelle_v1','yonetim_portal_kimligi_cakisma_engelle_v1']
+ok('Private runtime helper seti yalnız doğrulanan 6 fonksiyondur',sameSet(privateHelpers,expectedHelpers))
+ok('Private trigger kökü seti yalnız doğrulanan 3 fonksiyondur',sameSet(triggerRoots,expectedTriggers))
+ok('Legacy metin branş helperı Core dışında kalır',privateExcluded.includes('bs_ofis_ogretmen_brans_uygun_mu')&&!privateHelpers.includes('bs_ofis_ogretmen_brans_uygun_mu'))
+ok('Normalize branş helperı Core içinde kalır',privateHelpers.includes('ogretmen_brans_uygun_mu')&&teacherBranch?.core_helper==='private.ogretmen_brans_uygun_mu')
+ok('Öğretmen-branş legacy helperı açıkça işaretlidir',teacherBranch?.canli_legacy_helper==='private.bs_ofis_ogretmen_brans_uygun_mu')
+
+ok('Public API varsayılanı authenticated rolüdür',sameSet(security?.public_api_default?.execute||[],['authenticated']))
+ok('Public API varsayılanında anon execute kapalıdır',security?.public_api_default?.execute_anon===false)
+ok('Public API varsayılanında PUBLIC execute kapalıdır',security?.public_api_default?.execute_public===false)
+ok('Tek anon RPC kurum_public_bilgisi_v1 olur',sameSet(security?.anon_istisnalari||[],['kurum_public_bilgisi_v1']))
+ok('Private helperlara doğrudan API execute verilmez',(security?.private_helper_execute||[]).length===0)
+ok('Private triggerlara doğrudan API execute verilmez',(security?.private_trigger_execute||[]).length===0)
+
+ok('Finans sync köprüsü Core zorunluluğu değildir',finance?.core_zorunlu===false&&privateExcluded.includes('finans_v18_sync_tetikle'))
+ok('Finans sync için pg_net Core zorunluluğu değildir',finance?.pg_net_core_zorunlu===false&&!requiredExtensions.includes('pg_net'))
+ok('Tahsilat düzenleme/silme sanitizasyon kapsamındadır',sameSet(finance?.etkilenen_core_rpc||[],['tahsilat_guncelle_guvenli_v1','tahsilat_sil_guvenli_v1']))
+ok('Sanitize edilecek tahsilat RPCleri aktif contractta kalır',(finance?.etkilenen_core_rpc||[]).every((name)=>rpcNames.includes(name)))
+
 if(manifest.installable===true){
   ok('Installable manifest için Core SQL baseline mevcuttur',existsSync(baselinePath))
 }else{
@@ -71,7 +116,7 @@ if(manifest.installable===true){
 }
 
 if(errors.length){
-  console.error(`\n${errors.length} SaaS kurulum manifesti kontrolü başarısız.`)
+  console.error(`\n${errors.length} SaaS kurulum manifesti / RPC sözleşmesi kontrolü başarısız.`)
   process.exit(1)
 }
-console.log('\nSaaS V1 kurulum manifesti kalite kontrolleri geçti.')
+console.log('\nSaaS V1 kurulum manifesti ve Core RPC sözleşmesi kalite kontrolleri geçti.')

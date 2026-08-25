@@ -7,7 +7,7 @@
     "dev": "vite",
     "check:rules": "node scripts/check-business-rules-current.mjs",
     "check:instance-config": "node scripts/check-instance-config.mjs",
-    "check:saas-install": "node scripts/check-saas-install-manifest.mjs && node scripts/check-saas-core-sql.mjs",
+    "check:saas-install": "node scripts/check-saas-install-manifest.mjs && node scripts/check-saas-core-sql.mjs && node scripts/check-saas-provisioning.mjs",
     "build": "npm run check:instance-config && tsc -b && vite build",
     "preview": "vite preview"
   },

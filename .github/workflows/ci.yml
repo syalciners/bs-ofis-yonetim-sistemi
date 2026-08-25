@@ -13,6 +13,24 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: test
+      VITE_SUPABASE_URL: https://saas-hosted-isolation.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_hosted_isolation_test
+      VITE_PORTAL_URL: https://portal-hosted-isolation.example.com/
+      VITE_ENABLED_MODULES: ''
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +42,53 @@ jobs:
         run: npm run check:rules
       - name: SaaS kurulum manifesti ve Core RPC sözleşmesi
         run: npm run check:saas-install
+      - name: Hosted smoke SQL izolasyon testi
+        shell: bash
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          create schema if not exists extensions;
+          create schema if not exists auth;
+          create schema if not exists storage;
+          create table auth.users (id uuid primary key,email text,email_confirmed_at timestamptz);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create table storage.buckets (id text primary key,name text not null,public boolean not null default false,file_size_limit bigint,allowed_mime_types text[]);
+          create table storage.objects (id uuid default gen_random_uuid() primary key,bucket_id text,name text);
+          alter table storage.objects enable row level security;
+          create or replace function storage.foldername(name text) returns text[] language sql immutable as $$ select string_to_array(name,'/') $$;
+          do $$ begin
+            if not exists(select 1 from pg_roles where rolname='anon') then create role anon nologin; end if;
+            if not exists(select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if;
+            if not exists(select 1 from pg_roles where rolname='service_role') then create role service_role nologin; end if;
+          end $$;
+          SQL
+          for file in \
+            supabase/saas-v1-core/00a_core_tables.sql \
+            supabase/saas-v1-core/00b_core_constraints.sql \
+            supabase/saas-v1-core/00c_core_foreign_keys.sql \
+            supabase/saas-v1-core/00d_core_indexes.sql \
+            supabase/saas-v1-core/01_private_helpers.sql \
+            supabase/saas-v1-core/02a_portal_rpc.sql \
+            supabase/saas-v1-core/02b_management_rpc.sql \
+            supabase/saas-v1-core/02c_notifications_assignments_rpc.sql \
+            supabase/saas-v1-core/02d_finance_rpc.sql \
+            supabase/saas-v1-core/02e_lessons_weekly_rpc.sql \
+            supabase/saas-v1-core/02f_fixed_schedule_health_rpc.sql \
+            supabase/saas-v1-core/03_core_seed.sql \
+            supabase/saas-v1-core/04_core_security.sql \
+            supabase/saas-v1-core/05_core_storage.sql \
+            supabase/saas-v1-core/06_first_admin_bootstrap.sql
+          do
+            psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f "$file"
+          done
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -At -F '|' -f supabase/saas-v1-core/07_hosted_smoke_readonly.sql | tee /tmp/hosted-smoke.txt
+          if grep -q '|f|' /tmp/hosted-smoke.txt; then exit 1; fi
+          passed_count="$(grep -c '|t|' /tmp/hosted-smoke.txt || true)"
+          if [ "$passed_count" -ne 23 ]; then echo "Hosted smoke PASS sayısı 23 değil: $passed_count" >&2; exit 1; fi
+          echo "Hosted smoke 23/23 PASS."
       - name: Takvim UX kuralları
         run: node scripts/check-calendar-ux.mjs
       - name: İptal ders Takvim kuralı

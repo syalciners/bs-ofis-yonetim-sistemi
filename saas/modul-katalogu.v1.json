@@ -1,0 +1,51 @@
+{
+  "sozlesme_surumu": "1.0.0",
+  "dagitim_modeli": "dedicated-instance",
+  "aciklama": "Tek kod tabanında müşteri bazlı opsiyonel özelliklerin teknik kataloğu. Ticari paket ve fiyatlar bu dosyada tutulmaz.",
+  "core": {
+    "daima_acik": true,
+    "kapsam": [
+      "ogrenciler",
+      "ogretmenler",
+      "ders_programi",
+      "takvim",
+      "odevler",
+      "tahsilatlar",
+      "ogretmen_hakedisleri",
+      "kasa",
+      "giderler",
+      "raporlar",
+      "yonetim",
+      "ogrenci_ogretmen_portali"
+    ]
+  },
+  "opsiyonel_moduller": [
+    {
+      "id": "kocluk",
+      "ad": "Koçluk",
+      "varsayilan_acik": false,
+      "backend_core_kurulumunda_var": false,
+      "durum": "ayri_urun"
+    },
+    {
+      "id": "deneme-merkezi",
+      "ad": "Deneme Merkezi",
+      "varsayilan_acik": false,
+      "backend_core_kurulumunda_var": false,
+      "durum": "ayri_urun"
+    },
+    {
+      "id": "kutuphane",
+      "ad": "Kütüphane & Çalışma Alanı",
+      "varsayilan_acik": false,
+      "backend_core_kurulumunda_var": false,
+      "durum": "tasarim"
+    }
+  ],
+  "instance_env": {
+    "alan": "VITE_ENABLED_MODULES",
+    "format": "virgulle_ayrilmis_modul_id",
+    "bos_deger": "yalniz_core"
+  },
+  "ticari_paket_kurali": "Paket adları, fiyatlar ve paket->modül eşlemeleri frontend kodunda sabitlenmez; SaaS kontrol düzleminde yönetilir."
+}

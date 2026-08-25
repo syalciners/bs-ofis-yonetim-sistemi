@@ -1,0 +1,144 @@
+{
+  "surum": "1.0.0",
+  "snapshot_tarihi": "2026-08-25",
+  "urun": "BS Eğitim",
+  "dagitim_modeli": "dedicated-instance",
+  "amac": "Yeni kurum Supabase instance'ında kurulacak aktif Core RPC sözleşmesini, private runtime yardımcılarını, trigger köklerini ve güvenlik sınırlarını sabitlemek.",
+  "durum": "baseline-hazirlik",
+  "aktif_public_api_sayisi": 53,
+  "aktif_public_api_imzalari": [
+    "bildirim_okundu_v1(p_bildirim_id uuid, p_okundu boolean) -> jsonb",
+    "bildirim_okunmamis_sayisi_v1() -> integer",
+    "bildirimlerim_v1(p_limit integer) -> table",
+    "brans_kaydet_guvenli_v1(p_brans_id text, p_brans_adi text, p_aktif boolean) -> jsonb",
+    "ders_cakisma_kontrol_v1(p_tarih date, p_ogrenci_id text, p_ogretmen_id text, p_derslik_id text, p_baslangic_saati time, p_ders_sayisi numeric, p_haric_ders_id text) -> jsonb",
+    "ders_durumu_guncelle_guvenli_v1(p_ders_id text, p_yeni_durum text, p_aciklama text) -> jsonb",
+    "ders_guncelle_guvenli_v1(p_ders_id text, p_tarih date, p_ogrenci_id text, p_ogretmen_id text, p_brans_id text, p_derslik_id text, p_baslangic_saati time, p_ders_sayisi numeric, p_ogrenci_birim_ucreti numeric, p_ogretmen_birim_hakedisi numeric, p_aciklama text) -> jsonb",
+    "ders_kaydet_guvenli_v1(p_ders_id text, p_tarih date, p_ogrenci_id text, p_ogretmen_id text, p_brans_id text, p_derslik_id text, p_baslangic_saati time, p_ders_sayisi numeric, p_aciklama text, p_program_id text, p_ogrenci_birim_ucreti numeric, p_ogretmen_birim_hakedisi numeric) -> jsonb",
+    "derslik_kaydet_guvenli_v1(p_derslik_id text, p_mekan_adi text, p_mekan_turu text, p_kapasite integer, p_aktif boolean, p_aciklama text) -> jsonb",
+    "drive_yukleme_yetkili_mi_v1() -> boolean",
+    "gider_guncelle_guvenli_v1(p_gider_id text, p_tarih date, p_kategori_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text, p_hesap_id text) -> jsonb",
+    "gider_iptal_guvenli_v1(p_gider_id text, p_aciklama text) -> jsonb",
+    "gider_kategorisi_kaydet_guvenli_v1(p_kategori_id text, p_kategori_adi text, p_grup text, p_sira_no integer, p_aktif boolean, p_aciklama text) -> jsonb",
+    "gider_kaydet_guvenli_v1(p_gider_id text, p_hareket_id text, p_tarih date, p_kategori_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text, p_hesap_id text) -> jsonb",
+    "haftalik_ders_uretim_durumu_v3(p_hafta_baslangici date) -> jsonb",
+    "haftalik_dersleri_hazirla_guvenli_v6(p_hafta_baslangici date) -> jsonb",
+    "haftalik_program_kontrol_oneri_v2(p_hafta_baslangici date) -> jsonb",
+    "kasa_hesabi_kaydet_guvenli_v1(p_hesap_id text, p_hesap_adi text, p_hesap_turu text, p_banka_adi text, p_iban text, p_acilis_bakiyesi numeric, p_aktif boolean, p_aciklama text) -> jsonb",
+    "kullanici_kendi_profilini_guncelle_guvenli_v1(p_ad_soyad text, p_telefon text) -> jsonb",
+    "kullanici_profili_guncelle_guvenli_v2(p_auth_user_id uuid, p_ad_soyad text, p_telefon text, p_aktif boolean) -> jsonb",
+    "kurum_ayarlari_guncelle_guvenli_v1(p_kurum_adi text, p_marka_adi text, p_telefon text, p_email text, p_adres text, p_logo_url text) -> jsonb",
+    "kurum_public_bilgisi_v1() -> jsonb",
+    "odev_drive_eklerini_guncelle_guvenli_v1(p_odev_id text, p_odev_dosyasi text, p_odev_dosya_linki text, p_odev_fotografi text, p_odev_fotograf_linki text) -> jsonb",
+    "odev_durumu_guncelle_guvenli_v1(p_odev_id text, p_durum text, p_ogretmen_notu text, p_puan text) -> jsonb",
+    "odev_eklerini_guncelle_guvenli_v1(p_odev_id text, p_odev_dosyasi text, p_odev_fotografi text) -> jsonb",
+    "odev_kaydet_guvenli_v1(p_odev_id text, p_ogrenci_id text, p_ogretmen_id text, p_konu text, p_aciklama text, p_verilis_tarihi date, p_son_teslim_tarihi date, p_ders_id text, p_oncelik text) -> jsonb",
+    "ogrenci_ekle_guvenli_v1(p_ogrenci_id text, p_ad_soyad text, p_veli_adi text, p_veli_telefon text, p_ogrenci_telefon text, p_email text, p_kayit_tarihi date, p_notlar text) -> jsonb",
+    "ogrenci_kaydet_guvenli_v2(p_ogrenci_id text, p_ad_soyad text, p_veli_adi text, p_veli_telefon text, p_ogrenci_telefon text, p_email text, p_kayit_tarihi date, p_notlar text, p_durum text) -> jsonb",
+    "ogrenci_sil_guvenli_v1(p_ogrenci_id text) -> jsonb",
+    "ogretmen_kaydet_guvenli_v5(p_ogretmen_id text, p_ad_soyad text, p_brans_ids text[], p_telefon text, p_email text, p_notlar text, p_durum text) -> jsonb",
+    "ogretmen_odeme_guncelle_guvenli_v1(p_odeme_id text, p_tarih date, p_hakedis_donemi_id text, p_ogretmen_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text, p_hesap_id text) -> jsonb",
+    "ogretmen_odeme_iptal_guvenli_v1(p_odeme_id text, p_aciklama text) -> jsonb",
+    "ogretmen_odeme_kaydet_guvenli_v2(p_odeme_id text, p_hareket_id text, p_tarih date, p_hakedis_donemi_id text, p_ogretmen_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text, p_hesap_id text) -> jsonb",
+    "portal_bugun_v2() -> jsonb",
+    "portal_odevler_v2() -> jsonb",
+    "portal_ogrenci_bugun_v1() -> jsonb",
+    "portal_ogrenci_odev_tamamla_v1(p_odev_id text) -> jsonb",
+    "portal_oturum_bilgisi_v2() -> jsonb",
+    "portal_program_v2(p_gun integer) -> jsonb",
+    "profil_fotografi_guncelle_guvenli_v1(p_kayit_turu text, p_kayit_id text, p_profil_fotografi text) -> jsonb",
+    "program_ayarlari_guncelle_guvenli_v1(p_varsayilan_ders_birimi integer, p_takvim_baslangic_saati time, p_takvim_bitis_saati time) -> jsonb",
+    "program_saglik_kontrolu_v1() -> jsonb",
+    "sabit_program_cakisma_kontrol_v1(p_ogrenci_id text, p_ogretmen_id text, p_derslik_id text, p_haftanin_gunu text, p_baslangic_saati time, p_ders_sayisi numeric, p_tekrar_sikligi text, p_baslangic_tarihi date, p_bitis_tarihi date, p_haric_program_id text) -> jsonb",
+    "sabit_program_hafta_atla_guvenli_v1(p_program_id text, p_tarih date, p_aciklama text) -> jsonb",
+    "sabit_program_kaydet_guvenli_v4(p_program_id text, p_ogrenci_id text, p_ogretmen_id text, p_brans_id text, p_derslik_id text, p_haftanin_gunu text, p_baslangic_saati time, p_ders_sayisi numeric, p_ogrenci_birim_ucreti numeric, p_ogretmen_birim_hakedisi numeric, p_tekrar_sikligi text, p_baslangic_tarihi date, p_bitis_tarihi date, p_aciklama text, p_program_durumu text) -> jsonb",
+    "sabit_program_oneri_v1(p_ogrenci_id text, p_ogretmen_id text, p_derslik_id text, p_haftanin_gunu text, p_baslangic_saati time, p_ders_sayisi numeric, p_tekrar_sikligi text, p_baslangic_tarihi date, p_bitis_tarihi date, p_haric_program_id text) -> jsonb",
+    "sabit_program_onizleme_v1(p_program_id text, p_baslangic date, p_adet integer) -> jsonb",
+    "sabit_program_tek_sefer_tasi_guvenli_v1(p_program_id text, p_orijinal_tarih date, p_yeni_tarih date, p_yeni_baslangic_saati time, p_yeni_derslik_id text, p_aciklama text) -> jsonb",
+    "sistem_saglik_kontrolu_v1() -> jsonb",
+    "tahsilat_guncelle_guvenli_v1(p_tahsilat_id text, p_tarih date, p_ogrenci_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text) -> jsonb",
+    "tahsilat_iptal_guvenli_v1(p_tahsilat_id text, p_aciklama text) -> jsonb",
+    "tahsilat_kaydet_guvenli_v1(p_tahsilat_id text, p_hareket_id text, p_tarih date, p_ogrenci_id text, p_tutar numeric, p_odeme_yontemi text, p_aciklama text) -> jsonb",
+    "tahsilat_sil_guvenli_v1(p_tahsilat_id text) -> jsonb"
+  ],
+  "private_runtime_helpers": [
+    "bs_ofis_yonetici_mi",
+    "bs_program_tarih_kontrol_v1",
+    "ogretmen_brans_uygun_mu",
+    "portal_kimligi_epostadan_v2",
+    "sabit_program_tarih_uygun_mu",
+    "sabit_program_tarihe_duser_mi"
+  ],
+  "private_trigger_kokleri": [
+    "bs_ofis_ogretmen_brans_dogrula_v1",
+    "portal_yonetim_kimligi_cakisma_engelle_v1",
+    "yonetim_portal_kimligi_cakisma_engelle_v1"
+  ],
+  "guvenlik_hedefi": {
+    "public_api_default": {
+      "security_definer": true,
+      "search_path": "",
+      "execute": ["authenticated"],
+      "execute_public": false,
+      "execute_anon": false
+    },
+    "anon_istisnalari": [
+      "kurum_public_bilgisi_v1"
+    ],
+    "anon_istisna_execute": ["anon", "authenticated"],
+    "private_helper_execute": [],
+    "private_trigger_execute": [],
+    "not": "SECURITY DEFINER fonksiyonlarda PUBLIC EXECUTE varsayılanı baseline içinde açıkça revoke edilecektir. Yetkilendirme yalnız role grant ile değil, fonksiyon gövdesindeki auth/yönetici/portal kimliği kontrolleriyle birlikte uygulanacaktır."
+  },
+  "baseline_sanitizasyonlari": {
+    "ogretmen_brans_trigger": {
+      "canli_legacy_helper": "private.bs_ofis_ogretmen_brans_uygun_mu",
+      "core_helper": "private.ogretmen_brans_uygun_mu",
+      "kural": "Yeni baseline ogretmenler.branslar metin alanına değil public.ogretmen_branslari normalize ilişki tablosuna dayanacaktır."
+    },
+    "finans_asistani": {
+      "canli_kopru": "private.finans_v18_sync_tetikle",
+      "core_zorunlu": false,
+      "pg_net_core_zorunlu": false,
+      "etkilenen_core_rpc": [
+        "tahsilat_guncelle_guvenli_v1",
+        "tahsilat_sil_guvenli_v1"
+      ],
+      "kural": "Core sürümünde Finans Asistanı kurulmamışsa tahsilat düzenleme/silme işlemi senkron köprüsü yüzünden rollback olmayacaktır. Opsiyonel entegrasyon daha sonra ayrı kurulum katmanıyla bağlanacaktır."
+    }
+  },
+  "baseline_disinda_legacy_public_rpc": [
+    "haftalik_ders_uretim_durumu_v1",
+    "haftalik_ders_uretim_durumu_v2",
+    "haftalik_dersleri_olustur_guvenli_v1",
+    "haftalik_dersleri_olustur_guvenli_v2",
+    "haftalik_dersleri_olustur_guvenli_v3",
+    "haftalik_dersleri_olustur_guvenli_v4",
+    "haftalik_dersleri_olustur_guvenli_v5",
+    "haftalik_program_kontrol_oneri_v1",
+    "kullanici_profili_guncelle_guvenli_v1",
+    "ogrenci_kaldir_guvenli_v2",
+    "ogretmen_kaldir_guvenli_v2",
+    "ogretmen_kaydet_guvenli_v1",
+    "ogretmen_kaydet_guvenli_v2",
+    "ogretmen_kaydet_guvenli_v4",
+    "ogretmen_odeme_kaydet_guvenli_v1",
+    "ogretmen_sil_guvenli_v1",
+    "sabit_program_kaydet_guvenli_v1",
+    "sabit_program_kaydet_guvenli_v2",
+    "sabit_program_kaydet_guvenli_v3"
+  ],
+  "baseline_disinda_private": [
+    "bs_ofis_ogretmen_brans_uygun_mu",
+    "finans_v18_sync_tetikle"
+  ],
+  "uygulama_kokleri": {
+    "yonetim": "src",
+    "portal": "apps/bs-egitim-portali/src",
+    "haric": [
+      "apps/bs-kocluk",
+      "src/pages/CoachingPage.tsx",
+      "src/pages/ExamCenterPage.tsx"
+    ]
+  }
+}

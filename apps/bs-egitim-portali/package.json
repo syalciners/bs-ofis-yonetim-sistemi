@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "check:instance-config": "node scripts/check-instance-config.mjs",
+    "build": "npm run check:instance-config && tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

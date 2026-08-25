@@ -26,12 +26,14 @@ Core public RPC standardı:
 2. `search_path` sabitlenir; caller tarafından değiştirilebilir search path'e güvenilmez.
 3. Fonksiyon oluşturulduktan sonra `PUBLIC EXECUTE` açık bırakılmaz.
 4. Varsayılan istemci rolü `authenticated` olur.
-5. **Tek anonim istisna `kurum_public_bilgisi_v1`**'dir; giriş ekranında kurum marka bilgisinin okunması için `anon` + `authenticated` çalıştırabilir.
+5. **Tek anonim public RPC istisnası `kurum_public_bilgisi_v1`**'dir; giriş ekranında kurum marka bilgisinin okunması için `anon` + `authenticated` çalıştırabilir.
 6. Yönetici işlemleri yalnız role grant'e güvenmez; fonksiyon gövdesinde `auth.uid()` ve yönetici kimliği kontrolü zorunludur.
 7. Portal fonksiyonları authenticated kullanıcıyı öğrenci/öğretmen kimliğine güvenli biçimde eşler; yönetim hesabı portal kimliği olarak kullanılamaz.
-8. Private helper ve trigger fonksiyonlarına `anon` / `authenticated` doğrudan EXECUTE verilmez.
+8. Private helper ve trigger fonksiyonları istemci rollerine **varsayılan olarak kapalıdır**.
+9. Tek private helper EXECUTE istisnası `private.bs_ofis_yonetici_mi()` fonksiyonudur. RLS ve Storage policy ifadeleri bu fonksiyonu doğrudan değerlendirdiği için yalnız `authenticated` rolü EXECUTE alır. Fonksiyon yalnız boolean yönetici kontrolü döndürür ve `SECURITY DEFINER` + sabit `search_path` kullanır.
+10. Private trigger fonksiyonlarına istemci rollerinden doğrudan EXECUTE verilmez.
 
-Bu kural özellikle canlı katalogda tespit edilen gereğinden geniş anon/PUBLIC izinlerinin yeni müşterilere taşınmasını engeller.
+Bu kural özellikle canlı katalogda tespit edilen gereğinden geniş anon/PUBLIC izinlerinin yeni müşterilere taşınmasını engeller ve RLS policy değerlendirmesinin çalışması için gereken tek kontrollü private helper istisnasını açıkça belgeler.
 
 ## 3. Öğretmen–branş normalizasyonu
 
@@ -84,9 +86,10 @@ SaaS kuralı:
 5. Öğretmen-branş trigger'ı normalize ilişki tablosunu kullanır.
 6. Finance köprüsü Core zorunluluğu değildir.
 7. `PUBLIC EXECUTE` kapalıdır; yalnız sözleşmedeki roller grant alır.
-8. Public/exposed tablolarda RLS ve gerekli policy/grant'ler açıkça tanımlıdır.
-9. Storage bucket/policy'leri kurulum manifestiyle uyumludur.
-10. Yönetim uygulaması ve BS Eğitim Portalı aynı yeni instance environment'ıyla production build verir.
-11. Kurulum sonrası şema/RPC/permission smoke testleri tamamen geçer.
+8. Private helper EXECUTE varsayılanı kapalıdır; yalnız `private.bs_ofis_yonetici_mi()` → `authenticated` istisnası vardır.
+9. Public/exposed tablolarda RLS ve gerekli policy/grant'ler açıkça tanımlıdır.
+10. Storage bucket/policy'leri kurulum manifestiyle uyumludur.
+11. Yönetim uygulaması ve BS Eğitim Portalı aynı yeni instance environment'ıyla production build verir.
+12. Kurulum sonrası şema/RPC/permission smoke testleri tamamen geçer.
 
 Bu kriterler tamamlanmadan `saas/kurulum-manifesti.v1.json` içindeki `installable` alanı `true` yapılmayacaktır.

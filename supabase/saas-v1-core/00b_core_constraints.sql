@@ -1,0 +1,45 @@
+-- BS Eğitim SaaS V1 — Primary/Unique/Check kısıtları
+-- Foreign key'ler sonraki katmanda eklenir; böylece referans anahtarları önce oluşur.
+
+alter table public.aylik_snapshotlar add constraint aylik_snapshotlar_ay_check check (ay >= 1 and ay <= 12);
+alter table public.aylik_snapshotlar add constraint aylik_snapshotlar_pkey primary key (snapshot_id);
+alter table public.bildirim_okumalari add constraint bildirim_okumalari_pkey primary key (bildirim_id, auth_user_id);
+alter table public.bildirimler add constraint bildirimler_alici_turu_check check (alici_turu = any (array['Yönetici'::text, 'Öğretmen'::text, 'Öğrenci'::text, 'Veli'::text, 'Tüm Kullanıcılar'::text]));
+alter table public.bildirimler add constraint bildirimler_oncelik_check check (oncelik = any (array['Düşük'::text, 'Normal'::text, 'Yüksek'::text, 'Kritik'::text]));
+alter table public.bildirimler add constraint bildirimler_pkey primary key (bildirim_id);
+alter table public.branslar add constraint branslar_pkey primary key (brans_id);
+alter table public.dersler add constraint dersler_pkey primary key (ders_id);
+alter table public.derslikler add constraint derslikler_pkey primary key (derslik_id);
+alter table public.gider_kategorileri add constraint gider_kategorileri_pkey primary key (kategori_id);
+alter table public.giderler add constraint giderler_tutar_check check (tutar > 0::numeric);
+alter table public.giderler add constraint giderler_pkey primary key (gider_id);
+alter table public.haftalik_ders_uretimleri add constraint haftalik_ders_uretimleri_pkey primary key (hafta_baslangici);
+alter table public.hakedis_donemleri add constraint hakedis_donemleri_pkey primary key (hakedis_donemi_id);
+alter table public.kasa_hareketleri add constraint kasa_hareketleri_pkey primary key (hareket_id);
+alter table public.kasa_hesaplari add constraint kasa_hesaplari_pkey primary key (hesap_id);
+alter table public.krediler add constraint krediler_aylik_taksit_tutari_check check (aylik_taksit_tutari is null or aylik_taksit_tutari >= 0::numeric);
+alter table public.krediler add constraint krediler_odenen_taksit_check check (odenen_taksit is null or odenen_taksit >= 0);
+alter table public.krediler add constraint krediler_toplam_taksit_check check (toplam_taksit is null or toplam_taksit >= 0);
+alter table public.krediler add constraint krediler_pkey primary key (kredi_id);
+alter table public.kullanici_profilleri add constraint kullanici_profilleri_rol_check check (rol = any (array['Yönetici'::text, 'Personel'::text, 'Öğretmen'::text]));
+alter table public.kullanici_profilleri add constraint kullanici_profilleri_pkey primary key (auth_user_id);
+alter table public.kullanici_profilleri add constraint kullanici_profilleri_email_key unique (email);
+alter table public.kurum_ayarlari add constraint kurum_ayarlari_takvim_saatleri_check check (takvim_baslangic_saati < takvim_bitis_saati);
+alter table public.kurum_ayarlari add constraint kurum_ayarlari_tek_kayit check (kurum_id = 'ANA'::text);
+alter table public.kurum_ayarlari add constraint kurum_ayarlari_varsayilan_ders_birimi_check check (varsayilan_ders_birimi >= 1 and varsayilan_ders_birimi <= 2);
+alter table public.kurum_ayarlari add constraint kurum_ayarlari_pkey primary key (kurum_id);
+alter table public.odevler add constraint odevler_pkey primary key (odev_id);
+alter table public.ogrenciler add constraint ogrenciler_pkey primary key (ogrenci_id);
+alter table public.ogretmen_branslari add constraint ogretmen_branslari_pkey primary key (ogretmen_id, brans_id);
+alter table public.ogretmen_odemeleri add constraint ogretmen_odemeleri_pkey primary key (ogretmen_odeme_id);
+alter table public.ogretmenler add constraint ogretmenler_pkey primary key (ogretmen_id);
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_rol_baglanti_ck check (rol = 'Öğretmen'::text and ogretmen_id is not null and ogrenci_id is null or rol = 'Öğrenci'::text and ogrenci_id is not null and ogretmen_id is null);
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_rol_check check (rol = any (array['Öğretmen'::text, 'Öğrenci'::text]));
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_pkey primary key (auth_user_id);
+alter table public.rapor_talepleri add constraint rapor_talepleri_pkey primary key (rapor_talep_id);
+alter table public.sabit_ders_programi add constraint sabit_ders_programi_tekrar_sikligi_ck check (tekrar_sikligi = any (array['Her Hafta'::text, '2 Haftada Bir'::text, 'Ayda Bir'::text]));
+alter table public.sabit_ders_programi add constraint sabit_ders_programi_pkey primary key (program_id);
+alter table public.sabit_program_istisnalari add constraint sabit_program_istisnalari_tur_check check (tur = any (array['Atla'::text, 'Taşı'::text]));
+alter table public.sabit_program_istisnalari add constraint sabit_program_istisnalari_pkey primary key (istisna_id);
+alter table public.tahsilatlar add constraint tahsilatlar_pkey primary key (tahsilat_id);
+alter table public.tarifeler add constraint tarifeler_pkey primary key (tarife_id);

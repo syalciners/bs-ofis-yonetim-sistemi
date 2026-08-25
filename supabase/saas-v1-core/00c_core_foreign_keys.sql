@@ -1,0 +1,43 @@
+-- BS Eğitim SaaS V1 — Foreign key katmanı
+-- Yalnız Core tabloları ve Supabase auth.users bağı içerir.
+
+alter table public.aylik_snapshotlar add constraint aylik_snapshotlar_ogrenci_id_fkey foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id);
+alter table public.aylik_snapshotlar add constraint aylik_snapshotlar_ogretmen_id_fkey foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id);
+alter table public.bildirim_okumalari add constraint bildirim_okumalari_bildirim_id_fkey foreign key (bildirim_id) references public.bildirimler(bildirim_id) on delete cascade;
+alter table public.branslar add constraint fk_branslar_varsayilan_ogretmen foreign key (varsayilan_ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.dersler add constraint fk_dersler_brans foreign key (brans_id) references public.branslar(brans_id) on delete restrict;
+alter table public.dersler add constraint fk_dersler_derslik foreign key (derslik_id) references public.derslikler(derslik_id) on delete restrict;
+alter table public.dersler add constraint fk_dersler_ogrenci foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.dersler add constraint fk_dersler_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.dersler add constraint fk_dersler_program foreign key (program_id) references public.sabit_ders_programi(program_id) on delete restrict;
+alter table public.giderler add constraint giderler_hesap_id_fkey foreign key (hesap_id) references public.kasa_hesaplari(hesap_id);
+alter table public.giderler add constraint giderler_kategori_id_fkey foreign key (kategori_id) references public.gider_kategorileri(kategori_id);
+alter table public.kasa_hareketleri add constraint fk_kasa_hareketleri_hesap foreign key (hesap_id) references public.kasa_hesaplari(hesap_id) on delete restrict;
+alter table public.kasa_hareketleri add constraint fk_kasa_hareketleri_ogrenci foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.kasa_hareketleri add constraint fk_kasa_hareketleri_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.kullanici_profilleri add constraint fk_kullanici_profilleri_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.kullanici_profilleri add constraint kullanici_profilleri_auth_user_id_fkey foreign key (auth_user_id) references auth.users(id) on delete restrict;
+alter table public.odevler add constraint fk_odevler_ders foreign key (ders_id) references public.dersler(ders_id) on delete restrict;
+alter table public.odevler add constraint fk_odevler_ogrenci foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.odevler add constraint fk_odevler_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.ogretmen_odemeleri add constraint fk_ogretmen_odemeleri_donem foreign key (hakedis_donemi_id) references public.hakedis_donemleri(hakedis_donemi_id) on delete restrict;
+alter table public.ogretmen_odemeleri add constraint fk_ogretmen_odemeleri_hesap foreign key (hesap_id) references public.kasa_hesaplari(hesap_id) on delete restrict;
+alter table public.ogretmen_odemeleri add constraint fk_ogretmen_odemeleri_kasa_hareketi foreign key (kasa_hareket_id) references public.kasa_hareketleri(hareket_id) on delete restrict;
+alter table public.ogretmen_odemeleri add constraint fk_ogretmen_odemeleri_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_auth_user_id_fkey foreign key (auth_user_id) references auth.users(id) on delete cascade;
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_ogrenci_id_fkey foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.portal_kullanicilari add constraint portal_kullanicilari_ogretmen_id_fkey foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.rapor_talepleri add constraint rapor_talepleri_ogrenci_id_fkey foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id);
+alter table public.rapor_talepleri add constraint rapor_talepleri_ogretmen_id_fkey foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id);
+alter table public.sabit_ders_programi add constraint fk_sabit_program_brans foreign key (brans_id) references public.branslar(brans_id) on delete restrict;
+alter table public.sabit_ders_programi add constraint fk_sabit_program_derslik foreign key (derslik_id) references public.derslikler(derslik_id) on delete restrict;
+alter table public.sabit_ders_programi add constraint fk_sabit_program_ogrenci foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.sabit_ders_programi add constraint fk_sabit_program_ogretmen foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id) on delete restrict;
+alter table public.sabit_program_istisnalari add constraint sabit_program_istisnalari_orijinal_ders_id_fkey foreign key (orijinal_ders_id) references public.dersler(ders_id) on delete set null;
+alter table public.sabit_program_istisnalari add constraint sabit_program_istisnalari_program_id_fkey foreign key (program_id) references public.sabit_ders_programi(program_id) on delete restrict;
+alter table public.sabit_program_istisnalari add constraint sabit_program_istisnalari_yeni_ders_id_fkey foreign key (yeni_ders_id) references public.dersler(ders_id) on delete set null;
+alter table public.tahsilatlar add constraint fk_tahsilatlar_hesap foreign key (hesap_id) references public.kasa_hesaplari(hesap_id) on delete restrict;
+alter table public.tahsilatlar add constraint fk_tahsilatlar_ogrenci foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id) on delete restrict;
+alter table public.tarifeler add constraint tarifeler_brans_id_fkey foreign key (brans_id) references public.branslar(brans_id);
+alter table public.tarifeler add constraint tarifeler_ogrenci_id_fkey foreign key (ogrenci_id) references public.ogrenciler(ogrenci_id);
+alter table public.tarifeler add constraint tarifeler_ogretmen_id_fkey foreign key (ogretmen_id) references public.ogretmenler(ogretmen_id);

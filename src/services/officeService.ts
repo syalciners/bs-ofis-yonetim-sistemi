@@ -165,7 +165,7 @@ export type ProgramSaveResult = {
 }
 
 export async function saveProgram(input: SabitProgram): Promise<ProgramSaveResult> {
-  const { data, error } = await supabase.rpc('sabit_program_kaydet_guvenli_v3', {
+  const { data, error } = await supabase.rpc('sabit_program_kaydet_guvenli_v4', {
     p_program_id: input.program_id || uid('SP'), p_ogrenci_id: input.ogrenci_id, p_ogretmen_id: input.ogretmen_id,
     p_brans_id: input.brans_id, p_derslik_id: input.derslik_id, p_haftanin_gunu: input.haftanin_gunu,
     p_baslangic_saati: input.baslangic_saati, p_ders_sayisi: Number(input.ders_sayisi || 1),

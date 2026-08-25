@@ -22,6 +22,8 @@ jobs:
           node-version: 22
       - name: Kritik iş kuralları
         run: npm run check:rules
+      - name: SaaS kurulum manifesti ve Core RPC sözleşmesi
+        run: npm run check:saas-install
       - name: Takvim UX kuralları
         run: node scripts/check-calendar-ux.mjs
       - name: İptal ders Takvim kuralı

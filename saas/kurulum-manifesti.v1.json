@@ -1,0 +1,124 @@
+{
+  "manifest_surumu": "1.0.0-inventory",
+  "urun": "BS Eğitim Yönetimi",
+  "dagitim_modeli": "dedicated-instance",
+  "durum": "envanter_sabitlendi",
+  "installable": false,
+  "installable_false_nedeni": "Tam ve tekrar üretilebilir Core SQL baseline henüz oluşturulmadı ve boş Supabase üzerinde doğrulanmadı.",
+  "zorunlu_instance_env": [
+    "VITE_APP_MODE",
+    "VITE_SUPABASE_URL",
+    "VITE_SUPABASE_PUBLISHABLE_KEY",
+    "VITE_PORTAL_URL"
+  ],
+  "veritabani": {
+    "core_public_tablolar": [
+      "aylik_snapshotlar",
+      "bildirim_okumalari",
+      "bildirimler",
+      "branslar",
+      "dersler",
+      "derslikler",
+      "gider_kategorileri",
+      "giderler",
+      "haftalik_ders_uretimleri",
+      "hakedis_donemleri",
+      "kasa_hareketleri",
+      "kasa_hesaplari",
+      "krediler",
+      "kullanici_profilleri",
+      "kurum_ayarlari",
+      "odevler",
+      "ogrenciler",
+      "ogretmen_branslari",
+      "ogretmen_odemeleri",
+      "ogretmenler",
+      "portal_kullanicilari",
+      "rapor_talepleri",
+      "sabit_ders_programi",
+      "sabit_program_istisnalari",
+      "tahsilatlar",
+      "tarifeler"
+    ],
+    "core_tablo_sayisi": 26,
+    "zorunlu_eklentiler": ["pgcrypto"],
+    "core_rpc_stratejisi": "Tam Core SQL baseline üretiminde canlı frontend/trigger bağımlılıklarıyla kesin liste oluşturulacak; legacy RPC'ler körlemesine taşınmayacak."
+  },
+  "storage": {
+    "core_bucketlar": [
+      {"id": "kurum-markasi", "public": true},
+      {"id": "odev-ekleri", "public": false},
+      {"id": "profil-fotograflari", "public": false}
+    ]
+  },
+  "opsiyonel_entegrasyonlar": {
+    "google_drive_odev_arsivi": {
+      "edge_function": "odev-drive-yukle",
+      "verify_jwt": true,
+      "supabase_secret": "ODEV_DRIVE_APPS_SCRIPT_URL",
+      "zorunlu": false
+    },
+    "kurum_finans_asistani": {
+      "private_tablo": "private.finans_v18_edge_ayar",
+      "eklentiler": ["pg_net", "pg_cron"],
+      "edge_function": "finans-gelir-sync-v18",
+      "zorunlu": false,
+      "not": "Endpoint/token ve cron aktivasyonu müşteri başına güvenli kanaldan ayrıca yapılandırılır."
+    }
+  },
+  "haric_urunler": {
+    "bs_kocluk_tablolari": [
+      "kitap_katalogu",
+      "kocluk_deneme_bolum_sonuclari",
+      "kocluk_deneme_sinavlari",
+      "kocluk_gorusmeleri",
+      "kocluk_ogrenci_profilleri",
+      "kocluk_veli_iletisimleri",
+      "ogrenci_kitaplari"
+    ],
+    "md_tablolari": [
+      "md_branslar",
+      "md_ders_katilimlari",
+      "md_ders_ucretleri",
+      "md_dersler",
+      "md_donem_ucretleri",
+      "md_egitmen_branslari",
+      "md_egitmen_hakedisleri",
+      "md_egitmen_odemeleri",
+      "md_egitmenler",
+      "md_gider_kategorileri",
+      "md_giderler",
+      "md_kasa_hesaplari",
+      "md_kurs_grup_uyeleri",
+      "md_kurs_gruplari",
+      "md_kursiyer_velileri",
+      "md_kursiyerler",
+      "md_kurum_kullanicilari",
+      "md_kurumlar",
+      "md_mekanlar",
+      "md_sabit_programlar",
+      "md_subeler",
+      "md_tahsilatlar",
+      "md_veliler"
+    ],
+    "yeni_bs_egitim_instanceina_kurulmaz": true
+  },
+  "edge_function_haricleri": [
+    "demo-teklif-al",
+    "deneme-fotograf-oku-v1",
+    "kitap-ai-eslestir-v1",
+    "kitap-arama-v1",
+    "kitap-kapak-oku-v1",
+    "kocluk-ai-asistan-v1",
+    "kocluk-ai-haftalik-plan-v2",
+    "kocluk-veli-ozeti-v1"
+  ],
+  "sonraki_zorunlu_adimlar": [
+    "Canlı katalogdan sanitize edilmiş BS Eğitim Core SQL başlangıç şeması üret.",
+    "Core RPC/trigger bağımlılıklarını exact liste halinde sabitle.",
+    "Boş Supabase test projesinde baseline + Storage + seed kurulumunu doğrula.",
+    "İlk yönetici bootstrap akışını doğrula.",
+    "Kurulum smoke testini otomatikleştir.",
+    "Tüm adımlar yeşil olmadan installable değerini true yapma."
+  ]
+}

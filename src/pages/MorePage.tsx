@@ -2,6 +2,7 @@ import { Bell, BookOpenCheck, ClipboardCheck, FileBarChart, GraduationCap, Heart
 import { useNavigate } from 'react-router-dom'
 import { useAppData } from '../components/AppDataProvider'
 import { ManagerModeNav } from '../components/ManagerModeNav'
+import { isModuleEnabled } from '../lib/modules'
 
 export function MorePage(){
   const nav=useNavigate()
@@ -11,8 +12,8 @@ export function MorePage(){
     {to:'/ogretmenler',Icon:GraduationCap,title:'Öğretmenler',text:'Hakediş, program ve iletişim'},
     {to:'/sabit-program',Icon:Repeat2,title:'Sabit Ders Programı',text:'Tekrar eden ders şablonları'},
     {to:'/odevler',Icon:BookOpenCheck,title:'Ödevler',text:'Bekleyen ve tamamlanan ödevler'},
-    {to:'/kocluk',Icon:Target,title:'Koçluk',text:'Öğrenci hedefi, plan ve görüşme takibi'},
-    {to:'/deneme-merkezi',Icon:ClipboardCheck,title:'Deneme Merkezi',text:'Net değişimi, ders analizi ve koçluk sinyalleri'},
+    ...(isModuleEnabled('kocluk')?[{to:'/kocluk',Icon:Target,title:'Koçluk',text:'Öğrenci hedefi, plan ve görüşme takibi'}]:[]),
+    ...(isModuleEnabled('deneme-merkezi')?[{to:'/deneme-merkezi',Icon:ClipboardCheck,title:'Deneme Merkezi',text:'Net değişimi, ders analizi ve koçluk sinyalleri'}]:[]),
     ...(isManager?[{to:'/bildirimler',Icon:Bell,title:'Bildirimler',text:'Satış, operasyon ve sistem uyarıları'}]:[]),
     {to:'/raporlar',Icon:FileBarChart,title:'Raporlar',text:'Öğrenci, öğretmen ve kurum özetleri'},
     {to:'/ayarlar',Icon:Settings,title:'Ayarlar',text:'Kullanıcı ve uygulama tercihleri'},

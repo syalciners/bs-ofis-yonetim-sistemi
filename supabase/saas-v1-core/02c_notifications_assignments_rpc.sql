@@ -24,11 +24,6 @@ begin
 end;
 $function$;
 
-create or replace function public.bildirim_okunmamis_sayisi_v1()
-returns integer language sql stable security definer set search_path to '' as $function$
-  select count(*)::integer from public.bildirimlerim_v1(200) b where b.okundu=false;
-$function$;
-
 create or replace function public.bildirimlerim_v1(p_limit integer default 100)
 returns table(bildirim_id uuid,kategori text,baslik text,icerik text,oncelik text,kaynak text,alici_turu text,alici_id text,ilgili_kayit_turu text,ilgili_kayit_id text,eylem_yolu text,meta jsonb,olusturulma_zamani timestamp with time zone,okundu boolean,okunma_zamani timestamp with time zone)
 language plpgsql stable security definer set search_path to '' as $function$
@@ -49,6 +44,11 @@ begin
   where b.aktif=true and (b.son_gecerlilik_zamani is null or b.son_gecerlilik_zamani>now()) and (b.alici_turu='Tüm Kullanıcılar' or (v_rol='Yönetici' and b.alici_turu='Yönetici') or (v_rol in ('Öğrenci','Öğretmen') and b.alici_turu=v_rol and (b.alici_id is null or b.alici_id=v_alici_id)))
   order by b.olusturulma_zamani desc limit p_limit;
 end;
+$function$;
+
+create or replace function public.bildirim_okunmamis_sayisi_v1()
+returns integer language sql stable security definer set search_path to '' as $function$
+  select count(*)::integer from public.bildirimlerim_v1(200) b where b.okundu=false;
 $function$;
 
 create or replace function public.odev_drive_eklerini_guncelle_guvenli_v1(p_odev_id text,p_odev_dosyasi text default null::text,p_odev_dosya_linki text default null::text,p_odev_fotografi text default null::text,p_odev_fotograf_linki text default null::text)

@@ -13,6 +13,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_APP_MODE: test
+      VITE_SUPABASE_URL: https://saas-portal-env-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_saas_portal_env_test_placeholder
+      VITE_PORTAL_URL: https://saas-portal-test.example.com/
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +27,8 @@ jobs:
           node-version: 22
       - name: Kritik iş kuralları
         run: npm run check:rules
+      - name: SaaS kurulum manifesti
+        run: npm run check:saas-install
       - name: Takvim UX kuralları
         run: node scripts/check-calendar-ux.mjs
       - name: İptal ders Takvim kuralı
@@ -52,21 +59,6 @@ jobs:
         run: node scripts/sync-pages-root.mjs
       - name: Derlenmiş Pages paketini doğrula
         run: node scripts/check-published-pages.mjs
-      - name: Derlenmiş Pages paketini branch'e kaydet
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/v1-')) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Derlenmiş Pages paketi zaten güncel."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Derlenmiş Pages yayın paketini güncelle [skip ci]"
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            git push origin "HEAD:${GITHUB_HEAD_REF}"
-          else
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+      - name: Test branch'ine paket yazma kapalı
+        if: ${{ false }}
+        run: echo 'Test branchine yazma kapalı.'

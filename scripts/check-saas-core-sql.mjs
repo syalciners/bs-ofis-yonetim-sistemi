@@ -48,7 +48,7 @@ ok('Ders triggerı normalize helper kökünü kullanır',helpers.includes('trg_d
 ok('Sabit program triggerı normalize helper kökünü kullanır',helpers.includes('trg_sabit_program_ogretmen_brans')&&helpers.includes('private.bs_ofis_ogretmen_brans_dogrula_v1'))
 
 const portal=contents['supabase/saas-v1-core/02a_portal_rpc.sql']
-ok('Öğrenci Bugün RPC response uyumluluğu için kitap alanını null korur',portal.includes("'kitap_adi', null"))
+ok('Öğrenci Bugün RPC response uyumluluğu için kitap alanını null korur',/'kitap_adi'\s*,\s*null\b/i.test(portal))
 ok('Öğrenci Bugün RPC Koçluk kitap tablolarına join yapmaz',!portal.includes('ogrenci_kitaplari')&&!portal.includes('kitap_katalogu'))
 
 const finance=contents['supabase/saas-v1-core/02d_finance_rpc.sql']

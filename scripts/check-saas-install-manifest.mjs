@@ -14,6 +14,7 @@ const edge=readFileSync(edgePath,'utf8')
 const portalSupabase=readFileSync(portalSupabasePath,'utf8')
 const portalVite=readFileSync(portalVitePath,'utf8')
 const portalPackage=JSON.parse(readFileSync(portalPackagePath,'utf8'))
+const baseline=existsSync(baselinePath)?readFileSync(baselinePath,'utf8'):''
 const errors=[]
 const ok=(label,condition,message=label)=>{
   console.log(`${condition?'✓':'✗'} ${label}`)
@@ -75,6 +76,7 @@ const privateHelpers=rpcContract?.private_runtime_helpers||[]
 const triggerRoots=rpcContract?.private_trigger_kokleri||[]
 const privateExcluded=rpcContract?.baseline_disinda_private||[]
 const security=rpcContract?.guvenlik_hedefi||{}
+const helperExceptions=security?.private_helper_execute_istisnalari||{}
 const finance=rpcContract?.baseline_sanitizasyonlari?.finans_asistani||{}
 const teacherBranch=rpcContract?.baseline_sanitizasyonlari?.ogretmen_brans_trigger||{}
 
@@ -101,13 +103,28 @@ ok('Public API varsayılanı authenticated rolüdür',sameSet(security?.public_a
 ok('Public API varsayılanında anon execute kapalıdır',security?.public_api_default?.execute_anon===false)
 ok('Public API varsayılanında PUBLIC execute kapalıdır',security?.public_api_default?.execute_public===false)
 ok('Tek anon RPC kurum_public_bilgisi_v1 olur',sameSet(security?.anon_istisnalari||[],['kurum_public_bilgisi_v1']))
-ok('Private helperlara doğrudan API execute verilmez',(security?.private_helper_execute||[]).length===0)
+ok('Private helper varsayılan execute listesi kapalıdır',(security?.private_helper_execute||[]).length===0)
+ok('Tek private helper istisnası yönetici kontrolüdür',sameSet(Object.keys(helperExceptions),['private.bs_ofis_yonetici_mi']))
+ok('Yönetici helper istisnası yalnız authenticated rolüne verilir',sameSet(helperExceptions['private.bs_ofis_yonetici_mi']||[],['authenticated']))
 ok('Private triggerlara doğrudan API execute verilmez',(security?.private_trigger_execute||[]).length===0)
 
 ok('Finans sync köprüsü Core zorunluluğu değildir',finance?.core_zorunlu===false&&privateExcluded.includes('finans_v18_sync_tetikle'))
 ok('Finans sync için pg_net Core zorunluluğu değildir',finance?.pg_net_core_zorunlu===false&&!requiredExtensions.includes('pg_net'))
 ok('Tahsilat düzenleme/silme sanitizasyon kapsamındadır',sameSet(finance?.etkilenen_core_rpc||[],['tahsilat_guncelle_guvenli_v1','tahsilat_sil_guvenli_v1']))
 ok('Sanitize edilecek tahsilat RPCleri aktif contractta kalır',(finance?.etkilenen_core_rpc||[]).every((name)=>rpcNames.includes(name)))
+
+if(baseline){
+  const tableCreates=[...baseline.matchAll(/create table public\.([a-z0-9_]+)/gi)].map((m)=>m[1])
+  ok('Core SQL baseline tam 26 public tablo oluşturur',tableCreates.length===26&&sameSet(tableCreates,core))
+  ok('Core SQL baseline tablo adlarında tekrar yoktur',unique(tableCreates))
+  ok('Core SQL baseline pgcrypto eklentisini extensions şemasında kurar',/create extension if not exists pgcrypto with schema extensions;/i.test(baseline))
+  ok('Core SQL baseline extension sürümü pinlemez',!/create extension[^;]*\bversion\b/i.test(baseline))
+  const forbiddenOdev=['ogrenci_kitap_id','calisma_turu','baslangic_no','bitis_no','calisma_detayi','kaynak_gorusme_id','haftalik_plan_id','plan_kaynagi','ai_plan_madde_anahtari']
+  ok('Core ödev şemasına Koçluk çalışma alanları sızmaz',forbiddenOdev.every((name)=>!baseline.includes(name)))
+  ok('Core SQL baseline Koçluk kitap tablolarına bağlanmaz',!baseline.includes('ogrenci_kitaplari')&&!baseline.includes('kitap_katalogu'))
+  ok('Core kullanıcı rol checki Koç rolünü içermez',baseline.includes("array['Yönetici'::text, 'Personel'::text, 'Öğretmen'::text]")&&!baseline.includes("'Koç'::text"))
+  ok('Core SQL baseline Finans Asistanı veya pg_net bağı taşımaz',!baseline.includes('finans_v18_')&&!baseline.includes('net.http_')&&!baseline.includes('pg_net'))
+}
 
 if(manifest.installable===true){
   ok('Installable manifest için Core SQL baseline mevcuttur',existsSync(baselinePath))

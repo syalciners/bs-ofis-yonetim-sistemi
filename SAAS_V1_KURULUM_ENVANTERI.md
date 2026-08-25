@@ -83,7 +83,9 @@ Bucket oluşturmak tek başına yeterli değildir. İlgili Storage policy'leri d
 
 Drive yapılandırılmamışsa ödev eki private `odev-ekleri` bucket'ında kalabilir; uygulamanın temel ödev akışı çalışmaya devam etmelidir.
 
-**Açık teknik borç:** `odev-drive-yukle` repo sürümünde mevcut BS Eğitim Supabase publishable key'i sabit olarak kaynak koda yazılmıştır. Bu değer instance-safe hale getirilmeden yeni müşteriye deploy edilmeyecektir.
+**Instance-safe düzeltme tamamlandı:** `odev-drive-yukle` içindeki kuruma özel sabit publishable key kaldırıldı. Hosted Supabase ortamında `SUPABASE_PUBLISHABLE_KEYS.default`, local uyumlulukta `SUPABASE_PUBLISHABLE_KEY`, legacy uyumlulukta `SUPABASE_ANON_KEY` kullanılır. Function service-role/secret key kullanmaz; kullanıcı Authorization bağlamı ve RLS korunur.
+
+Bu kural `scripts/check-saas-install-manifest.mjs` tarafından otomatik denetlenir; kaynak koda yeniden `sb_publishable_...` anahtarı yazılması kontrolü kırar.
 
 ### 5.2 Kurum Finans Asistanı entegrasyonu
 
@@ -159,7 +161,20 @@ VITE_PORTAL_URL=https://...
 
 Eksik değerler build öncesi fail-fast reddedilir.
 
-## 9. Faz 2'nin tamamlanma kriteri
+## 9. Otomatik manifest kalite kapısı
+
+`npm run check:saas-install` aşağıdaki sınırları doğrular:
+
+- Core tablo seti 26 kayıttır ve tekrarsızdır.
+- `md_*`, `kocluk_*`, `kitap_katalogu` ve `ogrenci_kitaplari` Core'a sızmaz.
+- Core ve diğer ürün tablo setleri kesişmez.
+- dört zorunlu instance environment değeri korunur.
+- üç Core Storage bucket'ı ve public/private durumları korunur.
+- `pg_net` ve `pg_cron` Core zorunlu eklentilerine yanlışlıkla eklenmez.
+- `odev-drive-yukle` sabit publishable key, service-role veya secret key içermez.
+- tam Core SQL baseline oluşana kadar manifest `installable=false` kalır.
+
+## 10. Faz 2'nin tamamlanma kriteri
 
 Bu envanter **kurulum paketi tamamlandı** anlamına gelmez. Faz 2 ancak aşağıdakiler tamamlandığında kapanır:
 
@@ -173,6 +188,6 @@ Bu envanter **kurulum paketi tamamlandı** anlamına gelmez. Faz 2 ancak aşağ�
 8. RLS, RPC, Storage ve temel smoke testleri geçer.
 9. Kurulum manifestindeki `installable` değeri ancak bundan sonra `true` yapılır.
 
-## 10. Sonraki işlem
+## 11. Sonraki işlem
 
 Sonraki teknik adım: **Core SQL başlangıç şemasını üretmeden önce aktif Core RPC sözleşmesini çıkarmak ve legacy fonksiyonlardan ayırmak.**
